@@ -1,0 +1,38 @@
+
+Mon Dec 10 15:15:43 EST 2012
+
+Question: how do we deal with IDs? When do we do the inlining?
+
+The trouble is... I don't know what the language supports. Do ID's have to
+come in order? That would be great, because I could just add that state to the
+parser monad.
+
+Can they be recursive?
+
+Well... documentation isn't clear, but this should be easy enough to test. Let
+me try it out.
+
+Okay, I can build... let's just change the order and see.
+
+Mon Dec 10 15:37:53 EST 2012
+
+Looks like no restriction on order of declarations. That will make things
+slightly more complicated for me... How will I deal with inlining things?
+
+Add VarC to the datatype, return an expression with VarC, and a map from var
+to value. That's one way.
+
+Another way would be to tie the knot, as it were. Have as the initial state
+passed to the parser all the ids. And this based on the return value.
+
+That's a bit tricky...
+
+Let me start with the first idea. The reasonable idea. Leave ID as ID. We may
+want this information eventually anyway. I can always have an inline pass
+which gets rid of all ID as needed. Or we can figure out how to leverage the
+sharing information if needed or useful.
+
+Good. Simple. So I should be able to do this just fine. Let me write up some
+syntactic sugar to make it easier for me to construct items of this datatype,
+then implement the parser and try it out.
+

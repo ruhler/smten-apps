@@ -1,4 +1,8 @@
 
+module Lexer (
+    Token(..), ParserMonad, lexer, failE,
+    ) where
+
 import Prelude hiding (lex)
 
 import Control.Monad.Error
@@ -89,9 +93,6 @@ tokens = do
         TkEOF -> return []
         _ -> (:) t <$> tokens
 
-main :: IO ()
-main = do
-    input <- getContents
-    let toks = runStateT tokens input
-    putStrLn $ show toks
-        
+lexer :: (Token -> ParserMonad a) -> ParserMonad a
+lexer output = lex >>= output
+
