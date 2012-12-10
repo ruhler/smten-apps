@@ -1,7 +1,7 @@
 
 module CFG (
     CFG(..), ID,
-    charC, stringC, unionC, concatC, varC, fixC,
+    charC, stringC, unionC, concatC, varC, fixC, emptyC,
     ) where
 
 type ID = String
@@ -37,4 +37,7 @@ varC = C_Var
 
 fixC :: ID -> Integer -> CFG
 fixC = C_Fix
+
+emptyC :: CFG
+emptyC = C_Empty
 

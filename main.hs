@@ -7,6 +7,8 @@ main :: IO ()
 main = do
     input <- getContents
     let r = runStateT hampi input
-    putStrLn $ show r
+    case r of
+        Left msg -> fail msg
+        Right h -> putStrLn $ show h
         
 

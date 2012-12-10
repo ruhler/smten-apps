@@ -62,6 +62,8 @@ vardecl :: { Var }
 cfgstmt :: { Stmt }
  : 'cfg' id ':=' cfgprods
     { valS $2 (unionC $4) }
+ | 'cfg' id ':='
+    { valS $2 emptyC }
 
 cfgprods :: { [CFG] }
  : cfgprod  { [$1] }
