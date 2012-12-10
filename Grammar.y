@@ -28,15 +28,21 @@ import Lexer
     ';'     { TkSemicolon }
     ':'     { TkColon }
     ':='    { TkColonEquals }
+    '..'    { TkDoubleDot }
+    'val'   { TkVal }
     'var'   { TkVar }
     'cfg'   { TkCfg }
     'reg'   { TkReg }
     'fix'   { TkFix }
+    'star'   { TkStar }
     'assert'    { TkAssert }
+    'concat'    { TkConcat }
     'in'    { TkIn}
+    'contains'    { TkContains}
     id      { TkID $$ }
     int     { TkInt $$ }
     string  { TkString $$ }
+    char  { TkChar $$ }
 
 %%
 
@@ -53,20 +59,28 @@ stmts :: { [Stmt] }
 stmt :: { Stmt }
  : cfgstmt { $1 }
  | regstmt { $1 }
+ | valstmt { $1 }
  | assertstmt { $1 }
 
 vardecl :: { Var }
  : 'var' id ':' int
     { fixedV $2 $4 }
+ | 'var' id ':' int '..' int
+    { boundedV $2 $4 $6 }
+
+valstmt :: { Stmt }
+ : 'val' id ':=' expr
+    { valS $2 $4 }
 
 cfgstmt :: { Stmt }
  : 'cfg' id ':=' cfgprods
     { valS $2 (unionC $4) }
- | 'cfg' id ':='
-    { valS $2 emptyC }
+ | 'cfg' id ':=' cfgprods '|'
+    { valS $2 (unionC ($4 ++ [emptyC])) }
 
 cfgprods :: { [CFG] }
- : cfgprod  { [$1] }
+ :          { [] }
+ | cfgprod  { [$1] }
  | cfgprods '|' cfgprod { $1 ++ [$3] }
 
 cfgprod :: { CFG }
@@ -78,6 +92,7 @@ cfgelems :: { [CFG] }
 
 cfgelem :: { CFG }
  : string { stringC $1 }
+ | char { charC $1 }
  | id { varC $1 }
 
 regstmt :: { Stmt }
@@ -89,10 +104,25 @@ regdef :: { CFG }
  | string { stringC $1 }
  | 'fix' '(' id ',' int ')'
     { fixC $3 $5 }
+ | 'star' '(' regdef ')'
+    { starC $3 }
 
+ 
 assertstmt :: { Stmt }
  : 'assert' id 'in' id
     { assertInS $2 $4 }
+ | 'assert' id 'contains' string
+    { assertContainsS $2 $4 }
+
+expr :: { CFG }
+ : string { stringC $1 }
+ | id { varC $1 }
+ | 'concat' '(' exprs ')'
+    { concatC $3 }
+
+exprs :: { [CFG] }
+ : expr { [$1] }
+ | exprs ',' expr { $1 ++ [$3] }
 
 {
 
@@ -110,6 +140,9 @@ valS = ValStmt
 
 assertInS :: ID -> ID -> Stmt
 assertInS x y = AssertStmt $ Assertion x True In (varC y)
+
+assertContainsS :: ID -> String -> Stmt
+assertContainsS x y = AssertStmt $ Assertion x True Contains (stringC y)
 
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =

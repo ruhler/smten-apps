@@ -1,7 +1,7 @@
 
 module CFG (
     CFG(..), ID,
-    charC, stringC, unionC, concatC, varC, fixC, emptyC,
+    charC, stringC, unionC, concatC, varC, fixC, emptyC, starC,
     ) where
 
 type ID = String
@@ -23,12 +23,12 @@ stringC :: String -> CFG
 stringC = concatC . map charC
 
 unionC :: [CFG] -> CFG
-unionC [] = error "unionC on empty list"
+unionC [] = emptyC
 unionC [x] = x
 unionC xs = C_Union xs
 
 concatC :: [CFG] -> CFG
-concatC [] = error "TODO: concatC on empty list"
+concatC [] = emptyC
 concatC [x] = x
 concatC xs = C_Concat xs
 
@@ -40,4 +40,7 @@ fixC = C_Fix
 
 emptyC :: CFG
 emptyC = C_Empty
+
+starC :: CFG -> CFG
+starC = C_Star
 

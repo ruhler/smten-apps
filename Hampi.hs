@@ -1,6 +1,6 @@
 
 module Hampi (
-    Var(), fixedV,
+    Var(), fixedV, boundedV,
     AssertionType(..), Assertion(..), Hampi(..),
     ) where
 
@@ -13,6 +13,9 @@ data Var = Var ID Integer Integer
 
 fixedV :: ID -> Integer -> Var
 fixedV id x = Var id x x
+
+boundedV :: ID -> Integer -> Integer -> Var
+boundedV = Var
 
 data AssertionType = In | Contains
     deriving (Eq, Show)
