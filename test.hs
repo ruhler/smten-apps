@@ -6,7 +6,7 @@ import RegEx
 instance FromChar Int where
     fromChar = ord
 
-abstar :: (FromChar c) => RegEx c
+abstar :: (FromChar c, Eq c) => RegEx c
 abstar = starR (stringR "ab")
 
 main :: IO ()
