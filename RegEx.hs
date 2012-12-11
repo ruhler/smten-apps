@@ -1,7 +1,5 @@
 
-module RegEx
-  --(RegEx(), match, charR, stringR, starR)
-  where
+module RegEx where
 
 import Prelude
 
@@ -45,6 +43,21 @@ charR c = Atom (fromChar c)
 concatR :: RegEx c -> RegEx c -> RegEx c
 concatR r Epsilon = r
 concatR a b = Concat a b
+
+concatsR :: [RegEx c] -> RegEx c
+concatsR = foldl concatR epsilonR
+
+orR :: [RegEx c] -> RegEx c
+orR = Or
+
+epsilonR :: RegEx c
+epsilonR = Epsilon
+
+varR :: a -> RegEx c
+varR = error $ "TODO: varR"
+
+fixR :: a -> Integer -> RegEx c
+fixR = error $ "todo: fixR"
 
 stringR :: (FromChar c, Eq c) => String -> RegEx c
 stringR str = foldr concatR Epsilon (map charR str)

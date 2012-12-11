@@ -1,6 +1,8 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
+import Control.Monad.State
+
 import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.Functor ((<$>))
@@ -17,6 +19,7 @@ import qualified SeriGen as S
 
 import RegEx
 import Hampi
+import Grammar
 
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
@@ -82,7 +85,11 @@ htest = Hampi {
 
 main :: IO ()
 main = do
+    input <- getContents
+    h <- case runStateT parseHampi input of
+            Left msg -> fail msg
+            Right x -> return $ fst x
     y <- yices2
-    r <- runQuery (RunOptions (Just "tesths.dbg") y) (hquery htest)
+    r <- runQuery (RunOptions (Just "hampi.dbg") y) (hquery h)
     putStrLn r
 

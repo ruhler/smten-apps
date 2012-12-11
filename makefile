@@ -1,16 +1,6 @@
 
-shampi: hampi.hs SeriGen.hs Hampi.hs
+shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs
 	ghc -o shampi --make $<
-
-testsri: test.sri RegEx.sri
-	../seri/build/seri-bin/seri --io \
-		--include ../seri/seri/sri \
-		--include . \
-		--main-is Main.main \
-		-f test.sri
-
-main: main.hs Grammar.hs Lexer.hs CFG.hs Hampi.hs
-	ghc -o main --make $<
 
 SeriGen.hs: SeriGen.sri RegEx.sri
 	../seri/build/seri-bin/seri --haskellf \
@@ -20,7 +10,7 @@ SeriGen.hs: SeriGen.sri RegEx.sri
 		--mod-name SeriGen \
 		-f $< > $@
 
-Grammar.hs: Grammar.y
+Grammar.hs: Grammar.y RegEx.hs Hampi.hs
 	happy $<
 
 clean:

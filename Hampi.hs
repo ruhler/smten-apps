@@ -1,6 +1,7 @@
 
 module Hampi (
     ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
+    stringV, idV, concatV,
     ) where
 
 import qualified Data.Map as Map
@@ -24,6 +25,15 @@ data Var = Var {
 }
 
 data Val = ValID ID | ValLit [Elem] | ValCat Val Val
+
+stringV :: String -> Val
+stringV = ValLit . map fromChar
+
+idV :: ID -> Val
+idV = ValID
+
+concatV :: [Val] -> Val
+concatV = foldr1 ValCat
 
 data Hampi = Hampi {
     h_var :: Var,
