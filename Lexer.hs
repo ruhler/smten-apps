@@ -14,7 +14,7 @@ import Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen
   | TkBar | TkComma | TkSemicolon | TkColon | TkColonEquals | TkDoubleDot
-  | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar
+  | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr
   | TkAssert | TkIn | TkContains
   | TkID String
   | TkInt Integer
@@ -60,7 +60,8 @@ keywords = [
     ("in", TkIn),
     ("contains", TkContains),
     ("concat", TkConcat),
-    ("star", TkStar)
+    ("star", TkStar),
+    ("or", TkOr)
   ]
 
 isIDChar :: Char -> Bool

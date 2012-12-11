@@ -35,6 +35,7 @@ import Lexer
     'reg'   { TkReg }
     'fix'   { TkFix }
     'star'   { TkStar }
+    'or'   { TkOr }
     'assert'    { TkAssert }
     'concat'    { TkConcat }
     'in'    { TkIn}
@@ -104,7 +105,12 @@ regdef :: { RegEx Elem }
     { fixR $3 $5 }
  | 'star' '(' regdef ')'
     { starR $3 }
+ | 'or' '(' regdefs ')'
+    { orR $3 }
 
+regdefs :: { [RegEx Elem] }
+ : regdef { [$1] }
+ | regdefs ',' regdef { $1 ++ [$3] }
  
 assertstmt :: { Stmt }
  : 'assert' id 'in' id
