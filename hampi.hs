@@ -5,7 +5,7 @@ import System.Environment
 import Control.Monad.State
 
 import qualified Data.Map as Map
-import Data.Maybe (fromJust)
+import Data.Maybe (fromMaybe)
 import Data.Functor ((<$>))
 
 import Seri.Type
@@ -34,8 +34,8 @@ freevar = qS . S.frees . S.seriS
 -- Make a hampi assertion.
 hassert :: Map.Map ID S_String -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
 hassert vals regs (Assert v b r) =
-    let vstr = fromJust $ Map.lookup v vals
-        rreg = S.seriS . fromJust $ Map.lookup r regs
+    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        rreg = S.seriS . fromMaybe (error $ "reg " ++ r ++ " not found") $ Map.lookup r regs
         positive = S.match rreg vstr
         p = if b then positive else S.not positive
     in assertS p
@@ -54,7 +54,7 @@ inlinevals varid varval m =
             a' <- lookupval a
             b' <- lookupval b
             return $ a' S.++ b'
-      vals = [(id, fromJust $ lookupval v) | (id, v) <- Map.toList m]
+      vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- Map.toList m]
   in Map.fromList $ (varid, varval) : vals
 
 -- A hampi query.

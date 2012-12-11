@@ -25,6 +25,7 @@ data Var = Var {
 }
 
 data Val = ValID ID | ValLit [Elem] | ValCat Val Val
+    deriving (Show)
 
 stringV :: String -> Val
 stringV = ValLit . map fromChar
