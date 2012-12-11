@@ -23,6 +23,9 @@ derive_SeriEH ''RegEx
 instance FromChar Integer where
     fromChar = toInteger . fromEnum
 
+toChar :: Integer -> Char
+toChar = toEnum . fromInteger
+
 abstar :: RegEx Integer
 abstar = starR (stringR "ab")
 
@@ -77,12 +80,19 @@ data Hampi = Hampi {
 }
 
 -- A hampi query.
-hquery :: Hampi -> Query (Answer [Elem])
+hquery :: Hampi -> Query String
 hquery (Hampi (Var vid vwidth) vals regs asserts) = do
     svar <- freevar vwidth
     let svals = inlinevals vid svar vals
     mapM_ (hassert svals regs) asserts
-    query $ realizeS svar
+    r <- query $ realizeS svar
+    case r of
+        Satisfiable v ->
+          let tostr :: [Elem] -> String
+              tostr = map toChar
+          in return $ "{VAR(" ++ vid ++ ")=" ++ tostr v ++ "}"
+        Unsatisfiable -> return "UNSAT"
+        _ -> return "UNKNOWN"
 
 htest :: Hampi
 htest = Hampi {
@@ -96,5 +106,5 @@ main :: IO ()
 main = do
     y <- yices2
     r <- runQuery (RunOptions (Just "tesths.dbg") y) (hquery htest)
-    putStrLn $ show r
+    putStrLn r
 
