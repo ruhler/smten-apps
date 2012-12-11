@@ -1,4 +1,7 @@
 
+test: test.hs RegEx.hs
+	ghc -o test --make $<
+
 main: main.hs Grammar.hs Lexer.hs CFG.hs Hampi.hs
 	ghc -o main --make $<
 
