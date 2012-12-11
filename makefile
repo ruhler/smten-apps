@@ -1,4 +1,11 @@
 
+testsri: test.sri RegEx.sri
+	../seri/build/seri-bin/seri --io \
+		--include ../seri/seri/sri \
+		--include . \
+		--main-is Main.main \
+		-f test.sri
+
 test: test.hs RegEx.hs
 	ghc -o test --make $<
 

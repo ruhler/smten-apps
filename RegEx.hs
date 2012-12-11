@@ -3,6 +3,8 @@ module RegEx
   --(RegEx(), match, charR, stringR, starR)
   where
 
+import Prelude
+
 data RegEx c = Empty
            | Atom String (c -> Bool)
            | Star (RegEx c)
@@ -29,7 +31,7 @@ partitions str = map (flip splitAt str) [0..(length str)]
 match :: RegEx c -> [c] -> Bool
 match Empty str = null str
 match (Atom _ f) [c] = f c
-match (Atom {}) _ = False
+match (Atom _ _) _ = False
 match s@(Star x) str = match (Or [Empty, Concat x s]) str
 match (Concat a b) str = any (matchboth a b) (partitions str)
 match (Or rs) str = any (flip match str) rs
@@ -39,7 +41,7 @@ matchboth a b (sa, sb) = match a sa && match b sb
 
 charR :: (FromChar c, Eq c) => Char -> RegEx c
 charR c =
- let p x = fromChar c == x
+ let p = \x -> fromChar c == x
  in Atom (show c) p
 
 concatR :: RegEx c -> RegEx c -> RegEx c
