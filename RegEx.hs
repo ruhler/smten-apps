@@ -5,14 +5,14 @@ module RegEx
 
 import Prelude
 
-data RegEx c = Empty
+data RegEx c = Epsilon
            | Atom String (c -> Bool)
            | Star (RegEx c)
            | Concat (RegEx c) (RegEx c)
            | Or [RegEx c]
 
 instance Show (RegEx c) where
-    show (Empty) = "Empty"
+    show (Epsilon) = "Epsilon"
     show (Atom s _) = "Atom " ++ s
     show (Star x) = "Star (" ++ show x ++ ")"
     show (Concat a b) = "Concat (" ++ show a ++ ") (" ++ show b ++ ")"
@@ -29,10 +29,10 @@ partitions :: [a] -> [([a], [a])]
 partitions str = map (flip splitAt str) [0..(length str)]
 
 match :: RegEx c -> [c] -> Bool
-match Empty str = null str
+match Epsilon str = null str
 match (Atom _ f) [c] = f c
 match (Atom _ _) _ = False
-match s@(Star x) str = match (Or [Empty, Concat x s]) str
+match s@(Star x) str = match (Or [Epsilon, Concat x s]) str
 match (Concat a b) str = any (matchboth a b) (partitions str)
 match (Or rs) str = any (flip match str) rs
 
@@ -45,11 +45,11 @@ charR c =
  in Atom (show c) p
 
 concatR :: RegEx c -> RegEx c -> RegEx c
-concatR r Empty = r
+concatR r Epsilon = r
 concatR a b = Concat a b
 
 stringR :: (FromChar c, Eq c) => String -> RegEx c
-stringR str = foldr concatR Empty (map charR str)
+stringR str = foldr concatR Epsilon (map charR str)
 
 starR :: RegEx c -> RegEx c
 starR = Star
