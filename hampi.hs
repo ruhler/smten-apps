@@ -1,6 +1,7 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
+import System.Environment
 import Control.Monad.State
 
 import qualified Data.Map as Map
@@ -85,7 +86,11 @@ htest = Hampi {
 
 main :: IO ()
 main = do
-    input <- getContents
+    args <- getArgs
+    fin <- case args of
+             f:_ -> return f
+             _ -> fail "Usage: Hampi <filename> [timeout in secs]"
+    input <- readFile fin
     h <- case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
