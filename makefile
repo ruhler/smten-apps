@@ -1,6 +1,6 @@
 
-test: test.hs SeriGen.hs
-	ghc -o test --make $<
+shampi: hampi.hs SeriGen.hs Hampi.hs
+	ghc -o shampi --make $<
 
 testsri: test.sri RegEx.sri
 	../seri/build/seri-bin/seri --io \

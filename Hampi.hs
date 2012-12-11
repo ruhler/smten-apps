@@ -1,32 +1,34 @@
 
 module Hampi (
-    Var(), fixedV, boundedV,
-    AssertionType(..), Assertion(..), Hampi(..),
+    ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
     ) where
 
 import qualified Data.Map as Map
 
-import CFG
+import RegEx
 
-data Var = Var ID Integer Integer
-    deriving (Show, Eq)
+type ID = String
+type Elem = Integer
 
-fixedV :: ID -> Integer -> Var
-fixedV id x = Var id x x
+instance FromChar Integer where
+    fromChar = toInteger . fromEnum
 
-boundedV :: ID -> Integer -> Integer -> Var
-boundedV = Var
+toChar :: Integer -> Char
+toChar = toEnum . fromInteger
 
-data AssertionType = In | Contains
-    deriving (Eq, Show)
+data Assertion = Assert ID Bool ID
 
-data Assertion = Assertion ID Bool AssertionType CFG
-    deriving (Eq, Show)
+data Var = Var {
+    v_id :: ID,
+    v_width :: Integer
+}
 
--- A HAMPI constraint.
+data Val = ValID ID | ValLit [Elem] | ValCat Val Val
+
 data Hampi = Hampi {
     h_var :: Var,
-    h_env :: Map.Map ID CFG,
+    h_vals :: Map.Map ID Val,
+    h_regs :: Map.Map ID (RegEx Elem),
     h_asserts :: [Assertion]
-} deriving (Eq, Show)
-    
+}
+

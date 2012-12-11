@@ -16,28 +16,16 @@ import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SeriGen as S
 
 import RegEx
+import Hampi
 
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
 
-instance FromChar Integer where
-    fromChar = toInteger . fromEnum
-
-toChar :: Integer -> Char
-toChar = toEnum . fromInteger
-
-abstar :: RegEx Integer
-abstar = starR (stringR "ab")
-
-freevar :: Integer -> Query S_String
-freevar = qS . S.frees . S.seriS
-
-type ID = String
-type Elem = Integer
 type S_Elem = S.Integer
 type S_String = S.List__ S_Elem
 
-data Assertion = Assert ID Bool ID
+freevar :: Integer -> Query S_String
+freevar = qS . S.frees . S.seriS
 
 -- Make a hampi assertion.
 hassert :: Map.Map ID S_String -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
@@ -47,8 +35,6 @@ hassert vals regs (Assert v b r) =
         positive = S.match rreg vstr
         p = if b then positive else S.not positive
     in assertS p
-
-data Val = ValID ID | ValLit [Elem] | ValCat Val Val
 
 -- inlinevals varid varval vals
 --  Given the var id, it's symbolic value, and the rest of the values, return
@@ -67,18 +53,6 @@ inlinevals varid varval m =
       vals = [(id, fromJust $ lookupval v) | (id, v) <- Map.toList m]
   in Map.fromList $ (varid, varval) : vals
 
-data Var = Var {
-    v_id :: ID,
-    v_width :: Integer
-}
-
-data Hampi = Hampi {
-    h_var :: Var,
-    h_vals :: Map.Map ID Val,
-    h_regs :: Map.Map ID (RegEx Elem),
-    h_asserts :: [Assertion]
-}
-
 -- A hampi query.
 hquery :: Hampi -> Query String
 hquery (Hampi (Var vid vwidth) vals regs asserts) = do
@@ -93,6 +67,10 @@ hquery (Hampi (Var vid vwidth) vals regs asserts) = do
           in return $ "{VAR(" ++ vid ++ ")=" ++ tostr v ++ "}"
         Unsatisfiable -> return "UNSAT"
         _ -> return "UNKNOWN"
+
+
+abstar :: RegEx Integer
+abstar = starR (stringR "ab")
 
 htest :: Hampi
 htest = Hampi {
