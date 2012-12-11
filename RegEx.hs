@@ -1,39 +1,46 @@
 
-module RegEx (
-    RegEx(), match,
-    charR, stringR, starR
-    ) where
+module RegEx
+  --(RegEx(), match, charR, stringR, starR)
+  where
 
-data RegEx = Empty
-           | Atom Char Char
-           | Star RegEx
-           | Concat RegEx RegEx
-           | Or [RegEx]
+data RegEx c = Empty
+           | Atom c c
+           | Star (RegEx c)
+           | Concat (RegEx c) (RegEx c)
+           | Or [RegEx c]
     deriving (Eq, Show)
 
--- Find all possible paritions for the given string.
-partitions :: String -> [(String, String)]
-partitions str = [splitAt i str | i <- [0..(length str)]]
+class FromChar c where
+    fromChar :: Char -> c
 
-match :: RegEx -> String -> Bool
+instance FromChar Char where
+    fromChar = id
+
+-- Find all possible paritions for the given list.
+partitions :: [a] -> [([a], [a])]
+partitions str = map (flip splitAt str) [0..(length str)]
+
+match :: (Ord c) => RegEx c -> [c] -> Bool
 match Empty str = null str
 match (Atom cmin cmax) [c] = cmin <= c && c <= cmax
 match (Atom {}) _ = False
 match s@(Star x) str = match (Or [Empty, Concat x s]) str
-match (Concat a b) str
-  = or [match a sa && match b sb | (sa, sb) <- partitions str]
-match (Or rs) str = or [match r str | r <- rs]
+match (Concat a b) str = any (matchboth a b) (partitions str)
+match (Or rs) str = any (flip match str) rs
 
-charR :: Char -> RegEx
-charR c = Atom c c
+matchboth :: (Ord c) => RegEx c -> RegEx c -> ([c], [c]) -> Bool
+matchboth a b (sa, sb) = match a sa && match b sb
 
-concatR :: RegEx -> RegEx -> RegEx
+charR :: (FromChar c) => Char -> RegEx c
+charR c = Atom (fromChar c) (fromChar c)
+
+concatR :: RegEx c -> RegEx c -> RegEx c
 concatR r Empty = r
 concatR a b = Concat a b
 
-stringR :: String -> RegEx
+stringR :: (FromChar c) => String -> RegEx c
 stringR str = foldr concatR Empty (map charR str)
 
-starR :: RegEx -> RegEx
+starR :: RegEx c -> RegEx c
 starR = Star
 

@@ -1,11 +1,19 @@
 
+import Data.Char(ord)
+
 import RegEx
 
-abstar :: RegEx
+instance FromChar Int where
+    fromChar = ord
+
+abstar :: (FromChar c) => RegEx c
 abstar = starR (stringR "ab")
 
 main :: IO ()
 main = do
-    putStrLn $ show abstar
+    putStrLn $ show (abstar :: RegEx Char)
     putStrLn . show $ match abstar "abab"
+
+    putStrLn $ show (abstar :: RegEx Int)
+    putStrLn . show $ match abstar (map ord "abab")
 
