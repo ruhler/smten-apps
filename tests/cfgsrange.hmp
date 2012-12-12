@@ -1,0 +1,8 @@
+
+var str : 2 ;
+cfg E := [\097-\122] "b" ;
+reg e := fix(E, 2) ;
+reg f := concat("a", [\097-\122]) ;
+assert str in e ;
+assert str in f ;
+

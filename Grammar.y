@@ -27,6 +27,9 @@ import Lexer
     ']'     { TkCloseBracket }
     '|'     { TkBar }
     '-'     { TkDash }
+    '*'     { TkAsterisk }
+    '+'     { TkPlus }
+    '?'     { TkQuestionMark }
     ','     { TkComma }
     ';'     { TkSemicolon }
     ':'     { TkColon }
@@ -99,6 +102,14 @@ cfgelem :: { RegEx Elem }
  : string { stringR $1 }
  | char { charR $1 }
  | id { varR $1 }
+ | '(' id ')' '*'
+   { starR (varR $2) }
+ | '(' id ')' '+'
+   { plusR (varR $2) }
+ | '(' id ')' '?'
+   { optionR (varR $2) }
+ | '[' char '-' char ']'
+   { rangeR $2 $4 }
 
 regstmt :: { Stmt }
  : 'reg' id ':=' regdef
@@ -111,7 +122,7 @@ regdef :: { RegEx Elem }
  | '[' char '-' char ']'
     { rangeR $2 $4 }
  | 'fix' '(' id ',' int ')'
-    { fixR $3 $5 }
+    { fixR (varR $3) $5 }
  | 'star' '(' regdef ')'
     { starR $3 }
  | 'or' '(' regdefs ')'

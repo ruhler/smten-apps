@@ -12,6 +12,7 @@ data RegEx c = Epsilon
            | Concat (RegEx c) (RegEx c)
            | Or [RegEx c]
            | Variable ID
+           | Fix (RegEx c) Integer
 
 instance (Show c) => Show (RegEx c) where
     show (Epsilon) = "Epsilon"
@@ -20,6 +21,7 @@ instance (Show c) => Show (RegEx c) where
     show (Star x) = "Star (" ++ show x ++ ")"
     show (Concat a b) = "Concat (" ++ show a ++ ") (" ++ show b ++ ")"
     show (Or xs) = "Or " ++ show xs
+    show (Variable id) = "Variable " ++ show id
 
 class FromChar c where
     fromChar :: Char -> c
@@ -27,7 +29,11 @@ class FromChar c where
 instance FromChar Char where
     fromChar = id
 
--- Find all possible paritions for the given list.
+ilength :: [a] -> Integer
+ilength (x:xs) = 1 + ilength xs
+ilength _ = 0
+
+
 partitions :: [a] -> [([a], [a])]
 partitions str = map (flip splitAt str) [0..(length str)]
 
@@ -40,6 +46,8 @@ match (Range _ _) _ = False
 match s@(Star x) str = match (Or [Epsilon, Concat x s]) str
 match (Concat a b) str = any (matchboth a b) (partitions str)
 match (Or rs) str = any (flip match str) rs
+match (Fix x n) str = (ilength str == n) && match x str
+match (Variable x) _ = error $ "match: Variable " ++ x
 
 matchboth :: (Eq c, Ord c) => RegEx c -> RegEx c -> ([c], [c]) -> Bool
 matchboth a b (sa, sb) = match a sa && match b sb
@@ -48,6 +56,7 @@ charR :: (FromChar c) => Char -> RegEx c
 charR c = Atom (fromChar c)
 
 concatR :: RegEx c -> RegEx c -> RegEx c
+concatR Epsilon r = r
 concatR r Epsilon = r
 concatR a b = Concat a b
 
@@ -63,14 +72,20 @@ epsilonR = Epsilon
 varR :: ID -> RegEx c
 varR = Variable
 
-fixR :: a -> Integer -> RegEx c
-fixR = error $ "todo: fixR"
+fixR :: RegEx c -> Integer -> RegEx c
+fixR = Fix
 
 stringR :: (FromChar c) => String -> RegEx c
 stringR str = foldr concatR Epsilon (map charR str)
 
 starR :: RegEx c -> RegEx c
 starR = Star
+
+plusR :: RegEx c -> RegEx c
+plusR r = concatR r (starR r)
+
+optionR :: RegEx c -> RegEx c
+optionR r = orR [epsilonR, r]
 
 rangeR :: (FromChar c) => Char -> Char -> RegEx c
 rangeR a b = Range (fromChar a) (fromChar b)

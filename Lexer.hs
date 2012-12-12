@@ -14,7 +14,7 @@ import Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkBar | TkComma | TkSemicolon | TkColon | TkColonEquals | TkDoubleDot
-  | TkDash
+  | TkDash | TkAsterisk | TkPlus | TkQuestionMark
   | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr | TkNot
   | TkAssert | TkIn | TkContains
   | TkID String
@@ -42,6 +42,9 @@ singles = [
     (']', TkCloseBracket),
     ('|', TkBar),
     ('-', TkDash),
+    ('*', TkAsterisk),
+    ('+', TkPlus),
+    ('?', TkQuestionMark),
     (';', TkSemicolon),
     (',', TkComma),
     (':', TkColon)
