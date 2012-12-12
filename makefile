@@ -19,6 +19,6 @@ Grammar.hs: Grammar.y RegEx.hs Hampi.hs Lexer.hs
 	happy $<
 
 clean:
-	- rm *.o *.hi Grammar.hs shampi SeriGen.hs hampi.dbg tests.shampi tests.rhampi
+	- rm *.o *.hi Grammar.hs shampi SeriGen.hs hampi.dbg tests.shampi tests.rhampi tests/*.dbg
 
 

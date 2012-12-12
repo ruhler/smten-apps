@@ -150,10 +150,10 @@ valS :: ID -> Val -> Stmt
 valS = ValStmt
 
 assertInS :: ID -> ID -> Stmt
-assertInS x y = AssertStmt $ Assert x True y
+assertInS x y = AssertStmt $ AssertIn x True y
 
 assertContainsS :: ID -> String -> Stmt
-assertContainsS = error $ "TODO: assertContainsS"
+assertContainsS x y = AssertStmt $ AssertContains x True y
 
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =

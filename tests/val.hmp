@@ -1,0 +1,6 @@
+
+var str : 2 ;
+reg r := "foolsbar" ;
+val fb := concat("foo", str, "bar") ;
+assert fb in r ;
+

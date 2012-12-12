@@ -1,8 +1,9 @@
 
 module SeriGen where
 
-import RegEx
+import Data.List
 import Seri.SMT.SMT
+import RegEx
 
 frees :: (Free a) => Integer -> Query [a]
 frees x = sequence (replicate x free)

@@ -17,7 +17,8 @@ instance FromChar Integer where
 toChar :: Integer -> Char
 toChar = toEnum . fromInteger
 
-data Assertion = Assert ID Bool ID
+data Assertion = AssertIn ID Bool ID
+               | AssertContains ID Bool [Elem]
 
 data Var = Var {
     v_id :: ID,

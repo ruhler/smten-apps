@@ -33,10 +33,16 @@ freevar = qS . S.frees . S.seriS
 
 -- Make a hampi assertion.
 hassert :: Map.Map ID S_String -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
-hassert vals regs (Assert v b r) =
+hassert vals regs (AssertIn v b r) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         rreg = S.seriS . fromMaybe (error $ "reg " ++ r ++ " not found") $ Map.lookup r regs
         positive = S.match rreg vstr
+        p = if b then positive else S.not positive
+    in assertS p
+hassert vals regs (AssertContains v b s) =
+    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        sstr = S.seriS s
+        positive = S.isInfixOf sstr vstr
         p = if b then positive else S.not positive
     in assertS p
 
@@ -72,18 +78,6 @@ hquery (Hampi (Var vid vwidth) vals regs asserts) = do
         Unsatisfiable -> return "UNSAT"
         _ -> return "UNKNOWN"
 
-
-abstar :: RegEx Integer
-abstar = starR (stringR "ab")
-
-htest :: Hampi
-htest = Hampi {
-    h_var = Var "str" 6,
-    h_vals = Map.empty,
-    h_regs = Map.singleton "abstar" abstar,
-    h_asserts = [Assert "str" True "abstar"]
-}
-
 main :: IO ()
 main = do
     args <- getArgs
@@ -95,6 +89,6 @@ main = do
             Left msg -> fail msg
             Right x -> return $ fst x
     y <- yices2
-    r <- runQuery (RunOptions (Just "hampi.dbg") y) (hquery h)
+    r <- runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery h)
     putStrLn r
 

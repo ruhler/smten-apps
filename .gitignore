@@ -7,3 +7,4 @@ hampi.dbg
 tests.shampi
 tests.rhampi
 hampi/
+tests/*.dbg

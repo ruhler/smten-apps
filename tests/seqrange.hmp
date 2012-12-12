@@ -1,0 +1,7 @@
+
+var str : 2 ;
+reg ax := concat("a", [\097-\122]) ;
+reg xb := concat(['a'-'z'], "b") ;
+assert str in ax ;
+assert str in xb ;
+
