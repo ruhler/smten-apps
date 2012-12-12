@@ -2,13 +2,15 @@
 module Hampi (
     ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
     stringV, idV, concatV,
+    inlineregs,
     ) where
 
+import Debug.Trace
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 
 import RegEx
 
-type ID = String
 type Elem = Integer
 
 instance FromChar Integer where
@@ -44,4 +46,18 @@ data Hampi = Hampi {
     h_regs :: Map.Map ID (RegEx Elem),
     h_asserts :: [Assertion]
 }
+
+inlineregs :: Hampi -> Hampi
+inlineregs (Hampi var vals regs asserts) =
+  let lookupreg :: RegEx Elem -> RegEx Elem
+      lookupreg r
+        | Star x <- r = Star (lookupreg x)
+        | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
+        | Or xs <- r = Or (map lookupreg xs)
+        | Variable x <- r = lookupreg $
+            fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs
+        | otherwise = r
+
+      regs' = Map.map lookupreg regs
+  in Hampi var vals regs' asserts
 

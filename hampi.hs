@@ -91,6 +91,6 @@ main = do
             Left msg -> fail msg
             Right x -> return $ fst x
     y <- yices2
-    r <- runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery h)
+    r <- runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery (inlineregs h))
     putStrLn r
 

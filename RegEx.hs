@@ -3,12 +3,15 @@ module RegEx where
 
 import Prelude
 
+type ID = String
+
 data RegEx c = Epsilon
            | Atom c
            | Range c c
            | Star (RegEx c)
            | Concat (RegEx c) (RegEx c)
            | Or [RegEx c]
+           | Variable ID
 
 instance (Show c) => Show (RegEx c) where
     show (Epsilon) = "Epsilon"
@@ -57,8 +60,8 @@ orR = Or
 epsilonR :: RegEx c
 epsilonR = Epsilon
 
-varR :: a -> RegEx c
-varR = error $ "TODO: varR"
+varR :: ID -> RegEx c
+varR = Variable
 
 fixR :: a -> Integer -> RegEx c
 fixR = error $ "todo: fixR"

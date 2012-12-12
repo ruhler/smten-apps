@@ -1,0 +1,6 @@
+
+var str : 4 ;
+reg a := "ab" ;
+reg b := star(a) ;
+assert str in b ;
+
