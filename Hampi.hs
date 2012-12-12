@@ -22,7 +22,8 @@ data Assertion = AssertIn ID Bool ID
 
 data Var = Var {
     v_id :: ID,
-    v_width :: Integer
+    v_minwidth :: Integer,
+    v_maxwidth :: Integer
 }
 
 data Val = ValID ID | ValLit [Elem] | ValCat Val Val

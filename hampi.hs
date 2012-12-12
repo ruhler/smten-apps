@@ -65,17 +65,19 @@ inlinevals varid varval m =
 
 -- A hampi query.
 hquery :: Hampi -> Query String
-hquery (Hampi (Var vid vwidth) vals regs asserts) = do
-    svar <- freevar vwidth
+hquery (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
+hquery (Hampi (Var vid wmin wmax) vals regs asserts) = do
+    svar <- freevar wmin
     let svals = inlinevals vid svar vals
-    mapM_ (hassert svals regs) asserts
-    r <- query $ realizeS svar
+    r <- queryS $ do
+        mapM_ (hassert svals regs) asserts
+        query $ realizeS svar
     case r of
         Satisfiable v ->
           let tostr :: [Elem] -> String
               tostr = map toChar
           in return $ "{VAR(" ++ vid ++ ")=" ++ tostr v ++ "}"
-        Unsatisfiable -> return "UNSAT"
+        Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals regs asserts)
         _ -> return "UNKNOWN"
 
 main :: IO ()

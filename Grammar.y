@@ -69,7 +69,9 @@ stmt :: { Stmt }
 
 vardecl :: { Var }
  : 'var' id ':' int
-    { Var $2 $4 }
+    { Var $2 $4 $4 }
+ | 'var' id ':' int '..' int
+    { Var $2 $4 $6 }
 
 valstmt :: { Stmt }
  : 'val' id ':=' expr
