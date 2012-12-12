@@ -1,0 +1,6 @@
+
+var str : 2 ;
+reg charl := concat(\097, \098) ;
+assert str in charl ;
+
+

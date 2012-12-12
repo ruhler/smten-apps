@@ -101,6 +101,7 @@ regstmt :: { Stmt }
 regdef :: { RegEx Elem }
  : id { varR $1 }
  | string { stringR $1 }
+ | char { charR $1 }
  | 'fix' '(' id ',' int ')'
     { fixR $3 $5 }
  | 'star' '(' regdef ')'
