@@ -15,7 +15,7 @@ data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkBar | TkComma | TkSemicolon | TkColon | TkColonEquals | TkDoubleDot
   | TkDash
-  | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr
+  | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr | TkNot
   | TkAssert | TkIn | TkContains
   | TkID String
   | TkInt Integer
@@ -65,7 +65,8 @@ keywords = [
     ("contains", TkContains),
     ("concat", TkConcat),
     ("star", TkStar),
-    ("or", TkOr)
+    ("or", TkOr),
+    ("not", TkNot)
   ]
 
 isIDChar :: Char -> Bool

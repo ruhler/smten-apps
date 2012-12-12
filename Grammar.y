@@ -39,6 +39,7 @@ import Lexer
     'fix'   { TkFix }
     'star'   { TkStar }
     'or'   { TkOr }
+    'not'   { TkNot }
     'assert'    { TkAssert }
     'concat'    { TkConcat }
     'in'    { TkIn}
@@ -121,10 +122,14 @@ regdefs :: { [RegEx Elem] }
  | regdefs ',' regdef { $1 ++ [$3] }
  
 assertstmt :: { Stmt }
- : 'assert' id 'in' id
-    { assertInS $2 $4 }
- | 'assert' id 'contains' string
-    { assertContainsS $2 $4 }
+ : 'assert' id not 'in' id
+    { assertInS $2 $3 $5 }
+ | 'assert' id not 'contains' string
+    { assertContainsS $2 $3 $5 }
+
+not :: { Bool }
+ :  { True }
+ |  'not' { False } 
 
 expr :: { Val }
  : string { stringV $1 }
@@ -149,11 +154,11 @@ regS = RegStmt
 valS :: ID -> Val -> Stmt
 valS = ValStmt
 
-assertInS :: ID -> ID -> Stmt
-assertInS x y = AssertStmt $ AssertIn x True y
+assertInS :: ID -> Bool -> ID -> Stmt
+assertInS x n y = AssertStmt $ AssertIn x n y
 
-assertContainsS :: ID -> String -> Stmt
-assertContainsS x y = AssertStmt $ AssertContains x True y
+assertContainsS :: ID -> Bool -> String -> Stmt
+assertContainsS x n y = AssertStmt $ AssertContains x n (map fromChar y)
 
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =
