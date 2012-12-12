@@ -2,7 +2,7 @@
 test: shampi
 	tclsh runtests.tcl ./$< > tests.shampi
 	tclsh runtests.tcl ./rhampi > tests.rhampi
-	cmp tests.rhampi tests.shampi
+	diff tests.rhampi tests.shampi
 
 shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs
 	ghc -o shampi --make $<

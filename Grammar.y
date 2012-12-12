@@ -23,7 +23,10 @@ import Lexer
 %token
     '('     { TkOpenParen }
     ')'     { TkCloseParen }
+    '['     { TkOpenBracket }
+    ']'     { TkCloseBracket }
     '|'     { TkBar }
+    '-'     { TkDash }
     ','     { TkComma }
     ';'     { TkSemicolon }
     ':'     { TkColon }
@@ -102,6 +105,8 @@ regdef :: { RegEx Elem }
  : id { varR $1 }
  | string { stringR $1 }
  | char { charR $1 }
+ | '[' char '-' char ']'
+    { rangeR $2 $4 }
  | 'fix' '(' id ',' int ')'
     { fixR $3 $5 }
  | 'star' '(' regdef ')'

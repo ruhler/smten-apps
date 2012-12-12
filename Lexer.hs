@@ -12,8 +12,9 @@ import Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr)
 import Data.Functor ((<$>))
 
 data Token =
-    TkOpenParen | TkCloseParen
+    TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkBar | TkComma | TkSemicolon | TkColon | TkColonEquals | TkDoubleDot
+  | TkDash
   | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr
   | TkAssert | TkIn | TkContains
   | TkID String
@@ -37,7 +38,10 @@ singles :: [(Char, Token)]
 singles = [
     ('(', TkOpenParen),
     (')', TkCloseParen),
+    ('[', TkOpenBracket),
+    (']', TkCloseBracket),
     ('|', TkBar),
+    ('-', TkDash),
     (';', TkSemicolon),
     (',', TkComma),
     (':', TkColon)
@@ -88,6 +92,7 @@ lex = do
       (c:cs) | isDigit c ->
          let (ns, rest) = span isDigit cs
          in put rest >> return (TkInt . read $ c:ns)
+      ('\'':c:'\'':cs) -> put cs >> return (TkChar c)
       ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c ->
          put cs >> return (TkChar . chr . read $ [a, b, c])
       ('"':cs) | (ns, '"':rest) <- break (== '"') cs ->
