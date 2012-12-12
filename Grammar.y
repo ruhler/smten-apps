@@ -82,9 +82,9 @@ valstmt :: { Stmt }
 
 cfgstmt :: { Stmt }
  : 'cfg' id ':=' cfgprods
-    { regS $2 (orR $4) }
+    { regS $2 (orsR $4) }
  | 'cfg' id ':=' cfgprods '|'
-    { regS $2 (orR ($4 ++ [epsilonR])) }
+    { regS $2 (orsR ($4 ++ [epsilonR])) }
 
 cfgprods :: { [RegEx Elem] }
  :          { [] }
@@ -126,7 +126,7 @@ regdef :: { RegEx Elem }
  | 'star' '(' regdef ')'
     { starR $3 }
  | 'or' '(' regdefs ')'
-    { orR $3 }
+    { orsR $3 }
  | 'concat' '(' regdefs ')'
     { concatsR $3 }
 

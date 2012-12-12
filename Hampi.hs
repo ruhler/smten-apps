@@ -53,7 +53,7 @@ inlineregs (Hampi var vals regs asserts) =
       lookupreg r
         | Star x <- r = Star (lookupreg x)
         | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
-        | Or xs <- r = Or (map lookupreg xs)
+        | Or a b <- r = Or (lookupreg a) (lookupreg b)
         | Fix x n <- r = Fix (lookupreg x) n
         | Variable x <- r = lookupreg $
             fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs
