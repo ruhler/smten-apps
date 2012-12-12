@@ -1,21 +1,7 @@
 
 module RegEx where
 
-import Prelude
-
-type ID = String
-
-data RegEx c =
-             Epsilon        -- matches ""
-           | Empty          -- never matches
-           | Atom c
-           | Range c c
-           | Star (RegEx c)
-           | Concat (RegEx c) (RegEx c)
-           | Or (RegEx c) (RegEx c)
-           | Variable ID
-           | Fix (RegEx c) Integer
-   deriving(Eq)
+import SeriRegEx
 
 instance (Show c) => Show (RegEx c) where
     show (Epsilon) = "Epsilon"
@@ -26,36 +12,6 @@ instance (Show c) => Show (RegEx c) where
     show (Concat a b) = "Concat (" ++ show a ++ ") (" ++ show b ++ ")"
     show (Or a b) = "Or (" ++ show a ++ ") (" ++ show b ++ ")"
     show (Variable id) = "Variable " ++ show id
-
-class FromChar c where
-    fromChar :: Char -> c
-
-instance FromChar Char where
-    fromChar = id
-
-ilength :: [a] -> Integer
-ilength (x:xs) = 1 + ilength xs
-ilength _ = 0
-
-
-partitions :: [a] -> [([a], [a])]
-partitions str = map (flip splitAt str) [0..(length str)]
-
-match :: (Eq c, Ord c) => RegEx c -> [c] -> Bool
-match Epsilon str = null str
-match Empty _ = False
-match (Atom x) [c] = x == c
-match (Atom _) _ = False
-match (Range cmin cmax) [c] = cmin <= c && c <= cmax
-match (Range _ _) _ = False
-match s@(Star x) str = match (Or Epsilon (Concat x s)) str
-match (Concat a b) str = any (matchboth a b) (partitions str)
-match (Or a b) str = match a str || match b str
-match (Fix x n) str = (ilength str == n) && match x str
-match (Variable x) _ = error $ "match: Variable " ++ x
-
-matchboth :: (Eq c, Ord c) => RegEx c -> RegEx c -> ([c], [c]) -> Bool
-matchboth a b (sa, sb) = match a sa && match b sb
 
 charR :: (FromChar c) => Char -> RegEx c
 charR c = Atom (fromChar c)
@@ -123,6 +79,7 @@ matchEpsilon env   (Variable i) = case lookup i env of
                                     (Just c) -> matchEpsilon (filter (\(x,_) -> x /= i) env) c -- okay for match epsilon
 matchEpsilon env      (Fix r n) = n == 0 && matchEpsilon env r
 
+fixNonZero :: (Eq c) => [(ID, RegEx c)] -> RegEx c -> RegEx c
 fixNonZero env c | not (matchEpsilon env c) = c
 fixNonZero env Empty            = Empty
 fixNonZero env Epsilon          = Empty
@@ -139,8 +96,8 @@ fixNonZero env (Variable i)          = case lookup i env of
                                       (Just c) -> fixNonZero env c
 fixNonZero env c@(Fix _ i)        = if i == 0 then Empty else c
 
-fixTable :: (Eq c) => [(ID, RegEx c)] -> Integer -> RegEx c -> [((Integer,ID), RegEx c)]
-fixTable env n _ = table
+fixTable :: (Eq c) => [(ID, RegEx c)] -> Integer -> [((Integer,ID), RegEx c)]
+fixTable env n = table
   where keys = [(i,v, c) | i <- [0..n], (v,c) <- env]
         table = foldl (\t (n,i,c) -> ((n,i),fix' t n c):t) [] keys
         fix' t 0 cfg         = if matchEpsilon env cfg then Epsilon else Empty        
@@ -156,17 +113,3 @@ fixTable env n _ = table
                                       Nothing -> Empty
         fix' t n (Fix c n')      = if n /= n' then Empty else fix' t n c
 
-
-
-
-
--- data RegEx c =
---              Epsilon        -- matches ""
---            | Empty          -- never matches
---            | Atom c
---            | Range c c
---            | Star (RegEx c)
---            | Concat (RegEx c) (RegEx c)
---            | Or (RegEx c) (RegEx c)
---            | Variableiable ID
---            | Fix (RegEx c) Integer

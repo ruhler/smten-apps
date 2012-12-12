@@ -9,6 +9,7 @@ import Debug.Trace
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 
+import SeriRegEx
 import RegEx
 
 type Elem = Integer
@@ -54,7 +55,11 @@ inlineregs (Hampi var vals regs asserts) =
         | Star x <- r = Star (lookupreg x)
         | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
         | Or a b <- r = Or (lookupreg a) (lookupreg b)
-        | Fix x n <- r = Fix (lookupreg x) n
+        | Fix (Variable x) n <- r =
+            let ft = fixTable (Map.toList regs) n
+            in fromMaybe (error $ "fixtable: " ++ x ++ show n) $
+                  lookup (n, x) ft
+        | Fix _ n <- r = error $ "fix got non-variable"
         | Variable x <- r = lookupreg $
             fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs
         | otherwise = r

@@ -18,6 +18,7 @@ import Seri.SMT.Yices.Yices2
 import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SeriGen as S
 
+import SeriRegEx
 import RegEx
 import Hampi
 import Grammar

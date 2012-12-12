@@ -7,6 +7,7 @@ import Control.Monad.State
 import Data.List (partition)
 import qualified Data.Map as Map
 
+import SeriRegEx
 import RegEx
 import Hampi
 

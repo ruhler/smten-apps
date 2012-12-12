@@ -3,7 +3,7 @@ module SeriGen where
 
 import Data.List
 import Seri.SMT.SMT
-import RegEx
+import SeriRegEx
 
 frees :: (Free a) => Integer -> Query [a]
 frees x = sequence (replicate x free)

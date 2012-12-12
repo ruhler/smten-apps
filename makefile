@@ -7,7 +7,7 @@ test: shampi
 shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs
 	ghc -o shampi --make $<
 
-SeriGen.hs: SeriGen.sri RegEx.sri
+SeriGen.hs: SeriGen.sri SeriRegEx.sri
 	../seri/build/seri-bin/seri --haskellf \
 		--include ../seri/seri/sri \
 		--include . \
