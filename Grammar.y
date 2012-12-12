@@ -107,6 +107,8 @@ regdef :: { RegEx Elem }
     { starR $3 }
  | 'or' '(' regdefs ')'
     { orR $3 }
+ | 'concat' '(' regdefs ')'
+    { concatsR $3 }
 
 regdefs :: { [RegEx Elem] }
  : regdef { [$1] }

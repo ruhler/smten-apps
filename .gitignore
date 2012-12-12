@@ -1,0 +1,9 @@
+*.o
+*.hi
+Grammar.hs
+shampi
+SeriGen.hs
+hampi.dbg
+tests.shampi
+tests.rhampi
+hampi/
