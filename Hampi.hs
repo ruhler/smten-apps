@@ -56,7 +56,7 @@ inlineregs (Hampi var vals regs asserts) =
         | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
         | Or a b <- r = Or (lookupreg a) (lookupreg b)
         | Fix (Variable x) n <- r =
-            let ft = fixTable (Map.toList regs) n
+            let ft = fixTable regs n
             in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
                 fromMaybe (error $ "fixtable: " ++ x ++ show n) $
                   lookup (n, x) ft

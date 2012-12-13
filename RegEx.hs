@@ -1,5 +1,7 @@
 module RegEx where
 
+import qualified Data.Map as Map
+
 import Debug.Trace
 import SeriRegEx
 
@@ -68,7 +70,7 @@ emptyR = Empty
 
 -------------------------------------------------
 
-matchEpsilon :: [(ID, RegEx c)] -> RegEx c -> Bool
+matchEpsilon :: Map.Map ID (RegEx c) -> RegEx c -> Bool
 matchEpsilon env          Empty = False
 matchEpsilon env        Epsilon = True
 matchEpsilon env       (Atom _) = False
@@ -76,12 +78,12 @@ matchEpsilon env     (Range {}) = False
 matchEpsilon env       (Star _) = True
 matchEpsilon env (Concat c1 c2) = matchEpsilon env c1 && matchEpsilon env c2
 matchEpsilon env     (Or c1 c2) = matchEpsilon env c1 || matchEpsilon env c2
-matchEpsilon env   (Variable i) = case lookup i env of
+matchEpsilon env   (Variable i) = case Map.lookup i env of
                                     Nothing  -> False
-                                    (Just c) -> matchEpsilon (filter (\(x,_) -> x /= i) env) c -- okay for match epsilon
+                                    (Just c) -> matchEpsilon (Map.filterWithKey (\x _ -> x /= i) env) c -- okay for match epsilon
 matchEpsilon env      (Fix r n) = n == 0 && matchEpsilon env r
 
-fixNonZero :: [(ID, RegEx c)] -> RegEx c -> RegEx c
+fixNonZero :: Map.Map ID (RegEx c) -> RegEx c -> RegEx c
 fixNonZero env c | not (matchEpsilon env c) = c
 fixNonZero env Empty            = Empty
 fixNonZero env Epsilon          = Empty
@@ -93,14 +95,14 @@ fixNonZero env c@(Concat c1 c2) = case (matchEpsilon env c1, matchEpsilon env c2
                                                             concatR (fixNonZero env c1) (fixNonZero env c2)]
                                       _            -> c
 fixNonZero env c@(Or c1 c2)     = Or (fixNonZero env c1) (fixNonZero env c2)
-fixNonZero env (Variable i)          = case lookup i env of
+fixNonZero env (Variable i)          = case Map.lookup i env of
                                       Nothing  -> Empty
                                       (Just c) -> fixNonZero env c
 fixNonZero env c@(Fix _ i)        = if i == 0 then Empty else c
 
-fixTable :: (Show c) => [(ID, RegEx c)] -> Integer -> [((Integer,ID), RegEx c)]
+fixTable :: (Show c) => Map.Map ID (RegEx c) -> Integer -> [((Integer,ID), RegEx c)]
 fixTable env sz = table
-  where keys = [(i,v,c) | i <- [0..sz], (v,c) <- env]
+  where keys = [(i,v,c) | i <- [0..sz], (v,c) <- Map.toList env]
         table = map (\(key, regex) -> (key, inline key regex)) fixtable
         --inline key c | trace ("\n\nINLINE: " ++  show key ++ " => " ++ show c) False = error ""
         inline key (Star cb)           = Star (inline key cb)
@@ -112,12 +114,13 @@ fixTable env sz = table
         inline key@(n,i) (Fix r n')    = if n == n' then inline key r else Empty
         inline key r                   = r                                      
         fixtable = map (\(n,i,c) -> ((n,i), fix' n n c)) keys
-        fix' n0 0 cfg         = if matchEpsilon env cfg then Epsilon else Empty       
+        --fix' n0 0 cfg         = if matchEpsilon env cfg then Epsilon else Empty       
         fix' n0 n Empty       = Empty
         fix' n0 n Epsilon     = if n == 0 then Epsilon else Empty 
         fix' n0 n c@(Atom {}) = if n == 1 then c else Empty
         fix' n0 n c@(Range{}) = if n == 1 then c else Empty        
-        fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR (fixNonZero env cb) c)
+        --fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR (fixNonZero env cb) c)
+        fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR cb c)
         fix' n0 n c@(Concat c1 c2) = orsR $ map (\x -> concatR (fix' n0 x c1) (fix' n0 (n-x) c2)) [0..n]
         fix' n0 n (Or c1 c2)       = orR (fix' n0 n c1) (fix' n0 n c2)        
         fix' n0 n c@(Variable i) = case lookup (n, i) fixtable of
