@@ -1,7 +1,7 @@
 
 module Hampi (
     ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
-    stringV, idV, concatV,
+    stringV, idV, concatV, subV,
     inlineregs,
     ) where
 
@@ -30,7 +30,14 @@ data Var = Var {
     v_maxwidth :: Integer
 }
 
-data Val = ValID ID | ValLit [Elem] | ValCat Val Val
+data Val = ValID ID
+         | ValLit [Elem]
+         | ValCat Val Val
+         | ValSub {
+             vs_source :: ID,
+             vs_offset :: Integer,
+             vs_length :: Integer
+           }
     deriving (Show)
 
 stringV :: String -> Val
@@ -38,6 +45,9 @@ stringV = ValLit . map fromChar
 
 idV :: ID -> Val
 idV = ValID
+
+subV :: ID -> Integer -> Integer -> Val
+subV = ValSub
 
 concatV :: [Val] -> Val
 concatV = foldr1 ValCat

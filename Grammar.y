@@ -153,6 +153,8 @@ expr :: { Val }
  | id { idV $1 }
  | 'concat' '(' exprs ')'
     { concatV $3 }
+ | id '[' int ':' int ']'
+    { subV $1 $3 $5 }
 
 exprs :: { [Val] }
  : expr { [$1] }

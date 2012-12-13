@@ -8,3 +8,7 @@ import SeriRegEx
 frees :: (Free a) => Integer -> Query [a]
 frees x = sequence (replicate x free)
 
+-- substring src offset length
+substring :: [a] -> Integer -> Integer -> [a]
+substring s o l = take l $ drop o s
+

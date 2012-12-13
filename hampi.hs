@@ -68,6 +68,9 @@ inlinevals varid varval m =
             a' <- lookupval a
             b' <- lookupval b
             return $ a' S.++ b'
+      lookupval (ValSub src off len) = do
+            src' <- lookupval (ValID src)
+            return $ S.substring src' (S.seriS off) (S.seriS len)
       vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- Map.toList m]
   in Map.fromList $ (varid, varval) : vals
 
