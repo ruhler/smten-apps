@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 import System.Environment
+import System.Timeout
 import Control.Monad.State
 
 import qualified Data.Map as Map
@@ -84,14 +85,15 @@ hquery (Hampi (Var vid wmin wmax) vals regs asserts) = do
 main :: IO ()
 main = do
     args <- getArgs
-    fin <- case args of
-             f:_ -> return f
+    (fin, to) <- case args of
+             [f] -> return (f, -1)
+             [f, i] -> return (f, read i)
              _ -> fail "Usage: Hampi <filename> [timeout in secs]"
     input <- readFile fin
     h <- case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
     y <- yices2
-    r <- runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery (inlineregs h))
-    putStrLn r
+    r <- timeout (1000000*to) $ runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery (inlineregs h))
+    putStrLn (fromMaybe "TIMEOUT" r)
 
