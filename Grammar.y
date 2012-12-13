@@ -89,7 +89,7 @@ cfgstmt :: { Stmt }
     { regS $2 (orsR ($4 ++ [epsilonR])) }
 
 cfgprods :: { [RegEx Elem] }
- :          { [] }
+ :          { [epsilonR] }
  | cfgprod  { [$1] }
  | cfgprods '|' cfgprod { $1 ++ [$3] }
 
