@@ -4,7 +4,7 @@ test: shampi
 	tclsh runtests.tcl ./rhampi > tests.rhampi
 	diff tests.rhampi tests.shampi
 
-shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs
+shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Fix.hs
 	ghc -o shampi --make $<
 
 prof: shampi
@@ -18,7 +18,7 @@ SeriGen.hs: SeriGen.sri SeriRegEx.sri
 		--mod-name SeriGen \
 		-f $< > $@
 
-Grammar.hs: Grammar.y RegEx.hs Hampi.hs Lexer.hs
+Grammar.hs: Grammar.y RegEx.hs Hampi.hs Lexer.hs Elem.hs
 	happy $<
 
 clean:

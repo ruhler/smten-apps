@@ -11,14 +11,8 @@ import Data.Maybe (fromMaybe)
 
 import SeriRegEx
 import RegEx
-
-type Elem = Integer
-
-instance FromChar Integer where
-    fromChar = toInteger . fromEnum
-
-toChar :: Integer -> Char
-toChar = toEnum . fromInteger
+import Elem
+import Fix
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool [Elem]
@@ -66,11 +60,7 @@ inlineregs (Hampi var vals regs asserts) =
         | Star x <- r = Star (lookupreg x)
         | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
         | Or a b <- r = Or (lookupreg a) (lookupreg b)
-        | Fix (Variable x) n <- r = fix regs x n
---            let ft = fixTable regs n
---            in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
---                fromMaybe (error $ "fixtable: " ++ x ++ show n) $
---                  lookup (n, x) ft
+        | Fix (Variable x) n <- r = fixN regs x n
         | Fix _ n <- r = error $ "fix got non-variable"
         | Variable x <- r = lookupreg $
             fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs

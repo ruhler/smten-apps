@@ -1,9 +1,5 @@
 module RegEx where
 
-import qualified Data.Map as Map
-import Data.Maybe(fromMaybe)
-
-import Debug.Trace
 import SeriRegEx
 
 instance (Show c) => Show (RegEx c) where
@@ -68,32 +64,4 @@ rangeR a b = Range (fromChar a) (fromChar b)
 
 emptyR :: RegEx c
 emptyR = Empty
-
-fix :: Map.Map ID (RegEx c) -> ID -> Integer -> RegEx c
-fix regs id n =
-  let fix' :: Map.Map (ID, Integer) (RegEx c) -> Integer -> RegEx c -> RegEx c
-      fix' m n r
-        | Epsilon <- r = if n == 0 then Epsilon else Empty
-        | Empty <- r = Empty
-        | Atom {} <- r = if n == 1 then r else Empty
-        | Range {} <- r = if n == 1 then r else Empty
-        | Star x <- r = 
-            if n == 0
-                then Epsilon
-                else fix' m n (Concat x r)
-        | Concat a b <- r
-            = orsR [concatR (fix' m i a) (fix' m (n-i) b) | i <- [0..n]]
-        | Or a b <- r = orR (fix' m n a) (fix' m n b)
-        | Variable id <- r = fromMaybe Empty (Map.lookup (id,n) m)
-        | Fix x n' <- r = if n == n' then fix' m n x else Empty
-    
-      --fixid :: Map.Map (ID, Integer) (RegEx c) -> (ID, Integer) -> RegEx c
-      fixid t k@(id, n) = 
-        let t' = Map.insert k Empty t
-            src = fromMaybe (error $ "fixid: " ++ show id) (Map.lookup id regs)
-        in fix' t' n src
-
-      keys = [(x, i) | i <- [0..n], x <- Map.keys regs]
-      table = Map.fromList [(k, fixid table k) | k <- keys]
-  in fromMaybe (error $ "fix: " ++ show id) (Map.lookup (id, n) table)
 
