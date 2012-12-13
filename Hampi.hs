@@ -2,7 +2,6 @@
 module Hampi (
     ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
     stringV, idV, concatV, subV,
-    inlineregs,
     ) where
 
 import Debug.Trace
@@ -52,20 +51,4 @@ data Hampi = Hampi {
     h_regs :: Map.Map ID (RegEx Elem),
     h_asserts :: [Assertion]
 }
-
-inlineregs :: Hampi -> Hampi
-inlineregs (Hampi var vals regs asserts) =
-  let lookupreg :: RegEx Elem -> RegEx Elem
-      lookupreg r
-        | Star x <- r = Star (lookupreg x)
-        | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
-        | Or a b <- r = Or (lookupreg a) (lookupreg b)
-        | Fix (Variable x) n <- r = fixN regs x n
-        | Fix _ n <- r = error $ "fix got non-variable"
-        | Variable x <- r = lookupreg $
-            fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs
-        | otherwise = r
-
-      regs' = Map.map lookupreg regs
-  in Hampi var vals regs' asserts
 

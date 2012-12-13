@@ -1,0 +1,4 @@
+var v : 4;
+cfg E :=  "()" | E E | "(" E ")" ;
+assert v in E; //limit should be inferred
+assert v contains ")(" ;

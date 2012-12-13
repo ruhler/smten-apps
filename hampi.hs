@@ -5,9 +5,12 @@ import System.Environment
 import System.Timeout
 import Control.Monad.State
 
+import Debug.Trace
+
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Data.Functor ((<$>))
+import Data.List (genericLength)
 
 import Seri.Type
 import Seri.Exp
@@ -21,6 +24,7 @@ import qualified SeriGen as S
 
 import SeriRegEx
 import RegEx
+import Fix
 import Hampi
 import Grammar
 
@@ -34,21 +38,21 @@ freevar :: Integer -> Query S_String
 freevar = qS . S.frees . S.seriS
 
 -- Make a hampi assertion.
-hassert :: Map.Map ID S_String -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
+hassert :: Map.Map ID (Integer, S_String) -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
 hassert vals regs (AssertIn v b r) =
-    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        rreg = S.seriS . fromMaybe (error $ "reg " ++ r ++ " not found") $ Map.lookup r regs
+    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        rreg = S.seriS $ fixN regs r vlen
         positive = S.match rreg vstr
         p = if b then positive else S.not positive
     in assertS p
 hassert vals regs (AssertEquals v b x) =
-    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
         positive = vstr S.== xstr
         p = if b then positive else S.not positive
     in assertS p
 hassert vals regs (AssertContains v b s) =
-    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         sstr = S.seriS s
         positive = S.isInfixOf sstr vstr
         p = if b then positive else S.not positive
@@ -56,21 +60,22 @@ hassert vals regs (AssertContains v b s) =
 
 -- inlinevals varid varval vals
 --  Given the var id, it's symbolic value, and the rest of the values, return
---  a mapping from id to totally inlined values.
-inlinevals :: ID -> S_String -> Map.Map ID Val -> Map.Map ID S_String
+--  a mapping from id to totally inlined values along with the length of those
+--  totally inlined values (for bounds inference)
+inlinevals :: ID -> (Integer, S_String) -> Map.Map ID Val -> Map.Map ID (Integer, S_String)
 inlinevals varid varval m =
-  let lookupval :: Val -> Maybe S_String
+  let lookupval :: Val -> Maybe (Integer, S_String)
       lookupval (ValID x)
         | x == varid = return varval
         | otherwise = Map.lookup x m >>= lookupval
-      lookupval (ValLit x) = return $ S.seriS x
+      lookupval (ValLit x) = return $ (genericLength x, S.seriS x)
       lookupval (ValCat a b) = do
-            a' <- lookupval a
-            b' <- lookupval b
-            return $ a' S.++ b'
+            (la, a') <- lookupval a
+            (lb, b') <- lookupval b
+            return $ (la + lb, a' S.++ b')
       lookupval (ValSub src off len) = do
-            src' <- lookupval (ValID src)
-            return $ S.substring src' (S.seriS off) (S.seriS len)
+            (_, src') <- lookupval (ValID src)
+            return $ (len, S.substring src' (S.seriS off) (S.seriS len))
       vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- Map.toList m]
   in Map.fromList $ (varid, varval) : vals
 
@@ -79,7 +84,7 @@ hquery :: Hampi -> Query String
 hquery (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
 hquery (Hampi (Var vid wmin wmax) vals regs asserts) = do
     svar <- freevar wmin
-    let svals = inlinevals vid svar vals
+    let svals = inlinevals vid (wmin, svar) vals
     r <- queryS $ do
         mapM_ (hassert svals regs) asserts
         query $ realizeS svar
@@ -103,6 +108,6 @@ main = do
             Left msg -> fail msg
             Right x -> return $ fst x
     y <- yices2
-    r <- timeout (1000000*to) $ runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery (inlineregs h))
+    r <- timeout (1000000*to) $ runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery h)
     putStrLn (fromMaybe "TIMEOUT" r)
 
