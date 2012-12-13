@@ -1,4 +1,3 @@
-
 module Hampi (
     ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
     stringV, idV, concatV,
@@ -58,8 +57,9 @@ inlineregs (Hampi var vals regs asserts) =
         | Fix (Variable x) n <- r =
             let ft = fixTable regs n
             in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
-                fromMaybe (error $ "fixtable: " ++ x ++ show n) $
-                  lookup (n, x) ft
+               case Map.lookup n ft of   
+                 (Just m) | (Just v) <- Map.lookup x m -> v
+                 _                                     -> error "fixtable: ++ x ++ show n"
         | Fix _ n <- r = error $ "fix got non-variable"
         | Variable x <- r = lookupreg $
             fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs

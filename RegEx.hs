@@ -100,31 +100,30 @@ fixNonZero env (Variable i)          = case Map.lookup i env of
                                       (Just c) -> fixNonZero env c
 fixNonZero env c@(Fix _ i)        = if i == 0 then Empty else c
 
-fixTable :: (Show c) => Map.Map ID (RegEx c) -> Integer -> [((Integer,ID), RegEx c)]
+fixTable :: (Show c) => Map.Map ID (RegEx c) -> Integer -> Map.Map Integer (Map.Map ID (RegEx c))
 fixTable env sz = table
-  where keys = [(i,v,c) | i <- [0..sz], (v,c) <- Map.toList env]
-        table = map (\(key, regex) -> (key, inline key regex)) fixtable
+  where table = Map.mapWithKey (\n idmap -> Map.mapWithKey (\i r -> inline (n,i) r) idmap) fixtable
         --inline key c | trace ("\n\nINLINE: " ++  show key ++ " => " ++ show c) False = error ""
         inline key (Star cb)           = Star (inline key cb)
         inline key (Concat c1 c2)      = concatR (inline key c1) (inline key c2)
         inline key (Or c1 c2)          = orR (inline key c1) (inline key c2)
-        inline key@(n,i) (Variable i') = case lookup (n,i') table of
-                                           Just r | i /= i' -> r
-                                           _                -> Empty
+        inline key@(n,i) (Variable i') = case Map.lookup n table of
+                                           Just m | i /= i', (Just r) <- Map.lookup i' m -> r
+                                           _                                             -> Empty
         inline key@(n,i) (Fix r n')    = if n == n' then inline key r else Empty
         inline key r                   = r                                      
-        fixtable = map (\(n,i,c) -> ((n,i), fix' n n c)) keys
-        --fix' n0 0 cfg         = if matchEpsilon env cfg then Epsilon else Empty       
+        fixtable = (Map.fromList [(n, Map.map (\c -> fix' n n c) env) | n <- [0..sz]])
+        fix' n0 0 cfg         = if matchEpsilon env cfg then Epsilon else Empty       
         fix' n0 n Empty       = Empty
         fix' n0 n Epsilon     = if n == 0 then Epsilon else Empty 
         fix' n0 n c@(Atom {}) = if n == 1 then c else Empty
         fix' n0 n c@(Range{}) = if n == 1 then c else Empty        
-        --fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR (fixNonZero env cb) c)
-        fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR cb c)
+        fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR (fixNonZero env cb) c)
+        --fix' n0 n c@(Star cb) = if n == 0 then Epsilon else fix' n0 n (concatR cb c)
         fix' n0 n c@(Concat c1 c2) = orsR $ map (\x -> concatR (fix' n0 x c1) (fix' n0 (n-x) c2)) [0..n]
         fix' n0 n (Or c1 c2)       = orR (fix' n0 n c1) (fix' n0 n c2)        
-        fix' n0 n c@(Variable i) = case lookup (n, i) fixtable of
-                                          Just  r | n0 /= n -> r -- inline if same size as orginal
-                                          _                 -> Fix c n
-        fix' n0 n (Fix c n')      = if n /= n' then Empty else fix' n0 n c
+        fix' n0 n c@(Variable i) = case Map.lookup n fixtable of
+                                          Just m | n0 /= n, (Just r) <- Map.lookup i m -> r
+                                          _                                              -> Fix c n
+        fix' n0 n (Fix c n')      = if n /= n' then Empty else fix' n0 n c        
 
