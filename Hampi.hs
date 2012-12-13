@@ -55,11 +55,11 @@ inlineregs (Hampi var vals regs asserts) =
         | Star x <- r = Star (lookupreg x)
         | Concat a b <- r = Concat (lookupreg a) (lookupreg b)
         | Or a b <- r = Or (lookupreg a) (lookupreg b)
-        | Fix (Variable x) n <- r =
-            let ft = fixTable regs n
-            in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
-                fromMaybe (error $ "fixtable: " ++ x ++ show n) $
-                  lookup (n, x) ft
+        | Fix (Variable x) n <- r = fix regs x n
+--            let ft = fixTable regs n
+--            in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
+--                fromMaybe (error $ "fixtable: " ++ x ++ show n) $
+--                  lookup (n, x) ft
         | Fix _ n <- r = error $ "fix got non-variable"
         | Variable x <- r = lookupreg $
             fromMaybe (error $ "undefined reg: " ++ x) $ Map.lookup x regs

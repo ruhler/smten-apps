@@ -1,4 +1,5 @@
 *.o
+*.o_prof
 *.hi
 Grammar.hs
 shampi
@@ -8,3 +9,4 @@ tests.shampi
 tests.rhampi
 hampi/
 tests/*.dbg
+buggy/*.dbg
