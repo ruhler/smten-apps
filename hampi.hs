@@ -41,6 +41,12 @@ hassert vals regs (AssertIn v b r) =
         positive = S.match rreg vstr
         p = if b then positive else S.not positive
     in assertS p
+hassert vals regs (AssertEquals v b x) =
+    let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
+        positive = vstr S.== xstr
+        p = if b then positive else S.not positive
+    in assertS p
 hassert vals regs (AssertContains v b s) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         sstr = S.seriS s

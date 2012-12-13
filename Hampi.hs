@@ -22,6 +22,7 @@ toChar = toEnum . fromInteger
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool [Elem]
+               | AssertEquals ID Bool ID
 
 data Var = Var {
     v_id :: ID,

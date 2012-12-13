@@ -16,7 +16,7 @@ data Token =
   | TkBar | TkComma | TkSemicolon | TkColon | TkColonEquals | TkDoubleDot
   | TkDash | TkAsterisk | TkPlus | TkQuestionMark
   | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr | TkNot
-  | TkAssert | TkIn | TkContains
+  | TkAssert | TkIn | TkContains | TkEquals
   | TkID String
   | TkInt Integer
   | TkString String
@@ -66,6 +66,7 @@ keywords = [
     ("assert", TkAssert),
     ("in", TkIn),
     ("contains", TkContains),
+    ("equals", TkEquals),
     ("concat", TkConcat),
     ("star", TkStar),
     ("or", TkOr),

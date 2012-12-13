@@ -48,6 +48,7 @@ import Lexer
     'concat'    { TkConcat }
     'in'    { TkIn}
     'contains'    { TkContains}
+    'equals'    { TkEquals }
     id      { TkID $$ }
     int     { TkInt $$ }
     string  { TkString $$ }
@@ -140,6 +141,8 @@ assertstmt :: { Stmt }
     { assertInS $2 $3 $5 }
  | 'assert' id not 'contains' string
     { assertContainsS $2 $3 $5 }
+ | 'assert' id not 'equals' id
+    { assertEqualsS $2 $3 $5 }
 
 not :: { Bool }
  :  { True }
@@ -173,6 +176,9 @@ assertInS x n y = AssertStmt $ AssertIn x n y
 
 assertContainsS :: ID -> Bool -> String -> Stmt
 assertContainsS x n y = AssertStmt $ AssertContains x n (map fromChar y)
+
+assertEqualsS :: ID -> Bool -> ID -> Stmt
+assertEqualsS x n y = AssertStmt $ AssertEquals x n y
 
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =

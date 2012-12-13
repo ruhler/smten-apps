@@ -1,0 +1,5 @@
+
+var v:6;
+val x := "abcdef" ;
+assert v equals x ;
+
