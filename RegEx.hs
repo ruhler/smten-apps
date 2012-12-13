@@ -102,7 +102,7 @@ fixTable :: (Show c) => [(ID, RegEx c)] -> Integer -> [((Integer,ID), RegEx c)]
 fixTable env sz = table
   where keys = [(i,v,c) | i <- [0..sz], (v,c) <- env]
         table = map (\(key, regex) -> (key, inline key regex)) fixtable
-        inline key c | trace ("\n\nINLINE: " ++  show key ++ " => " ++ show c) False = error ""
+        --inline key c | trace ("\n\nINLINE: " ++  show key ++ " => " ++ show c) False = error ""
         inline key (Star cb)           = Star (inline key cb)
         inline key (Concat c1 c2)      = concatR (inline key c1) (inline key c2)
         inline key (Or c1 c2)          = orR (inline key c1) (inline key c2)

@@ -1,0 +1,6 @@
+
+var str : 2 ;
+cfg A := "ab" | (A)* ;
+reg a := fix(A, 2) ;
+assert str in a ;
+

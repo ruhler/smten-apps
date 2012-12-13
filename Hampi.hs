@@ -57,7 +57,8 @@ inlineregs (Hampi var vals regs asserts) =
         | Or a b <- r = Or (lookupreg a) (lookupreg b)
         | Fix (Variable x) n <- r =
             let ft = fixTable (Map.toList regs) n
-            in fromMaybe (error $ "fixtable: " ++ x ++ show n) $
+            in --trace ("fix " ++ x ++ show n ++ " gives: " ++ show ft) $
+                fromMaybe (error $ "fixtable: " ++ x ++ show n) $
                   lookup (n, x) ft
         | Fix _ n <- r = error $ "fix got non-variable"
         | Variable x <- r = lookupreg $

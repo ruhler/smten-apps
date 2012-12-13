@@ -3,4 +3,5 @@ var str : 4 ;
 cfg E := "()" | E E | "(" E ")" ;
 reg e := fix(E, 4) ;
 assert str in e ;
+assert str contains ")(" ;
 

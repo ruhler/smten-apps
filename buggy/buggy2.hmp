@@ -1,0 +1,5 @@
+
+var str : 2 ;
+reg e := or(star(""), "ab") ;
+assert str in e ;
+

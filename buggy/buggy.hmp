@@ -1,0 +1,9 @@
+
+var str : 2 ;
+cfg E := ['a'-'z'] "b" ;
+cfg F := "a" ['a'-'z'] ;
+reg e := fix(E, 2) ;
+reg f := fix(F, 2) ;
+assert str in e ;
+assert str in f ;
+
