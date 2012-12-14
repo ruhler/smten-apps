@@ -4,6 +4,10 @@ test: shampi
 	tclsh runtests.tcl ./rhampi > tests.rhampi
 	diff tests.rhampi tests.shampi
 
+bench: shampi
+	tclsh runbench.tcl ./shampi > bench.shampi
+	tclsh runbench.tcl ./rhampi > bench.rhampi
+
 shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Fix.hs
 	ghc -o shampi --make $<
 

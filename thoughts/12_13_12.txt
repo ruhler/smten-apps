@@ -1,0 +1,692 @@
+
+Thu Dec 13 08:47:24 EST 2012
+
+Contains issue:
+
+The "contains" assertion blows up in the generated SMT query unexpectedly.
+Goal: understand why it blows up, and see if I can fix it.
+
+First, let me take some time to understand the problem. Then I'll look into
+it.
+
+The problem:
+
+We say:
+    x <- freevar N  -- for some fixed width N.
+    assert (S.isInfixOf (take M "abcdefghijklm...") x)
+
+N is greater than M.
+
+As M increases, with fixed N, the generated SMT query grows exponentially. I
+expect it to grow linearly. What's up?
+
+Expected for N = 4:
+
+M = 1:  or [x0 == 'a', x1 == 'a', x2 == 'a', x3 == 'a']
+M = 2: or [
+    x0 == 'a' && x1 == 'b',
+    x1 == 'a' && x2 == 'b',
+    x2 == 'a' && x3 == 'b']
+M = 3: or [
+    x0 == 'a' && x1 == 'b' && x2 == 'c',
+    x1 == 'a' && x2 == 'b' && x3 == 'c']
+M = 4: or [
+    x0 == 'a' && x1 == 'b' && x2 == 'c' && x3 == 'd']
+    
+Worst case is when M == N/2. Then we expect to have:
+    N/2 * (M-N/2-1)  comparisons.
+
+Or... N*M/2 - N*N/4 - N/2
+
+Linear in the size of M, quadratic in the size of N.
+
+Here's what I'm actually getting:
+
+M = 1:  or [x0 == 'a', x1 == 'a', x2 == 'a', x3 == 'a']
+M = 2:
+    if (x0 == 'a')
+      then    (x1 == 'b')
+           || (if (x1 == 'a')
+                  then    (x2 == 'b')
+                       || (x2 == 'a' && x3 == 'b')
+                  else (x2 == 'a' && x3 == 'b'))
+      else (if (x1 == 'a')
+               then    (x2 == 'b')
+                    || (x2 == 'a' && x3 == 'b')
+               else (x2 == 'a' && x3 == 'b'))
+
+This appears to be a sharing problem. We are duplicating default cases.
+With sharing, I would expect instead to see:
+
+let a = let b = x2 == 'a' && x3 == 'b'
+        in if (x1 == 'b')
+              then (x2 == 'b') || b
+              else b
+in if (x0 == 'a')
+      then (x1 == 'b') || a
+      else a
+
+Written this way, we have the six comparisons as expected.
+
+Thu Dec 13 09:27:14 EST 2012
+
+It's clear if we supported sharing in generated queries, this would not be an
+issue. That's hard to fix. The other option would be to rewrite the contains
+function to avoid this duplication problem.
+
+First let me understand where the duplication problem is actually coming from.
+Then I'll take another look at the issues needed to be solved when sharing.
+Then I'll see if I can rewrite the contains function to make immediate
+progress here.
+
+1. Where is the duplication coming from? Let me see what this looks like by
+hand.
+
+Reduced to N = 3 case:
+
+let n = (x1 == 'a' && x2 == 'b')
+in if (x0 == 'a')
+     then (x1 == 'b') || n
+     else n
+
+isInfixOf "ab" [x0, x1, x2]:
+
+any isPrefixOf "ab" [[x0, x1, x2], [x1, x2], [x2], []]
+
+or [isPrefixOf "ab" [x0, x1, x2],
+    isPrefixOf "ab" [x1, x2],
+    isPrefixOf "ab" [x2],
+    isPrefixOf "ab" []]
+
+Let me evaluate the components first:
+
+isPrefixOf "ab" []: False
+isPrefixOf "ab" [x2]: False
+isPrefixOf "ab" [x1, x2]: (x1 == 'a' && x2 == 'b')
+isPrefixOf "ab" [x0, x1, x2]: (x0 == 'a' && x1 == 'b')
+
+Nothing fancy there. That works exactly as expected, without duplication.
+
+Now... what about 'or'? How does this look?
+
+or [x0 == 'a' && x1 == 'b',
+    x1 == 'a' && x2 == 'b',
+    False,
+    False]
+
+foldr (||) False [x0 == 'a' && x1 == 'b', ...]
+
+let n = error "case no match"
+    n1 = False
+in 
+
+I don't understand. Let me play with some test cases to see if I can figure
+out what the culprit is.
+
+Thu Dec 13 09:54:26 EST 2012
+
+It simplifies to this problem:
+
+((a && b) || (c && d)) ==> 
+    if a
+      then (b || (c && d))
+      else (c && d)
+
+Which introduces the duplication. I can probably simplify more.
+
+((a && b) || c) ==>
+    if a
+        then b || c
+        else c
+
+Introduces the duplication there.
+
+now I should be able to understand this.
+
+First we do the ||.
+
+case (a && b) of
+   True -> True
+   _ -> c
+
+And expanding the &&:
+
+case (case a of
+         True -> b
+         _ -> False) of
+    True -> True
+    _ -> c
+
+Hmm... If we perform case function pushing, we get:
+
+case a of
+    True -> case b of
+                True -> True
+                _ -> c
+    _ -> c
+
+Thus the duplication!
+
+Question: Why do we do the case function pushing for booleans? We shouldn't,
+right?
+
+Thu Dec 13 10:06:38 EST 2012
+
+I found the problem. It's a problem in seri. We were doing case of case for
+boolean case arguments, which there's no need for. That was introducing a
+duplication which sharing didn't catch.
+
+I worked around that issue. Unfortunately, we seem to have broken one of our
+test cases.
+
+Nope! It was just an ambiguity. Cool.
+
+Let me try the real "paper" example now, see how it works.
+
+Thu Dec 13 10:14:11 EST 2012
+
+Paper example still has problems. Not with the contains assertion anymore, but
+with the sql assertion. I'm running profiling now to get an idea of what's
+taking so much time.
+
+Meanwhile, I want to mention some things:
+
+* In this example, it was important we don't specialize if we don't have to,
+  because specialization introduces duplication. It's cheaper not to.
+* if we had sharing, the generated code wouldn't be more complex with
+  over-eager specialization
+
+How can we do sharing?
+
+Thu Dec 13 10:19:54 EST 2012
+
+Side note: the current problem with the paper test is fixTable blows up. I can
+try to look and see what the issue is. It could be just that it's very large:
+53 elements? Or it could be stuck in a loop. Note sure. I'll let Nirav deal
+with that.
+
+Let me think about sharing some more.
+
+Thu Dec 13 12:54:07 EST 2012
+
+We are still having problems with fix. Let me propose a different, simpler
+approach. I'm not going to worry about strange cases. This can serve to get us
+off the ground (assuming it works). So I can get at the important seri issues.
+
+Proposal:
+
+fix :: Map (ID, Integer) RegEx -> Integer -> RegEx -> RegEx
+
+Fix the given regex as specified in the given environment.
+We assume the environment contains all fully fixed id's needed.
+
+It will be a recursive, tie the knot kind of implementation.
+
+Given these things, how do we compute the 'fix' function? I argue it is easy:
+
+ Epsilon => if n == 0 then Epsilon else Empty
+ Empty => Empty
+ Atom => if n == 1 then Atom else Empty
+ Range => if n == 1 then Range else Empty
+ Star x => if n == 0 then Epsilon
+                     else fix (Concat x (Star x))
+ Concat a b => orsR [Concat (fix i a) (fix (n-i) b) | i <- [0..n]]
+ Or a b => orsR [fix n a, fix n b]
+ Variable id => fromMaybe Empty (lookup (id,n) env)
+ Fix x n' => if n == n' then fix n x else Empty
+
+Simple. Nothing hard here. The only concern is potential looping. We'll know
+if that is the case or not.
+
+Let me implement this. See if it works. If so, cool.
+
+Thu Dec 13 13:12:46 EST 2012
+
+Concern: We can still get stuck in a loop, with mutually recursive things.
+
+What I need to do is continue to remove elements from maps?
+
+I should understand this.
+
+E := "()" | E E | "(" E ")"
+
+E4 will fail, because in the course if it, we will look up
+E0 E4. If E4 is in the table as itself, we have a loop.
+
+To prevent this, while I'm working on E4, I want to not recursively look it up
+(it should default to empty instead of E4).
+
+That's fine. But we have other issues:
+
+A := "a" | B B
+B := "b" | A A
+
+A4 looks up B4. Fine, we have that.
+B4 looks up A4. Boom. We get stuck in a loop.
+
+What I want to say is:
+
+I'm computing A4 now. So remove A4 from the map... go.
+I need to look up B4. Where I look that up, we are not allowed to have A4 in
+the map, so remove that.
+
+Okay. That's not so unreasonable... Is it? Or does it mean we lose
+our dynamic programming?
+
+It's only an issue for variables of the same size.
+
+We'll, I'll have to fix this eventually. But for now, hopefully we don't have
+those. I'm aware of the issue. I can try and figure out an appropriate
+solution. Let me get this hack working first.
+
+Thu Dec 13 13:36:54 EST 2012
+
+Looks like this fixes the fixN problem I was having. All the tests pass. The
+paper.hmp now get's stuck running concrete evaluation of the match. Probably
+because it is exponential. I ought to be able to verify that somehow.
+
+In other words, I now believe the problem is with our match algorithm.
+
+How to test? Let me focus instead now on smaller test cases. Make sure they
+work. I'll start taking test cases from hampi's tests.
+
+Thu Dec 13 14:09:08 EST 2012
+
+Okay! So, I ran on all of hampi's test cases. Let me try to summarize the
+
+results (tests.0.*):
+
+ambiguous (?)::
+* test_047_AND_049_size5
+
+fails to find result rhampi found::
+* test_062_AND_030_size5
+* test_044_AND_021_size5
+
+<<loop>>::
+* test_013_AND_010_size5
+* test_001_AND_039_size5
+* test_030_AND_014_size5
+
+val substring::
+* testEquals2.hmp
+
+stack overflow::
+* testPaperExample.hmp
+
+And there are many more examples.
+
+Good. This is a good start. A great base to work with. We are making good
+progress.
+
+What steps do I want to take next? I feel like I should try solving one thing
+at a time.
+
+Okay. Here's the deal. Pick a problem to solve. Figure out the problem. Try to
+minimize it. Put it in tests. Solve the problem. And go from there. Sounds
+like a plan to me.
+
+First... say we start with the parse errors. Because those should be pretty
+straight forward.
+
+First: what is this v[0:3] notation? Looks like a substring.
+
+Okay, so it looks like I have two things I want to add support for.
+
+1: substring:
+ v[s:l]
+    s - starting offset into string. 0 is the first element of the string.
+    l - length of the substring.
+2. equals assertion
+
+Looks like equals should be easier to add. So let me start with that.
+
+Thu Dec 13 14:44:14 EST 2012
+
+Okay, so I got the parser things done. That's good. What do I want to tackle
+next?
+
+I feel like <<loop>> is the most important thing to do next. At least get
+started on it, see if I can't figure out a reasonable solution.
+
+Guess what it is! The very example I already came up with.
+
+var x : 5;
+cfg S :=  "a" | A A ;
+cfg A :=  "b" | S S ;
+reg a := fix(S, 5);
+assert x in a;
+
+Let's see what we know here. I want to get a better sense of this grammar.
+
+Um... It's very confusing to me.
+
+Question: does "" belong to this grammar?
+
+Let's assume the answer is yes, then "" belongs to A and we are all set.
+Let's assume the answer is no....
+
+What does hampi think? It says no. "" does not belong to the grammar. That
+should make it more clear.
+
+S0 := {}
+A0 := {}
+
+S1 := {"a"}
+A1 := {"b'}
+
+S2 := {"bb"}
+A2 := {"aa"}
+
+S3 := {"baa", "aab"}
+A3 := {"bba", "abb"}
+
+Okay, how do we find S3? Algorithmically?
+
+Assuming I have this full table...
+
+I don't have to go that far even. Find S1.
+
+Assuming I have the map, and that I'm not allowed to go recursively... I want
+to do something like this.
+
+S1: "a" | A A ;
+
+"a" is one possible value. Easy.
+
+A A: I have to look up
+    A1, A0
+
+A1: "b" is one possible value. Easy.
+     I have to look up S1, S0.
+
+I'm in the process of looking up S1, so that must return empty.
+
+In other words... any time I look something up, I have to remove it from the
+table?
+
+Thu Dec 13 16:14:42 EST 2012
+
+Here's how it should work. It's like inline in seri.
+
+We use perform unsafe IO to cache the results of things. Basically we want to
+cache the result of fixid.
+
+So, we wrap it in an IO computation which works as follows:
+
+1. See if the result is in the cache. If so, return that.
+2. If the result is not in the cache:
+    1. Put Empty as the result in the cache (to break recursion)
+    2. compute fixid
+    3. Put the result as the result in the cache
+
+That's it. Simple. Easy. Efficient.
+
+Let me try this out.
+
+
+Thu Dec 13 16:26:17 EST 2012
+
+Question: why not just do the whole thing in IO?
+That way I don't have to worry about this stuff. Have one big IO computation
+which makes use of a cache. Wrap it in unsafePerformIO. That sounds like a
+good idea to me. Safer.
+
+Thu Dec 13 16:36:34 EST 2012
+
+Why am I using unsafePerformIO? I should just use a State monad.
+
+Ug. Let me pull this into its own file.
+
+Thu Dec 13 16:54:30 EST 2012
+
+Okay! State monad, in its own file. Everything is good.
+
+Except... we get stuck in an infinite loop in the cfgstar test. Let me try to
+understand.
+
+Thu Dec 13 17:09:34 EST 2012
+
+Okay! So <<loop>> is now taken care of. Next?
+
+Let's say I run all the tests again. This time with a ... still a 30 second
+time limit, say. See how things look now.
+
+Thu Dec 13 17:47:03 EST 2012
+
+Okay, 30 second time limit, takes 17 minutes to run all the tests.
+
+What do we see now? No <<loop>> issues! Hurray.
+
+What we are left with are the following kinds of things:
+
+* Differing SAT answers
+Not sure if because of ambiguity or bug
+
+* SAT vs UNSAT
+This must be a bug
+
+* TIMEOUT
+
+* Stack overflow
+
+There is one more feature I don't claim to support, which is bounds inference.
+Use of a cfg without fix in an assertion.
+
+That should be pretty easy to test. We should just insert a Fix for every
+assertion. No reason we can't fix regular expressions too. I don't think fix
+costs us very much.
+
+Hmm... I want to give priority to correctness issues. Correctness issues are
+SAT vs UNSAT. So... let me not worry about bounds inference just yet, though
+that would be nice to have implemented and out of the way...
+
+How hard is it? The trick is, vals needs to map from ID to string and length.
+That's probably easy...
+
+So let me do that real quick like.
+
+Thu Dec 13 18:02:16 EST 2012
+
+Okay! So I did a bounds inference thing. The bounds inference test blows up if
+the input size is too big, which is bad, but it's a separate issue. Right? I
+better double check.
+
+No. My test didn't test. It didn't make a difference.
+
+So I guess I have to revert, unless I can find a test case where it makes a
+difference. Where it would be infinite inlining anyway...
+
+Okay, so I found a test which should make a difference, but my bounds
+inference doesn't solve. I must not be doing the inference correctly.
+
+I think I have to create a new label for it so we don't get stuck in infinite
+recursion?
+
+Or... I need to fixN before the infinite inlining!
+
+What if that is where I do the inlining? So I should just do it all there.
+Make sense?
+
+Yup! That fixes it. Cool.
+
+Nifty. What's next?
+
+Let me just look at one of the buggy ones and see if I can start thinking
+about it. I need dinner soon.
+
+First let me check if I agree with rhampi's choice.
+
+abbba.
+
+First, it should be in S0.
+
+cfg S0 :=  C0 A0 | A0 B0 ;
+cfg A0 :=  "a" ;
+cfg B0 :=  "b" | A0 B0 | B0 C0 ;
+cfg C0 :=  "b" | "a" B0 ;
+
+I don't think it is in. Is this a bug in hampy?
+
+No. It's not.
+
+S0 -> C0 A0 -> C0 "a" -> "a" B0 "a" -> "a" B0 C0 "a" 
+-> "a" B0 C0 C0 "a" -> "abbba"
+
+So that's fine.
+
+How about in The second part of it?
+
+cfg S1 :=  "a" L1 A1 L1 "a" ;
+cfg L1 :=  | " " L1 ;
+cfg A1 :=  | A1 "b" ;
+reg limit1 := fix(S1, 5);
+
+S1 -> "a" L1 A1 L1 "a"
+-> "a" A1 "a"
+-> "a" A1 "b" "a"
+-> "a" A1 "b" "b" "a"
+-> "a" A1 "bbba"
+-> "abbba"
+
+Now, "abbba" solves it. So this is a bug in shampi. Perhaps having to do with
+the empty alternatives?
+
+Here's a question, what does | A1 "b" mean? I've been saying it means:
+    "" | A1 "b".  That's the only thing that makes sense.
+
+So let me try this test case, and see if making "" explicit helps. If so, it's
+a parser bug.
+
+Yup. As I expected... Can I simplify this test case?
+
+Yes. I can, and have. Now, where is the bug?
+
+Okay, found and fixed.
+
+Perhaps that was all the bugs. Let me run all the tests again while I go off
+to dinner, see how things look now.
+
+Thu Dec 13 19:22:00 EST 2012
+
+How things look now... Pretty good I would say.
+
+Differences are:
+
+* SAT vs. SAT. I don't know if it's a bug or an ambiguity.
+* TIMEOUT.
+* default char: I use \000, they use '?'. Is there an easy way to change that?
+  This is like an ambiguity... At the very least, conversion from int to char
+  should check for negative numbers and make the '?'.
+
+Looks like they all finish or timeout. No errors. That's good.
+
+How do we test these cases of ambiguity?
+
+I can do them by hand easily enough.
+
+Add an assertion that the result contains the result I get, then run in rhampi
+to see if it still can find that result or not. It's a bit tedious to do
+though...
+
+I should do this for a number of samples... Maybe the odd ones, just to make
+sure things look okay. Other than that, I should start investigating
+performance. 
+
+I think we're at a good place right now.
+
+Thu Dec 13 19:30:10 EST 2012
+
+I did some random sampling. No correctness issues found. I think we just have
+ambiguous grammars. So let me assume they are all correct. (ha).
+
+Next step is...
+
+Performance!
+
+I see a fairly common pattern, which is TIMEOUTs occur for long inputs.
+
+Perhaps I ought to just run with a longer timeout. Like... 5 minutes? See
+which cases that helps?
+
+Or pick one to focus on and identify the problem with.
+
+I think we could speed things up a lot if we did a simple check asking for the
+length's possible for a RegEx.
+
+That is, the time is all spent in concat. I'm guessing.
+
+Like, let's say we have something like... hmm... how could I form it.
+
+Anyway, something like:
+
+match (concat "abcdefghijklmnopqrstuvwxy" "z") "abcdefghijklmnopqrstuvwxyz"
+
+What is this going to attempt to do?
+It will try to break up the string in 25 different ways, try matching 24 of
+them, but each of those makes 24 ways, try matching 23, etc... In other words,
+something as simple as a constant string match, if done in the wrong order,
+could lead to exponential blowup.
+
+The proposed solution is as follows:
+
+We should have a function for each RegEx saying what possible lengths a string
+which matches that regex could have. We can get this info reasonably
+efficiently I think, then use that to limit which partitions you
+try for concat.
+
+How do we get this info?
+
+Input: N: max bound to try and max against.
+Output: List of integers ranging from 0 to N representing those lengths
+possibly matched by the given RegEx.
+
+Epsilon: [0]
+Empty: []
+Atom: [1]
+Range: [1]
+Star: ...
+ Ask for those ranges possible for the given regex.
+ Then include all multiples of those ranges up to N.
+ It might be nice if we kept the values sorted so we don't have to worry about
+ duplicates and such. Or have a filter, or something. Who knows.
+Concat: ...
+ Get the range for the first, and the range for the second.
+ Include all the sums of ranges.
+Or: union of both fields.
+Var: should not ever be seen.
+Fix: the length for the given fix.
+    
+Yes. So this is easy. If I'm clever, I could keep it sorted. I suspect this is
+very much worth it. If I really want to, I can analyze this info statically,
+build it into the RegEx, and compute it all in Haskell before converting to
+Seri. That's if we spend a lot of time trying to figure out this info.
+
+Let me see if I can come up with the stupid blowup case. How about try a
+long literal match?
+
+match "abcdefg" "abcdefg"
+    
+For concat we try the following partitions:
+
+("", "abcdefg")
+This fails right away, because "" doesn't match.
+("a", "bcdefg")
+
+Okay, so we are pretty quick to match those.
+
+I don't know. Something to think about.
+
+Thu Dec 13 20:03:09 EST 2012
+
+I ran the paper test. It finishes after 5 minutes. So it's just a performance
+issue.
+
+Let's say I try running all the tests with ... a ... 
+
+There were 32 timeout tests. Let say I run over night... say 8 hours. 4
+timeouts per hour. So 15 minute timeout. See how far that gets us.
+
+Sounds like a plan to me.
+
+
