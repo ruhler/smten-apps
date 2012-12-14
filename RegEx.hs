@@ -1,10 +1,9 @@
 
-module RegEx where
+module RegEx (
+    epsilonR, emptyR, concatR, orsR, orR,
+    ) where
 
 import SeriRegEx
-
-charR :: (FromChar c) => Char -> RegEx c
-charR c = Atom (fromChar c)
 
 concatR :: RegEx c -> RegEx c -> RegEx c
 concatR Empty          y = Empty
@@ -13,9 +12,6 @@ concatR (Concat x1 x2) y = x1 `concatR` (x2 `concatR` y )
 concatR x          Empty = Empty
 concatR x        Epsilon = x
 concatR x              y = Concat x y
-
-concatsR :: [RegEx c] -> RegEx c
-concatsR = foldl concatR epsilonR
 
 orsR :: [RegEx c] -> RegEx c
 orsR = foldl orR emptyR
@@ -28,23 +24,6 @@ orR x          y = Or x y
 
 epsilonR :: RegEx c
 epsilonR = Epsilon
-
-stringR :: (FromChar c) => String -> RegEx c
-stringR str = foldr concatR Epsilon (map charR str)
-
-starR :: RegEx c -> RegEx c
-starR Epsilon = Epsilon
-starR Empty   = Empty  
-starR x       = Star x
-
-plusR :: RegEx c -> RegEx c
-plusR r = concatR r (starR r)
-
-optionR :: RegEx c -> RegEx c
-optionR r = orR epsilonR r
-
-rangeR :: (FromChar c) => Char -> Char -> RegEx c
-rangeR a b = Range (fromChar a) (fromChar b)
 
 emptyR :: RegEx c
 emptyR = Empty

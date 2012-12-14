@@ -5,8 +5,8 @@ import SeriRegEx
 
 type Elem = Integer
 
-instance FromChar Integer where
-    fromChar = toInteger . fromEnum
+fromChar :: Char -> Elem
+fromChar = toInteger . fromEnum
 
 toChar :: Elem -> Char
 toChar = toEnum . fromInteger

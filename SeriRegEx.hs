@@ -15,12 +15,6 @@ data RegEx c =
            | Or (RegEx c) (RegEx c)
    deriving(Eq)
 
-class FromChar c where
-    fromChar :: Char -> c
-
-instance FromChar Char where
-    fromChar = id
-
 ilength :: [a] -> Integer
 ilength (x:xs) = 1 + ilength xs
 ilength _ = 0
