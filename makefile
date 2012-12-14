@@ -14,7 +14,7 @@ shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Fix.hs
 	ghc -o shampi -O2 --make $<
 
 prof: shampi
-	ghc -o shampi -O2 hampi.hs -auto-all -prof -rtsopts -osuf o_prof
+	ghc -o shampi_prof -O2 hampi.hs -auto-all -prof -rtsopts -osuf o_prof
 
 SeriGen.hs: SeriGen.sri SeriRegEx.sri
 	../seri/build/seri-bin/seri --haskellf \

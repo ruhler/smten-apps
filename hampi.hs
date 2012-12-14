@@ -19,6 +19,8 @@ import qualified Seri.HaskellF.Symbolic as S
 import Seri.HaskellF.Query
 import Seri.SMT.Query
 import Seri.SMT.Yices.Yices2
+import Seri.SMT.Yices.Yices1
+import Seri.SMT.STP.STP
 import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SeriGen as S
 
@@ -33,7 +35,11 @@ import Grammar
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
 
-type S_Elem = S.Integer
+type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
+type S_4 = S.N__TIMES S_2 S_2
+type S_8 = S.N__TIMES S_4 S_2
+type S_Elem = S.Bit S_8
+--type S_Elem = S.Integer
 type S_String = S.List__ S_Elem
 
 freevar :: Integer -> Query S_String
@@ -111,7 +117,7 @@ main = do
     h <- case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
-    y <- yices2
+    y <- stp
     r <- timeout (1000000*to) $ runQuery (RunOptions dbg y) (hquery h)
     putStrLn (fromMaybe "TIMEOUT" r)
 
