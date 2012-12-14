@@ -35,11 +35,11 @@ import Grammar
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
 
-type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
-type S_4 = S.N__TIMES S_2 S_2
-type S_8 = S.N__TIMES S_4 S_2
-type S_Elem = S.Bit S_8
---type S_Elem = S.Integer
+--type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
+--type S_4 = S.N__TIMES S_2 S_2
+--type S_8 = S.N__TIMES S_4 S_2
+--type S_Elem = S.Bit S_8
+type S_Elem = S.Integer
 type S_String = S.List__ S_Elem
 
 freevar :: Integer -> Query S_String
@@ -49,8 +49,9 @@ freevar = qS . S.frees . S.seriS
 hassert :: Map.Map ID (Integer, S_String) -> Map.Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        rreg = S.seriS $ fixN cfgs r vlen
-        positive = S.match rreg vstr
+        rreg = fixN cfgs r vlen
+        srreg = S.seriS rreg
+        positive = S.match srreg vstr
         p = if b then positive else S.not positive
     in assertS p
 hassert vals _ (AssertEquals v b x) =
@@ -117,7 +118,7 @@ main = do
     h <- case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
-    y <- stp
+    y <- yices2
     r <- timeout (1000000*to) $ runQuery (RunOptions dbg y) (hquery h)
     putStrLn (fromMaybe "TIMEOUT" r)
 

@@ -1,4 +1,6 @@
 
+{-# LANGUAGE StandaloneDeriving #-}
+
 module RegEx (
     epsilonR, emptyR, concatR, orsR,
     ) where
@@ -6,6 +8,14 @@ module RegEx (
 import Data.List(nub)
 
 import SeriRegEx
+
+instance (Show c) => Show (RegEx c) where
+    show Epsilon = "ϵ"
+    show Empty = "∅"
+    show (Atom c) = show c
+    show (Range a b) = "[" ++ show a ++ "-" ++ show b ++ "]"
+    show (Concat _ a b) = show a ++ " " ++ show b
+    show (Or _ a b) = "(" ++ show a ++ " | " ++ show b ++ ")"
 
 concatR :: RegEx c -> RegEx c -> RegEx c
 concatR Empty          y = Empty
