@@ -10,23 +10,16 @@ data RegEx c =
            | Empty          -- never matches
            | Atom c
            | Range c c
-           | Concat (RegEx c) (RegEx c)
-           | Or (RegEx c) (RegEx c)
+           | Concat Integer (RegEx c) (RegEx c)
+           | Or Integer (RegEx c) (RegEx c)
    deriving(Eq)
 
-partitions :: [a] -> [([a], [a])]
-partitions str = map (flip splitAt str) [0..(length str)]
-
-match :: (Eq c, Ord c) => RegEx c -> [c] -> Bool
-match Epsilon str = null str
-match Empty _ = False
-match (Atom x) [c] = x == c
-match (Atom _) _ = False
-match (Range cmin cmax) [c] = cmin <= c && c <= cmax
-match (Range _ _) _ = False
-match (Concat a b) str = any (matchboth a b) (partitions str)
-match (Or a b) str = match a str || match b str
-
-matchboth :: (Eq c, Ord c) => RegEx c -> RegEx c -> ([c], [c]) -> Bool
-matchboth a b (sa, sb) = match a sa && match b sb
+-- The length a string much be to match against the given regular expression.
+rlength :: RegEx c -> Integer
+rlength Epsilon = 0
+rlength Empty = 1   -- not strictly correct, what should go here?
+rlength (Atom _) = 1
+rlength (Range _ _) = 1
+rlength (Concat n _ _) = n
+rlength (Or n _ _) = n
 
