@@ -94,4 +94,3 @@ main = do
     y <- yices2
     r <- runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery (inlineregs h))
     putStrLn r
-
