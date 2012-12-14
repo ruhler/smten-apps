@@ -15,10 +15,6 @@ data RegEx c =
            | Or (RegEx c) (RegEx c)
    deriving(Eq)
 
-ilength :: [a] -> Integer
-ilength (x:xs) = 1 + ilength xs
-ilength _ = 0
-
 partitions :: [a] -> [([a], [a])]
 partitions str = map (flip splitAt str) [0..(length str)]
 
