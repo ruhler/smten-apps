@@ -55,7 +55,7 @@ fixM r n
   | OrC a b <- r = do
         a' <- fixM a n
         b' <- fixM b n
-        return $ orR a' b'
+        return $ orsR [a', b']
   | VariableC id <- r = fixidM id n
   | FixC x n' <- r = if n == n' then fixidM x n else return emptyR
 

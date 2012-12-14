@@ -1,7 +1,9 @@
 
 module RegEx (
-    epsilonR, emptyR, concatR, orsR, orR,
+    epsilonR, emptyR, concatR, orsR,
     ) where
+
+import Data.List(nub)
 
 import SeriRegEx
 
@@ -10,14 +12,16 @@ concatR Empty          y = Empty
 concatR Epsilon        y = y            
 concatR x          Empty = Empty
 concatR x        Epsilon = x
+concatR (Concat _ a b) y = concatR a (concatR b y)
 concatR x              y = Concat (rlength x + rlength y) x y
 
-orsR :: [RegEx c] -> RegEx c
-orsR = foldl orR emptyR
+orsR :: (Eq c) => [RegEx c] -> RegEx c
+orsR = foldl orR emptyR . nub
 
 orR :: RegEx c -> RegEx c -> RegEx c
 orR Empty      y = y
 orR x      Empty = x
+orR (Or _ a b) y = orR a (orR b y)
 orR x          y = Or (rlength x) x y                                    
 
 epsilonR :: RegEx c
