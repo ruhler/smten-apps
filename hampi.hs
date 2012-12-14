@@ -101,15 +101,17 @@ hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
 main :: IO ()
 main = do
     args <- getArgs
-    (fin, to) <- case args of
-             [f] -> return (f, -1)
-             [f, i] -> return (f, read i)
+    (fin, to, dbg) <- case args of
+             [f] -> return (f, -1, Nothing)
+             [f, "-d", dbg] -> return (f, -1, Just dbg)
+             [f, i] -> return (f, read i, Nothing)
+             [f, i, "-d", dbg] -> return (f, read i, Just dbg)
              _ -> fail "Usage: Hampi <filename> [timeout in secs]"
     input <- readFile fin
     h <- case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
     y <- yices2
-    r <- timeout (1000000*to) $ runQuery (RunOptions (Just $ fin ++ ".dbg") y) (hquery h)
+    r <- timeout (1000000*to) $ runQuery (RunOptions dbg y) (hquery h)
     putStrLn (fromMaybe "TIMEOUT" r)
 
