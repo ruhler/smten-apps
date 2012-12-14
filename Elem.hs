@@ -1,5 +1,5 @@
 
-module Elem (Elem, toChar) where
+module Elem (Elem, fromChar, toChar) where
 
 import SeriRegEx
 

@@ -7,10 +7,9 @@ import Control.Monad.State
 import Data.List (partition)
 import qualified Data.Map as Map
 
-import SeriRegEx
-import RegEx
+import Elem
+import CFG
 import Hampi
-
 import Lexer
 
 }
@@ -84,55 +83,55 @@ valstmt :: { Stmt }
 
 cfgstmt :: { Stmt }
  : 'cfg' id ':=' cfgprods
-    { regS $2 (orsR $4) }
+    { cfgS $2 (orsC $4) }
  | 'cfg' id ':=' cfgprods '|'
-    { regS $2 (orsR ($4 ++ [epsilonR])) }
+    { cfgS $2 (orsC ($4 ++ [epsilonC])) }
 
-cfgprods :: { [RegEx Elem] }
- :          { [epsilonR] }
+cfgprods :: { [CFG] }
+ :          { [epsilonC] }
  | cfgprod  { [$1] }
  | cfgprods '|' cfgprod { $1 ++ [$3] }
 
-cfgprod :: { RegEx Elem }
- : cfgelems { concatsR $1 }
+cfgprod :: { CFG }
+ : cfgelems { concatsC $1 }
 
-cfgelems :: { [RegEx Elem] }
+cfgelems :: { [CFG] }
  : cfgelem { [$1] }
  | cfgelems cfgelem { $1 ++ [$2] }
 
-cfgelem :: { RegEx Elem }
- : string { stringR $1 }
- | char { charR $1 }
- | id { varR $1 }
+cfgelem :: { CFG }
+ : string { stringC $1 }
+ | char { charC $1 }
+ | id { varC $1 }
  | '(' id ')' '*'
-   { starR (varR $2) }
+   { starC (varC $2) }
  | '(' id ')' '+'
-   { plusR (varR $2) }
+   { plusC (varC $2) }
  | '(' id ')' '?'
-   { optionR (varR $2) }
+   { optionC (varC $2) }
  | '[' char '-' char ']'
-   { rangeR $2 $4 }
+   { rangeC $2 $4 }
 
 regstmt :: { Stmt }
  : 'reg' id ':=' regdef
-    { regS $2 $4 }
+    { cfgS $2 $4 }
 
-regdef :: { RegEx Elem }
- : id { varR $1 }
- | string { stringR $1 }
- | char { charR $1 }
+regdef :: { CFG }
+ : id { varC $1 }
+ | string { stringC $1 }
+ | char { charC $1 }
  | '[' char '-' char ']'
-    { rangeR $2 $4 }
+    { rangeC $2 $4 }
  | 'fix' '(' id ',' int ')'
-    { fixR (varR $3) $5 }
+    { fixC (varC $3) $5 }
  | 'star' '(' regdef ')'
-    { starR $3 }
+    { starC $3 }
  | 'or' '(' regdefs ')'
-    { orsR $3 }
+    { orsC $3 }
  | 'concat' '(' regdefs ')'
-    { concatsR $3 }
+    { concatsC $3 }
 
-regdefs :: { [RegEx Elem] }
+regdefs :: { [CFG] }
  : regdef { [$1] }
  | regdefs ',' regdef { $1 ++ [$3] }
  
@@ -165,10 +164,10 @@ exprs :: { [Val] }
 data Stmt = 
    AssertStmt Assertion
  | ValStmt ID Val
- | RegStmt ID (RegEx Elem)
+ | CfgStmt ID CFG
 
-regS :: ID -> RegEx Elem -> Stmt
-regS = RegStmt
+cfgS :: ID -> CFG -> Stmt
+cfgS = CfgStmt
 
 valS :: ID -> Val -> Stmt
 valS = ValStmt
@@ -185,9 +184,9 @@ assertEqualsS x n y = AssertStmt $ AssertEquals x n y
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =
  let vals = Map.fromList [(id, v) | ValStmt id v <- stmts]
-     regs = Map.fromList [(id, r) | RegStmt id r <- stmts]
+     cfgs = Map.fromList [(id, r) | CfgStmt id r <- stmts]
      asserts = [a | AssertStmt a <- stmts]
- in Hampi v vals regs asserts
+ in Hampi v vals cfgs asserts
 
 parseError :: Token -> ParserMonad a
 parseError tok = do

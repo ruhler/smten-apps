@@ -1,18 +1,8 @@
+
 module RegEx where
 
 import SeriRegEx
 
-instance (Show c) => Show (RegEx c) where
-    show (Epsilon) = "Epsilon"
-    show (Empty)   = "Empty"    
-    show (Atom c)  = "Atom " ++ show c
-    show (Range cmin cmax) = "Range " ++ show cmin ++ " " ++ show cmax
-    show (Star x)      = "Star (" ++ show x ++ ")"
-    show (Concat a b)  = "Concat (" ++ show a ++ ") (" ++ show b ++ ")"
-    show (Or a b)      = "Or (" ++ show a ++ ") (" ++ show b ++ ")"
-    show (Variable id) = "Variable " ++ show id
-    show (Fix f n)     = "Fix (" ++ show f ++ ") " ++ show n
-                         
 charR :: (FromChar c) => Char -> RegEx c
 charR c = Atom (fromChar c)
 
@@ -38,12 +28,6 @@ orR x          y = Or x y
 
 epsilonR :: RegEx c
 epsilonR = Epsilon
-
-varR :: ID -> RegEx c
-varR = Variable
-
-fixR :: RegEx c -> Integer -> RegEx c
-fixR = Fix
 
 stringR :: (FromChar c) => String -> RegEx c
 stringR str = foldr concatR Epsilon (map charR str)

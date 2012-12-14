@@ -22,8 +22,10 @@ import Seri.SMT.Yices.Yices2
 import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SeriGen as S
 
+import Elem
 import SeriRegEx
 import RegEx
+import CFG
 import Fix
 import Hampi
 import Grammar
@@ -38,20 +40,20 @@ freevar :: Integer -> Query S_String
 freevar = qS . S.frees . S.seriS
 
 -- Make a hampi assertion.
-hassert :: Map.Map ID (Integer, S_String) -> Map.Map ID (RegEx Elem) -> Assertion -> Query ()
-hassert vals regs (AssertIn v b r) =
+hassert :: Map.Map ID (Integer, S_String) -> Map.Map ID CFG -> Assertion -> Query ()
+hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        rreg = S.seriS $ fixN regs r vlen
+        rreg = S.seriS $ fixN cfgs r vlen
         positive = S.match rreg vstr
         p = if b then positive else S.not positive
     in assertS p
-hassert vals regs (AssertEquals v b x) =
+hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
         positive = vstr S.== xstr
         p = if b then positive else S.not positive
     in assertS p
-hassert vals regs (AssertContains v b s) =
+hassert vals _ (AssertContains v b s) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         sstr = S.seriS s
         positive = S.isInfixOf sstr vstr
@@ -82,18 +84,18 @@ inlinevals varid varval m =
 -- A hampi query.
 hquery :: Hampi -> Query String
 hquery (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
-hquery (Hampi (Var vid wmin wmax) vals regs asserts) = do
+hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
     svar <- freevar wmin
     let svals = inlinevals vid (wmin, svar) vals
     r <- queryS $ do
-        mapM_ (hassert svals regs) asserts
+        mapM_ (hassert svals cfgs) asserts
         query $ realizeS svar
     case r of
         Satisfiable v ->
           let tostr :: [Elem] -> String
               tostr = map toChar
           in return $ "{VAR(" ++ vid ++ ")=" ++ tostr v ++ "}"
-        Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals regs asserts)
+        Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
         _ -> return "UNKNOWN"
 
 main :: IO ()

@@ -8,10 +8,8 @@ import Debug.Trace
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 
-import SeriRegEx
-import RegEx
 import Elem
-import Fix
+import CFG
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool [Elem]
@@ -48,7 +46,7 @@ concatV = foldr1 ValCat
 data Hampi = Hampi {
     h_var :: Var,
     h_vals :: Map.Map ID Val,
-    h_regs :: Map.Map ID (RegEx Elem),
+    h_cfgs :: Map.Map ID CFG,
     h_asserts :: [Assertion]
 }
 
