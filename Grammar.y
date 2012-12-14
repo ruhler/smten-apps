@@ -123,7 +123,7 @@ regdef :: { CFG }
  | '[' char '-' char ']'
     { rangeC $2 $4 }
  | 'fix' '(' id ',' int ')'
-    { fixC (varC $3) $5 }
+    { fixC $3 $5 }
  | 'star' '(' regdef ')'
     { starC $3 }
  | 'or' '(' regdefs ')'

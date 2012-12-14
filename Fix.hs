@@ -57,7 +57,7 @@ fixM r n
         b' <- fixM b n
         return $ orR a' b'
   | VariableC id <- r = fixidM id n
-  | FixC x n' <- r = if n == n' then fixM x n else return emptyR
+  | FixC x n' <- r = if n == n' then fixidM x n else return emptyR
 
 fixN :: Map.Map ID CFG -> ID -> Integer -> RegEx Elem
 fixN regs x n = evalState (fixidM x n) $ FS regs Map.empty

@@ -14,7 +14,7 @@ data CFG =
    | ConcatC CFG CFG
    | OrC CFG CFG
    | VariableC ID
-   | FixC CFG Integer
+   | FixC ID Integer
    deriving(Show, Eq)
 
 charC :: Char -> CFG
@@ -46,7 +46,7 @@ epsilonC = EpsilonC
 varC :: ID -> CFG
 varC = VariableC
 
-fixC :: CFG -> Integer -> CFG
+fixC :: ID -> Integer -> CFG
 fixC = FixC
 
 stringC :: String -> CFG
