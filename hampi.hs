@@ -26,7 +26,6 @@ import qualified SeriGen as S
 
 import Elem
 import SeriRegEx
-import RegEx
 import CFG
 import Fix
 import Hampi

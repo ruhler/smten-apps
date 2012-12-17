@@ -9,7 +9,6 @@ import Map
 
 import Elem
 import SeriRegEx
-import RegEx
 import CFG
 
 data FS = FS {
