@@ -7,7 +7,7 @@ import Control.Monad.State
 
 import Data.Functor((<$>))
 import Data.Maybe(fromMaybe)
-import qualified Data.Map as Map
+import Map
 
 import Elem
 import SeriRegEx
@@ -15,8 +15,8 @@ import RegEx
 import CFG
 
 data FS = FS {
-    fs_cfgs :: Map.Map ID CFG,
-    fs_cache :: Map.Map (ID, Integer) (RegEx Elem)
+    fs_cfgs :: Map ID CFG,
+    fs_cache :: Map (ID, Integer) (RegEx Elem)
 }
 
 type FixM = State FS
@@ -24,13 +24,13 @@ type FixM = State FS
 fixidM :: ID -> Integer -> FixM (RegEx Elem)
 fixidM x n = do
     fs <- get
-    case Map.lookup (x, n) (fs_cache fs) of
+    case map_lookup (x, n) (fs_cache fs) of
         Just v -> return v
         Nothing -> do
-            put $ fs { fs_cache = Map.insert (x, n) Empty (fs_cache fs) }
-            let r = fromMaybe (error $ "fixid.r: " ++ x) $ Map.lookup x (fs_cfgs fs)
+            put $ fs { fs_cache = map_insert (x, n) Empty (fs_cache fs) }
+            let r = fromMaybe (error $ "fixid.r: " ++ x) $ map_lookup x (fs_cfgs fs)
             v <- fixM r n
-            modify $ \fs -> fs { fs_cache = Map.insert (x, n) v (fs_cache fs) }
+            modify $ \fs -> fs { fs_cache = map_insert (x, n) v (fs_cache fs) }
             return v
 
 fixM :: CFG -> Integer -> FixM (RegEx Elem)
@@ -59,6 +59,6 @@ fixM r n
   | VariableC id <- r = fixidM id n
   | FixC x n' <- r = if n == n' then fixidM x n else return emptyR
 
-fixN :: Map.Map ID CFG -> ID -> Integer -> RegEx Elem
-fixN regs x n = evalState (fixidM x n) $ FS regs Map.empty
+fixN :: Map ID CFG -> ID -> Integer -> RegEx Elem
+fixN regs x n = evalState (fixidM x n) $ FS regs map_empty
 

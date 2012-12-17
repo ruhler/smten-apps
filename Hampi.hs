@@ -5,7 +5,7 @@ module Hampi (
     ) where
 
 import Debug.Trace
-import qualified Data.Map as Map
+import Map
 import Data.Maybe (fromMaybe)
 
 import Elem
@@ -45,8 +45,8 @@ concatV = foldr1 ValCat
 
 data Hampi = Hampi {
     h_var :: Var,
-    h_vals :: Map.Map ID Val,
-    h_cfgs :: Map.Map ID CFG,
+    h_vals :: Map ID Val,
+    h_cfgs :: Map ID CFG,
     h_asserts :: [Assertion]
 }
 
