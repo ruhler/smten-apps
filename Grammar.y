@@ -8,6 +8,7 @@ import Data.List (partition)
 import Map
 
 import Elem
+import SeriCFG
 import CFG
 import Hampi
 import Lexer

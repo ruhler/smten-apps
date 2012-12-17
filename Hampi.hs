@@ -9,7 +9,7 @@ import Map
 import Data.Maybe (fromMaybe)
 
 import Elem
-import CFG
+import SeriCFG
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool [Elem]

@@ -24,7 +24,7 @@ SeriGen.hs: SeriGen.sri SeriRegEx.sri
 		--mod-name SeriGen \
 		-f $< > $@
 
-Grammar.hs: Grammar.y Hampi.hs Lexer.hs Elem.hs SeriGen.hs
+Grammar.hs: Grammar.y Hampi.hs Lexer.hs Elem.hs SeriGen.hs SeriCFG.hs
 	happy $<
 
 clean:

@@ -7,9 +7,8 @@ import Data.Functor
 import Data.Maybe
 import Map
 
-import Elem
 import SeriRegEx
-import CFG
+import SeriCFG
 
 data FS = FS {
     fs_cfgs :: Map ID CFG,

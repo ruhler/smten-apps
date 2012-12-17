@@ -2,20 +2,7 @@
 module CFG where
 
 import Elem
-
-type ID = String
-
-data CFG =
-     EpsilonC       -- matches ""
-   | EmptyC         -- never matches
-   | AtomC Elem
-   | RangeC Elem Elem
-   | StarC CFG
-   | ConcatC CFG CFG
-   | OrC CFG CFG
-   | VariableC ID
-   | FixC ID Integer
-   deriving(Show, Eq)
+import SeriCFG
 
 charC :: Char -> CFG
 charC c = AtomC (fromChar c)
