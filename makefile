@@ -16,7 +16,7 @@ shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Fix.hs Map.hs
 prof: shampi
 	ghc -o shampi_prof -O2 hampi.hs -auto-all -prof -rtsopts -osuf o_prof
 
-SeriGen.hs: SeriGen.sri SeriRegEx.sri
+SeriGen.hs: SeriGen.sri SeriRegEx.sri SeriCFG.sri Fix.sri
 	../seri/build/seri-bin/seri --haskellf \
 		--include ../seri/seri/sri \
 		--include . \

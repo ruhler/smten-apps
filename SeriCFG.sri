@@ -15,5 +15,5 @@ data CFG =
    | OrC CFG CFG
    | VariableC ID
    | FixC ID Integer
-   deriving(Show, Eq)
+   deriving (Eq)
 
