@@ -1,12 +1,10 @@
 
 module Fix (fixN) where
 
-import Debug.Trace
-
 import Control.Monad.State
 
-import Data.Functor((<$>))
-import Data.Maybe(fromMaybe)
+import Data.Functor
+import Data.Maybe
 import Map
 
 import Elem
@@ -16,12 +14,12 @@ import CFG
 
 data FS = FS {
     fs_cfgs :: Map ID CFG,
-    fs_cache :: Map (ID, Integer) (RegEx Elem)
+    fs_cache :: Map (ID, Integer) RegEx
 }
 
 type FixM = State FS
 
-fixidM :: ID -> Integer -> FixM (RegEx Elem)
+fixidM :: ID -> Integer -> FixM RegEx
 fixidM x n = do
     fs <- get
     case map_lookup (x, n) (fs_cache fs) of
@@ -33,7 +31,7 @@ fixidM x n = do
             modify $ \fs -> fs { fs_cache = map_insert (x, n) v (fs_cache fs) }
             return v
 
-fixM :: CFG -> Integer -> FixM (RegEx Elem)
+fixM :: CFG -> Integer -> FixM RegEx
 fixM r n
   | EpsilonC <- r = return $ if n == 0 then epsilonR else emptyR
   | EmptyC <- r = return emptyR
@@ -59,6 +57,6 @@ fixM r n
   | VariableC id <- r = fixidM id n
   | FixC x n' <- r = if n == n' then fixidM x n else return emptyR
 
-fixN :: Map ID CFG -> ID -> Integer -> RegEx Elem
+fixN :: Map ID CFG -> ID -> Integer -> RegEx
 fixN regs x n = evalState (fixidM x n) $ FS regs map_empty
 

@@ -12,7 +12,7 @@ frees x = sequence (replicate x free)
 substring :: [a] -> Integer -> Integer -> [a]
 substring s o l = take l $ drop o s
 
-match :: (Eq c, Ord c) => RegEx c -> [c] -> Bool
+match :: RegEx -> [Elem] -> Bool
 match Epsilon str = null str
 match Empty _ = False
 match (Atom x) [c] = x == c

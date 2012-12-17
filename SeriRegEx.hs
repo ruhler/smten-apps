@@ -5,17 +5,19 @@ module SeriRegEx where
 
 import Prelude
 
-data RegEx c =
-             Epsilon        -- matches ""
-           | Empty          -- never matches
-           | Atom c
-           | Range c c
-           | Concat Integer (RegEx c) (RegEx c)
-           | Or Integer (RegEx c) (RegEx c)
+type Elem = Integer
+
+data RegEx =
+           Epsilon        -- matches ""
+         | Empty          -- never matches
+         | Atom Elem
+         | Range Elem Elem
+         | Concat Integer RegEx RegEx
+         | Or Integer RegEx RegEx
    deriving(Eq)
 
 -- The length a string much be to match against the given regular expression.
-rlength :: RegEx c -> Integer
+rlength :: RegEx -> Integer
 rlength Epsilon = 0
 rlength Empty = 1   -- not strictly correct, what should go here?
 rlength (Atom _) = 1

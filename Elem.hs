@@ -9,10 +9,6 @@ import Seri.ExpH
 
 import SeriRegEx
 
--- Changes to Elem must also be updated where S_Elem is specified in hampi.hs.
-type Elem = Integer
---type Elem = BitElem
-
 class Element a where
     fromChar :: Char -> a
     toChar :: a -> Char
