@@ -10,11 +10,11 @@ bench: shampi
 	#tclsh runbench.tcl ./rhampi_c > bench.rhampi
 	#./rhampi_shutdown
 
-shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Fix.hs Map.hs
+shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Map.hs
 	ghc -o shampi -O2 --make $<
 
 prof: shampi
-	ghc -o shampi_prof -O2 hampi.hs -auto-all -prof -rtsopts -osuf o_prof
+	ghc -o shampi_prof hampi.hs -auto-all -prof -rtsopts -osuf o_prof
 
 SeriGen.hs: SeriGen.sri SeriRegEx.sri SeriCFG.sri Fix.sri
 	../seri/build/seri-bin/seri --haskellf \

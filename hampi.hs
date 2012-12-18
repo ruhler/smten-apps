@@ -15,6 +15,7 @@ import Data.List (genericLength)
 import Seri.Type
 import Seri.Exp
 import Seri.ExpH
+import Seri.Ppr
 import qualified Seri.HaskellF.Symbolic as S
 import Seri.HaskellF.Query
 import Seri.SMT.Query
@@ -28,12 +29,14 @@ import Elem
 import SeriRegEx
 import SeriCFG
 import CFG
-import Fix
 import Hampi
 import Grammar
 
-derive_SeriT ''RegEx
-derive_SeriEH ''RegEx
+derive_SeriT ''CFG
+derive_SeriEH ''CFG
+
+derive_SeriT ''Map
+derive_SeriEH ''Map
 
 --type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
 --type S_4 = S.N__TIMES S_2 S_2
@@ -48,11 +51,11 @@ freevar = qS . S.frees . S.seriS
 -- Make a hampi assertion.
 hassert :: Map ID (Integer, S_String) -> Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
-    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
-        rreg = fixN cfgs r vlen
-        srreg = S.seriS rreg
-        positive = S.match srreg vstr
-        p = if b then positive else S.not positive
+    let (_, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
+        cfgs' = S.seriS cfgs
+        b' = S.seriS b
+        r' = S.seriS r
+        p = S.assertContains cfgs' vstr b' r'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals

@@ -8,6 +8,7 @@ import Data.List
 
 
 type Elem = Integer
+type ElemString = [Elem]
 
 data RegEx =
            Epsilon        -- matches ""

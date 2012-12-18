@@ -25,3 +25,9 @@ match (Concat _ a b) str =
   in match a sa && match b sb
 match (Or _ a b) str = match a str || match b str
 
+assertContains :: Map ID CFG -> ElemString -> Bool -> ID -> Bool
+assertContains cfgs vstr b r =
+ let rreg = fixN cfgs r (length vstr)
+     p = match rreg vstr
+ in if b then p else not p
+
