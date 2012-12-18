@@ -1,0 +1,69 @@
+
+module Match where
+
+import Control.Monad.State
+
+import Data.Functor
+import Data.Maybe
+import Map
+
+import SeriRegEx
+import SeriCFG
+
+data SubMatch = SubMatch {
+    m_id :: ID,         -- ID.
+    m_len :: Integer,   -- Length to match.
+    m_off :: Integer    -- Offset in entire string to match at.
+} deriving (Eq)
+
+data MS = MS {
+    ms_cfgs :: Map ID CFG,
+    ms_cache :: Map SubMatch Bool
+}
+
+type MatchM = State MS
+
+matchidM :: SubMatch -> ElemString -> MatchM Bool
+matchidM s@(SubMatch x n off) str = do
+    ms <- get
+    case map_lookup s (ms_cache ms) of
+        Just v -> return v
+        Nothing -> do
+            put $ ms { ms_cache = map_insert s False (ms_cache ms) }
+            let r = fromMaybe (error $ "matchid.r: " ++ x) $ map_lookup x (ms_cfgs ms)
+            v <- matchM r n off str
+            modify $ \ms -> ms { ms_cache = map_insert s v (ms_cache ms) }
+            return v
+
+matchM :: CFG -> Integer -> Integer -> ElemString -> MatchM Bool
+matchM r n off str =
+  case r of
+     EpsilonC -> return (n == 0)
+     EmptyC -> return False
+     AtomC c -> return $
+        and [n == 1, not (null str), head str == c]
+     RangeC a b -> return $ 
+        and [n == 1, not (null str), a <= head str, head str <= b]
+     StarC x ->
+       if n == 0
+           then return True
+           else matchM (ConcatC x r) n off str
+     ConcatC a b ->
+       let p = \i -> do
+             a' <- matchM a i off str
+             if not a'
+                 then return False
+                 else do
+                     b' <- matchM b (n-i) (off+i) (drop i str)
+                     return $ a' && b'
+       in or <$> mapM p [0..n]
+     OrC a b -> do
+         a' <- matchM a n off str
+         b' <- matchM b n off str
+         return $ a' || b'
+     VariableC id -> matchidM (SubMatch id n off) str
+     FixC x n' -> if n == n' then matchidM (SubMatch x n off) str else return False
+
+matchN :: Map ID CFG -> ID -> ElemString -> Bool
+matchN cfgs x str = evalState (matchidM (SubMatch x (length str) 0) str) $ MS cfgs map_empty
+

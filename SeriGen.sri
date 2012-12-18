@@ -4,7 +4,7 @@ module SeriGen where
 import Data.List
 import Seri.SMT.SMT
 import SeriRegEx
-import Fix
+import Match
 
 frees :: (Free a) => Integer -> Query [a]
 frees x = sequence (replicate x free)
@@ -27,7 +27,6 @@ match (Or _ a b) str = match a str || match b str
 
 assertContains :: Map ID CFG -> ElemString -> Bool -> ID -> Bool
 assertContains cfgs vstr b r =
- let rreg = fixN cfgs r (length vstr)
-     p = match rreg vstr
+ let p = matchN cfgs r vstr
  in if b then p else not p
 
