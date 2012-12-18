@@ -16,6 +16,13 @@ data SubMatch = SubMatch {
     m_off :: Integer    -- Offset in entire string to match at.
 } deriving (Eq)
 
+instance Ord SubMatch where
+    (<) (SubMatch ax al ao) (SubMatch bx bl bo)
+        = (ao, (al, ax)) < (bo, (bl, bx))
+    (>) a b = not (a <= b)
+    (<=) a b = (a < b) || (a == b)
+    (>=) a b = not (a < b)
+
 data MS = MS {
     ms_regs :: Map (ID, Integer) RegEx,
     ms_cache :: Map SubMatch Bool
