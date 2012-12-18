@@ -3,8 +3,6 @@ module SeriCFG where
 
 import SeriRegEx
 
-type ID = String
-
 data CFG =
      EpsilonC       -- matches ""
    | EmptyC         -- never matches

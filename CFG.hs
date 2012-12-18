@@ -2,6 +2,7 @@
 module CFG where
 
 import Elem
+import SeriRegEx
 import SeriCFG
 
 charC :: Char -> CFG

@@ -53,9 +53,16 @@ fixM r n =
          a' <- fixM a n
          b' <- fixM b n
          return $ orsR [a', b']
-     VariableC id -> fixidM id n
+     VariableC id -> do
+        x <- fixidM id n
+        return $
+          case x of
+            Empty -> Empty
+            _ -> Variable n id
      FixC x n' -> if n == n' then fixidM x n else return emptyR
 
-fixN :: Map ID CFG -> ID -> Integer -> RegEx
-fixN regs x n = evalState (fixidM x n) $ FS regs map_empty
+fixN :: Map ID CFG -> ID -> Integer -> (Map (ID, Integer) RegEx, RegEx)
+fixN regs x n =
+  let (r, s) = runState (fixidM x n) $ FS regs map_empty
+  in (fs_cache s, r)
 

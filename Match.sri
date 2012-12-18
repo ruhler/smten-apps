@@ -17,7 +17,7 @@ data SubMatch = SubMatch {
 } deriving (Eq)
 
 data MS = MS {
-    ms_cfgs :: Map ID CFG,
+    ms_regs :: Map (ID, Integer) RegEx,
     ms_cache :: Map SubMatch Bool
 }
 
@@ -30,40 +30,31 @@ matchidM s@(SubMatch x n off) str = do
         Just v -> return v
         Nothing -> do
             put $ ms { ms_cache = map_insert s False (ms_cache ms) }
-            let r = fromMaybe (error $ "matchid.r: " ++ x) $ map_lookup x (ms_cfgs ms)
-            v <- matchM r n off str
+            let r = fromMaybe Empty $ map_lookup (x, n) (ms_regs ms)
+            v <- matchM r off str
             modify $ \ms -> ms { ms_cache = map_insert s v (ms_cache ms) }
             return v
 
-matchM :: CFG -> Integer -> Integer -> ElemString -> MatchM Bool
-matchM r n off str =
+matchM :: RegEx -> Integer -> ElemString -> MatchM Bool
+matchM r off str =
   case r of
-     EpsilonC -> return (n == 0)
-     EmptyC -> return False
-     AtomC c -> return $
-        and [n == 1, not (null str), head str == c]
-     RangeC a b -> return $ 
-        and [n == 1, not (null str), a <= head str, head str <= b]
-     StarC x ->
-       if n == 0
-           then return True
-           else matchM (ConcatC x r) n off str
-     ConcatC a b ->
-       let p = \i -> do
-             a' <- matchM a i off str
-             if not a'
-                 then return False
-                 else do
-                     b' <- matchM b (n-i) (off+i) (drop i str)
-                     return $ a' && b'
-       in or <$> mapM p [0..n]
-     OrC a b -> do
-         a' <- matchM a n off str
-         b' <- matchM b n off str
-         return $ a' || b'
-     VariableC id -> matchidM (SubMatch id n off) str
-     FixC x n' -> if n == n' then matchidM (SubMatch x n off) str else return False
+     Epsilon -> return True
+     Empty -> return False
+     Atom c -> return (head str == c)
+     Range a b -> return ((a <= head str) && (head str <= b))
+     Concat _ a b -> do
+       let i = rlength a
+       a' <- matchM a off str
+       if a'
+          then matchM b (off+i) (drop i str)
+          else return False
+     Or _ a b -> do
+         a' <- matchM a off str
+         if a'
+            then return True
+            else matchM b off str
+     Variable n id -> matchidM (SubMatch id n off) str
 
-matchN :: Map ID CFG -> ID -> ElemString -> Bool
-matchN cfgs x str = evalState (matchidM (SubMatch x (length str) 0) str) $ MS cfgs map_empty
+match :: Map (ID, Integer) RegEx -> RegEx -> ElemString -> Bool
+match regs x str = evalState (matchM x 0 str) $ MS regs map_empty
 
