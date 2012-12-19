@@ -36,7 +36,6 @@ matchidM s@(SubMatch x n off) str = do
     case map_lookup s (ms_cache ms) of
         Just v -> return v
         Nothing -> do
-            put $ ms { ms_cache = map_insert s False (ms_cache ms) }
             let r = fromMaybe Empty $ map_lookup (x, n) (ms_regs ms)
             v <- matchM r off str
             modify $ \ms -> ms { ms_cache = map_insert s v (ms_cache ms) }
