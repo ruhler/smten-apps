@@ -38,7 +38,7 @@ instance Show RegEx where
     show (Range a b) = "[" ++ show a ++ "-" ++ show b ++ "]"
     show (Concat _ a b) = show a ++ " " ++ show b
     show (Or _ a b) = "(" ++ show a ++ " | " ++ show b ++ ")"
-    show (Variable _ x) = x
+    show (Variable n x) = x ++ "." ++ show n
 
 concatR :: RegEx -> RegEx -> RegEx
 concatR Empty          y = Empty

@@ -1,6 +1,8 @@
 
 module SeriGen where
 
+import Debug.Trace
+
 import Data.List
 import Seri.SMT.SMT
 import SeriRegEx

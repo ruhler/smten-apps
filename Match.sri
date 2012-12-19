@@ -1,6 +1,8 @@
 
 module Match where
 
+import Debug.Trace
+
 import Control.Monad.State
 
 import Data.Functor
@@ -15,6 +17,9 @@ data SubMatch = SubMatch {
     m_len :: Integer,   -- Length to match.
     m_off :: Integer    -- Offset in entire string to match at.
 } deriving (Eq)
+
+instance Show SubMatch where
+    show (SubMatch x n o) = x ++ "." ++ show n ++ "." ++ show o
 
 instance Ord SubMatch where
     (<) (SubMatch ax al ao) (SubMatch bx bl bo)
@@ -51,14 +56,12 @@ matchM r off str =
      Concat _ a b -> do
        let i = rlength a
        a' <- matchM a off str
-       if a'
-          then matchM b (off+i) (drop i str)
-          else return False
+       b' <- matchM b (off+i) (drop i str)
+       return (a' && b')
      Or _ a b -> do
          a' <- matchM a off str
-         if a'
-            then return True
-            else matchM b off str
+         b' <- matchM b off str
+         return (a' || b')
      Variable n id -> matchidM (SubMatch id n off) str
 
 match :: Map (ID, Integer) RegEx -> RegEx -> ElemString -> Bool

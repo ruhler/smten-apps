@@ -10,6 +10,9 @@ data Map k a = Tip
 
 type Size = Integer
 
+instance (Show k, Show a) => Show (Map k a) where
+    show m = show (map_toList m)
+
 map_lookup :: (Eq k, Ord k) => k -> Map k v -> Maybe v
 map_lookup k t
   = case t of
@@ -29,6 +32,10 @@ map_insert kx x t =
            LT -> balance ky y (map_insert kx x l) r
            GT -> balance ky y l (map_insert kx x r)
            EQ -> Bin sz kx x l r
+
+-- TODO: make this more efficient!
+map_filter :: (Eq k, Ord k) => (v -> Bool) -> Map k v -> Map k v
+map_filter p = map_fromList . filter (p . snd) . map_toList
 
 delta :: Integer
 delta = 5
