@@ -5,14 +5,15 @@ import Control.Monad.State
 
 import Data.Functor
 import Data.Maybe
-import Map
+import qualified Data.Map as Map
+import qualified Map as SMap
 
 import SeriRegEx
 import SeriCFG
 
 data FS = FS {
-    fs_cfgs :: Map ID CFG,
-    fs_cache :: Map (ID, Integer) RegEx
+    fs_cfgs :: SMap.Map ID CFG,
+    fs_cache :: Map.Map (ID, Integer) RegEx
 }
 
 type FixM = State FS
@@ -20,13 +21,13 @@ type FixM = State FS
 fixidM :: ID -> Integer -> FixM RegEx
 fixidM x n = do
     fs <- get
-    case map_lookup (x, n) (fs_cache fs) of
+    case Map.lookup (x, n) (fs_cache fs) of
         Just v -> return v
         Nothing -> do
-            put $ fs { fs_cache = map_insert (x, n) Empty (fs_cache fs) }
-            let r = fromMaybe (error $ "fixid.r: " ++ x) $ map_lookup x (fs_cfgs fs)
+            put $ fs { fs_cache = Map.insert (x, n) Empty (fs_cache fs) }
+            let r = fromMaybe (error $ "fixid.r: " ++ x) $ SMap.map_lookup x (fs_cfgs fs)
             v <- fixM r n
-            modify $ \fs -> fs { fs_cache = map_insert (x, n) v (fs_cache fs) }
+            modify $ \fs -> fs { fs_cache = Map.insert (x, n) v (fs_cache fs) }
             return v
 
 fixM :: CFG -> Integer -> FixM RegEx
@@ -61,8 +62,8 @@ fixM r n =
             _ -> Variable n id
      FixC x n' -> if n == n' then fixidM x n else return emptyR
 
-fixN :: Map ID CFG -> ID -> Integer -> (Map (ID, Integer) RegEx, RegEx)
+fixN :: SMap.Map ID CFG -> ID -> Integer -> (SMap.Map (ID, Integer) RegEx, RegEx)
 fixN regs x n =
-  let (r, s) = runState (fixidM x n) $ FS regs map_empty
-  in (fs_cache s, r)
+  let (r, s) = runState (fixidM x n) $ FS regs Map.empty
+  in (SMap.map_fromList . filter ((/= Empty) . snd) . Map.toList $ fs_cache s, r)
 

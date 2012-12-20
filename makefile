@@ -10,7 +10,7 @@ bench: shampi
 	#tclsh runbench.tcl ./rhampi_c > bench.rhampi
 	#./rhampi_shutdown
 
-shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Map.hs
+shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Map.hs Fix.hs
 	ghc -o shampi -O2 --make $< -with-rtsopts="-K1g"
 
 prof: shampi
