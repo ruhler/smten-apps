@@ -55,7 +55,7 @@ hassert vals cfgs (AssertIn v b r) =
         cfgs' = S.seriS cfgs
         b' = S.seriS b
         r' = S.seriS r
-        p = S.assertContains cfgs' vstr b' r'
+        p = S.assertIn cfgs' vstr b' r'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
