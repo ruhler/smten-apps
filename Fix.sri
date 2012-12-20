@@ -64,5 +64,5 @@ fixM r n =
 fixN :: Map ID CFG -> ID -> Integer -> (Map (ID, Integer) RegEx, RegEx)
 fixN regs x n =
   let (r, s) = runState (fixidM x n) $ FS regs map_empty
-  in (map_filter ((/=) Empty) $ fs_cache s, r)
+  in (fs_cache s, r)
 

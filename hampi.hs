@@ -14,7 +14,7 @@ import Data.List (genericLength)
 
 import Seri.Type
 import Seri.Exp
-import Seri.ExpH
+import Seri.ExpH hiding (ID)
 import Seri.Ppr
 import qualified Seri.HaskellF.Symbolic as S
 import Seri.HaskellF.Query
