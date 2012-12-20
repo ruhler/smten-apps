@@ -6,7 +6,6 @@ import Debug.Trace
 import Data.List
 import Seri.SMT.SMT
 import SeriRegEx
-import Fix
 import Match
 
 frees :: (Free a) => Integer -> Query [a]
@@ -28,9 +27,8 @@ substring s o l = take l $ drop o s
 --  in match a sa && match b sb
 --match (Or _ a b) str = match a str || match b str
 
-assertIn :: Map ID CFG -> ElemString -> Bool -> ID -> Bool
-assertIn cfgs vstr b r =
- let (regs, reg) = fixN cfgs r (length vstr)
-     p = match regs reg vstr
+assertIn :: Map (ID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
+assertIn regs vstr b reg =
+ let p = match regs reg vstr
  in if b then p else not p
 

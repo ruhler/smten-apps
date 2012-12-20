@@ -31,9 +31,10 @@ import SeriCFG
 import CFG
 import Hampi
 import Grammar
+import Fix
 
-derive_SeriT ''CFG
-derive_SeriEH ''CFG
+derive_SeriT ''RegEx
+derive_SeriEH ''RegEx
 
 derive_SeriT ''Map
 derive_SeriEH ''Map
@@ -51,11 +52,12 @@ freevar = qS . S.frees . S.seriS
 -- Make a hampi assertion.
 hassert :: Map ID (Integer, S_String) -> Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
-    let (_, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
-        cfgs' = S.seriS cfgs
+    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
+        (regs, reg) = fixN cfgs r vlen
+        reg' = S.seriS reg
+        regs' = S.seriS regs
         b' = S.seriS b
-        r' = S.seriS r
-        p = S.assertIn cfgs' vstr b' r'
+        p = S.assertIn regs' vstr b' reg'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
