@@ -22,11 +22,13 @@ instance Show SubMatch where
     show (SubMatch x n o) = x ++ "." ++ show n ++ "." ++ show o
 
 instance Ord SubMatch where
-    (<) (SubMatch ax al ao) (SubMatch bx bl bo)
-        = (ao, (al, ax)) < (bo, (bl, bx))
-    (>) a b = not (a <= b)
-    (<=) a b = (a < b) || (a == b)
-    (>=) a b = not (a < b)
+    compare (SubMatch a b c) (SubMatch d e f)
+      = __lexorder [compare b e, compare c f, compare a d]
+        
+    (<) a b = compare a b == LT
+    (>) a b = compare a b == GT
+    (<=) a b = compare a b /= GT
+    (>=) a b = compare a b /= LT
 
 data MS = MS {
     ms_regs :: Map (ID, Integer) RegEx,

@@ -33,10 +33,6 @@ map_insert kx x t =
            GT -> balance ky y l (map_insert kx x r)
            EQ -> Bin sz kx x l r
 
--- TODO: make this more efficient!
-map_filter :: (Eq k, Ord k) => (v -> Bool) -> Map k v -> Map k v
-map_filter p = map_fromList . filter (p . snd) . map_toList
-
 delta :: Integer
 delta = 5
 
