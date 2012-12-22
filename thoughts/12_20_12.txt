@@ -1,0 +1,422 @@
+
+Thu Dec 20 11:34:50 EST 2012
+
+Implemented preservation of sharing in seri. It works. A bunch of test cases
+which timed out before finish now, which is good.
+
+Overall, we seem to have a somewhat high overhead. What's that from?
+
+Suspects:
+* Move fixN to haskell, and filter out empty
+* Ord is very expensive for lookups
+    Make compare part of Ord class, and autoderive
+* Something in seri sharing code is eating up memory. Do profiling with all of
+  seri turned on.
+
+For example, the paper example, which used to finish, no longer seems to. That
+would be a good one to look into.
+
+Thu Dec 20 11:55:21 EST 2012
+
+All the time is being spent in fixN!
+
+That's surprising to me. What's up with that?
+
+Let me look closer into fixN...
+
+Did I change anything? Only that one little thing, right?
+
+Well... I could look at... what? What could it be in fix?
+
+A bug in the algorithm? Or just slow?
+
+Let me look into different parts of fix, see how much time they take.
+Err...
+
+Or I could put in tracing, to see what all stuff it's doing?
+
+Thu Dec 20 12:04:47 EST 2012
+
+Looks like all the time is spent in lookup_fix_cache.
+
+Not sure what changed...
+
+Here's an idea... to look at an expression, because of identify, maybe we end
+up having to force things prematurely? I'm not sure.
+
+All the time is in lookup_fix_cache... Let me do some tracing to see what all
+items we are putting in this cache...
+
+Or, maybe we are just leaking maps because we are lazy in our balancing?
+
+Odd. Fishy...
+
+Looks like... we are just doing a whole bunch of lookups. More than expected?
+An exponential number?
+
+I should run the fix algorithm by hand on the buggy paper and see what's up.
+
+
+Thu Dec 20 12:40:04 EST 2012
+
+Here's the question. What did I do that broke fix on paper.hmp?
+
+That's what will tell me is wrong.
+
+The questions are:
+* is it slower?
+* is it doing more work?
+
+Why?
+
+Well... That shouldn't be too hard to figure out.
+ * don't be explicitly lazy in match: times out.
+ * move fixN implementation from haskell into seri: times out
+ * switched from Data.Map to wrapped association list: works okay.
+
+Okay, so it seems to me... We have a problem with Map, and/or doing fix in
+seri.
+
+Good news is... fix can be done entirely in haskell. Then I should be able to
+debug the performance issues from there.
+
+This is kind of side stepping the issue. Is it? There's really no reason for
+fix to be in seri... except it's slightly easier to call, because we can use
+the seri "length" function to figure out the length of the string...
+
+But then again, we could do that anyway.
+
+Okay, fine then. What's the plan? Here's the plan: move fix to haskell. See if
+that helps things. If not... do profiling. Try using an association list. Try
+using a Data.Map. That should solve the trouble.
+
+Question is though, what is the issue? Because we might have this same issue
+for match. I should see which of my changes make a big difference, and
+understand that.
+
+Thu Dec 20 13:09:08 EST 2012
+
+Moving fix into haskell made a big difference in performance. It did not,
+however, fix the stack overflow issue.
+
+Change fixN to use a Data.Map instead of seriable Map helps performance a
+bunch too. It does not, however, fix the stack overflow issue. I wonder what
+that's from... Maybe it's always been there? That's hard to imagine...
+
+Maybe I need to get rid of Map for cfgs?
+
+Thu Dec 20 13:17:39 EST 2012
+
+Anyway, performance now is much improved... but we still don't dominate hampi
+the way I would like. And we still have this stack overflow issue I don't
+understand.
+
+So, here's what I think should be done...
+
+Focus, as usual, on one of the tests which times out. Understand why it times
+out. Where is all the time being spent? If I can minimize and understand the
+test case, then I should be in good shape for improving performance.
+
+Remember a big open issue still is Ord. But I'll do the profiling to figure it
+out.
+
+Cool! That will be fun work to do when I get back.
+
+Thu Dec 20 13:53:10 EST 2012
+
+Time to find a candidate to understand performance issues.
+
+Okay, I have a couple of candidates. And they aren't so complicated I don't
+think... Let me start looking at them then.
+
+First, the simpler looking one: perf4.hmp.
+
+Issue: stack overflows. Greater than 1K. So I need to figure out the stack
+overflow issue.
+
+Good news: it looks like this test is easy to scale up and down. I hope.
+
+Let me see if I can start it small and have it scale up.
+
+Yes. Looks like I can. That will help for measuring performance improvements.
+
+Observations from profile:
+
+* all time is in match. Fix takes no time at all
+* Much time in: ==, <, <, __mkTuple2__, ==...
+    In other words, we spend a ton of time comparing things.
+    Suggests: ord will help.
+              Or a better Map implementation.
+
+I suspect all the time we spend in looking up in the cache.
+
+If so, then we want to do something like:
+* reduce number of lookups (maybe by making match pure?)
+* improve performance of lookups
+** improve map implementation
+** improve Ord implementation
+
+Yes. 70% of the time is spent looking up in the cache, so that's something to
+try to improve.
+
+First attempt at improvement: compare.
+
+First fix Ord manually for:
+ - List, character, Integer, SubMatch
+
+See how performance improves.
+
+Thu Dec 20 14:28:24 EST 2012
+
+The compare function takes tons of time and memory... That's surprising.
+
+It's an improvement over what we had, but not a major one. 9 down to 7. That
+kind of thing.
+
+What about the implementation of compare could possibly be taking so long?
+
+Oh... let me check offset and id first, how about? This could be string
+comparison, which is slow.
+
+Thu Dec 20 14:32:43 EST 2012
+
+That helped a bit. 7 down to 5. But still, I've only cut the time in half. It
+still seems to be excessive.
+
+Why is compare taking so much time and allocation?
+
+Let me try to figure out which compare is responsible for the allocation and
+time...
+
+Actually, it looks like __lexorder alone takes an absurd amount of time. It
+should take no time at all, right? How could it be taking so much?
+
+Let me do two things.
+
+1. translate string literals to haskell string literals.
+2. translate lets to haskell lets.
+
+This could help. It will at the very least make the code easier to understand.
+
+Trouble with (2). Our lets are different from haskell.
+
+let x = foo x
+in ...
+
+Means something different in haskell. So it's not trivial to support that
+construct. Let's see if the string thing made any difference performance wise.
+
+Thu Dec 20 14:54:20 EST 2012
+
+No difference.
+
+Let me rewrite the __lexorder haskell implementation by hand, see how that
+does. Does it make a difference?
+
+We expect there to be no allocation at all for __lexorder. At least, if it
+were implemented in haskell. So all the allocation is just the caseS and
+friends?
+
+So, it turns out rewriting by hand doesn't improve things. That's good. It's
+not a function of how we express the haskell code. It's something else...
+
+I have a hypothesis. We pass to caseS an argument which is a function. We box
+up the function, then we unbox it. Doesn't that hurt? Can we avoid that
+somehow?
+
+* Yes, I call unbox on it. I need to do this though. It's not a wrap/unwrap
+  kind of thing. It's a: wrap it now kind of thing.
+
+Here's an observation... this could be specific to haskellf. We may not have
+this problem with the pure elaborator. Is there a way I can test that?
+
+I fear not easily. But, if that is the case, then doing haskellf specific
+things may be appropriate...
+
+For example... let's say we know things are concrete, that we can match,
+because the case argument is known. Then there's no reason to box then unbox
+this function, right?
+
+Hmm... This is a bit of a radical suggestion... Let me see if I can work out
+how it should work.
+
+
+Here's the idea. Say we have something like:
+    __caseFoo x (\a -> \b -> ...) n
+
+This boxes up the function into lambdas.
+Say the value of 'x' is concrete... Then we ought to...
+
+What we have to do currently:
+
+* box \a -> \b -> yv into LamEH LamEH
+    where input arguments are boxed, applied to original f, then result is
+    unboxed... In other words, we get a new function something like:
+    
+    \a' -> unbox ((\a -> (\b' -> unbox ((\b -> yv) (box b')))) (box a'))
+
+Notice what unbox of ((\b -> yv) (box b')) is...
+ It's the same as (\b -> yv) b'? Or something like that?
+
+I could at least avoid some effort if we ...
+Had an alternative representation for functions? Like... what if I cached the
+haskell function? That would let me unbox for free?
+
+* We have to extract the values from the argument x if it matches. If those
+  were just boxed up, that's an extra box and unbox?
+
+Well... anyway, I can definitely see there's bad stuff going on here.
+
+Here's an idea. How about I be smarter about unboxing functions (or boxing, or
+whatever order it was) and see if that helps.
+
+No... I don't think that will help...
+
+But one thing that maybe could help... if I try it out, and I'm lucky, and
+things inline right, and so on...
+
+Rewrite rules? Say that box of unbox is id, and unbox of box is id.
+
+Let me try to learn about that.
+
+I can at least play around and see if anything interesting happens.
+
+No. None of the rules fire. This can't really be the right way to deal with
+this problem.
+
+Well... maybe the trick is to generate smarter symbolic things. The goal
+should be... if something is concrete, don't go boxing and unboxing all over
+the place, especially lambdas.
+
+In other words... do as much case matching in haskell as you can get away
+with.
+
+For example, consider a tuple:
+
+newtype Tuple2__ a b = Tuple2__ S.ExpH
+instance S.Symbolic2 Tuple2__ where
+    box2 = Tuple2__
+    unbox2 (Tuple2__ x) = x
+
+__mkTuple2__ :: (S.Symbolic a, S.Symbolic b) => a -> b -> Tuple2__ a b
+__mkTuple2__ = S.conS "(,)"
+
+__caseTuple2__ :: (S.Symbolic a, S.Symbolic b, S.Symbolic z) => Tuple2__ a b -> (a -> b -> z) -> z -> z
+__caseTuple2__ = S.caseS "(,)"
+
+This is the entire interface we have to tuple. It simple. It's easy to change.
+So long as I can support this interface in every case, then I'm all set.
+
+Now, let's say we do it like this instead...
+
+data Tuple2__ a b =
+    Tuple2__c a b
+  | Tuple2__ S.ExpH
+
+instance S.Symbolic2 Tuple2__ where
+    box2 e
+      | Just [a, b] <- de_kconEH "(,)" e = Tuple2__c (box a) (box b)
+      | otherwise = Tuple2__ e
+    unbox2 (Tuple2__c a b) = ConEH ... [unbox a, unbox b]
+
+__mkTuple2__ = Tuple2__c 
+__caseTuple2__ (Tuple2__c a b) = y a b
+__caseTuple2__ (Tuple2__ x) = S.caseS ...
+__caseTupel2__ _ = n
+
+Wow! Do you see this? Do you see what's good about this?
+
+In concrete cases, we entirely get rid of boxing and unboxing. That could be
+HUGE.
+
+Note: this is specific to haskellf, but that makes sense, because the boxing
+and unboxing cost is also specific to haskellf. At least, I think so. I wonder
+if there's any decent way for me to test that.
+
+Well, I have a map implementation. I know comparison is bad. I can write up a
+program which does a bunch of map insertions and removals...
+
+I can even hard code the map input for the test case I'm interested in, and
+that way compare haskellf with the elaborator...
+
+Why is this important? This is important because, if the performance sucks in
+the elaborator as much as in haskellf, then box and unboxing is not the issue.
+
+That would be a valuable experiment to perform. Before going to much further
+too.
+
+Okay, I'll do that experiment next. Anyway, let me have some fun and work out
+how I would implement this concretization thing for haskellf.
+
+It's all there in the tuple example.
+
+The data type we generate for an object has:
+ * a constructor for each constructor in the original object.
+   Exactly as you would expect. Takes the arguments you would expect.
+   Just a transliteration.
+ * a single constructor which is just an ExpH.
+
+For the instance of 'box':
+ * Use pattern guards. For each constructor:
+    Call de_kconEH to try and match that constructor.
+    On match: construct using the right constructor, boxing each argument.
+ * Default: use the symbolic constructor.
+
+For the instance of 'unbox':
+ * Use ConEH (or some sugar if I provide it) for each concrete constructor.
+ * Default: Just uses the default value.
+
+For the __mkFoo constructor: use the concrete constructor.
+ No boxing or unboxing of arguments needed!
+
+For the case statement:
+ * Have a branch for:
+    * The correct concrete constructor: apply the given function directly.
+    * The symbolic constructor: call caseEH (via helper function)
+    * Anything else: return n directly.
+ No boxing or unboxing for concrete values!
+
+And that's it! It's really easy. Simple. Get's rid of boxing and unboxing in
+concrete cases entirely. The only time we do symbolic work is when we have
+symbolic arguments, which come from free variables.
+
+In other words... I would expect a concrete seri program translated in this
+manner to be as efficient as the pure haskell implementation.
+
+And given that most of our time is spent doing concrete stuff (lookup of
+concrete keys in a concrete map), this should be a *HUGE* win for us.
+
+Cool. This is exciting.
+
+Okay. Here's the plan then.
+
+1. I have to finish up this one last isca review.
+2. Hard code the Map generated for perf4 into a standalone seri function.
+* Run it with haskellf (perf should be like what we've seen)
+* Run it with seri elaborator...
+  I'm hoping to see something interesting. I'm not really sure what to find.
+  I suppose it doesn't matter much. I want to do this concrete thing anyway.
+3. Implement my proposed concretization scheme in seri.
+
+
+Thu Dec 20 19:49:59 EST 2012
+
+You know what? I can try out this concretization idea by first implementing it
+for the primitive types... especially... LIST. And see if it makes a big
+difference or no. That should be easy, fun, and valuable.
+
+Let me try that now.
+
+Thu Dec 20 20:39:26 EST 2012
+
+I did the concretization for Unit, Bool, List. All the primitives.
+Performance increases nicely. From 5 to 3. But that was just with those
+primitives. The __lexorder totally dropped away. And I bet a bunch of other
+things will too if I do this in general. Sweet.
+
+I think the pattern I want to use for the translation is now well established.
+I think it will help a bunch.
+
+Cool.
+
+
