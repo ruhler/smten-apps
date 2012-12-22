@@ -11,7 +11,7 @@ bench: shampi
 	#./rhampi_shutdown
 
 shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Map.hs Fix.hs
-	ghc -o shampi -O2 --make $< -with-rtsopts="-K1g"
+	ghc -o shampi -O2 --make $<
 
 prof: shampi
 	ghc -o shampi_prof hampi.hs -prof -fprof-auto-top -rtsopts -osuf o_prof

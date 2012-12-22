@@ -1,4 +1,5 @@
 
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 import System.Environment
@@ -14,7 +15,7 @@ import Data.List (genericLength)
 
 import Seri.Type
 import Seri.Exp
-import Seri.ExpH hiding (ID)
+import Seri.ExpH
 import Seri.Ppr
 import qualified Seri.HaskellF.Symbolic as S
 import Seri.HaskellF.Query
@@ -36,8 +37,25 @@ import Fix
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
 
+instance S.SeriS RegEx S.RegEx where
+    seriS Epsilon = S.Epsilon
+    seriS Empty = S.Empty
+    seriS (Atom c) = S.Atom (S.seriS c)
+    seriS (Range a b) = S.Range (S.seriS a) (S.seriS b)
+    seriS (Concat a b c) = S.Concat (S.seriS a) (S.seriS b) (S.seriS c)
+    seriS (Or a b c) = S.Or (S.seriS a) (S.seriS b) (S.seriS c)
+    seriS (Variable a b) = S.Variable (S.seriS a) (S.seriS b)
+
+instance (S.SeriS ca fa, S.SeriS cb fb) => S.SeriS (ca, cb) (S.Tuple2__ fa fb) where
+    seriS (a, b) = S.Tuple2__ (S.seriS a) (S.seriS b)
+
 derive_SeriT ''Map
 derive_SeriEH ''Map
+
+instance (S.SeriS ck fk, S.SeriS cv fv) => S.SeriS (Map ck cv) (S.Map fk fv) where
+    seriS Tip = S.Tip
+    seriS (Bin a b c d e) = S.Bin (S.seriS a) (S.seriS b) (S.seriS c) (S.seriS d) (S.seriS e)
+    
 
 --type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
 --type S_4 = S.N__TIMES S_2 S_2
@@ -53,11 +71,11 @@ freevar = qS . S.frees . S.seriS
 hassert :: Map ID (Integer, S_String) -> Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
-        (regs, reg) = fixN cfgs r vlen
-        reg' = S.seriS reg
-        regs' = S.seriS regs
+        (regs, reg) = {-# SCC "fixN" #-} fixN cfgs r vlen
+        reg' = {-# SCC "seriS_reg" #-} S.seriS reg
+        regs' = {-# SCC "seriS_regs" #-} S.seriS regs
         b' = S.seriS b
-        p = S.assertIn regs' vstr b' reg'
+        p = {-# SCC "assertIn" #-} S.assertIn regs' vstr b' reg'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
