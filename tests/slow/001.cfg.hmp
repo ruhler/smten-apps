@@ -1,0 +1,7 @@
+var hampiStringVar : 20;
+cfg S :=  "a" | A B ;
+cfg A :=  "b" | S B ;
+cfg B :=  "a" | B A ;
+reg limit := fix(S, 20);
+assert hampiStringVar in limit;
+

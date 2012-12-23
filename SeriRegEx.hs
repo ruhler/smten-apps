@@ -7,7 +7,7 @@ import Prelude
 import Data.List
 
 
-type ID = String
+type RID = Integer
 type Elem = Integer
 type ElemString = [Elem]
 
@@ -18,7 +18,7 @@ data RegEx =
          | Range Elem Elem
          | Concat Integer RegEx RegEx
          | Or Integer RegEx RegEx
-         | Variable Integer ID
+         | Variable Integer RID
    deriving(Eq)
 
 -- The length a string much be to match against the given regular expression.
@@ -38,7 +38,7 @@ instance Show RegEx where
     show (Range a b) = "[" ++ show a ++ "-" ++ show b ++ "]"
     show (Concat _ a b) = show a ++ " " ++ show b
     show (Or _ a b) = "(" ++ show a ++ " | " ++ show b ++ ")"
-    show (Variable n x) = x ++ "." ++ show n
+    show (Variable n x) = show x ++ "." ++ show n
 
 concatR :: RegEx -> RegEx -> RegEx
 concatR Empty          y = Empty

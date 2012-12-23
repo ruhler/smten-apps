@@ -10,20 +10,19 @@ import Data.Maybe
 import Map
 
 import SeriRegEx
-import SeriCFG
 
 data SubMatch = SubMatch {
-    m_id :: ID,         -- ID.
+    m_id :: RID,        -- ID.
     m_len :: Integer,   -- Length to match.
     m_off :: Integer    -- Offset in entire string to match at.
 } deriving (Eq)
 
 instance Show SubMatch where
-    show (SubMatch x n o) = x ++ "." ++ show n ++ "." ++ show o
+    show (SubMatch x n o) = show x ++ "." ++ show n ++ "." ++ show o
 
 instance Ord SubMatch where
     compare (SubMatch a b c) (SubMatch d e f)
-      = __lexorder [compare b e, compare c f, compare a d]
+      = __lexorder [compare a d, compare b e, compare c f]
         
     (<) a b = compare a b == LT
     (>) a b = compare a b == GT
@@ -31,7 +30,7 @@ instance Ord SubMatch where
     (>=) a b = compare a b /= LT
 
 data MS = MS {
-    ms_regs :: Map (ID, Integer) RegEx,
+    ms_regs :: Map (RID, Integer) RegEx,
     ms_cache :: Map SubMatch Bool
 }
 
@@ -66,6 +65,6 @@ matchM r off str =
          return (a' || b')
      Variable n id -> matchidM (SubMatch id n off) str
 
-match :: Map (ID, Integer) RegEx -> RegEx -> ElemString -> Bool
+match :: Map (RID, Integer) RegEx -> RegEx -> ElemString -> Bool
 match regs x str = evalState (matchM x 0 str) $ MS regs map_empty
 

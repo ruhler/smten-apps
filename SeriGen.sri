@@ -27,7 +27,7 @@ substring s o l = take l $ drop o s
 --  in match a sa && match b sb
 --match (Or _ a b) str = match a str || match b str
 
-assertIn :: Map (ID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
+assertIn :: Map (RID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
 assertIn regs vstr b reg =
  let p = match regs reg vstr
  in if b then p else not p

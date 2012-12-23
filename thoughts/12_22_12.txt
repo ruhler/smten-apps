@@ -1,0 +1,74 @@
+
+Sat Dec 22 17:37:27 EST 2012
+
+Performance now is pretty darn good. We are, I would say, on par with hampi.
+We don't totally beat it, but we are right there. And for the hard tests, we
+are in within a factor of 4.
+
+Now, the question I have is... still perf4, which is our worst test.
+
+What's taking so much time? What's taking so much allocation?
+
+We know we are doing lots of map lookups. What I don't know is, why do they
+cost us so much?
+
+map_lookup is 50% of allocation, 40% of time.
+Much of that comes from compare. How could compare cost so much?
+
+Let me try to see which compare it is.
+
+Sat Dec 22 17:54:45 EST 2012
+
+SubMatch includes Strings. I'm comparing strings. That means I'm using
+__prim_toInteger_Char, which we know is costly. How about I concretize that?
+
+Sat Dec 22 18:06:33 EST 2012
+
+Okay, that helped a little. But we are still spending, for example, 5% of our
+time in __prim_eq_Integer. Why? Most of the time in binaryS.
+
+I don't understand. Maybe I should do some more heap profiling. What's taking
+up all the space? Is it the Maybe types for pattern guards? Is there any
+reasonable way we could avoid that?
+
+Perhaps we should instead have something like:
+
+  seriS_ :: f -> (c -> b) -> Maybe b    ?
+
+This way we don't have to allocate the intermediate maybe? Except... there is
+some of an intermediate maybe... I don't know.
+
+Of course, the other thing to do would be to change the shampi algorithm to do
+less calls to map_lookup. Or... oh. Like I had said yesterday, have a
+hierarchical map instead of tuples. That's worth a try.
+
+Sat Dec 22 20:54:58 EST 2012
+
+I want to try the hierarchical map thing.
+
+Just for the info, let me try running the profiler on one of the easier tests
+which we bomb, to see if I get a similar sense as to what the problem is.
+
+Then update the MatchCache to be a nested map.
+
+Then I should be golden. If not... and I want to be extreme, I can add support
+for arrays. That should be really effective.
+
+1. Tried one of the tough ones. We spend all our time in check. So either the
+generated query is more complicated than it should be, or switching to a
+different solver/representation could actually make a decent difference here.
+
+2. Tried comparing ID first in SubMatch compare. It slowed things down a
+bunch. This suggests to me I should start by making RegEx ID an Integer
+instead of a string. I can update the Fix implementation to make these
+assignments. But it will take more effort than I have right now, so let me
+call it a night here.
+
+Tomorrow:
+
+1. Make RegEx ID an Integer.
+2. Make a multi-level MatchCache.
+
+After this, I hope to see things going much faster. At least for perf4. I
+hope.
+
