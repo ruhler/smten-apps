@@ -29,9 +29,20 @@ instance Ord SubMatch where
     (<=) a b = compare a b /= GT
     (>=) a b = compare a b /= LT
 
+type MatchCache = Map SubMatch Bool
+
+mc_empty :: MatchCache
+mc_empty = map_empty
+
+mc_lookup :: SubMatch -> MatchCache -> Maybe Bool
+mc_lookup = map_lookup
+
+mc_insert :: SubMatch -> Bool -> MatchCache -> MatchCache
+mc_insert = map_insert
+
 data MS = MS {
     ms_regs :: Map (RID, Integer) RegEx,
-    ms_cache :: Map SubMatch Bool
+    ms_cache :: MatchCache
 }
 
 type MatchM = State MS
@@ -39,12 +50,12 @@ type MatchM = State MS
 matchidM :: SubMatch -> ElemString -> MatchM Bool
 matchidM s@(SubMatch x n off) str = do
     ms <- get
-    case map_lookup s (ms_cache ms) of
+    case mc_lookup s (ms_cache ms) of
         Just v -> return v
         Nothing -> do
             let r = fromMaybe Empty $ map_lookup (x, n) (ms_regs ms)
             v <- matchM r off str
-            modify $ \ms -> ms { ms_cache = map_insert s v (ms_cache ms) }
+            modify $ \ms -> ms { ms_cache = mc_insert s v (ms_cache ms) }
             return v
 
 matchM :: RegEx -> Integer -> ElemString -> MatchM Bool
@@ -66,5 +77,5 @@ matchM r off str =
      Variable n id -> matchidM (SubMatch id n off) str
 
 match :: Map (RID, Integer) RegEx -> RegEx -> ElemString -> Bool
-match regs x str = evalState (matchM x 0 str) $ MS regs map_empty
+match regs x str = evalState (matchM x 0 str) $ MS regs mc_empty
 
