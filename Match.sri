@@ -20,25 +20,26 @@ data SubMatch = SubMatch {
 instance Show SubMatch where
     show (SubMatch x n o) = show x ++ "." ++ show n ++ "." ++ show o
 
-instance Ord SubMatch where
-    compare (SubMatch a b c) (SubMatch d e f)
-      = __lexorder [compare a d, compare b e, compare c f]
-        
-    (<) a b = compare a b == LT
-    (>) a b = compare a b == GT
-    (<=) a b = compare a b /= GT
-    (>=) a b = compare a b /= LT
-
-type MatchCache = Map SubMatch Bool
+-- RID -> Length -> Offset -> Match Result
+type MatchCache = Map RID (Map Integer (Map Integer Bool))
 
 mc_empty :: MatchCache
 mc_empty = map_empty
 
 mc_lookup :: SubMatch -> MatchCache -> Maybe Bool
-mc_lookup = map_lookup
+mc_lookup (SubMatch rid len off) mrid = do
+    mlen <- map_lookup rid mrid
+    moff <- map_lookup len mlen
+    map_lookup off moff
 
 mc_insert :: SubMatch -> Bool -> MatchCache -> MatchCache
-mc_insert = map_insert
+mc_insert (SubMatch rid len off) v mrid =
+  let mlen = fromMaybe map_empty (map_lookup rid mrid)
+      moff = fromMaybe map_empty (map_lookup len mlen)
+      moff' = map_insert off v moff
+      mlen' = map_insert len moff' mlen
+  in map_insert rid mlen' mrid
+    
 
 data MS = MS {
     ms_regs :: Map (RID, Integer) RegEx,
