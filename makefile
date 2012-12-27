@@ -6,9 +6,9 @@ test: shampi
 
 bench: shampi
 	tclsh runbench.tcl ./shampi > bench.shampi
-	#./rhampi_s
-	#tclsh runbench.tcl ./rhampi_c > bench.rhampi
-	#./rhampi_shutdown
+	./rhampi_s
+	tclsh runbench.tcl ./rhampi_c > bench.rhampi
+	./rhampi_shutdown
 
 shampi: hampi.hs SeriGen.hs Hampi.hs Grammar.hs Lexer.hs Map.hs Fix.hs
 	ghc -o shampi -O2 --make $<
