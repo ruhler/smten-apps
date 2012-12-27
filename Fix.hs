@@ -1,6 +1,8 @@
 
 module Fix where
 
+import Debug.Trace
+
 import Control.Monad.State
 
 import Data.Functor
@@ -44,16 +46,23 @@ fixidM x n = do
             return v
 
 fixM :: CFG -> Integer -> FixM RegEx
-fixM r n =
+fixM r n = 
   case r of
      EpsilonC -> return $ if n == 0 then epsilonR else emptyR
      EmptyC -> return emptyR
      AtomC c -> return $ if n == 1 then Atom c else emptyR
      RangeC a b -> return $ if n == 1 then Range a b else emptyR
-     StarC x ->
-       if n == 0
-           then return epsilonR
-           else fixM (ConcatC x r) n
+     StarC x
+      | n == 0 -> return epsilonR
+      | otherwise ->
+       let p = \i -> do
+             a' <- fixM x i
+             if a' == Empty
+                 then return Empty
+                 else do
+                     b' <- fixM r (n-i)
+                     return $ concatR a' b'
+       in orsR <$> mapM p [1..n]
      ConcatC a b ->
        let p = \i -> do
              a' <- fixM a i
