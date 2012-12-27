@@ -1,6 +1,10 @@
 *.o
 *.o_prof
 *.hi
+*.prof
+*.data
+*.shampi
+*.rhampi
 Grammar.hs
 shampi
 SeriGen.hs

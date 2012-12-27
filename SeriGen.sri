@@ -8,8 +8,14 @@ import Seri.SMT.SMT
 import SeriRegEx
 import Match
 
-frees :: (Free a) => Integer -> Query [a]
-frees x = sequence (replicate x free)
+freeelem :: Query Integer
+freeelem = do
+    x <- free
+    assert (x >= 0 && x < 256)
+    return x
+
+frees :: Integer -> Query [Integer]
+frees x = sequence (replicate x freeelem)
 
 -- substring src offset length
 substring :: [a] -> Integer -> Integer -> [a]
