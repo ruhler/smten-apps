@@ -1,0 +1,37 @@
+
+Sun Dec 23 09:38:15 EST 2012
+
+Okay! We are looking good now.
+
+I think we could do better by using an array, and ditching the state monad,
+but I'm not sure I want to figure out how to support that. Do we need
+recursive let expressions?
+
+Err... that may actually be a very good thing to try. Our worst test case
+still spends most of its time in mc_lookup, and we could make that a constant
+time thing. And take advantage of laziness to do less lookups...
+
+So, in summary, I think the last algorithmic change to make to shampi would be
+switch to arrays and prefill the match cache. We would need primitive array
+support for this in seri... And maybe recursive lets... Or... we could try to
+do that part in haskell somehow... I'm not sure how.
+
+But our numbers are certainly good enough to publish. In some cases we do
+worse than hampi, but not by much. In many cases, and many hard cases, hampi
+does much worse than we do. So we are even. Cool.
+
+I want to look into the one big outlier test case: 242. Which we do way worse
+on than hampi.
+
+Sun Dec 23 09:45:08 EST 2012
+
+Notice: 80% of the time is spent in check. And it's an UNSAT case.
+
+For this, it would be worth trying bit vectors, and trying STP.
+
+Perhaps I should try to figure out how to do that next. See how the numbers
+change.
+
+The other thing to do would be to reread the hampi paper, to try and figure
+out what the benchmarks they ran are. And can I run them too?
+

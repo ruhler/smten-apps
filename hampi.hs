@@ -71,11 +71,11 @@ freevar = qS . S.frees . S.seriS
 hassert :: Map ID (Integer, S_String) -> Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
-        (regs, reg) = {-# SCC "fixN" #-} fixN cfgs r vlen
-        reg' = {-# SCC "seriS_reg" #-} S.seriS reg
-        regs' = {-# SCC "seriS_regs" #-} S.seriS regs
+        (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
+        reg' = {-# SCC "SeriS" #-} S.seriS reg
+        regs' = {-# SCC "SeriS" #-} S.seriS regs
         b' = S.seriS b
-        p = {-# SCC "assertIn" #-} S.assertIn regs' vstr b' reg'
+        p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
@@ -128,20 +128,31 @@ hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
         _ -> return "UNKNOWN"
 
+lookuparg :: String -> [String] -> Maybe String
+lookuparg k m = 
+  case dropWhile (/= k) m of
+     (_:x:_) -> Just x
+     _ -> Nothing
+
 main :: IO ()
-main = do
+main = {-# SCC "Main" #-} do
     args <- getArgs
-    (fin, to, dbg) <- case args of
-             [f] -> return (f, -1, Nothing)
-             [f, "-d", dbg] -> return (f, -1, Just dbg)
-             [f, i] -> return (f, read i, Nothing)
-             [f, i, "-d", dbg] -> return (f, read i, Just dbg)
-             _ -> fail "Usage: Hampi <filename> [timeout in secs]"
+    (fin, to) <- case take 2 args of
+             (f:i:_) | head i /= '-' -> return (f, read i)
+             (f:_) -> return (f, -1)
+             _ -> fail "Usage: Hampi <filename> [timeout in secs] [-d debug] [-s solver]"
+    let dbg = lookuparg "-d" args
+    solver <- case lookuparg "-s" args of
+                 Just "yices1" -> return yices1
+                 Just "yices2" -> return yices2
+                 Just "stp" -> return stp
+                 Just x -> fail $ "Unknown solver: " ++ x
+                 Nothing -> return yices2
     input <- readFile fin
-    h <- case runStateT parseHampi input of
+    h <- {-# SCC "Parse" #-} case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
-    y <- yices2
-    r <- timeout (1000000*to) $ runQuery (RunOptions dbg y) (hquery h)
+    s <- solver
+    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) (hquery h)
     putStrLn (fromMaybe "TIMEOUT" r)
 
