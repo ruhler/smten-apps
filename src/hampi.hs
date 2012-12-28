@@ -9,6 +9,7 @@ import Control.Monad.State
 import Debug.Trace
 
 import Map
+import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Data.Functor ((<$>))
 import Data.List (genericLength)
@@ -67,9 +68,9 @@ freevar :: Integer -> Query S_String
 freevar = qS . S.frees . S.seriS
 
 -- Make a hampi assertion.
-hassert :: Map ID (Integer, S_String) -> Map ID CFG -> Assertion -> Query ()
+hassert :: M.Map ID (Integer, S_String) -> M.Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
-    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
+    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
         reg' = {-# SCC "SeriS" #-} S.seriS reg
         regs' = {-# SCC "SeriS" #-} S.seriS regs
@@ -77,13 +78,13 @@ hassert vals cfgs (AssertIn v b r) =
         p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
-    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
-        xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ map_lookup x vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
+        xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ M.lookup x vals
         positive = vstr S.== xstr
         p = if b then positive else S.not positive
     in assertS p
 hassert vals _ (AssertContains v b s) =
-    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ map_lookup v vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         sstr = S.seriS s
         positive = S.isInfixOf sstr vstr
         p = if b then positive else S.not positive
@@ -93,12 +94,12 @@ hassert vals _ (AssertContains v b s) =
 --  Given the var id, it's symbolic value, and the rest of the values, return
 --  a mapping from id to totally inlined values along with the length of those
 --  totally inlined values (for bounds inference)
-inlinevals :: ID -> (Integer, S_String) -> Map ID Val -> Map ID (Integer, S_String)
+inlinevals :: ID -> (Integer, S_String) -> M.Map ID Val -> M.Map ID (Integer, S_String)
 inlinevals varid varval m =
   let lookupval :: Val -> Maybe (Integer, S_String)
       lookupval (ValID x)
         | x == varid = return varval
-        | otherwise = map_lookup x m >>= lookupval
+        | otherwise = M.lookup x m >>= lookupval
       lookupval (ValLit x) = return $ (genericLength x, S.seriS x)
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
@@ -107,8 +108,8 @@ inlinevals varid varval m =
       lookupval (ValSub src off len) = do
             (_, src') <- lookupval (ValID src)
             return $ (len, S.substring src' (S.seriS off) (S.seriS len))
-      vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- map_toList m]
-  in map_fromList $ (varid, varval) : vals
+      vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- M.toList m]
+  in M.fromList $ (varid, varval) : vals
 
 -- A hampi query.
 hquery :: Hampi -> Query String

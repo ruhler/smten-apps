@@ -5,7 +5,7 @@ module Grammar (parseHampi) where
 
 import Control.Monad.State
 import Data.List (partition)
-import Map
+import qualified Data.Map as Map
 
 import Elem
 import CFG
@@ -183,8 +183,8 @@ assertEqualsS x n y = AssertStmt $ AssertEquals x n y
 
 mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =
- let vals = map_fromList [(id, v) | ValStmt id v <- stmts]
-     cfgs = map_fromList [(id, r) | CfgStmt id r <- stmts]
+ let vals = Map.fromList [(id, v) | ValStmt id v <- stmts]
+     cfgs = Map.fromList [(id, r) | CfgStmt id r <- stmts]
      asserts = [a | AssertStmt a <- stmts]
  in Hampi v vals cfgs asserts
 

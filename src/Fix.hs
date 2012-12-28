@@ -14,7 +14,7 @@ import RegEx
 import CFG
 
 data FS = FS {
-    fs_cfgs :: SMap.Map ID CFG,
+    fs_cfgs :: Map.Map ID CFG,
     fs_cache :: Map.Map (RID, Integer) RegEx,
     fs_rids :: Map.Map ID RID,
     fs_nrid :: RID
@@ -40,7 +40,7 @@ fixidM x n = do
         Just v -> return v
         Nothing -> do
             put $ fs { fs_cache = Map.insert (rid, n) Empty (fs_cache fs) }
-            let r = fromMaybe (error $ "fixid.r: " ++ x) $ SMap.map_lookup x (fs_cfgs fs)
+            let r = fromMaybe (error $ "fixid.r: " ++ x) $ Map.lookup x (fs_cfgs fs)
             v <- fixM r n
             modify $ \fs -> fs { fs_cache = Map.insert (rid, n) v (fs_cache fs) }
             return v
@@ -85,7 +85,7 @@ fixM r n =
             return $ Variable n rid
      FixC x n' -> if n == n' then fixidM x n else return emptyR
 
-fixN :: SMap.Map ID CFG -> ID -> Integer -> (SMap.Map (RID, Integer) RegEx, RegEx)
+fixN :: Map.Map ID CFG -> ID -> Integer -> (SMap.Map (RID, Integer) RegEx, RegEx)
 fixN regs x n =
   let (r, s) = runState (fixidM x n) $ FS regs Map.empty Map.empty 0
   in (SMap.map_fromList . filter ((/= Empty) . snd) . Map.toList $ fs_cache s, r)
