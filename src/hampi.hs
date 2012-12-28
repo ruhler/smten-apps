@@ -120,6 +120,9 @@ hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         Unsatisfiable -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
         _ -> return "UNKNOWN"
 
+data ElemType = ET_Integer | ET_Bit
+    deriving (Eq, Show)
+
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
   case dropWhile (/= k) m of
@@ -140,11 +143,20 @@ main = {-# SCC "Main" #-} do
                  Just "stp" -> return stp
                  Just x -> fail $ "Unknown solver: " ++ x
                  Nothing -> return yices2
+    elemtype <- case lookuparg "-e" args of
+                 Just "Integer" -> return ET_Integer
+                 Just "Bit" -> return ET_Bit
+                 Just x -> fail $ "Unknown elem type: " ++ x
+                 Nothing -> return ET_Bit
+
     input <- readFile fin
     h <- {-# SCC "Parse" #-} case runStateT parseHampi input of
             Left msg -> fail msg
             Right x -> return $ fst x
     s <- solver
-    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) (hquery S.integerElem h)
+    let hq = case elemtype of
+                ET_Bit -> hquery S.bitElem h
+                ET_Integer -> hquery S.integerElem h
+    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) hq
     putStrLn (fromMaybe "TIMEOUT" r)
 

@@ -2,20 +2,15 @@
 module Elem where
 
 import Data.Char
+import Data.Functor
+
 import Seri.SMT.SMT
+import Seri.Bit
 
 class Element a where
     toElem :: Char -> a
     fromElem :: a -> Char
     freeElem :: Query a
-    
-instance Element Integer where
-    toElem = ord
-    fromElem = chr
-    freeElem = do
-        x <- free
-        assert (x >= 0 && x < 256)
-        return x
 
 toElemString :: (Element e) => String -> [e]
 toElemString = map toElem
@@ -27,7 +22,33 @@ fromElemString = map fromElem
 freeElemString :: (Element e) => Integer -> Query [e]
 freeElemString x = sequence (replicate x freeElem)
 
+instance Element Integer where
+    toElem = ord
+    fromElem = chr
+    freeElem = do
+        x <- free
+        assert (x >= 0 && x < 256)
+        return x
+
 -- A sample integer Element.
 integerElem :: Integer
 integerElem = 0
+
+data BitElem = BitElem (Bit #8)
+    deriving (Eq)
+
+instance Ord BitElem where
+    (<) (BitElem a) (BitElem b) = a < b
+    (>) (BitElem a) (BitElem b) = a > b
+    (<=) (BitElem a) (BitElem b) = a <= b
+    (>=) (BitElem a) (BitElem b) = a >= b
+    compare (BitElem a) (BitElem b) = compare a b
+
+instance Element BitElem where
+    toElem = BitElem . __prim_fromInteger_Bit . ord
+    fromElem (BitElem x) = chr (__prim_toInteger_Bit x)
+    freeElem = BitElem <$> free
+
+bitElem :: BitElem
+bitElem = BitElem 0
 
