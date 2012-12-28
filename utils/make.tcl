@@ -16,8 +16,8 @@ run ../seri/build/seri-bin/seri --haskellf \
         --include ../seri/seri/sri \
         --include src \
         --no-main \
-        --mod-name SeriGen \
-        -f src/SeriGen.sri > build/SeriGen.hs
+        --mod-name SHampi \
+        -f src/SHampi.sri > build/SHampi.hs
 hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs
 
 # -fprof-auto-top

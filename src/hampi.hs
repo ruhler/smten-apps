@@ -24,7 +24,7 @@ import Seri.SMT.Yices.Yices2
 import Seri.SMT.Yices.Yices1
 import Seri.SMT.STP.STP
 import qualified Seri.HaskellF.Lib.Prelude as S
-import qualified SeriGen as S
+import qualified SHampi as S
 
 import Elem
 import RegEx

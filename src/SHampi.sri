@@ -1,5 +1,5 @@
 
-module SeriGen where
+module SHampi where
 
 import Debug.Trace
 
