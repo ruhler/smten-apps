@@ -2,6 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TemplateHaskell #-}
 
+import System.Exit
 import System.Environment
 import System.Timeout
 import Control.Monad.State
@@ -129,24 +130,28 @@ lookuparg k m =
      (_:x:_) -> Just x
      _ -> Nothing
 
+usage :: String
+usage = "Usage: Hampi <filename> [timeout in secs] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit]"
+
 main :: IO ()
 main = {-# SCC "Main" #-} do
     args <- getArgs
     (fin, to) <- case take 2 args of
+             ("--help":_) -> putStrLn usage >> exitSuccess
              (f:i:_) | head i /= '-' -> return (f, read i)
              (f:_) -> return (f, -1)
-             _ -> fail "Usage: Hampi <filename> [timeout in secs] [-d debug] [-s solver]"
+             _ -> fail usage
     let dbg = lookuparg "-d" args
     solver <- case lookuparg "-s" args of
                  Just "yices1" -> return yices1
                  Just "yices2" -> return yices2
                  Just "stp" -> return stp
-                 Just x -> fail $ "Unknown solver: " ++ x
+                 Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                  Nothing -> return yices2
     elemtype <- case lookuparg "-e" args of
                  Just "Integer" -> return ET_Integer
                  Just "Bit" -> return ET_Bit
-                 Just x -> fail $ "Unknown elem type: " ++ x
+                 Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
                  Nothing -> return ET_Bit
 
     input <- readFile fin
