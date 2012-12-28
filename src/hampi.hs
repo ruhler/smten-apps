@@ -27,7 +27,6 @@ import Seri.SMT.STP.STP
 import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SHampi as S
 
-import Elem
 import RegEx
 import CFG
 import Hampi
@@ -55,7 +54,6 @@ derive_SeriEH ''Map
 instance (S.SeriS ck fk, S.SeriS cv fv) => S.SeriS (Map ck cv) (S.Map fk fv) where
     seriS Tip = S.Tip
     seriS (Bin a b c d e) = S.Bin (S.seriS a) (S.seriS b) (S.seriS c) (S.seriS d) (S.seriS e)
-    
 
 type S_Elem = S.Integer
 type S_String = S.List__ S_Elem
@@ -81,8 +79,8 @@ hassert vals _ (AssertEquals v b x) =
     in assertS p
 hassert vals _ (AssertContains v b s) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
-        sstr = S.seriS (map fromChar s)
-        positive = S.isInfixOf sstr vstr
+        sstr = S.seriS s
+        positive = S.contains vstr sstr
         p = if b then positive else S.not positive
     in assertS p
 
@@ -96,7 +94,7 @@ inlinevals varid varval m =
       lookupval (ValID x)
         | x == varid = return varval
         | otherwise = M.lookup x m >>= lookupval
-      lookupval (ValLit x) = return $ (genericLength x, S.seriS (map fromChar x))
+      lookupval (ValLit x) = return $ (genericLength x, S.toElemString (S.seriS x))
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
             (lb, b') <- lookupval b
@@ -115,12 +113,11 @@ hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
     let svals = inlinevals vid (wmin, svar) vals
     r <- queryS $ do
         mapM_ (hassert svals cfgs) asserts
-        query $ realizeS svar
+        query $ realizeS' svar
     case r of
         Satisfiable v ->
-          let tostr :: [Elem] -> String
-              tostr = map toChar
-          in return $ "{VAR(" ++ vid ++ ")=" ++ tostr v ++ "}"
+          let vstr = fromMaybe (error "vstr not concrete") (S.de_seriS (S.fromElemString v))
+          in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
         Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
         _ -> return "UNKNOWN"
 

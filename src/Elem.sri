@@ -1,9 +1,20 @@
 
 module Elem where
 
+import Data.Char
+
 type Elem = Integer
 type ElemString = [Elem]
 
-fromChar :: Char -> Elem
-fromChar = __prim_toInteger_Char
+toElem :: Char -> Elem
+toElem = ord
+
+toElemString :: String -> ElemString
+toElemString = map toElem
+
+fromElem :: Elem -> Char
+fromElem = chr
+
+fromElemString :: ElemString -> String
+fromElemString = map fromElem
 

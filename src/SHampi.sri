@@ -5,6 +5,7 @@ import Debug.Trace
 
 import Data.List
 import Seri.SMT.SMT
+import Elem
 import RegEx
 import Match
 
@@ -20,6 +21,9 @@ frees x = sequence (replicate x freeelem)
 -- substring src offset length
 substring :: [a] -> Integer -> Integer -> [a]
 substring s o l = take l $ drop o s
+
+contains :: ElemString -> String -> Bool
+contains v s = isInfixOf (toElemString s) v
 
 assertIn :: Map (RID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
 assertIn regs vstr b reg =

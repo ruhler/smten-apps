@@ -65,8 +65,8 @@ matchM r off str =
   case r of
      Epsilon -> return True
      Empty -> return False
-     Atom c -> return (head str == fromChar c)
-     Range a b -> return ((fromChar a <= head str) && (head str <= fromChar b))
+     Atom c -> return (head str == toElem c)
+     Range a b -> return ((toElem a <= head str) && (head str <= toElem b))
      Concat _ a b -> do
        let i = rlength a
        a' <- matchM a off str
