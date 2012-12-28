@@ -55,14 +55,12 @@ instance (S.SeriS ck fk, S.SeriS cv fv) => S.SeriS (Map ck cv) (S.Map fk fv) whe
     seriS Tip = S.Tip
     seriS (Bin a b c d e) = S.Bin (S.seriS a) (S.seriS b) (S.seriS c) (S.seriS d) (S.seriS e)
 
-type S_Elem = S.Integer
-type S_String = S.List__ S_Elem
-
-freevar :: Integer -> Query S_String
-freevar = qS . S.frees . S.seriS
+-- Ignores value of the first argument. That's just to specify the type.
+freevar :: (S.Element e) => e -> Integer -> Query (S.List__ e)
+freevar _ = qS . S.freeElemString . S.seriS
 
 -- Make a hampi assertion.
-hassert :: M.Map ID (Integer, S_String) -> M.Map ID CFG -> Assertion -> Query ()
+hassert :: (S.Element e, S.Ord e, S.Eq e) => M.Map ID (Integer, S.List__ e) -> M.Map ID CFG -> Assertion -> Query ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
@@ -88,10 +86,9 @@ hassert vals _ (AssertContains v b s) =
 --  Given the var id, it's symbolic value, and the rest of the values, return
 --  a mapping from id to totally inlined values along with the length of those
 --  totally inlined values (for bounds inference)
-inlinevals :: ID -> (Integer, S_String) -> M.Map ID Val -> M.Map ID (Integer, S_String)
+inlinevals :: (S.Element e) => ID -> (Integer, S.List__ e) -> M.Map ID Val -> M.Map ID (Integer, S.List__ e)
 inlinevals varid varval m =
-  let lookupval :: Val -> Maybe (Integer, S_String)
-      lookupval (ValID x)
+  let lookupval (ValID x)
         | x == varid = return varval
         | otherwise = M.lookup x m >>= lookupval
       lookupval (ValLit x) = return $ (genericLength x, S.toElemString (S.seriS x))
@@ -106,10 +103,12 @@ inlinevals varid varval m =
   in M.fromList $ (varid, varval) : vals
 
 -- A hampi query.
-hquery :: Hampi -> Query String
-hquery (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
-hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
-    svar <- freevar wmin
+-- Takes an argument of Element type to specify which type to use for the
+-- elemtn. The value of that argument is ignored.
+hquery :: (S.Element e, S.Eq e, S.Ord e) => e -> Hampi -> Query String
+hquery _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
+hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
+    svar <- freevar e wmin
     let svals = inlinevals vid (wmin, svar) vals
     r <- queryS $ do
         mapM_ (hassert svals cfgs) asserts
@@ -118,7 +117,7 @@ hquery (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         Satisfiable v ->
           let vstr = fromMaybe (error "vstr not concrete") (S.de_seriS (S.fromElemString v))
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
-        Unsatisfiable -> hquery (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
+        Unsatisfiable -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
         _ -> return "UNKNOWN"
 
 lookuparg :: String -> [String] -> Maybe String
@@ -146,6 +145,6 @@ main = {-# SCC "Main" #-} do
             Left msg -> fail msg
             Right x -> return $ fst x
     s <- solver
-    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) (hquery h)
+    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) (hquery S.integerElem h)
     putStrLn (fromMaybe "TIMEOUT" r)
 

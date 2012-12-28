@@ -9,23 +9,14 @@ import Elem
 import RegEx
 import Match
 
-freeelem :: Query Integer
-freeelem = do
-    x <- free
-    assert (x >= 0 && x < 256)
-    return x
-
-frees :: Integer -> Query [Integer]
-frees x = sequence (replicate x freeelem)
-
 -- substring src offset length
 substring :: [a] -> Integer -> Integer -> [a]
 substring s o l = take l $ drop o s
 
-contains :: ElemString -> String -> Bool
+contains :: (Element e, Eq e) => [e] -> String -> Bool
 contains v s = isInfixOf (toElemString s) v
 
-assertIn :: Map (RID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
+assertIn :: (Element e, Eq e, Ord e) => Map (RID, Integer) RegEx -> [e] -> Bool -> RegEx -> Bool
 assertIn regs vstr b reg =
  let p = match regs reg vstr
  in if b then p else not p
