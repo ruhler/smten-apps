@@ -9,7 +9,7 @@ import Data.Functor
 import Data.Maybe
 import Map
 
-import SeriRegEx
+import RegEx
 
 data SubMatch = SubMatch {
     m_id :: RID,        -- ID.

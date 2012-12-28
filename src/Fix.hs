@@ -10,7 +10,7 @@ import Data.Maybe
 import qualified Data.Map as Map
 import qualified Map as SMap
 
-import SeriRegEx
+import RegEx
 import SeriCFG
 
 data FS = FS {

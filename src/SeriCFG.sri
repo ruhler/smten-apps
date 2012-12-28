@@ -1,7 +1,7 @@
 
 module SeriCFG where
 
-import SeriRegEx
+import RegEx
 
 type ID = String
 

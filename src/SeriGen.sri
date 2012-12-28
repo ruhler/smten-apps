@@ -5,7 +5,7 @@ import Debug.Trace
 
 import Data.List
 import Seri.SMT.SMT
-import SeriRegEx
+import RegEx
 import Match
 
 freeelem :: Query Integer
@@ -20,18 +20,6 @@ frees x = sequence (replicate x freeelem)
 -- substring src offset length
 substring :: [a] -> Integer -> Integer -> [a]
 substring s o l = take l $ drop o s
-
---match :: RegEx -> [Elem] -> Bool
---match Epsilon str = null str
---match Empty _ = False
---match (Atom x) [c] = x == c
---match (Atom _) _ = False
---match (Range cmin cmax) [c] = cmin <= c && c <= cmax
---match (Range _ _) _ = False
---match (Concat _ a b) str =
---  let (sa, sb) = splitAt (rlength a) str
---  in match a sa && match b sb
---match (Or _ a b) str = match a str || match b str
 
 assertIn :: Map (RID, Integer) RegEx -> ElemString -> Bool -> RegEx -> Bool
 assertIn regs vstr b reg =

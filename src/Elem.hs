@@ -7,7 +7,7 @@ import Seri.Bit
 import Seri.Type
 import Seri.ExpH
 
-import SeriRegEx
+import RegEx
 
 class Element a where
     fromChar :: Char -> a

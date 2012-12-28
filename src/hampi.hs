@@ -27,7 +27,7 @@ import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SeriGen as S
 
 import Elem
-import SeriRegEx
+import RegEx
 import SeriCFG
 import CFG
 import Hampi

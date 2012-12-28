@@ -1,11 +1,9 @@
 
 -- This file shared by Haskell and Seri.
 -- So it should be restricted to Seri syntax and features.
-module SeriRegEx where
+module RegEx where
 
-import Prelude
 import Data.List
-
 
 type RID = Integer
 type Elem = Integer

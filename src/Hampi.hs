@@ -9,7 +9,7 @@ import Map
 import Data.Maybe (fromMaybe)
 
 import Elem
-import SeriRegEx
+import RegEx
 import SeriCFG
 
 data Assertion = AssertIn ID Bool ID
