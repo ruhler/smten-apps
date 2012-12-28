@@ -1,12 +1,9 @@
 
-puts "test AssertIn Check FixN Parse RunCmds SeriS SmtE Other"
-
 foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
     set sccs [dict create AssertIn 0 Check 0 FixN 0 Parse 0 RunCmds 0 SeriS 0 SmtE 0]
 
     puts -nonewline "$x "
-    exec ./shampi_prof $x +RTS -p "-V0.0001"
-    #exec grep {^   [^ ]} shampi_prof.prof | awk {{ print $1 " " $7}} | sort > $x.prof
+    set thistime [lindex [time {exec ./shampi_prof $x +RTS -p "-V0.0001"}] 0]
     
     set other 100
     set lines [split [read [open "shampi_prof.prof"]] "\n"]
@@ -21,8 +18,8 @@ foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
     }
 
     foreach {k v} $sccs {
-        puts -nonewline "[format "%.2f" $v] "
+        puts -nonewline "[format "%.2f" [expr $v * $thistime / 100.0]] "
     }
-    puts [format "%.2f" $other]
+    puts "[format "%.2f" [expr $v * $thistime / 100.0] $other] $thistime"
 }
     
