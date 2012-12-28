@@ -10,7 +10,7 @@ import Data.Maybe (fromMaybe)
 
 import Elem
 import RegEx
-import SeriCFG
+import CFG
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool [Elem]

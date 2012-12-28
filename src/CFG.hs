@@ -1,8 +1,26 @@
 
-module CFG where
+module CFG (
+    ID, CFG(..),
+    charC, concatC, concatsC, orsC, orC, epsilonC, varC, fixC,
+    stringC, starC, optionC, plusC, rangeC, emptyC,
+ )  where
 
 import Elem
-import SeriCFG
+
+type ID = String
+
+data CFG =
+     EpsilonC       -- matches ""
+   | EmptyC         -- never matches
+   | AtomC Elem
+   | RangeC Elem Elem
+   | StarC CFG
+   | ConcatC CFG CFG
+   | OrC CFG CFG
+   | VariableC ID
+   | FixC ID Integer
+   deriving (Eq, Show)
+
 
 charC :: Char -> CFG
 charC c = AtomC (fromChar c)

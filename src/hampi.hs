@@ -28,7 +28,6 @@ import qualified SeriGen as S
 
 import Elem
 import RegEx
-import SeriCFG
 import CFG
 import Hampi
 import Grammar

@@ -1,5 +1,5 @@
 
-module Fix where
+module Fix (fixN) where
 
 import Debug.Trace
 
@@ -11,7 +11,7 @@ import qualified Data.Map as Map
 import qualified Map as SMap
 
 import RegEx
-import SeriCFG
+import CFG
 
 data FS = FS {
     fs_cfgs :: SMap.Map ID CFG,
