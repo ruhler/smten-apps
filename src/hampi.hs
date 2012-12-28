@@ -57,10 +57,6 @@ instance (S.SeriS ck fk, S.SeriS cv fv) => S.SeriS (Map ck cv) (S.Map fk fv) whe
     seriS (Bin a b c d e) = S.Bin (S.seriS a) (S.seriS b) (S.seriS c) (S.seriS d) (S.seriS e)
     
 
---type S_2 = S.N__2p0 (S.N__2p1 S.N__0)
---type S_4 = S.N__TIMES S_2 S_2
---type S_8 = S.N__TIMES S_4 S_2
---type S_Elem = S.Bit S_8
 type S_Elem = S.Integer
 type S_String = S.List__ S_Elem
 
@@ -85,7 +81,7 @@ hassert vals _ (AssertEquals v b x) =
     in assertS p
 hassert vals _ (AssertContains v b s) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
-        sstr = S.seriS s
+        sstr = S.seriS (map fromChar s)
         positive = S.isInfixOf sstr vstr
         p = if b then positive else S.not positive
     in assertS p
@@ -100,7 +96,7 @@ inlinevals varid varval m =
       lookupval (ValID x)
         | x == varid = return varval
         | otherwise = M.lookup x m >>= lookupval
-      lookupval (ValLit x) = return $ (genericLength x, S.seriS x)
+      lookupval (ValLit x) = return $ (genericLength x, S.seriS (map fromChar x))
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
             (lb, b') <- lookupval b

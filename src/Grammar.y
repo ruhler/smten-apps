@@ -7,7 +7,6 @@ import Control.Monad.State
 import Data.List (partition)
 import qualified Data.Map as Map
 
-import Elem
 import CFG
 import Hampi
 import Lexer
@@ -176,7 +175,7 @@ assertInS :: ID -> Bool -> ID -> Stmt
 assertInS x n y = AssertStmt $ AssertIn x n y
 
 assertContainsS :: ID -> Bool -> String -> Stmt
-assertContainsS x n y = AssertStmt $ AssertContains x n (map fromChar y)
+assertContainsS x n y = AssertStmt $ AssertContains x n y
 
 assertEqualsS :: ID -> Bool -> ID -> Stmt
 assertEqualsS x n y = AssertStmt $ AssertEquals x n y

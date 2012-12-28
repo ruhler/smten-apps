@@ -1,6 +1,6 @@
 
 module Hampi (
-    ID, Elem, Assertion(..), Var(..), Val(..), Hampi(..), toChar,
+    ID, Assertion(..), Var(..), Val(..), Hampi(..),
     stringV, idV, concatV, subV,
     ) where
 
@@ -8,12 +8,11 @@ import Debug.Trace
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 
-import Elem
 import RegEx
 import CFG
 
 data Assertion = AssertIn ID Bool ID
-               | AssertContains ID Bool [Elem]
+               | AssertContains ID Bool String
                | AssertEquals ID Bool ID
 
 data Var = Var {
@@ -23,7 +22,7 @@ data Var = Var {
 }
 
 data Val = ValID ID
-         | ValLit [Elem]
+         | ValLit String
          | ValCat Val Val
          | ValSub {
              vs_source :: ID,
@@ -33,7 +32,7 @@ data Val = ValID ID
     deriving (Show)
 
 stringV :: String -> Val
-stringV = ValLit . map fromChar
+stringV = ValLit
 
 idV :: ID -> Val
 idV = ValID

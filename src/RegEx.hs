@@ -6,14 +6,12 @@ module RegEx where
 import Data.List
 
 type RID = Integer
-type Elem = Integer
-type ElemString = [Elem]
 
 data RegEx =
            Epsilon        -- matches ""
          | Empty          -- never matches
-         | Atom Elem
-         | Range Elem Elem
+         | Atom Char
+         | Range Char Char
          | Concat Integer RegEx RegEx
          | Or Integer RegEx RegEx
          | Variable Integer RID

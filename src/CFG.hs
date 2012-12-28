@@ -5,15 +5,13 @@ module CFG (
     stringC, starC, optionC, plusC, rangeC, emptyC,
  )  where
 
-import Elem
-
 type ID = String
 
 data CFG =
      EpsilonC       -- matches ""
    | EmptyC         -- never matches
-   | AtomC Elem
-   | RangeC Elem Elem
+   | AtomC Char
+   | RangeC Char Char
    | StarC CFG
    | ConcatC CFG CFG
    | OrC CFG CFG
@@ -23,7 +21,7 @@ data CFG =
 
 
 charC :: Char -> CFG
-charC c = AtomC (fromChar c)
+charC = AtomC
 
 concatC :: CFG -> CFG -> CFG
 concatC EmptyC          y = EmptyC
@@ -69,7 +67,7 @@ optionC :: CFG -> CFG
 optionC r = orC epsilonC r
 
 rangeC :: Char -> Char -> CFG
-rangeC a b = RangeC (fromChar a) (fromChar b)
+rangeC = RangeC
 
 emptyC :: CFG
 emptyC = EmptyC

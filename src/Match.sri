@@ -9,6 +9,7 @@ import Data.Functor
 import Data.Maybe
 import Map
 
+import Elem
 import RegEx
 
 data SubMatch = SubMatch {
@@ -64,8 +65,8 @@ matchM r off str =
   case r of
      Epsilon -> return True
      Empty -> return False
-     Atom c -> return (head str == c)
-     Range a b -> return ((a <= head str) && (head str <= b))
+     Atom c -> return (head str == fromChar c)
+     Range a b -> return ((fromChar a <= head str) && (head str <= fromChar b))
      Concat _ a b -> do
        let i = rlength a
        a' <- matchM a off str
