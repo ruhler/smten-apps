@@ -1,0 +1,6 @@
+
+var s : 10;
+cfg az := ['a'-'z'] ;
+cfg azopt := (az)? ;
+cfg azoptstar :=  (azopt)* ;
+assert s in azoptstar;

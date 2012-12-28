@@ -1,0 +1,3 @@
+var v : 24;
+cfg E :=  "()" | E E | "(" E ")" ;
+assert v in E;
