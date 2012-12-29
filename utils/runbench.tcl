@@ -1,20 +1,29 @@
 
-set ::hampi [lindex $argv 0]
 set ::runspertest 10
-set ::timeout 30
+set ::timeout 60
 
-set i 0
-foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
-    puts -nonewline "$i $x: "
+proc mintime {script} {
     set mintime [expr $::timeout * 1000000]
-    for {set ti 0} {$ti < $runspertest} {incr ti} { 
-        set thistime [lindex [time {catch {exec $::hampi $x $::timeout }}] 0]
+    for {set ti 0} {$ti < $::runspertest} {incr ti} {
+        set thistime [lindex [time $script] 0]
         if {$thistime < $mintime} {
             set mintime $thistime
         }
-        puts -nonewline "$thistime "
     }
-    puts "$mintime"
-    incr i
+    return $mintime
 }
+
+puts "test hampi yices2.integer yices2.bit yices1.integer yices1.bit stp"
+
+exec ./utils/rhampi_s &
+foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
+    set hampi [mintime "exec ./utils/rhampi_c $x $::timeout"]
+    set y2int [mintime "exec ./build/shampi $x $::timeout -s yices2 -t Integer"]
+    set y2bit [mintime "exec ./build/shampi $x $::timeout -s yices2 -t Bit"]
+    set y1int [mintime "exec ./build/shampi $x $::timeout -s yices1 -t Integer"]
+    set y1bit [mintime "exec ./build/shampi $x $::timeout -s yices1 -t Bit"]
+    set stp [mintime "exec ./build/shampi $x $::timeout -s stp -t Bit"]
+    puts "$x $hampi $y2int $y2bit $y1int $y1bit $stp"
+}
+exec ./utils/rhampi_shutdown
     
