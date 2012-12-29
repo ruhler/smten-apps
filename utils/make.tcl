@@ -21,7 +21,7 @@ run ../seri/build/seri-bin/seri --haskellf \
 hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs
 
 # -fprof-auto-top
-hrun ghc -o build/shampi_prof -hidir build/ -odir build/ -isrc -ibuild -prof -rtsopts -osuf o_prof src/hampi.hs
+hrun ghc -o build/shampi_prof -hidir build/ -odir build/ -isrc -ibuild -prof -rtsopts -osuf o_prof src/hampi.hs -fprof-auto-top
 
 run tclsh utils/runtests.tcl ./build/shampi > build/tests.shampi
 hrun diff utils/tests.rhampi build/tests.shampi

@@ -16,7 +16,8 @@ proc mintime {script} {
 puts "test hampi yices2.integer yices2.bit yices1.integer yices1.bit stp"
 
 exec ./utils/rhampi_s &
-foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
+exec sleep 1
+foreach x [glob "tests/wsu/*.hmp"] {
     set hampi [mintime "exec ./utils/rhampi_c $x $::timeout"]
     set y2int [mintime "exec ./build/shampi $x $::timeout -s yices2 -t Integer"]
     set y2bit [mintime "exec ./build/shampi $x $::timeout -s yices2 -t Bit"]

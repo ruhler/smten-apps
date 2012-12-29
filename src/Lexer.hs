@@ -8,7 +8,7 @@ import Prelude hiding (lex)
 import Control.Monad.Error
 import Control.Monad.State
 
-import Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr)
+import Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
 import Data.Functor ((<$>))
 
 data Token =
@@ -81,6 +81,9 @@ closeblockcomment ('*':'/':cs) = cs
 closeblockcomment [] = []
 closeblockcomment (c:cs) = closeblockcomment cs
 
+mkseq :: Char -> Char -> Char -> Char
+mkseq a b c = chr $ (100 * digitToInt a) + (10 * digitToInt b) + digitToInt c
+
 lex :: ParserMonad Token
 lex = do
     text <- get
@@ -99,7 +102,7 @@ lex = do
          in put rest >> return (TkInt . read $ c:ns)
       ('\'':c:'\'':cs) -> put cs >> return (TkChar c)
       ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c ->
-         put cs >> return (TkChar . chr . read $ [a, b, c])
+         put cs >> return (TkChar (mkseq a b c))
       ('"':cs) | (ns, '"':rest) <- break (== '"') cs ->
          put rest >> return (TkString ns)
       ('/':'*':cs) -> put (closeblockcomment cs) >> lex

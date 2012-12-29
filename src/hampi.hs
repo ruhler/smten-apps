@@ -67,7 +67,7 @@ hassert vals cfgs (AssertIn v b r) =
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
         reg' = {-# SCC "SeriS" #-} S.seriS reg
         regs' = {-# SCC "SeriS" #-} S.seriS regs
-        b' = S.seriS b
+        b' = {-# SCC "SeriS" #-} S.seriS b
         p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
     in assertS p
 hassert vals _ (AssertEquals v b x) =
