@@ -5,6 +5,8 @@ module CFG (
     stringC, starC, optionC, plusC, rangeC, emptyC,
  )  where
 
+import Data.Char
+
 type ID = String
 
 data CFG =
@@ -32,13 +34,21 @@ concatC x        EpsilonC = x
 concatC x              y = ConcatC x y
 
 concatsC :: [CFG] -> CFG
-concatsC = foldl concatC epsilonC
+concatsC = foldr concatC epsilonC
 
 orsC :: [CFG] -> CFG
-orsC = foldl orC emptyC
+orsC = foldr orC emptyC
 
 orC :: CFG -> CFG -> CFG
 orC EmptyC      y = y
+
+-- These are specifically for the WSU test cases, which often have long ranges
+-- of characters explicitly spelled out.
+orC (AtomC a) (AtomC b) | (ord a + 1) == ord b = rangeC a b
+orC (AtomC a) (RangeC b c) | (ord a + 1) == ord b = rangeC a c
+orC (AtomC a) (OrC (AtomC b) c) | (ord a + 1) == ord b = OrC (RangeC a b) c
+orC (AtomC a) (OrC (RangeC b c) d) | (ord a + 1) == ord b = OrC (RangeC a c) d
+
 orC (OrC x1 x2) y = x1 `orC` (x2 `orC` y)           
 orC x      EmptyC = x
 orC x          y = OrC x y                                    
