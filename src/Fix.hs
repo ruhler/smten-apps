@@ -32,18 +32,18 @@ getridM x = do
             put $ fs { fs_nrid = v+1, fs_rids = Map.insert x v (fs_rids fs) }
             return v
 
-fixidM :: ID -> Integer -> FixM RegEx
+fixidM :: ID -> Integer -> FixM (RegEx, RID)
 fixidM x n = do
     rid <- getridM x
     fs <- get
     case Map.lookup (rid, n) (fs_cache fs) of
-        Just v -> return v
+        Just v -> return (v, rid)
         Nothing -> do
             put $ fs { fs_cache = Map.insert (rid, n) Empty (fs_cache fs) }
             let r = fromMaybe (error $ "fixid.r: " ++ x) $ Map.lookup x (fs_cfgs fs)
             v <- fixM r n
             modify $ \fs -> fs { fs_cache = Map.insert (rid, n) v (fs_cache fs) }
-            return v
+            return (v, rid)
 
 fixM :: CFG -> Integer -> FixM RegEx
 fixM r n = 
@@ -67,7 +67,7 @@ fixM r n =
        let p = \i -> do
              a' <- fixM a i
              if a' == Empty
-                 then return Empty
+                 then return a'
                  else do
                      b' <- fixM b (n-i)
                      return $ concatR a' b'
@@ -77,16 +77,14 @@ fixM r n =
          b' <- fixM b n
          return $ orsR [a', b']
      VariableC id -> do
-        x <- fixidM id n
+        (x, rid) <- fixidM id n
         case x of
-          Empty -> return Empty
-          _ -> do
-            rid <- getridM id
-            return $ Variable n rid
-     FixC x n' -> if n == n' then fixidM x n else return emptyR
+          Empty -> return x
+          _ -> return $ Variable n rid
+     FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
 
 fixN :: Map.Map ID CFG -> ID -> Integer -> (SMap.Map (RID, Integer) RegEx, RegEx)
 fixN regs x n =
-  let (r, s) = runState (fixidM x n) $ FS regs Map.empty Map.empty 0
+  let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
   in (SMap.map_fromList . filter ((/= Empty) . snd) . Map.toList $ fs_cache s, r)
 
