@@ -21,12 +21,14 @@ import Seri.ExpH
 import Seri.Ppr
 import qualified Seri.HaskellF.Symbolic as S
 import Seri.HaskellF.Query
+import Seri.HaskellF.TH
 import Seri.SMT.Query
 import Seri.SMT.Yices.Yices2
 import Seri.SMT.Yices.Yices1
 import Seri.SMT.STP.STP
 import qualified Seri.HaskellF.Lib.Prelude as S
 import qualified SHampi as S
+import qualified SHampi
 
 import RegEx
 import CFG
@@ -36,25 +38,14 @@ import Fix
 
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
-
-instance S.SeriS RegEx S.RegEx where
-    seriS Epsilon = S.Epsilon
-    seriS Empty = S.Empty
-    seriS (Atom c) = S.Atom (S.seriS c)
-    seriS (Range a b) = S.Range (S.seriS a) (S.seriS b)
-    seriS (Concat a b c) = S.Concat (S.seriS a) (S.seriS b) (S.seriS c)
-    seriS (Or a b c) = S.Or (S.seriS a) (S.seriS b) (S.seriS c)
-    seriS (Variable a b) = S.Variable (S.seriS a) (S.seriS b)
+derive_SeriS ''RegEx ''S.RegEx
 
 instance (S.SeriS ca fa, S.SeriS cb fb) => S.SeriS (ca, cb) (S.Tuple2__ fa fb) where
     seriS (a, b) = S.Tuple2__ (S.seriS a) (S.seriS b)
 
 derive_SeriT ''Map
 derive_SeriEH ''Map
-
-instance (S.SeriS ck fk, S.SeriS cv fv) => S.SeriS (Map ck cv) (S.Map fk fv) where
-    seriS Tip = S.Tip
-    seriS (Bin a b c d e) = S.Bin (S.seriS a) (S.seriS b) (S.seriS c) (S.seriS d) (S.seriS e)
+derive_SeriS ''Map ''S.Map
 
 -- Ignores value of the first argument. That's just to specify the type.
 freevar :: (S.Element e) => e -> Integer -> Query (S.List__ e)
