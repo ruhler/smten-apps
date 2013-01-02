@@ -39,10 +39,6 @@ import Fix
 derive_SeriT ''RegEx
 derive_SeriEH ''RegEx
 derive_SeriS ''RegEx ''S.RegEx
-
-instance (S.SeriS ca fa, S.SeriS cb fb) => S.SeriS (ca, cb) (S.Tuple2__ fa fb) where
-    seriS (a, b) = S.Tuple2__ (S.seriS a) (S.seriS b)
-
 derive_SeriT ''Map
 derive_SeriEH ''Map
 derive_SeriS ''Map ''S.Map
