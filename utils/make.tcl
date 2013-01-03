@@ -12,8 +12,7 @@ proc hrun {args} {
 # Run from the shampi/ directory.
 hrun mkdir -p build
 hrun happy src/Grammar.y -o build/Grammar.hs
-run ../seri/build/seri-bin/seri --haskellf \
-        --include ../seri/seri/sri \
+run seri --haskellf \
         --include src \
         --no-main \
         --mod-name SHampi \
