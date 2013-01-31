@@ -16,7 +16,7 @@ type Size = Integer
 instance (Show k, Show a) => Show (Map k a) where
     show m = show (map_toList m)
 
-map_lookup :: (Eq k, Ord k) => k -> Map k v -> Maybe v
+map_lookup :: (Ord k) => k -> Map k v -> Maybe v
 map_lookup k t
   = case t of
       Tip -> Nothing
@@ -26,7 +26,7 @@ map_lookup k t
           GT -> map_lookup k r
           EQ -> Just x
       
-map_insert :: (Eq k, Ord k) => k -> v -> Map k v -> Map k v
+map_insert :: (Ord k) => k -> v -> Map k v -> Map k v
 map_insert kx x t =
   case t of
     Tip -> map_singleton kx x
@@ -99,7 +99,7 @@ map_empty = Tip
 map_singleton :: k -> v -> Map k v
 map_singleton k v = Bin 1 k v map_empty map_empty
 
-map_fromList :: (Eq k, Ord k) => [(k, v)] -> Map k v
+map_fromList :: (Ord k) => [(k, v)] -> Map k v
 map_fromList ((k, v):xs) = map_insert k v (map_fromList xs)
 map_fromList _ = map_empty
 

@@ -1,9 +1,9 @@
 
-foreach x [glob "tests/*.hmp" "tests/hampi/*.hmp" "tests/slow/*.hmp"] {
+foreach x [glob "tests/hard/*.hmp"] {
     set sccs [dict create AssertIn 0 Check 0 FixN 0 Parse 0 RunCmds 0 SeriS 0 SmtE 0]
 
     puts -nonewline "$x "
-    set thistime [lindex [time {exec ./build/shampi_prof $x +RTS -p "-V0.0001"}] 0]
+    set thistime [lindex [time {exec ./build/shampi_prof $x -s yices2 -e Bit +RTS -p "-V0.0001"}] 0]
     
     set other 100
     set lines [split [read [open "shampi_prof.prof"]] "\n"]

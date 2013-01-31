@@ -49,7 +49,7 @@ data MS = MS {
 
 type MatchM = State MS
 
-matchidM :: (Element e, Eq e, Ord e) => SubMatch -> [e] -> MatchM Bool
+matchidM :: (Element e, Ord e) => SubMatch -> [e] -> MatchM Bool
 matchidM s@(SubMatch x n off) str = do
     ms <- get
     case mc_lookup s (ms_cache ms) of
@@ -60,7 +60,7 @@ matchidM s@(SubMatch x n off) str = do
             modify $ \ms -> ms { ms_cache = mc_insert s v (ms_cache ms) }
             return v
 
-matchM :: (Element e, Eq e, Ord e) => RegEx -> Integer -> [e] -> MatchM Bool
+matchM :: (Element e, Ord e) => RegEx -> Integer -> [e] -> MatchM Bool
 matchM r off str =
   case r of
      Epsilon -> return True
@@ -78,6 +78,6 @@ matchM r off str =
          return (a' || b')
      Variable n id -> matchidM (SubMatch id n off) str
 
-match :: (Element e, Eq e, Ord e) => Map (RID, Integer) RegEx -> RegEx -> [e] -> Bool
+match :: (Element e, Ord e) => Map (RID, Integer) RegEx -> RegEx -> [e] -> Bool
 match regs x str = evalState (matchM x 0 str) $ MS regs mc_empty
 
