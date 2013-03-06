@@ -2,8 +2,8 @@
 -- Implementation of binary balanced tree based on Data.Map source from
 -- haskell library.
 
--- This file shared by Haskell and Seri.
--- So it should be restricted to Seri syntax and features.
+-- This file shared by Haskell and Smten.
+-- So it should be restricted to Smten syntax and features.
 module Map where
 
 

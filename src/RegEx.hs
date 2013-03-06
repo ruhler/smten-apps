@@ -1,6 +1,6 @@
 
--- This file shared by Haskell and Seri.
--- So it should be restricted to Seri syntax and features.
+-- This file shared by Haskell and Smten.
+-- So it should be restricted to Smten syntax and features.
 module RegEx where
 
 import Data.List

@@ -12,11 +12,11 @@ proc hrun {args} {
 # Run from the shampi/ directory.
 hrun mkdir -p build
 hrun happy src/Grammar.y -o build/Grammar.hs
-run seri --haskellf \
+run smten --haskellf \
         --include src \
         --no-main \
         --mod-name SHampi \
-        -f src/SHampi.sri > build/SHampi.hs
+        -f src/SHampi.smtn > build/SHampi.hs
 hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs
 
 # -fprof-auto-top

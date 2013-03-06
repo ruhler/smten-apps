@@ -4,7 +4,6 @@ module SHampi where
 import Debug.Trace
 
 import Data.List
-import Seri.SMT.SMT
 import Elem
 import RegEx
 import Match

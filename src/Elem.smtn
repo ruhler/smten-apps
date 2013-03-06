@@ -4,13 +4,13 @@ module Elem where
 import Data.Char
 import Data.Functor
 
-import Seri.SMT.SMT
-import Seri.Bit
+import Smten.SMT.Symbolic
+import Smten.Bit
 
 class Element a where
     toElem :: Char -> a
     fromElem :: a -> Char
-    freeElem :: Query a
+    freeElem :: Symbolic a
 
 toElemString :: (Element e) => String -> [e]
 toElemString = map toElem
@@ -19,7 +19,7 @@ fromElemString :: (Element e) => [e] -> String
 fromElemString = map fromElem
 
 -- Create a free element string of fixed length.
-freeElemString :: (Element e) => Integer -> Query [e]
+freeElemString :: (Element e) => Integer -> Symbolic [e]
 freeElemString x = sequence (replicate x freeElem)
 
 instance Element Integer where

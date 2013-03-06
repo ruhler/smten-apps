@@ -15,18 +15,19 @@ import Data.Maybe (fromMaybe)
 import Data.Functor ((<$>))
 import Data.List (genericLength)
 
-import Seri.Type
-import Seri.Exp
-import Seri.ExpH
-import Seri.Ppr
-import qualified Seri.HaskellF.Symbolic as S
-import Seri.HaskellF.Query
-import Seri.HaskellF.TH
-import Seri.SMT.Query
-import Seri.SMT.Yices.Yices2
-import Seri.SMT.Yices.Yices1
-import Seri.SMT.STP.STP
-import qualified Seri.HaskellF.Lib.Prelude as S
+import Smten.Type
+import Smten.Exp
+import Smten.ExpH
+import Smten.Ppr
+import Smten.HaskellF.HaskellF
+import Smten.HaskellF.SMT
+import Smten.HaskellF.TH
+import Smten.SMT.Symbolic
+import Smten.SMT.SMT
+import Smten.SMT.Yices.Yices2
+import Smten.SMT.Yices.Yices1
+import Smten.SMT.STP.STP
+import qualified Smten.HaskellF.Lib.Prelude as S
 import qualified SHampi as S
 import qualified SHampi
 
@@ -36,39 +37,39 @@ import Hampi
 import Grammar
 import Fix
 
-derive_SeriT ''RegEx
-derive_SeriEH ''RegEx
-derive_SeriS ''RegEx ''S.RegEx
-derive_SeriT ''Map
-derive_SeriEH ''Map
-derive_SeriS ''Map ''S.Map
+derive_SmtenT ''RegEx
+derive_SmtenEH ''RegEx
+derive_SmtenHF ''RegEx ''S.RegEx
+derive_SmtenT ''Map
+derive_SmtenEH ''Map
+derive_SmtenHF ''Map ''S.Map
 
 -- Ignores value of the first argument. That's just to specify the type.
-freevar :: (S.Element e) => e -> Integer -> Query (S.List__ e)
-freevar _ = qS . S.freeElemString . S.seriS
+freevar :: (S.Element e) => e -> Integer -> Symbolic (S.List__ e)
+freevar _ = symbolicHF . S.freeElemString . smtenHF
 
 -- Make a hampi assertion.
-hassert :: (S.Element e, S.Ord e, S.Eq e) => M.Map ID (Integer, S.List__ e) -> M.Map ID CFG -> Assertion -> Query ()
+hassert :: (S.Element e, S.Ord e, S.Eq e) => M.Map ID (Integer, S.List__ e) -> M.Map ID CFG -> Assertion -> Symbolic ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
-        reg' = {-# SCC "SeriS" #-} S.seriS reg
-        regs' = {-# SCC "SeriS" #-} S.seriS regs
-        b' = {-# SCC "SeriS" #-} S.seriS b
+        reg' = {-# SCC "SmtenHF" #-} smtenHF reg
+        regs' = {-# SCC "SmtenHF" #-} smtenHF regs
+        b' = {-# SCC "SmtenHF" #-} smtenHF b
         p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
-    in assertS p
+    in assertHF p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ M.lookup x vals
         positive = vstr S.== xstr
         p = if b then positive else S.not positive
-    in assertS p
+    in assertHF p
 hassert vals _ (AssertContains v b s) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
-        sstr = S.seriS s
+        sstr = smtenHF s
         positive = S.contains vstr sstr
         p = if b then positive else S.not positive
-    in assertS p
+    in assertHF p
 
 -- inlinevals varid varval vals
 --  Given the var id, it's symbolic value, and the rest of the values, return
@@ -79,34 +80,33 @@ inlinevals varid varval m =
   let lookupval (ValID x)
         | x == varid = return varval
         | otherwise = M.lookup x m >>= lookupval
-      lookupval (ValLit x) = return $ (genericLength x, S.toElemString (S.seriS x))
+      lookupval (ValLit x) = return $ (genericLength x, S.toElemString (smtenHF x))
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
             (lb, b') <- lookupval b
             return $ (la + lb, a' S.++ b')
       lookupval (ValSub src off len) = do
             (_, src') <- lookupval (ValID src)
-            return $ (len, S.substring src' (S.seriS off) (S.seriS len))
+            return $ (len, S.substring src' (smtenHF off) (smtenHF len))
       vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- M.toList m]
   in M.fromList $ (varid, varval) : vals
 
 -- A hampi query.
 -- Takes an argument of Element type to specify which type to use for the
 -- elemtn. The value of that argument is ignored.
-hquery :: (S.Element e, S.Eq e, S.Ord e) => e -> Hampi -> Query String
+hquery :: (S.Element e, S.Eq e, S.Ord e) => e -> Hampi -> SMT String
 hquery _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
 hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
-    svar <- freevar e wmin
-    let svals = inlinevals vid (wmin, svar) vals
-    r <- queryS $ do
+    r <- queryHF $ do
+        svar <- freevar e wmin
+        let svals = inlinevals vid (wmin, svar) vals
         mapM_ (hassert svals cfgs) asserts
-        query $ realizeS' svar
+        return svar
     case r of
-        Satisfiable v ->
-          let vstr = fromMaybe (error "vstr not concrete") (S.de_seriS (S.fromElemString v))
+        Just v ->
+          let vstr = fromMaybe (error "vstr not concrete") (de_smtenHF (S.fromElemString v))
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
-        Unsatisfiable -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
-        _ -> return "UNKNOWN"
+        Nothing -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
 
 data ElemType = ET_Integer | ET_Bit
     deriving (Eq, Show)
@@ -149,6 +149,6 @@ main = {-# SCC "Main" #-} do
     let hq = case elemtype of
                 ET_Bit -> hquery S.bitElem h
                 ET_Integer -> hquery S.integerElem h
-    r <- timeout (1000000*to) $ runQuery (RunOptions dbg s) hq
+    r <- timeout (1000000*to) $ runSMT (RunOptions dbg s) hq
     putStrLn (fromMaybe "TIMEOUT" r)
 
