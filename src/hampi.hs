@@ -94,10 +94,10 @@ inlinevals varid varval m =
 -- A hampi query.
 -- Takes an argument of SChar type to specify which type to use for the
 -- elemtn. The value of that argument is ignored.
-hquery :: (S.SChar c) => c -> Hampi -> SMT String
-hquery _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
-hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
-    r <- queryHF $ do
+hquery :: (S.SChar c) => RunOptions -> c -> Hampi -> IO String
+hquery _ _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
+hquery opts e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
+    r <- runSymbolicHF opts $ do
         svar <- freevar e wmin
         let svals = inlinevals vid (wmin, svar) vals
         mapM_ (hassert svals cfgs) asserts
@@ -106,7 +106,7 @@ hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         Just v ->
           let vstr = fromMaybe (error "vstr not concrete") (de_smtenHF (S.fromSCharString v))
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
-        Nothing -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
+        Nothing -> hquery opts e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
 
 data SCharType = SChar_Integer | SChar_Bit
     deriving (Eq, Show)
@@ -146,9 +146,10 @@ main = {-# SCC "Main" #-} do
             Left msg -> fail msg
             Right x -> return $ fst x
     s <- solver
-    let hq = case elemtype of
-                SChar_Bit -> hquery S.bitSChar h
-                SChar_Integer -> hquery S.integerSChar h
-    r <- timeout (1000000*to) $ runSMT (RunOptions dbg s) hq
+    let opts = RunOptions dbg s
+        hq = case elemtype of
+                SChar_Bit -> hquery opts S.bitSChar h
+                SChar_Integer -> hquery opts S.integerSChar h
+    r <- timeout (1000000*to) hq
     putStrLn (fromMaybe "TIMEOUT" r)
 
