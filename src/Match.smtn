@@ -10,7 +10,7 @@ import Data.Functor
 import Data.Maybe
 import Map
 
-import Elem
+import SChar
 import RegEx
 
 data SubMatch = SubMatch {
@@ -50,7 +50,7 @@ data MS = MS {
 
 type MatchM = State MS
 
-matchidM :: (Element e, Ord e) => SubMatch -> [e] -> MatchM Bool
+matchidM :: (SChar c) => SubMatch -> [c] -> MatchM Bool
 matchidM s@(SubMatch x n off) str = do
     ms <- get
     case mc_lookup s (ms_cache ms) of
@@ -61,13 +61,13 @@ matchidM s@(SubMatch x n off) str = do
             modify $ \ms -> ms { ms_cache = mc_insert s v (ms_cache ms) }
             return v
 
-matchM :: (Element e, Ord e) => RegEx -> Integer -> [e] -> MatchM Bool
+matchM :: (SChar c) => RegEx -> Integer -> [c] -> MatchM Bool
 matchM r off str =
   case r of
      Epsilon -> return True
      Empty -> return False
-     Atom c -> return (head str == toElem c)
-     Range a b -> return ((toElem a <= head str) && (head str <= toElem b))
+     Atom c -> return (head str == toSChar c)
+     Range a b -> return ((toSChar a <= head str) && (head str <= toSChar b))
      Concat _ a b -> do
        let i = rlength a
        a' <- matchM a off str
@@ -79,6 +79,6 @@ matchM r off str =
          return (a' || b')
      Variable n id -> matchidM (SubMatch id n off) str
 
-match :: (Element e, Ord e) => Map (RID, Integer) RegEx -> RegEx -> [e] -> Bool
+match :: (SChar c) => Map (RID, Integer) RegEx -> RegEx -> [c] -> Bool
 match regs x str = evalState (matchM x 0 str) $ MS regs mc_empty
 

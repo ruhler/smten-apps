@@ -4,7 +4,7 @@ module SHampi where
 import Debug.Trace
 
 import Data.List
-import Elem
+import SChar
 import RegEx
 import Match
 
@@ -12,10 +12,10 @@ import Match
 substring :: [a] -> Integer -> Integer -> [a]
 substring s o l = take l $ drop o s
 
-contains :: (Element e, Eq e) => [e] -> String -> Bool
-contains v s = isInfixOf (toElemString s) v
+contains :: (SChar c) => [c] -> String -> Bool
+contains v s = isInfixOf (toSCharString s) v
 
-assertIn :: (Element e, Ord e) => Map (RID, Integer) RegEx -> [e] -> Bool -> RegEx -> Bool
+assertIn :: (SChar c) => Map (RID, Integer) RegEx -> [c] -> Bool -> RegEx -> Bool
 assertIn regs vstr b reg =
  let p = match regs reg vstr
  in if b then p else not p

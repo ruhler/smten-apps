@@ -1,0 +1,55 @@
+
+-- | Implementations of Symbolic Characters.
+module SChar where
+
+import Data.Char
+import Data.Functor
+
+import Smten.SMT.Symbolic
+import Smten.Bit
+
+class (Ord a) => SChar a where
+    toSChar :: Char -> a
+    fromSChar :: a -> Char
+    freeSChar :: Symbolic a
+
+toSCharString :: (SChar c) => String -> [c]
+toSCharString = map toSChar
+
+fromSCharString :: (SChar c) => [c] -> String
+fromSCharString = map fromSChar
+
+-- Create a free element string of fixed length.
+freeSCharString :: (SChar c) => Integer -> Symbolic [c]
+freeSCharString x = sequence (replicate x freeSChar)
+
+instance SChar Integer where
+    toSChar = ord
+    fromSChar = chr
+    freeSChar = do
+        x <- free
+        assert (x >= 0 && x < 256)
+        return x
+
+-- A sample integer character
+integerSChar :: Integer
+integerSChar = 0
+
+data BitSChar = BitSChar (Bit #8)
+    deriving (Eq)
+
+instance Ord BitSChar where
+    (<) (BitSChar a) (BitSChar b) = a < b
+    (>) (BitSChar a) (BitSChar b) = a > b
+    (<=) (BitSChar a) (BitSChar b) = a <= b
+    (>=) (BitSChar a) (BitSChar b) = a >= b
+    compare (BitSChar a) (BitSChar b) = compare a b
+
+instance SChar BitSChar where
+    toSChar = BitSChar . __prim_fromInteger_Bit . ord
+    fromSChar (BitSChar x) = chr (__prim_toInteger_Bit x)
+    freeSChar = BitSChar <$> free
+
+bitSChar :: BitSChar
+bitSChar = BitSChar 0
+

@@ -45,11 +45,11 @@ derive_SmtenEH ''Map
 derive_SmtenHF ''Map ''S.Map
 
 -- Ignores value of the first argument. That's just to specify the type.
-freevar :: (S.Element e) => e -> Integer -> Symbolic (S.List__ e)
-freevar _ = symbolicHF . S.freeElemString . smtenHF
+freevar :: (S.SChar c) => c -> Integer -> Symbolic (S.List__ c)
+freevar _ = symbolicHF . S.freeSCharString . smtenHF
 
 -- Make a hampi assertion.
-hassert :: (S.Element e, S.Ord e, S.Eq e) => M.Map ID (Integer, S.List__ e) -> M.Map ID CFG -> Assertion -> Symbolic ()
+hassert :: (S.SChar c) => M.Map ID (Integer, S.List__ c) -> M.Map ID CFG -> Assertion -> Symbolic ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
@@ -75,12 +75,12 @@ hassert vals _ (AssertContains v b s) =
 --  Given the var id, it's symbolic value, and the rest of the values, return
 --  a mapping from id to totally inlined values along with the length of those
 --  totally inlined values (for bounds inference)
-inlinevals :: (S.Element e) => ID -> (Integer, S.List__ e) -> M.Map ID Val -> M.Map ID (Integer, S.List__ e)
+inlinevals :: (S.SChar c) => ID -> (Integer, S.List__ c) -> M.Map ID Val -> M.Map ID (Integer, S.List__ c)
 inlinevals varid varval m =
   let lookupval (ValID x)
         | x == varid = return varval
         | otherwise = M.lookup x m >>= lookupval
-      lookupval (ValLit x) = return $ (genericLength x, S.toElemString (smtenHF x))
+      lookupval (ValLit x) = return $ (genericLength x, S.toSCharString (smtenHF x))
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
             (lb, b') <- lookupval b
@@ -92,9 +92,9 @@ inlinevals varid varval m =
   in M.fromList $ (varid, varval) : vals
 
 -- A hampi query.
--- Takes an argument of Element type to specify which type to use for the
+-- Takes an argument of SChar type to specify which type to use for the
 -- elemtn. The value of that argument is ignored.
-hquery :: (S.Element e, S.Eq e, S.Ord e) => e -> Hampi -> SMT String
+hquery :: (S.SChar c) => c -> Hampi -> SMT String
 hquery _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
 hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
     r <- queryHF $ do
@@ -104,11 +104,11 @@ hquery e (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         return svar
     case r of
         Just v ->
-          let vstr = fromMaybe (error "vstr not concrete") (de_smtenHF (S.fromElemString v))
+          let vstr = fromMaybe (error "vstr not concrete") (de_smtenHF (S.fromSCharString v))
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
         Nothing -> hquery e (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
 
-data ElemType = ET_Integer | ET_Bit
+data SCharType = SChar_Integer | SChar_Bit
     deriving (Eq, Show)
 
 lookuparg :: String -> [String] -> Maybe String
@@ -136,10 +136,10 @@ main = {-# SCC "Main" #-} do
                  Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                  Nothing -> return yices2
     elemtype <- case lookuparg "-e" args of
-                 Just "Integer" -> return ET_Integer
-                 Just "Bit" -> return ET_Bit
+                 Just "Integer" -> return SChar_Integer
+                 Just "Bit" -> return SChar_Bit
                  Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
-                 Nothing -> return ET_Bit
+                 Nothing -> return SChar_Bit
 
     input <- readFile fin
     h <- {-# SCC "Parse" #-} case runStateT parseHampi input of
@@ -147,8 +147,8 @@ main = {-# SCC "Main" #-} do
             Right x -> return $ fst x
     s <- solver
     let hq = case elemtype of
-                ET_Bit -> hquery S.bitElem h
-                ET_Integer -> hquery S.integerElem h
+                SChar_Bit -> hquery S.bitSChar h
+                SChar_Integer -> hquery S.integerSChar h
     r <- timeout (1000000*to) $ runSMT (RunOptions dbg s) hq
     putStrLn (fromMaybe "TIMEOUT" r)
 
