@@ -22,14 +22,18 @@ import Smten.Ppr
 import Smten.HaskellF.HaskellF
 import Smten.HaskellF.SMT
 import Smten.HaskellF.TH
-import Smten.SMT.Symbolic
 import Smten.SMT.SMT
 import Smten.SMT.Yices.Yices2
 import Smten.SMT.Yices.Yices1
 import Smten.SMT.STP.STP
 import qualified Smten.HaskellF.Lib.Prelude as S
-import qualified SHampi as S
-import qualified SHampi
+import qualified Smten.Lib.Map as S
+import qualified Smten.Lib.Map
+import qualified Smten.Lib.RegEx as S
+import qualified Smten.Lib.RegEx
+import qualified Smten.Lib.SHampi as S
+import qualified Smten.Lib.SChar as S
+import qualified Smten.Lib.Prelude as S
 
 import RegEx
 import CFG
@@ -37,11 +41,11 @@ import Hampi
 import Grammar
 import Fix
 
-derive_SmtenT ''RegEx
-derive_SmtenEH ''RegEx
+derive_SmtenT "RegEx" ''RegEx
+derive_SmtenEH "RegEx" ''RegEx
 derive_SmtenHF ''RegEx ''S.RegEx
-derive_SmtenT ''Map
-derive_SmtenEH ''Map
+derive_SmtenT "Map" ''Map
+derive_SmtenEH "Map" ''Map
 derive_SmtenHF ''Map ''S.Map
 
 -- Ignores value of the first argument. That's just to specify the type.

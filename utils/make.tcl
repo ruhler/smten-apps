@@ -14,9 +14,8 @@ hrun mkdir -p build
 hrun happy src/Grammar.y -o build/Grammar.hs
 run smten --haskellf \
         --include src \
-        --no-main \
-        --mod-name SHampi \
-        -f src/SHampi.smtn > build/SHampi.hs
+        --hsdir build \
+        -f src/SHampi.smtn
 hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs
 
 # -fprof-auto-top

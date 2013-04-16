@@ -4,6 +4,8 @@ module SHampi where
 import Debug.Trace
 
 import Data.List
+import Map
+
 import SChar
 import RegEx
 import Match
