@@ -9,8 +9,7 @@ import Control.Monad.State
 
 import Debug.Trace
 
-import Map
-import qualified Data.Map as M
+import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Data.Functor ((<$>))
 import Data.List (genericLength)
@@ -27,8 +26,8 @@ import Smten.SMT.Yices.Yices2
 import Smten.SMT.Yices.Yices1
 import Smten.SMT.STP.STP
 import qualified Smten.HaskellF.Lib.Prelude as S
-import qualified Smten.Lib.Map as S
-import qualified Smten.Lib.Map
+import qualified Smten.Lib.Data.Map as S
+import qualified Smten.Lib.Data.Map
 import qualified Smten.Lib.RegEx as S
 import qualified Smten.Lib.RegEx
 import qualified Smten.Lib.SHampi as S
@@ -44,18 +43,15 @@ import Fix
 derive_SmtenT "RegEx" ''RegEx
 derive_SmtenEH "RegEx" ''RegEx
 derive_SmtenHF ''RegEx ''S.RegEx
-derive_SmtenT "Map" ''Map
-derive_SmtenEH "Map" ''Map
-derive_SmtenHF ''Map ''S.Map
 
 -- Ignores value of the first argument. That's just to specify the type.
 freevar :: (S.SChar c) => c -> Integer -> Symbolic (S.List__ c)
 freevar _ = symbolicHF . S.freeSCharString . smtenHF
 
 -- Make a hampi assertion.
-hassert :: (S.SChar c) => M.Map ID (Integer, S.List__ c) -> M.Map ID CFG -> Assertion -> Symbolic ()
+hassert :: (S.SChar c) => Map.Map ID (Integer, S.List__ c) -> Map.Map ID CFG -> Assertion -> Symbolic ()
 hassert vals cfgs (AssertIn v b r) =
-    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
+    let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
         reg' = {-# SCC "SmtenHF" #-} smtenHF reg
         regs' = {-# SCC "SmtenHF" #-} smtenHF regs
@@ -63,13 +59,13 @@ hassert vals cfgs (AssertIn v b r) =
         p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
     in assertHF p
 hassert vals _ (AssertEquals v b x) =
-    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
-        xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ M.lookup x vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
+        xstr = snd $ fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
         positive = vstr S.== xstr
         p = if b then positive else S.not positive
     in assertHF p
 hassert vals _ (AssertContains v b s) =
-    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ M.lookup v vals
+    let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         sstr = smtenHF s
         positive = S.contains vstr sstr
         p = if b then positive else S.not positive
@@ -79,11 +75,11 @@ hassert vals _ (AssertContains v b s) =
 --  Given the var id, it's symbolic value, and the rest of the values, return
 --  a mapping from id to totally inlined values along with the length of those
 --  totally inlined values (for bounds inference)
-inlinevals :: (S.SChar c) => ID -> (Integer, S.List__ c) -> M.Map ID Val -> M.Map ID (Integer, S.List__ c)
+inlinevals :: (S.SChar c) => ID -> (Integer, S.List__ c) -> Map.Map ID Val -> Map.Map ID (Integer, S.List__ c)
 inlinevals varid varval m =
   let lookupval (ValID x)
         | x == varid = return varval
-        | otherwise = M.lookup x m >>= lookupval
+        | otherwise = Map.lookup x m >>= lookupval
       lookupval (ValLit x) = return $ (genericLength x, S.toSCharString (smtenHF x))
       lookupval (ValCat a b) = do
             (la, a') <- lookupval a
@@ -92,8 +88,8 @@ inlinevals varid varval m =
       lookupval (ValSub src off len) = do
             (_, src') <- lookupval (ValID src)
             return $ (len, S.substring src' (smtenHF off) (smtenHF len))
-      vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- M.toList m]
-  in M.fromList $ (varid, varval) : vals
+      vals = [(id, fromMaybe (error $ show v ++ " not found") $ lookupval v) | (id, v) <- Map.toList m]
+  in Map.fromList $ (varid, varval) : vals
 
 -- A hampi query.
 -- Takes an argument of SChar type to specify which type to use for the

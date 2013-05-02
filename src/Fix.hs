@@ -8,7 +8,6 @@ import Control.Monad.State
 import Data.Functor
 import Data.Maybe
 import qualified Data.Map as Map
-import qualified Map as SMap
 
 import RegEx
 import CFG
@@ -83,8 +82,8 @@ fixM r n =
           _ -> return $ Variable n rid
      FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
 
-fixN :: Map.Map ID CFG -> ID -> Integer -> (SMap.Map (RID, Integer) RegEx, RegEx)
+fixN :: Map.Map ID CFG -> ID -> Integer -> ([((RID, Integer), RegEx)], RegEx)
 fixN regs x n =
   let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
-  in (SMap.map_fromList . filter ((/= Empty) . snd) . Map.toList $ fs_cache s, r)
+  in (filter ((/=) Empty . snd) $ Map.toList (fs_cache s), r)
 
