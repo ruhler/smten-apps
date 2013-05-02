@@ -1,0 +1,10 @@
+*.prof
+*.aux
+*.hp
+*.pdf
+*.ps
+build/
+data/
+hampi/
+thoughts
+*.gp

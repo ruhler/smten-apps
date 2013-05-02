@@ -23,63 +23,35 @@ data SubMatch = SubMatch {
 instance Show SubMatch where
     show (SubMatch x n o) = show x ++ "." ++ show n ++ "." ++ show o
 
--- RID -> Length -> Offset -> Match Result
-type MatchCache = Map.Map RID (Map.Map Integer (Map.Map Integer Bool))
+-- ((RID, Length), Offset) -> Match Result
+type MatchCache = Array ((RID, Integer), Integer) Bool
 
-mc_empty :: MatchCache
-mc_empty = Map.empty
+matchidM :: MatchCache -> SubMatch -> Bool
+matchidM m s@(SubMatch x n off) = m ! ((x, n), off)
 
-mc_lookup :: SubMatch -> MatchCache -> Maybe Bool
-mc_lookup (SubMatch rid len off) mrid = do
-    mlen <- Map.lookup rid mrid
-    moff <- Map.lookup len mlen
-    Map.lookup off moff
-
-mc_insert :: SubMatch -> Bool -> MatchCache -> MatchCache
-mc_insert (SubMatch rid len off) v mrid =
-  let mlen = fromMaybe Map.empty (Map.lookup rid mrid)
-      moff = fromMaybe Map.empty (Map.lookup len mlen)
-      moff' = Map.insert off v moff
-      mlen' = Map.insert len moff' mlen
-  in Map.insert rid mlen' mrid
-    
-
-data MS = MS {
-    ms_regs :: Array (RID, Integer) RegEx,
-    ms_cache :: MatchCache
-}
-
-type MatchM = State MS
-
-matchidM :: (SChar c) => SubMatch -> [c] -> MatchM Bool
-matchidM s@(SubMatch x n off) str = do
-    ms <- get
-    case mc_lookup s (ms_cache ms) of
-        Just v -> return v
-        Nothing -> do
-            let r = (ms_regs ms) ! (x, n)
-            v <- matchM r off str
-            modify $ \ms -> ms { ms_cache = mc_insert s v (ms_cache ms) }
-            return v
-
-matchM :: (SChar c) => RegEx -> Integer -> [c] -> MatchM Bool
-matchM r off str =
+matchM :: (SChar c) => MatchCache -> RegEx -> Integer -> [c] -> Bool
+matchM mc r off str =
   case r of
-     Epsilon -> return True
-     Empty -> return False
-     Atom c -> return (head str == toSChar c)
-     Range a b -> return ((toSChar a <= head str) && (head str <= toSChar b))
-     Concat _ a b -> do
+     Epsilon -> True
+     Empty -> False
+     Atom c -> head str == toSChar c
+     Range a b -> (toSChar a <= head str) && (head str <= toSChar b)
+     Concat _ a b ->
        let i = rlength a
-       a' <- matchM a off str
-       b' <- matchM b (off+i) (drop i str)
-       return (a' && b')
-     Or _ a b -> do
-         a' <- matchM a off str
-         b' <- matchM b off str
-         return (a' || b')
-     Variable n id -> matchidM (SubMatch id n off) str
+           a' = matchM mc a off str
+           b' = matchM mc b (off+i) (drop i str)
+       in a' && b'
+     Or _ a b ->
+       let a' = matchM mc a off str
+           b' = matchM mc b off str
+       in a' || b'
+     Variable n id -> matchidM mc (SubMatch id n off)
 
 match :: (SChar c) => Array (RID, Integer) RegEx -> RegEx -> [c] -> Bool
-match regs x str = evalState (matchM x 0 str) $ MS regs mc_empty
+match regs x str =
+  let (regl, regh) = bounds regs
+      bnds = ((regl, 0), (regh, (length str)))
+      mc = array bnds [((rid,off), matchM mc (regs ! rid) off (drop off str))
+                            | (rid, off) <- range bnds]
+  in matchM mc x 0 str
 
