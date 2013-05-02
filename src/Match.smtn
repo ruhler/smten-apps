@@ -6,6 +6,7 @@ import Debug.Trace
 import Control.Monad.State
 import Control.Monad.State.Class
 
+import Data.Array
 import Data.Functor
 import Data.Maybe
 import qualified Data.Map as Map
@@ -44,7 +45,7 @@ mc_insert (SubMatch rid len off) v mrid =
     
 
 data MS = MS {
-    ms_regs :: Map.Map (RID, Integer) RegEx,
+    ms_regs :: Array (RID, Integer) RegEx,
     ms_cache :: MatchCache
 }
 
@@ -56,7 +57,7 @@ matchidM s@(SubMatch x n off) str = do
     case mc_lookup s (ms_cache ms) of
         Just v -> return v
         Nothing -> do
-            let r = fromMaybe Empty $ Map.lookup (x, n) (ms_regs ms)
+            let r = (ms_regs ms) ! (x, n)
             v <- matchM r off str
             modify $ \ms -> ms { ms_cache = mc_insert s v (ms_cache ms) }
             return v
@@ -79,6 +80,6 @@ matchM r off str =
          return (a' || b')
      Variable n id -> matchidM (SubMatch id n off) str
 
-match :: (SChar c) => Map.Map (RID, Integer) RegEx -> RegEx -> [c] -> Bool
+match :: (SChar c) => Array (RID, Integer) RegEx -> RegEx -> [c] -> Bool
 match regs x str = evalState (matchM x 0 str) $ MS regs mc_empty
 

@@ -3,6 +3,7 @@ module SHampi where
 
 import Debug.Trace
 
+import Data.Array
 import Data.List
 import qualified Data.Map as Map
 
@@ -19,6 +20,6 @@ contains v s = isInfixOf (toSCharString s) v
 
 assertIn :: (SChar c) => ((RID, Integer), (RID, Integer)) -> [((RID, Integer), RegEx)] -> [c] -> Bool -> RegEx -> Bool
 assertIn regsbnd regs vstr b reg =
- let p = match (Map.fromList regs) reg vstr
+ let p = match (array regsbnd regs) reg vstr
  in if b then p else not p
 
