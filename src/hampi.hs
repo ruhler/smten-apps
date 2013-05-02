@@ -52,11 +52,12 @@ freevar _ = symbolicHF . S.freeSCharString . smtenHF
 hassert :: (S.SChar c) => Map.Map ID (Integer, S.List__ c) -> Map.Map ID CFG -> Assertion -> Symbolic ()
 hassert vals cfgs (AssertIn v b r) =
     let (vlen, vstr) = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        (regs, reg) = {-# SCC "FixN" #-} fixN cfgs r vlen
-        reg' = {-# SCC "SmtenHF" #-} smtenHF reg
-        regs' = {-# SCC "SmtenHF" #-} smtenHF regs
+        fr = {-# SCC "FixN" #-} fixN cfgs r vlen
+        bnd = {-# SCC "SmtenHF" #-} smtenHF (fr_regbound fr)
+        reg = {-# SCC "SmtenHF" #-} smtenHF (fr_top fr)
+        regs = {-# SCC "SmtenHF" #-} smtenHF (fr_regs fr)
         b' = {-# SCC "SmtenHF" #-} smtenHF b
-        p = {-# SCC "AssertIn" #-} S.assertIn regs' vstr b' reg'
+        p = {-# SCC "AssertIn" #-} S.assertIn bnd regs vstr b' reg
     in assertHF p
 hassert vals _ (AssertEquals v b x) =
     let vstr = snd $ fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals

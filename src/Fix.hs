@@ -1,5 +1,5 @@
 
-module Fix (fixN) where
+module Fix (FixResult(..), fixN) where
 
 import Debug.Trace
 
@@ -82,8 +82,18 @@ fixM r n =
           _ -> return $ Variable n rid
      FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
 
-fixN :: Map.Map ID CFG -> ID -> Integer -> ([((RID, Integer), RegEx)], RegEx)
+data FixResult = FixResult {
+    fr_regbound :: ((RID, Integer), (RID, Integer)),
+    fr_regs :: [((RID, Integer), RegEx)],
+    fr_top :: RegEx
+}
+
+fixN :: Map.Map ID CFG -> ID -> Integer -> FixResult
 fixN regs x n =
   let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
-  in (filter ((/=) Empty . snd) $ Map.toList (fs_cache s), r)
+  in FixResult {    
+        fr_regbound = ((0, 0), ((fs_nrid s)-1, n)),
+        fr_regs = Map.toList (fs_cache s),
+        fr_top = r
+      }
 
