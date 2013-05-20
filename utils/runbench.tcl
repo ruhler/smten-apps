@@ -19,11 +19,11 @@ exec ./utils/rhampi_s &
 exec sleep 1
 foreach x [glob "tests/easy/*.hmp" "tests/wsu/*.hmp" "tests/hard/*.hmp"] {
     set hampi [mintime "exec ./utils/rhampi_c $x $::timeout"]
-    set y2int [mintime "exec ./build/shampi $x $::timeout -s yices2 -e Integer"]
-    set y2bit [mintime "exec ./build/shampi $x $::timeout -s yices2 -e Bit"]
-    set y1int [mintime "exec ./build/shampi $x $::timeout -s yices1 -e Integer"]
-    set y1bit [mintime "exec ./build/shampi $x $::timeout -s yices1 -e Bit"]
-    set stp [mintime "exec ./build/shampi $x $::timeout -s stp -e Bit"]
+    set y2int [mintime "exec ./build/shampi $x $::timeout -s yices2 -e Integer +RTS -K1g"]
+    set y2bit [mintime "exec ./build/shampi $x $::timeout -s yices2 -e Bit +RTS -K1g"]
+    set y1int [mintime "exec ./build/shampi $x $::timeout -s yices1 -e Integer +RTS -K1g"]
+    set y1bit [mintime "exec ./build/shampi $x $::timeout -s yices1 -e Bit +RTS -K1g"]
+    set stp [mintime "exec ./build/shampi $x $::timeout -s stp -e Bit +RTS -K1g"]
     puts "$x $hampi $y2int $y2bit $y1int $y1bit $stp"
 }
 exec ./utils/rhampi_shutdown

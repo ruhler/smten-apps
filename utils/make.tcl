@@ -16,10 +16,10 @@ run smten --haskellf \
         --include src \
         --hsdir build \
         -f src/SHampi.smtn
-hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs
+hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs -rtsopts
 
 # -fprof-auto-top
-hrun ghc -o build/shampi_prof -hidir build/ -odir build/ -isrc -ibuild -prof -rtsopts -osuf o_prof src/hampi.hs
+hrun ghc -o build/shampi_prof -O2 -hidir build/ -odir build/ -isrc -ibuild -prof -rtsopts -osuf o_prof src/hampi.hs
 
 run tclsh utils/runtests.tcl ./build/shampi > build/tests.shampi
 hrun diff utils/tests.rhampi build/tests.shampi
