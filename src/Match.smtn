@@ -51,7 +51,7 @@ match :: (SChar c) => Array (RID, Integer) RegEx -> RegEx -> [c] -> Bool
 match regs x str =
   let (regl, regh) = bounds regs
       bnds = ((regl, 0), (regh, (length str)))
-      mc = array bnds [((rid,off), matchM mc (regs ! rid) off (drop off str))
-                            | (rid, off) <- range bnds]
+      elems = map (\(rid, off) -> matchM mc (regs ! rid) off (drop off str)) (range bnds)
+      mc = listArray bnds elems
   in matchM mc x 0 str
 
