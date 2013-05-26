@@ -1,10 +1,9 @@
 
-module Match where
+module Match (match) where
 
 import Debug.Trace
 
 import Control.Monad.State
-import Control.Monad.State.Class
 
 import Data.Array
 import Data.Functor

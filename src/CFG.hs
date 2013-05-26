@@ -1,9 +1,5 @@
 
-module CFG (
-    ID, CFG(..),
-    charC, concatC, concatsC, orsC, orC, epsilonC, varC, fixC,
-    stringC, starC, optionC, plusC, rangeC, emptyC,
- )  where
+module CFG where
 
 import Data.Char
 

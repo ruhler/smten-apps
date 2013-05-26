@@ -15,11 +15,9 @@ hrun happy src/Grammar.y -o build/Grammar.hs
 run smten --haskellf \
         --include src \
         --hsdir build \
-        -f src/SHampi.smtn
-hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make src/hampi.hs -rtsopts
-
-# -fprof-auto-top
-hrun ghc -o build/shampi_prof -hidir build/ -odir build/ -isrc -ibuild -prof -rtsopts -osuf o_prof src/hampi.hs -fprof-auto-top
+        -f src/shampi.smtn
+hrun ghc -o build/shampi -O0 -hidir build/ -odir build/ -isrc -ibuild --make build/Smten/Lib/Main.hs -main-is Smten.Lib.Main.main__ -rtsopts
 
 run tclsh utils/runtests.tcl ./build/shampi > build/tests.shampi
 hrun diff utils/tests.rhampi build/tests.shampi
+

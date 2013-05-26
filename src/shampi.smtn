@@ -1,0 +1,63 @@
+
+import Data.Maybe(fromMaybe)
+import Smten.SMT.Symbolic
+
+import Imports
+import Hampi
+import Query
+import SChar
+
+data SCharType = SChar_Integer | SChar_Bit
+    deriving (Eq, Show)
+
+lookuparg :: String -> [String] -> Maybe String
+lookuparg k m = 
+  case dropWhile ((/=) k) m of
+     (_:x:_) -> Just x
+     _ -> Nothing
+
+usage :: String
+usage = "Usage: shampi <filename> [timeout in secs] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit]"
+
+main :: IO ()
+main = do
+    args <- getArgs
+
+    (fin, to) <- case take 2 args of
+             ("--help":_) -> putStrLn usage >> exitSuccess
+             (f:i:_) | head i /= '-' -> return (f, read i)
+             (f:_) -> return (f, negate 1)
+             _ -> fail usage
+
+    basesolver <- case lookuparg "-s" args of
+                     Just "yices1" -> return Yices1
+                     Just "yices2" -> return Yices2
+                     Just "stp" -> return STP
+                     Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
+                     Nothing -> return Yices2
+
+    let solver = case lookuparg "-d" args of
+                    Just fn -> Debug fn basesolver
+                    Nothing -> basesolver
+    
+
+    elemtype <- case lookuparg "-e" args of
+                 Just "Integer" -> return SChar_Integer
+                 Just "Bit" -> return SChar_Bit
+                 Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
+                 Nothing -> return SChar_Bit
+
+    input <- readFile fin
+
+    h <- case parseHampi input of
+            Left msg -> fail msg
+            Right x -> return x
+
+    let hq = case elemtype of
+                SChar_Bit -> hquery bitSChar solver h
+                SChar_Integer -> hquery integerSChar solver h
+    r <- timeout (1000000*to) hq
+    putStrLn (fromMaybe "TIMEOUT" r)
+
+
+

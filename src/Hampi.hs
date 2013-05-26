@@ -1,14 +1,6 @@
 
-module Hampi (
-    ID, Assertion(..), Var(..), Val(..), Hampi(..),
-    stringV, idV, concatV, subV,
-    ) where
+module Hampi where
 
-import Debug.Trace
-import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
-
-import RegEx
 import CFG
 
 data Assertion = AssertIn ID Bool ID
@@ -45,8 +37,8 @@ concatV = foldr1 ValCat
 
 data Hampi = Hampi {
     h_var :: Var,
-    h_vals :: Map.Map ID Val,
-    h_cfgs :: Map.Map ID CFG,
+    h_vals :: [(ID, Val)],
+    h_cfgs :: [(ID, CFG)],
     h_asserts :: [Assertion]
 }
 

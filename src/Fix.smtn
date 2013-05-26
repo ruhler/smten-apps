@@ -1,5 +1,5 @@
 
-module Fix (FixResult(..), fixN) where
+module Fix where
 
 import Debug.Trace
 

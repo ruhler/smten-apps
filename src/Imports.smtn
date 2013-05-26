@@ -1,0 +1,23 @@
+
+module Imports (getArgs, exitSuccess, readFile, parseHampi, timeout, read) where
+
+import Hampi
+
+foreign import hs "Imports.getArgsP"
+    getArgs :: IO [String]
+
+foreign import hs "Imports.exitSuccessP"
+    exitSuccess :: IO a
+
+foreign import hs "Imports.readFileP"
+    readFile :: FilePath -> IO String
+
+foreign import hs "Imports.timeoutP"
+    timeout :: Integer -> IO a -> IO (Maybe a)
+    
+foreign import hs "Imports.parseHampiP"
+    parseHampi :: String -> Either String Hampi
+
+foreign import hs "Imports.readP"
+    read :: String -> Integer
+
