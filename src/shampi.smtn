@@ -1,5 +1,6 @@
 
 import Data.Maybe(fromMaybe)
+import Data.Functor((<$>))
 import Smten.SMT.Symbolic
 
 import Imports
@@ -16,19 +17,24 @@ lookuparg k m =
      (_:x:_) -> Just x
      _ -> Nothing
 
+getfiles :: [String] -> [String]
+getfiles [] = []
+getfiles (x:xs) 
+  | head x == '-' = getfiles (drop 1 xs)
+  | otherwise = x:xs
+
 usage :: String
-usage = "Usage: shampi <filename> [timeout in secs] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit]"
+usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit] [FILE]"
 
 main :: IO ()
 main = do
     args <- getArgs
 
-    (fin, to) <- case take 2 args of
-             ("--help":_) -> putStrLn usage >> exitSuccess
-             (f:i:_) | head i /= '-' -> return (f, read i)
-             (f:_) -> return (f, negate 1)
-             _ -> fail usage
+    if "--help" `elem` args
+        then putStrLn usage >> exitSuccess
+        else return ()
 
+    let to = fromMaybe (negate 1) (read <$> lookuparg "-t" args)
     basesolver <- case lookuparg "-s" args of
                      Just "yices1" -> return Yices1
                      Just "yices2" -> return Yices2
@@ -47,17 +53,19 @@ main = do
                  Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
                  Nothing -> return SChar_Bit
 
-    input <- readFile fin
+    let fins = getfiles args
+        runf fin = do
+            putStr (fin ++ "...")
+            input <- readFile fin
 
-    h <- case parseHampi input of
-            Left msg -> fail msg
-            Right x -> return x
+            h <- case parseHampi input of
+                    Left msg -> fail msg
+                    Right x -> return x
 
-    let hq = case elemtype of
-                SChar_Bit -> hquery bitSChar solver h
-                SChar_Integer -> hquery integerSChar solver h
-    r <- timeout (1000000*to) hq
-    putStrLn (fromMaybe "TIMEOUT" r)
-
-
+            let hq = case elemtype of
+                        SChar_Bit -> hquery bitSChar solver h
+                        SChar_Integer -> hquery integerSChar solver h
+            r <- timeout (1000000*to) hq
+            putStrLn (fromMaybe "TIMEOUT" r)
+    mapM_ runf fins
 
