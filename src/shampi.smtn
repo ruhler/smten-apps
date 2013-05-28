@@ -55,7 +55,7 @@ main = do
 
     let fins = getfiles args
         runf fin = do
-            putStr (fin ++ "...")
+            putStr (fin ++ ": ")
             input <- readFile fin
 
             h <- case parseHampi input of

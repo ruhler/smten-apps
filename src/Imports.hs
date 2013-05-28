@@ -31,13 +31,13 @@ derive_SmtenT "Hampi" ''Hampi
 derive_SmtenEH "Hampi" ''Hampi
 
 getArgsP :: Prim
-getArgsP = nullaryP "Imports.getArgs" getArgs
+getArgsP = {-# SCC "getArgsP" #-} nullaryP "Imports.getArgs" getArgs
 
 exitSuccessP :: Prim
-exitSuccessP = nullaryP "Imports.exitSuccess" (exitSuccess :: IO ExpH)
+exitSuccessP = {-# SCC "exitSuccessP" #-} nullaryP "Imports.exitSuccess" (exitSuccess :: IO ExpH)
 
 readFileP :: Prim
-readFileP = unaryP "Imports.readFile" readFile
+readFileP = unaryP "Imports.readFile" ({-# SCC "readFileP" #-} readFile)
 
 timeoutP :: Prim
 timeoutP =
@@ -46,13 +46,13 @@ timeoutP =
   in binaryP "Imports.timeout" f
     
 parseHampiP :: Prim
-parseHampiP =
+parseHampiP = 
   let f :: String -> Either String Hampi
-      f s = case runStateT parseHampi s of
+      f s = {-# SCC "parseHampiP" #-} case runStateT parseHampi s of
                 Left msg -> Left msg
                 Right v -> Right (fst v)
   in unaryP "Imports.parseHampi" f
 
 readP :: Prim
-readP = unaryP "Imports.unary" (read :: String -> Integer)
+readP = {-# SCC "readP" #-} unaryP "Imports.unary" (read :: String -> Integer)
 
