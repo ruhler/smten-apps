@@ -119,18 +119,20 @@ lookuparg k m =
      (_:x:_) -> Just x
      _ -> Nothing
 
+getfiles :: [String] -> [String]
+getfiles [] = []
+getfiles (x:xs)
+  | head x == '-' = getfiles (tail xs)
+  | otherwise = (x:xs)
+
 usage :: String
-usage = "Usage: Hampi <filename> [timeout in secs] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit]"
+usage = "Usage: Hampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit] FILEs"
 
 main :: IO ()
 main = {-# SCC "Main" #-} do
     args <- getArgs
-    (fin, to) <- case take 2 args of
-             ("--help":_) -> putStrLn usage >> exitSuccess
-             (f:i:_) | head i /= '-' -> return (f, read i)
-             (f:_) -> return (f, -1)
-             _ -> fail usage
-    let dbg = lookuparg "-d" args
+
+    let to = fromMaybe (-1) $ read <$> lookuparg "-t" args
     solver <- case lookuparg "-s" args of
                  Just "yices1" -> return yices1
                  Just "yices2" -> return yices2
@@ -143,14 +145,19 @@ main = {-# SCC "Main" #-} do
                  Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
                  Nothing -> return SChar_Bit
 
-    input <- readFile fin
-    h <- {-# SCC "Parse" #-} case runStateT parseHampi input of
-            Left msg -> fail msg
-            Right x -> return $ fst x
-    s <- solver
-    let hq = case elemtype of
-                SChar_Bit -> hquery s S.bitSChar h
-                SChar_Integer -> hquery s S.integerSChar h
-    r <- timeout (1000000*to) hq
-    putStrLn (fromMaybe "TIMEOUT" r)
+    let fins = getfiles args
+
+    let hrun fin = do
+        putStr (fin ++ ": ")
+        input <- readFile fin
+        h <- {-# SCC "Parse" #-} case runStateT parseHampi input of
+                Left msg -> fail msg
+                Right x -> return $ fst x
+        s <- solver
+        let hq = case elemtype of
+                    SChar_Bit -> hquery s S.bitSChar h
+                    SChar_Integer -> hquery s S.integerSChar h
+        r <- timeout (1000000*to) hq
+        putStrLn (fromMaybe "TIMEOUT" r)
+    mapM_ hrun fins
 
