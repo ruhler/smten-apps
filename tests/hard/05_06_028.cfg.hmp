@@ -1,7 +1,0 @@
-var hampiStringVar : 20;
-cfg F :=  "t" "(" F "," F "," F ")" | E "&" E | M | "i" ;
-cfg M :=  E "=" E ;
-cfg E :=  "t" "(" E "," E "," E ")" | E "+" E | "i" ;
-reg limit := fix(F, 20);
-assert hampiStringVar in limit;
-
