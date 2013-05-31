@@ -1,5 +1,5 @@
 
-set ::runspertest 10
+set ::runspertest 1
 
 proc mintime {script} {
     set sumtime 0

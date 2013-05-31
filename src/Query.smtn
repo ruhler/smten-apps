@@ -56,18 +56,18 @@ assertIn fr vstr =
  in match (array regsbnd regs) reg vstr
 
 -- Make a hampi assertion.
-hassert :: (SChar c) => Map.Map ID [c] -> Map.Map ID CFG -> Assertion -> Symbolic ()
-hassert vals cfgs (AssertIn v b r) =
+hassert :: (SChar c) => Map.Map ID [c] -> Assertion -> Symbolic ()
+hassert vals (AssertIn v b f) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        fr = fixN cfgs r (length vstr)
+        fr = f (length vstr)
     in assert $ xor b (assertIn fr vstr)
 
-hassert vals _ (AssertEquals v b x) =
+hassert vals (AssertEquals v b x) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
     in assert $ xor b (vstr == xstr)
 
-hassert vals _ (AssertContains v b s) =
+hassert vals (AssertContains v b s) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
     in assert $ xor b (contains vstr s)
 
@@ -75,15 +75,15 @@ hassert vals _ (AssertContains v b s) =
 -- Takes an argument of SChar type to specify which type to use for the
 -- element. The value of that argument is ignored.
 hquery :: (SChar c) => c -> Solver -> Hampi -> IO String
-hquery _ _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
-hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
+hquery _ _ (Hampi (Var vid wmin wmax) _ _) | wmax < wmin = return "UNSAT"
+hquery e s (Hampi (Var vid wmin wmax) vals asserts) = do
     r <- runSymbolic s $ do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
-        mapM_ (hassert svals (Map.fromList cfgs)) asserts
+        mapM_ (hassert svals) asserts
         return svar
     case r of
         Just v ->
           let vstr = fromSCharString v
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
-        Nothing -> hquery e s (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)
+        Nothing -> hquery e s (Hampi (Var vid (wmin + 1) wmax) vals asserts)

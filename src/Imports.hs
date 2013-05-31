@@ -15,12 +15,16 @@ import Smten.Type
 import Smten.ExpH
 import Smten.Prim
 
+import Fix
+import RegEx
 import CFG
 import Hampi
 import Grammar
 
-derive_SmtenT "CFG" ''CFG
-derive_SmtenEH "CFG" ''CFG
+derive_SmtenT "Fix" ''FixResult
+derive_SmtenEH "Fix" ''FixResult
+derive_SmtenT "RegEx" ''RegEx
+derive_SmtenEH "RegEx" ''RegEx
 derive_SmtenT "Hampi" ''Val
 derive_SmtenEH "Hampi" ''Val
 derive_SmtenT "Hampi" ''Assertion

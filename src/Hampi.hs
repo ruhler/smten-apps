@@ -2,8 +2,9 @@
 module Hampi where
 
 import CFG
+import Fix
 
-data Assertion = AssertIn ID Bool ID
+data Assertion = AssertIn ID Bool (Integer -> FixResult)
                | AssertContains ID Bool String
                | AssertEquals ID Bool ID
 
@@ -38,7 +39,6 @@ concatV = foldr1 ValCat
 data Hampi = Hampi {
     h_var :: Var,
     h_vals :: [(ID, Val)],
-    h_cfgs :: [(ID, CFG)],
     h_asserts :: [Assertion]
 }
 
