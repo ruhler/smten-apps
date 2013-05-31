@@ -42,9 +42,13 @@ main = do
                      Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                      Nothing -> return Yices2
 
-    let solver = case lookuparg "-d" args of
-                    Just fn -> Debug fn basesolver
-                    Nothing -> basesolver
+    let dbgsolver = case lookuparg "-d" args of
+                        Just fn -> Debug fn basesolver
+                        Nothing -> basesolver
+
+    let solver = case lookuparg "-dl" args of
+                        Just fn -> DebugLL fn dbgsolver
+                        Nothing -> dbgsolver
     
 
     elemtype <- case lookuparg "-e" args of
