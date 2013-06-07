@@ -5,7 +5,7 @@ import Data.Array
 import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as Map
-import Smten.SMT.Symbolic
+import Smten.Symbolic
 
 import SChar
 import Hampi
@@ -77,7 +77,7 @@ hassert vals (AssertContains v b s) =
 hquery :: (SChar c) => c -> Solver -> Hampi -> IO String
 hquery _ _ (Hampi (Var vid wmin wmax) _ _) | wmax < wmin = return "UNSAT"
 hquery e s (Hampi (Var vid wmin wmax) vals asserts) = do
-    r <- runSymbolic s $ do
+    r <- run_symbolic s $ do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
         mapM_ (hassert svals) asserts

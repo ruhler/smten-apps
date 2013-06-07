@@ -82,6 +82,7 @@ fixM r n =
           _ -> return $ Variable n rid
      FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
 
+{-# AsInHaskell Fix FixResult #-}
 data FixResult = FixResult {
     fr_regbound :: ((RID, Integer), (RID, Integer)),
     fr_regs :: [((RID, Integer), RegEx)],

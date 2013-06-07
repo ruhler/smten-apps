@@ -1,7 +1,7 @@
 
 import Data.Maybe(fromMaybe)
 import Data.Functor((<$>))
-import Smten.SMT.Symbolic
+import Smten.Symbolic
 
 import Imports
 import Hampi

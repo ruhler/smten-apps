@@ -1,7 +1,7 @@
 
 module CFG where
 
-import Data.Char
+import Data.Char(ord)
 
 type ID = String
 
@@ -16,7 +16,6 @@ data CFG =
    | VariableC ID
    | FixC ID Integer
    deriving (Eq, Show)
-
 
 charC :: Char -> CFG
 charC = AtomC
