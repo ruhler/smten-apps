@@ -1,5 +1,5 @@
 
-module Imports (getArgs, exitSuccess, readFile, parseHampi, timeout, read) where
+module Imports (getArgs, exitSuccess, readFile, parseHampi, read) where
 
 import Hampi
 
@@ -7,13 +7,13 @@ foreign import hs "Imports.getArgs"
     getArgs :: IO [String]
 
 foreign import hs "Imports.exitSuccess"
-    exitSuccess :: IO a
+    exitSuccess :: IO ()
 
 foreign import hs "Imports.readFile"
     readFile :: FilePath -> IO String
 
-foreign import hs "Imports.timeout"
-    timeout :: Integer -> IO a -> IO (Maybe a)
+--foreign import hs "Imports.timeout"
+--    timeout :: Integer -> IO a -> IO (Maybe a)
     
 foreign import hs "Imports.parseHampi"
     parseHampi :: String -> Either String Hampi
