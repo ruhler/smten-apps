@@ -69,9 +69,7 @@ main = do
             let hq = case elemtype of
                         SChar_Bit -> hquery bitSChar solver h
                         SChar_Integer -> hquery integerSChar solver h
-            r <- hq
-            putStrLn r
-            --r <- timeout (1000000*to) hq
-            --putStrLn (fromMaybe "TIMEOUT" r)
+            r <- timeout (1000000*to) hq
+            putStrLn (fromMaybe "TIMEOUT" r)
     mapM_ runf fins
 
