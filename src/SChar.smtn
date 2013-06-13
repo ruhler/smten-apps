@@ -5,7 +5,7 @@ module SChar where
 import Data.Functor
 
 import Smten.Symbolic
-import Smten.Bit.Static
+import Smten.Bit
 
 class (Ord a) => SChar a where
     toSChar :: Char -> a
