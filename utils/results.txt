@@ -1,0 +1,4 @@
+ruhler@purity:shampi$ tclsh utils/runbench.tcl `cat utils/benchmarks.txt `
+hampi yices2.integer yices2.bit yices1.integer yices1.bit stp
+25032839 11304518 11511460 11206490 12546979 15146851
+
