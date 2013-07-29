@@ -1,15 +1,15 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Lexer (
     Token(..), ParserMonad, lexer, failE,
     ) where
 
-import Prelude hiding (lex)
+import Smten.Prelude
 
-import Control.Monad.Error
-import Control.Monad.State
+import Smten.Control.Monad.State
 
-import Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
-import Data.Functor ((<$>))
+import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
+import Smten.Data.Functor ((<$>))
 
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket

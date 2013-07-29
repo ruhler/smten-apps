@@ -1,31 +1,35 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Hampi where
 
+import Smten.Prelude
 import CFG
 import Fix
 
-{-# AsInHaskell Hampi Assertion #-}
-data Assertion = AssertIn ID Bool (Integer -> FixResult)
+data Assertion = AssertIn ID Bool (Int -> FixResult)
                | AssertContains ID Bool String
                | AssertEquals ID Bool ID
 
-{-# AsInHaskell Hampi Var #-}
 data Var = Var {
     v_id :: ID,
-    v_minwidth :: Integer,
-    v_maxwidth :: Integer
+    v_minwidth :: Int,
+    v_maxwidth :: Int
 }
 
-{-# AsInHaskell Hampi Val #-}
 data Val = ValID ID
          | ValLit String
          | ValCat Val Val
          | ValSub {
              vs_source :: ID,
-             vs_offset :: Integer,
-             vs_length :: Integer
+             vs_offset :: Int,
+             vs_length :: Int
            }
-    deriving (Show)
+
+instance Show Val where
+    show (ValID x) = "@" ++ show x
+    show (ValLit str) = show str
+    show (ValCat a b) = show a ++ " ++ " ++ show b
+    show (ValSub a b c) = "@" ++ show a ++ "[" ++ show b ++ ":" ++ show c ++ "]"
 
 stringV :: String -> Val
 stringV = ValLit
@@ -33,13 +37,12 @@ stringV = ValLit
 idV :: ID -> Val
 idV = ValID
 
-subV :: ID -> Integer -> Integer -> Val
+subV :: ID -> Int -> Int -> Val
 subV = ValSub
 
 concatV :: [Val] -> Val
 concatV = foldr1 ValCat
 
-{-# AsInHaskell Hampi Hampi #-}
 data Hampi = Hampi {
     h_var :: Var,
     h_vals :: [(ID, Val)],

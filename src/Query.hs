@@ -1,10 +1,12 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Query (hquery) where
 
-import Data.Array
-import Data.List (isInfixOf)
-import Data.Maybe (fromMaybe)
-import qualified Data.Map as Map
+import Smten.Prelude
+import Smten.Data.Array
+import Smten.Data.List (isInfixOf)
+import Smten.Data.Maybe (fromMaybe)
+import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
 import SChar
@@ -15,7 +17,7 @@ import Fix
 import Match
 
 -- Ignores value of the first argument. That's just to specify the type.
-freevar :: (SChar c) => c -> Integer -> Symbolic [c]
+freevar :: (SChar c) => c -> Int -> Symbolic [c]
 freevar _ = freeSCharString
 
 -- inlinevals varid varval vals
@@ -39,7 +41,7 @@ inlinevals varid varval m =
   in Map.fromList $ (varid, varval) : vals
 
 -- substring src offset length
-substring :: [a] -> Integer -> Integer -> [a]
+substring :: [a] -> Int -> Int -> [a]
 substring s o l = take l $ drop o s
 
 contains :: (SChar c) => [c] -> String -> Bool

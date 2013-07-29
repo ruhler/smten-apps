@@ -1,15 +1,34 @@
 
-import Data.Maybe(fromMaybe)
-import Data.Functor((<$>))
-import Smten.Symbolic
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 
-import Imports
+import Smten.Prelude
+import Smten.Data.Maybe(fromMaybe)
+import Smten.Data.Functor((<$>))
+import Smten.Symbolic
+import Smten.Symbolic.Solver.Debug
+import Smten.Symbolic.Solver.STP
+import Smten.Symbolic.Solver.Yices1
+import Smten.Symbolic.Solver.Yices2
+import Smten.System.Environment
+import Smten.System.Exit
+import Smten.System.IO
+import Smten.System.Timeout
+
+import Grammar
 import Hampi
 import Query
 import SChar
 
 data SCharType = SChar_Integer | SChar_Bit
-    deriving (Eq, Show)
+
+instance Eq SCharType where
+    (==) SChar_Integer SChar_Integer = True
+    (==) SChar_Bit SChar_Bit = True
+    (==) _ _ = False
+
+instance Show SCharType where
+    show SChar_Integer = "integer"
+    show SChar_Bit = "bit"
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -26,6 +45,23 @@ getfiles (x:xs)
 usage :: String
 usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit] [FILE]"
 
+read_int' :: Int -> String -> Int
+read_int' x ('0':xs) = read_int (x*10 + 0) xs
+read_int' x ('1':xs) = read_int (x*10 + 1) xs
+read_int' x ('2':xs) = read_int (x*10 + 2) xs
+read_int' x ('3':xs) = read_int (x*10 + 3) xs
+read_int' x ('4':xs) = read_int (x*10 + 4) xs
+read_int' x ('5':xs) = read_int (x*10 + 5) xs
+read_int' x ('6':xs) = read_int (x*10 + 6) xs
+read_int' x ('7':xs) = read_int (x*10 + 7) xs
+read_int' x ('8':xs) = read_int (x*10 + 8) xs
+read_int' x ('9':xs) = read_int (x*10 + 9) xs
+read_int' x _ = x
+
+read_int :: String -> Int
+read_int ('-':xs) = negate (read_int xs)
+read_int xs = read_int' 0 xs
+
 main :: IO ()
 main = do
     args <- getArgs
@@ -34,16 +70,16 @@ main = do
         then putStrLn usage >> exitSuccess
         else return ()
 
-    let to = fromMaybe (negate 1) (read <$> lookuparg "-t" args)
+    let to = fromMaybe (negate 1) (read_int <$> lookuparg "-t" args)
     basesolver <- case lookuparg "-s" args of
-                     Just "yices1" -> return Yices1
-                     Just "yices2" -> return Yices2
-                     Just "stp" -> return STP
+                     Just "yices1" -> return yices1
+                     Just "yices2" -> return yices2
+                     Just "stp" -> return stp
                      Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
-                     Nothing -> return Yices2
+                     Nothing -> return yices2
 
     let solver = case lookuparg "-d" args of
-                        Just fn -> Debug fn basesolver
+                        Just fn -> debug fn basesolver
                         Nothing -> basesolver
 
     elemtype <- case lookuparg "-e" args of

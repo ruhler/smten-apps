@@ -1,34 +1,39 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Match (match) where
 
-import Debug.Trace
+import Smten.Prelude
+import Smten.Control.Monad.State
 
-import Control.Monad.State
-
-import Data.Array
-import Data.Functor
-import Data.Maybe
-import qualified Data.Map as Map
+import Smten.Data.Array
+import Smten.Data.Functor
+import Smten.Data.Maybe
+import qualified Smten.Data.Map as Map
 
 import SChar
 import RegEx
 
 data SubMatch = SubMatch {
-    m_id :: RID,        -- ID.
-    m_len :: Integer,   -- Length to match.
-    m_off :: Integer    -- Offset in entire string to match at.
-} deriving (Eq)
+    m_id :: RID,    -- ID.
+    m_len :: Int,   -- Length to match.
+    m_off :: Int    -- Offset in entire string to match at.
+}
+
+instance Eq SubMatch where
+    (==) a b = (m_id a == m_id b)
+            && (m_len a == m_len b)
+            && (m_off a == m_off b)
 
 instance Show SubMatch where
     show (SubMatch x n o) = show x ++ "." ++ show n ++ "." ++ show o
 
 -- ((RID, Length), Offset) -> Match Result
-type MatchCache = Array ((RID, Integer), Integer) Bool
+type MatchCache = Array ((RID, Int), Int) Bool
 
 matchidM :: MatchCache -> SubMatch -> Bool
 matchidM m s@(SubMatch x n off) = m ! ((x, n), off)
 
-matchM :: (SChar c) => MatchCache -> RegEx -> Integer -> [c] -> Bool
+matchM :: (SChar c) => MatchCache -> RegEx -> Int -> [c] -> Bool
 matchM mc r off str =
   case r of
      Epsilon -> True
@@ -46,7 +51,7 @@ matchM mc r off str =
        in a' || b'
      Variable n id -> matchidM mc (SubMatch id n off)
 
-match :: (SChar c) => Array (RID, Integer) RegEx -> RegEx -> [c] -> Bool
+match :: (SChar c) => Array (RID, Int) RegEx -> RegEx -> [c] -> Bool
 match regs x str =
   let (regl, regh) = bounds regs
       bnds = ((regl, 0), (regh, (length str)))

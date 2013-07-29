@@ -1,7 +1,9 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module CFG where
 
-import Data.Char(ord)
+import Smten.Prelude
+import Smten.Data.Char(ord)
 
 type ID = String
 
@@ -14,8 +16,7 @@ data CFG =
    | ConcatC CFG CFG
    | OrC CFG CFG
    | VariableC ID
-   | FixC ID Integer
-   deriving (Eq, Show)
+   | FixC ID Int
 
 charC :: Char -> CFG
 charC = AtomC
@@ -54,7 +55,7 @@ epsilonC = EpsilonC
 varC :: ID -> CFG
 varC = VariableC
 
-fixC :: ID -> Integer -> CFG
+fixC :: ID -> Int -> CFG
 fixC = FixC
 
 stringC :: String -> CFG

@@ -1,20 +1,21 @@
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Fix where
 
-import Debug.Trace
+import Smten.Prelude
 
-import Control.Monad.State
+import Smten.Control.Monad.State
 
-import Data.Functor
-import Data.Maybe
-import qualified Data.Map as Map
+import Smten.Data.Functor
+import Smten.Data.Maybe
+import qualified Smten.Data.Map as Map
 
 import RegEx
 import CFG
 
 data FS = FS {
     fs_cfgs :: Map.Map ID CFG,
-    fs_cache :: Map.Map (RID, Integer) RegEx,
+    fs_cache :: Map.Map (RID, Int) RegEx,
     fs_rids :: Map.Map ID RID,
     fs_nrid :: RID
 }
@@ -31,7 +32,7 @@ getridM x = do
             put $ fs { fs_nrid = v+1, fs_rids = Map.insert x v (fs_rids fs) }
             return v
 
-fixidM :: ID -> Integer -> FixM (RegEx, RID)
+fixidM :: ID -> Int -> FixM (RegEx, RID)
 fixidM x n = do
     rid <- getridM x
     fs <- get
@@ -44,7 +45,7 @@ fixidM x n = do
             modify $ \fs -> fs { fs_cache = Map.insert (rid, n) v (fs_cache fs) }
             return (v, rid)
 
-fixM :: CFG -> Integer -> FixM RegEx
+fixM :: CFG -> Int -> FixM RegEx
 fixM r n = 
   case r of
      EpsilonC -> return $ if n == 0 then epsilonR else emptyR
@@ -82,14 +83,13 @@ fixM r n =
           _ -> return $ Variable n rid
      FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
 
-{-# AsInHaskell Fix FixResult #-}
 data FixResult = FixResult {
-    fr_regbound :: ((RID, Integer), (RID, Integer)),
-    fr_regs :: [((RID, Integer), RegEx)],
+    fr_regbound :: ((RID, Int), (RID, Int)),
+    fr_regs :: [((RID, Int), RegEx)],
     fr_top :: RegEx
 }
 
-fixN :: Map.Map ID CFG -> ID -> Integer -> FixResult
+fixN :: Map.Map ID CFG -> ID -> Int -> FixResult
 fixN regs x n = {-# SCC "FixN" #-}
   let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
   in FixResult {    

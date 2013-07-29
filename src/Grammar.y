@@ -1,10 +1,12 @@
 -- vim: ft=haskell
 {
 
+{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Grammar (parseHampi) where
 
-import Control.Monad.State
-import qualified Data.Map as Map
+import Smten.Prelude
+import Smten.Control.Monad.State
+import qualified Smten.Data.Map as Map
 
 import Fix
 import CFG
