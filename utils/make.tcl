@@ -11,7 +11,7 @@ proc hrun {args} {
 
 # Run from the shampi/ directory.
 hrun mkdir -p build
-#hrun happy src/Grammar.y -o build/Grammar.hs
+hrun happy src/Grammar.y -o build/Grammar.hs
 hrun ghc --make -c -ibuild -isrc -hidir build/ -odir build/ src/shampi.hs \
     -fplugin=Smten.Plugin.Plugin
 hrun ghc -o build/shampi -O2 -hidir build/ -odir build/ -isrc -ibuild --make build/Smten/Compiled/Main.hs -main-is Smten.Compiled.Main.main -rtsopts
