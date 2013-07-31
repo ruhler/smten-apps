@@ -203,5 +203,8 @@ parseError tok = do
     x <- get
     failE $ "parser error at " ++ show tok ++ "\n when parsing: " ++ x
 
+seq :: a -> b -> b
+seq = const id
+
 }
 

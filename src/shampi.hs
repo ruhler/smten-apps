@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 
 import Smten.Prelude
+import Smten.Control.Monad.State
 import Smten.Data.Maybe(fromMaybe)
 import Smten.Data.Functor((<$>))
 import Smten.Symbolic
@@ -14,6 +15,7 @@ import Smten.System.Exit
 import Smten.System.IO
 import Smten.System.Timeout
 
+import Lexer
 import Grammar
 import Hampi
 import Query
@@ -44,23 +46,6 @@ getfiles (x:xs)
 
 usage :: String
 usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp] [-e Integer | Bit] [FILE]"
-
-read_int' :: Int -> String -> Int
-read_int' x ('0':xs) = read_int (x*10 + 0) xs
-read_int' x ('1':xs) = read_int (x*10 + 1) xs
-read_int' x ('2':xs) = read_int (x*10 + 2) xs
-read_int' x ('3':xs) = read_int (x*10 + 3) xs
-read_int' x ('4':xs) = read_int (x*10 + 4) xs
-read_int' x ('5':xs) = read_int (x*10 + 5) xs
-read_int' x ('6':xs) = read_int (x*10 + 6) xs
-read_int' x ('7':xs) = read_int (x*10 + 7) xs
-read_int' x ('8':xs) = read_int (x*10 + 8) xs
-read_int' x ('9':xs) = read_int (x*10 + 9) xs
-read_int' x _ = x
-
-read_int :: String -> Int
-read_int ('-':xs) = negate (read_int xs)
-read_int xs = read_int' 0 xs
 
 main :: IO ()
 main = do
@@ -93,7 +78,7 @@ main = do
             putStr (fin ++ ": ")
             input <- readFile fin
 
-            h <- case parseHampi input of
+            h <- case evalStateT parseHampi input of
                     Left msg -> fail msg
                     Right x -> return x
 

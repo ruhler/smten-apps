@@ -1,11 +1,12 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Lexer (
-    Token(..), ParserMonad, lexer, failE,
+    Token(..), ParserMonad, lexer, failE, read_int,
     ) where
 
 import Smten.Prelude
 
+import Smten.Control.Monad.Error
 import Smten.Control.Monad.State
 
 import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
@@ -18,11 +19,44 @@ data Token =
   | TkVal | TkVar | TkCfg | TkReg | TkFix | TkConcat | TkStar | TkOr | TkNot
   | TkAssert | TkIn | TkContains | TkEquals
   | TkID String
-  | TkInt Integer
+  | TkInt Int
   | TkString String
   | TkChar Char
   | TkEOF
-    deriving (Show, Eq)
+
+instance Show Token where
+    show TkOpenParen = "TkOpenParen"
+    show TkCloseParen = "TkCloseParen"
+    show TkOpenBracket = "TkOpenBracket"
+    show TkCloseBracket = "TkCloseBracket"
+    show TkBar = "TkBar"
+    show TkComma = "TkComma"
+    show TkSemicolon = "TkSemicolon"
+    show TkColon            = "TkColon"
+    show TkColonEquals      = "TkColonEquals"
+    show TkDoubleDot        = "TkDoubleDot"
+    show TkDash             = "TkDash"
+    show TkAsterisk         = "TkAsterisk"
+    show TkPlus             = "TkPlus"
+    show TkQuestionMark     = "TkQuestionMark"
+    show TkVal              = "TkVal"
+    show TkVar              = "TkVar"
+    show TkCfg              = "TkCfg"
+    show TkReg              = "TkReg"
+    show TkFix              = "TkFix"
+    show TkConcat           = "TkConcat"
+    show TkStar             = "TkStar"
+    show TkOr               = "TkOr"
+    show TkNot              = "TkNot"
+    show TkAssert           = "TkAssert"
+    show TkIn               = "TkIn"
+    show TkContains         = "TkContains"
+    show TkEquals           = "TkEquals"
+    show (TkID x)           = "TkID " ++  show x
+    show (TkInt x)          = "TkInt " ++ show x
+    show (TkString x)    = "TkString " ++ show x
+    show (TkChar x)        = "TkChar " ++ show x
+    show TkEOF              = "TkEOF"
 
 -- | State is the text remaining to be parsed.
 --   Left is parse failed with error message
@@ -99,7 +133,7 @@ lex = do
                  | otherwise -> put rest >> return (TkID $ id)
       (c:cs) | isDigit c ->
          let (ns, rest) = span isDigit cs
-         in put rest >> return (TkInt . read $ c:ns)
+         in put rest >> return (TkInt . read_int $ c:ns)
       ('\'':c:'\'':cs) -> put cs >> return (TkChar c)
       ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c ->
          put cs >> return (TkChar (mkseq a b c))
@@ -119,4 +153,21 @@ tokens = do
 
 lexer :: (Token -> ParserMonad a) -> ParserMonad a
 lexer output = lex >>= output
+
+read_int' :: Int -> String -> Int
+read_int' x ('0':xs) = read_int' (x*10 + 0) xs
+read_int' x ('1':xs) = read_int' (x*10 + 1) xs
+read_int' x ('2':xs) = read_int' (x*10 + 2) xs
+read_int' x ('3':xs) = read_int' (x*10 + 3) xs
+read_int' x ('4':xs) = read_int' (x*10 + 4) xs
+read_int' x ('5':xs) = read_int' (x*10 + 5) xs
+read_int' x ('6':xs) = read_int' (x*10 + 6) xs
+read_int' x ('7':xs) = read_int' (x*10 + 7) xs
+read_int' x ('8':xs) = read_int' (x*10 + 8) xs
+read_int' x ('9':xs) = read_int' (x*10 + 9) xs
+read_int' x _ = x
+
+read_int :: String -> Int
+read_int ('-':xs) = negate (read_int xs)
+read_int xs = read_int' 0 xs
 
