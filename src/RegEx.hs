@@ -18,6 +18,7 @@ data RegEx =
 
 instance Eq RegEx where
     (==) Epsilon Epsilon = True
+    (==) Empty Empty = True
     (==) (Atom a) (Atom b) = a == b
     (==) (Range al ah) (Range bl bh) = al == bl && ah == bh
     (==) (Concat a1 a2 a3) (Concat b1 b2 b3) =
