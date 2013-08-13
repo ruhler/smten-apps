@@ -3,10 +3,11 @@
 module Hampi where
 
 import Smten.Prelude
+import qualified Smten.Data.Map as Map
 import CFG
 import Fix
 
-data Assertion = AssertIn ID Bool (Int -> FixResult)
+data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool String
                | AssertEquals ID Bool ID
 
@@ -46,6 +47,7 @@ concatV = foldr1 ValCat
 data Hampi = Hampi {
     h_var :: Var,
     h_vals :: [(ID, Val)],
+    h_cfgs :: Map.Map ID CFG,
     h_asserts :: [Assertion]
 }
 

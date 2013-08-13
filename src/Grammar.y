@@ -8,7 +8,6 @@ import Smten.Prelude
 import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 
-import Fix
 import CFG
 import Hampi
 import Lexer
@@ -164,7 +163,6 @@ exprs :: { [Val] }
 
 data Stmt = 
    AssertStmt Assertion
- | AssertInStmt ID Bool ID
  | ValStmt ID Val
  | CfgStmt ID CFG
 
@@ -175,7 +173,7 @@ valS :: ID -> Val -> Stmt
 valS = ValStmt
 
 assertInS :: ID -> Bool -> ID -> Stmt
-assertInS x n y = AssertInStmt x n y
+assertInS x n y = AssertStmt (AssertIn x n y)
 
 assertContainsS :: ID -> Bool -> String -> Stmt
 assertContainsS x n y = AssertStmt $ AssertContains x n y
@@ -187,16 +185,8 @@ mkhampi :: Var -> [Stmt] -> Hampi
 mkhampi v stmts =
  let vals = [(id, v) | ValStmt id v <- stmts]
      cfgs = Map.fromList [(id, r) | CfgStmt id r <- stmts]
-
-
-     mkinassert :: ID -> Bool -> ID -> Assertion
-     mkinassert x n y = AssertIn x n (fixN cfgs y)
-
-     easyasserts = [a | AssertStmt a <- stmts]
-     inasserts = [mkinassert x n y | AssertInStmt x n y <- stmts]
-
-     asserts = easyasserts ++ inasserts
- in Hampi v vals asserts
+     asserts = [a | AssertStmt a <- stmts]
+ in Hampi v vals cfgs asserts
 
 parseError :: Token -> ParserMonad a
 parseError tok = do

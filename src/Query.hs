@@ -58,18 +58,18 @@ assertIn fr vstr =
  in match (array regsbnd regs) reg vstr
 
 -- Make a hampi assertion.
-hassert :: (SChar c) => Map.Map ID [c] -> Assertion -> Symbolic ()
-hassert vals (AssertIn v b f) =
+hassert :: (SChar c) => Map.Map ID CFG -> Map.Map ID [c] -> Assertion -> Symbolic ()
+hassert cfgs vals (AssertIn v b y) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        fr = f (length vstr)
+        fr = fixN cfgs y (length vstr)
     in assert $ xor b (assertIn fr vstr)
 
-hassert vals (AssertEquals v b x) =
+hassert _ vals (AssertEquals v b x) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
     in assert $ xor b (vstr == xstr)
 
-hassert vals (AssertContains v b s) =
+hassert _ vals (AssertContains v b s) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
     in assert $ xor b (contains vstr s)
 
@@ -77,15 +77,15 @@ hassert vals (AssertContains v b s) =
 -- Takes an argument of SChar type to specify which type to use for the
 -- element. The value of that argument is ignored.
 hquery :: (SChar c) => c -> Solver -> Hampi -> IO String
-hquery _ _ (Hampi (Var vid wmin wmax) _ _) | wmax < wmin = return "UNSAT"
-hquery e s (Hampi (Var vid wmin wmax) vals asserts) = do
+hquery _ _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
+hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
     r <- run_symbolic s $ do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
-        mapM_ (hassert svals) asserts
+        mapM_ (hassert cfgs svals) asserts
         return svar
     case r of
         Just v ->
           let vstr = fromSCharString v
           in return $ "{VAR(" ++ vid ++ ")=" ++ vstr ++ "}"
-        Nothing -> hquery e s (Hampi (Var vid (wmin + 1) wmax) vals asserts)
+        Nothing -> hquery e s (Hampi (Var vid (wmin + 1) wmax) vals cfgs asserts)

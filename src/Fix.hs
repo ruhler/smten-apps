@@ -1,6 +1,6 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module Fix where
+module Fix (FixResult(..), fixN) where
 
 import Smten.Prelude
 
