@@ -51,11 +51,8 @@ xor :: Bool -> Bool -> Bool
 xor b p = if b then p else not p
 
 assertIn :: (SChar c) => FixResult -> [c] -> Bool
-assertIn fr vstr =
- let regsbnd = fr_regbound fr
-     regs = fr_regs fr
-     reg = fr_top fr
- in match (array regsbnd regs) reg vstr
+assertIn (FixResult regsbnd regs reg) vstr
+  = match (array regsbnd regs) reg vstr
 
 -- Make a hampi assertion.
 hassert :: (SChar c) => Map.Map ID CFG -> Map.Map ID [c] -> Assertion -> Symbolic ()

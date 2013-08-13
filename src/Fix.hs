@@ -4,7 +4,7 @@ module Fix (FixResult(..), fixN) where
 
 import Smten.Prelude
 
-import Smten.Control.Monad.State
+import Smten.Control.Monad.State.Strict
 
 import Smten.Data.Functor
 import Smten.Data.Maybe
