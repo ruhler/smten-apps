@@ -1,0 +1,10 @@
+
+test: Smten/Compiled/Main.hs
+	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
+	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<
+
+Smten/Compiled/Main.hs: test.hs BMC.hs ShiftReg.hs
+	ghc --make -osuf smten_o -prof -c -fplugin=Smten.Plugin.Plugin test.hs -fwarn-unused-binds -fwarn-unused-imports
+
+clean:
+	rm -rf *.hi *.smten_o Smten test test_prof
