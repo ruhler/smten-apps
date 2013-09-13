@@ -1,0 +1,13 @@
+Smten Applications
+==================
+Richard Uhler <ruhler@csail.mit.edu>
+September 13, 2013
+
+A collection of applications for smten.
+
+bmc:: A symbolic bounded model checker
+nqueens:: nqueens puzzle
+pcheck:: A model checker for property verification
+sketch:: Sketch program synthesis
+sudoku:: a 9x9 sudoku solver
+
