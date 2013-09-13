@@ -1,4 +1,7 @@
 
+all: test
+	./test
+
 test: Smten/Compiled/Main.hs
 	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
 	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<

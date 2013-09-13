@@ -1,9 +1,10 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module ShiftReg (shiftregm, shiftregf) where
+module ShiftReg (tests) where
 
 import Smten.Prelude
 import Smten.Symbolic
+import Smten.Symbolic.Solver.Pure
 
 import BMC
 
@@ -35,12 +36,27 @@ srtrans_good a b = (x0 b == x1 a) && (x1 b == x2 a) && (x2 b == False)
 srinit :: SRState -> Bool
 srinit = const True
 
-shiftregm :: Model SRState
-shiftregm = Model { _I = srinit, _T = srtrans_bad }
+shiftregm_bad :: Model SRState
+shiftregm_bad = Model { _I = srinit, _T = srtrans_bad }
+
+shiftregm_good :: Model SRState
+shiftregm_good = Model { _I = srinit, _T = srtrans_good }
 
 allzero :: SRState -> Bool
 allzero s = not (x0 s) && not (x1 s) && not (x2 s)
 
 shiftregf :: LTL SRState
 shiftregf = G (P (not . allzero))
+
+tests :: IO ()
+tests = do
+   s <- run_symbolic pure (check shiftregm_good shiftregf 3)
+   case s of
+      Nothing -> return ()
+      Just xs -> error $ "shiftregm_good test failed: " ++ show xs
+
+   s <- run_symbolic pure (check shiftregm_bad shiftregf 3)
+   case s of
+      Just xs -> putStrLn $ show xs
+      Nothing -> error "shiftregm_bad test failed"
 
