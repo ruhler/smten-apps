@@ -44,7 +44,7 @@ breakup n xs =
   case splitAt n xs of
      (a, b) -> a : (breakup n b)
 
-isvalid :: (Eq c, Cell c) => Board c -> Bool
+isvalid :: (Cell c) => Board c -> Bool
 isvalid b = all distinctCell (concat [rows b, cols b, boxes b])
 
 readRow :: (Cell c) => String -> Symbolic [c]
