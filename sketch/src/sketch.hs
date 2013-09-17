@@ -4,6 +4,7 @@
 import Smten.Prelude
 import Smten.Control.Monad.State
 import Grammar
+import Ppr
 
 main :: IO ()
 main = do
@@ -11,5 +12,5 @@ main = do
   sk <- case evalStateT parseSketch input of
             Left msg -> fail msg
             Right x -> return x
-  putStrLn (show sk)
+  putStrLn (pretty sk)
 
