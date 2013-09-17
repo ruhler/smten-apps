@@ -1,60 +1,62 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
-    SKProg, SKDecl(..), SKType(..), Name, SKStmt(..),
-    SKExpr(..),
+    Prog, Decl(..), Type(..), Name, Stmt(..),
+    Expr(..),
     ) where
 
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 
-type HoleID = Integer
 type Name = String
 
-data SKType = 
-    SKBit                       -- bit
-  | SKBitVector Int         -- bit[n]
+data Type = 
+    BitT              -- bit
+  | BitVectorT Int    -- bit[n]
 
-instance Show SKType where
-    show SKBit = "SKBit"
-    show (SKBitVector n) = "SKBitVector " ++ show n
+instance Show Type where
+    show BitT = "BitT"
+    show (BitVectorT n) = "BitVectorT " ++ show n
 
-data SKExpr = 
-   SKBVAnd SKExpr SKExpr        -- ^ a & b
- | SKBVOr SKExpr SKExpr         -- ^ a | b
- | SKHole HoleID                -- ^ ??
- | SKInt Int                -- ^ 42
- | SKVar Name                   -- ^ foo
- | SKAccess SKExpr SKExpr       -- ^ foo[i]
+data Expr = 
+   AndE Expr Expr        -- ^ a & b
+ | OrE Expr Expr         -- ^ a | b
+ | HoleE                       -- ^ ??
+ | IntE Int                -- ^ 42
+ | VarE Name                   -- ^ foo
+ | AccessE Expr Expr       -- ^ foo[i]
 
-instance Show SKExpr where
-    show (SKBVAnd a b) = "SKBVAnd " ++ show a ++ " " ++ show b
-    show (SKBVOr a b) = "SKBVOr " ++ show a ++ " " ++ show b
-    show (SKHole x) = "SKHole " ++ show x
-    show (SKInt x) = "SKInt " ++ show x
-    show (SKVar n) = "SKVar " ++ show n
-    show (SKAccess a b) = "SKAccess " ++ show a ++ " " ++ show b
+instance Show Expr where
+    show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
+    show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
+    show HoleE = "HoleE"
+    show (IntE x) = "IntE " ++ show x
+    show (VarE n) = "VarE " ++ show n
+    show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
 
-data SKStmt = SKReturn SKExpr
+data Stmt = ReturnS Expr
 
-instance Show SKStmt where
-    show (SKReturn x) = "SKReturn " ++ show x
+instance Show Stmt where
+    show (ReturnS x) = "ReturnS " ++ show x
 
-data SKDecl =
-   SKFun {
-    skf_name :: Name,
-    skf_outty :: SKType,
-    skf_args :: [(SKType, Name)],
-    skf_stmts :: [SKStmt],
-    skf_spec :: Maybe Name }
+data Decl = FunD {
+  fd_name :: Name,
+  fd_outty :: Type,
+  fd_args :: [(Type, Name)],
+  fd_stmts :: [Stmt],
+  
+  -- | Nothing means this declaration is a specification
+  --   Just foo means this is a sketch with specification 'foo'
+  fd_spec :: Maybe Name
+}
 
-instance Show SKDecl where
-    show x = "SKFun { " ++
-      "nm = " ++ show (skf_name x) ++ ", " ++
-      "oty = " ++ show (skf_outty x) ++ ", " ++
-      "args = " ++ show (skf_args x) ++ ", " ++
-      "stmts = " ++ show (skf_stmts x) ++ ", " ++
-      "spec = " ++ show (skf_spec x) ++ "}"
+instance Show Decl where
+    show x = "FunD { " ++
+      "nm = " ++ show (fd_name x) ++ ", " ++
+      "oty = " ++ show (fd_outty x) ++ ", " ++
+      "args = " ++ show (fd_args x) ++ ", " ++
+      "stmts = " ++ show (fd_stmts x) ++ ", " ++
+      "spec = " ++ show (fd_spec x) ++ "}"
 
-type SKProg = [SKDecl]
+type Prog = [Decl]
 
