@@ -1,6 +1,7 @@
 
-all: test
-	./test
+.PHONY: all
+all: 
+	tclsh utils/make.tcl
 
 test: Smten/Compiled/Main.hs
 	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof

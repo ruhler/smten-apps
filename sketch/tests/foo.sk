@@ -1,0 +1,11 @@
+/* This is a comment. What do you think? */
+// How about this?
+bit reverse (bit[4] foo, bit[4] bar) {
+	return (foo & bar)[3];
+}
+
+
+bit reverseSketch(bit[4] in, bit[4] in2) implements reverse {	
+	return (in & in2)[??];
+}
+
