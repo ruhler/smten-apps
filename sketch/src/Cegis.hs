@@ -18,12 +18,12 @@ import Smten.Symbolic.SMT
 --
 --  x has type a
 --  c has type b
-cegis :: (Free a, Free b) => [a] -> (b -> a -> Bool) -> SMT (Maybe b)
-cegis xs p = do
+cegis :: Symbolic a -> Symbolic b -> [a] -> (b -> a -> Bool) -> SMT (Maybe b)
+cegis freeX freeC xs p = do
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.
   rc <- query $ do
-      c <- free
+      c <- freeC
       assert (all (p c) xs)
       return c
   case rc of
@@ -31,10 +31,10 @@ cegis xs p = do
     Just cv -> do
       -- Search for a counter example
       rx <- query $ do
-          x <- free
+          x <- freeX
           assert (not (p cv x))
           return x
       case rx of
         Nothing -> return (Just cv)
-        Just xv -> cegis (xv:xs) p
+        Just xv -> cegis freeX freeC (xv:xs) p
   

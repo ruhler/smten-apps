@@ -52,7 +52,7 @@ decl :: { Decl }
 
 type :: { Type }
  : 'bit' { BitT }
- | 'bit' '[' int ']' { BitVectorT $3 }
+ | 'bit' '[' int ']' { BitsT $3 }
 
 args :: { [(Type, Name)] }
  : arg { [$1] }

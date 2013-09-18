@@ -19,7 +19,8 @@ instance Ppr Name where
 
 instance Ppr Type where
    pretty BitT = "bit"
-   pretty (BitVectorT n) = "bit[" ++ pretty n ++ "]"
+   pretty (BitsT n) = "bit[" ++ pretty n ++ "]"
+   pretty IntT = "int"
 
    prettya = pretty
 

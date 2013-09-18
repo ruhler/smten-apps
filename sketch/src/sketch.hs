@@ -3,8 +3,12 @@
 
 import Smten.Prelude
 import Smten.Control.Monad.State
+import Smten.Symbolic.SMT
+import Smten.Symbolic.Solver.Yices2
+
 import Grammar
 import Ppr
+import Synthesis
 
 main :: IO ()
 main = do
@@ -12,5 +16,6 @@ main = do
   sk <- case evalStateT parseSketch input of
             Left msg -> fail msg
             Right x -> return x
-  putStrLn (pretty sk)
+  sk' <- runSMT yices2 (synthesize sk)
+  putStrLn (pretty sk')
 

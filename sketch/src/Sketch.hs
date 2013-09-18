@@ -3,28 +3,35 @@
 module Sketch (
     Prog, Decl(..), Type(..), Name, Stmt(..),
     Expr(..),
+    valEq,
     ) where
 
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 
+import Bits
+
 type Name = String
 
 data Type = 
     BitT              -- bit
-  | BitVectorT Int    -- bit[n]
+  | BitsT Int         -- bit[n]
+  | IntT              -- int
 
 instance Show Type where
     show BitT = "BitT"
-    show (BitVectorT n) = "BitVectorT " ++ show n
+    show (BitsT n) = "BitsT " ++ show n
+    show IntT = "IntT"
 
 data Expr = 
    AndE Expr Expr        -- ^ a & b
  | OrE Expr Expr         -- ^ a | b
- | HoleE                       -- ^ ??
- | IntE Int                -- ^ 42
- | VarE Name                   -- ^ foo
- | AccessE Expr Expr       -- ^ foo[i]
+ | HoleE                 -- ^ ??
+ | BitE Bit              -- ^ 1
+ | BitsE Bits            -- ^ 4'h2
+ | IntE Int              -- ^ 42
+ | VarE Name             -- ^ foo
+ | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
@@ -59,4 +66,11 @@ instance Show Decl where
       "spec = " ++ show (fd_spec x) ++ "}"
 
 type Prog = [Decl]
+
+valEq :: Expr -> Expr -> Bool
+valEq (BitE a) (BitE b) = a == b
+valEq (BitsE a) (BitsE b) = a == b
+valEq (IntE a) (IntE b) = a == b
+valEq _ _ = error "valEq: bad args"
+
 
