@@ -1,8 +1,0 @@
-
-bit typeTest (bit[4] foo, bit[4] bar) {
-	return true;
-}
-
-bit typeTestSketch (bit[4] foo, bit[4] bar) implements typeTest {
-	return (2 + foo)[1];
-}

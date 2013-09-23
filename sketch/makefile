@@ -3,6 +3,10 @@
 all: 
 	tclsh utils/make.tcl
 
+check:
+	tclsh utils/test.tcl
+
+# Make the test case for the S2QBF and Isolate0
 test: Smten/Compiled/Main.hs
 	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
 	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<
