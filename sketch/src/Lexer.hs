@@ -15,7 +15,7 @@ import Smten.Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
-  | TkBar | TkAmp | TkComma | TkSemicolon | TkDoubleQuestionMark
+  | TkBar | TkAmp | TkEquals | TkComma | TkSemicolon | TkDoubleQuestionMark
   | TkBit | TkImplements | TkReturn
   | TkID String
   | TkInt Int
@@ -30,6 +30,7 @@ instance Show Token where
     show TkCloseBrace = "TkCloseBrace"
     show TkBar = "TkBar"
     show TkAmp = "TkAmp"
+    show TkEquals = "TkEquals"
     show TkComma = "TkComma"
     show TkSemicolon = "TkSemicolon"
     show TkDoubleQuestionMark = "TkDoubleQuestionMark"
@@ -60,6 +61,7 @@ singles = [
     ('}', TkCloseBrace),
     ('|', TkBar),
     ('&', TkAmp),
+    ('=', TkEquals),
     (',', TkComma),
     (';', TkSemicolon)
   ]

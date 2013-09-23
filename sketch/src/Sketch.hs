@@ -44,10 +44,15 @@ instance Show Expr where
     show (VarE n) = "VarE " ++ show n
     show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
 
-data Stmt = ReturnS Expr
+data Stmt =
+     ReturnS Expr
+   | DeclS Type Name Expr
+   | UpdateS Name Expr
 
 instance Show Stmt where
     show (ReturnS x) = "ReturnS " ++ show x
+    show (DeclS ty nm ex) = "DeclS " ++ show ty ++ " " ++ show nm ++ " " ++ show ex
+    show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
 
 data Decl = FunD {
   fd_name :: Name,

@@ -29,6 +29,7 @@ import Sketch
     '}'     { TkCloseBrace }
     '|'     { TkBar }
     '&'     { TkAmp }
+    '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
     '??'    { TkDoubleQuestionMark }
@@ -67,6 +68,8 @@ stmts :: { [Stmt] }
 
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
+ | type id '=' expr ';' { DeclS $1 $2 $4 }
+ | id '=' expr ';' { UpdateS $1 $3 }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

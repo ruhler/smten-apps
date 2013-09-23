@@ -45,11 +45,25 @@ Expressions
          if there is any input that will cause the assertion to fail."
         (I'm not sure what that means though)
 
+Holes
+-----
+    ??       - a free bit, char, bits, or int expression (and others?)
+    {*}      - ??? I don't know. Same as '??'?
+
 
 Statements
 ----------
-    return <expr>   - set the result of the current function to the value of
-                      <expr>
+    return <expr> ;
+      - set the result of the current function to the value of <expr>
+
+    <type> <name> = <expr> ;
+      - Declare the variable <name> to have <type> and initial value <expr>
+
+    <lval> = <expr> ;
+      - Update the left hand side value <lval> to have value <expr>
+      where lval can be:    name
+                     or:    access
+
 
         
 
