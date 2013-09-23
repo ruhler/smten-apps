@@ -1,11 +1,8 @@
-/* This is a comment. What do you think? */
-// How about this?
-bit reverse (bit[4] foo, bit[4] bar) {
-	return (foo & bar)[3];
+
+bit typeTest (bit[4] foo, bit[4] bar) {
+	return true;
 }
 
-
-bit reverseSketch(bit[4] in, bit[4] in2) implements reverse {	
-	return (in & in2)[??];
+bit typeTestSketch (bit[4] foo, bit[4] bar) implements typeTest {
+	return (2 + foo)[1];
 }
-

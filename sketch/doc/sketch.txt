@@ -1,0 +1,56 @@
+The Sketch Language
+===================
+Richard Uhler <ruhler@csail.mit.edu>
+September 2013
+
+Introduction
+------------
+This document describes the syntax and semantics of the Sketch language, as
+discovered for the purposes of re-implementing sketch.
+
+Types
+------
+  bit     - a single bit: true or false
+  char    - a character: (8 bit?)
+  int     - an integer: range specified by --bnd-inbits flag. Defaults to 5,
+            in practice works up to 7 or 8 bits.
+  bit[<n>]   - an array of n bits
+
+Expressions
+-----------
+    <expr> & <expr> 
+        Bitwise AND. Works on bit, bit[], (others?).
+        Does not have short circuit semantics.
+
+    <expr> && <expr>
+        Logical AND. Works on bit, (others?).
+        Has short circuit semantics.
+
+    <expr> | <expr> 
+        Bitwise OR. Works on bit, bit[], (others?).
+        Does not have short circuit semantics.
+
+    <expr> || <expr>
+        Logical OR. Works on bit, (others?).
+        Has short circuit semantics.
+
+    <expr> [<expr>]
+        Array access. The array must have an array type (bit arrays are
+        allowed). The index must have Int type. Returns the value of the array
+        at the given index.
+
+        Array access is bounds checked:
+        "For every array access a[i] the synthesizer produces an assertion
+         assert i>=0 && i<len(a) so the synthesizer will reject your program
+         if there is any input that will cause the assertion to fail."
+        (I'm not sure what that means though)
+
+
+Statements
+----------
+    return <expr>   - set the result of the current function to the value of
+                      <expr>
+
+        
+
+

@@ -17,6 +17,7 @@ data Type =
     BitT              -- bit
   | BitsT Int         -- bit[n]
   | IntT              -- int
+  | UnknownT          -- type to be inferred during type inference.
 
 instance Show Type where
     show BitT = "BitT"
@@ -26,7 +27,7 @@ instance Show Type where
 data Expr = 
    AndE Expr Expr        -- ^ a & b
  | OrE Expr Expr         -- ^ a | b
- | HoleE                 -- ^ ??
+ | HoleE Type            -- ^ ??
  | BitE Bit              -- ^ 1
  | BitsE Bits            -- ^ 4'h2
  | IntE Int              -- ^ 42
@@ -36,7 +37,9 @@ data Expr =
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
-    show HoleE = "HoleE"
+    show (HoleE _) = "HoleE"
+    show (BitE b) = "BitE " ++ show b
+    show (BitsE b) = "BitsE " ++ show b
     show (IntE x) = "IntE " ++ show x
     show (VarE n) = "VarE " ++ show n
     show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b

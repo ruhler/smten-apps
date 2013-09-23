@@ -1,0 +1,8 @@
+
+* clean up type inference (leverage an smt solver?)
+
+Document Behaviors of sketch:
+* What happens to: ??[4] in terms of type inference?
+    blows up
+* what happens to: 7[2] in terms of type inference?
+    blows up

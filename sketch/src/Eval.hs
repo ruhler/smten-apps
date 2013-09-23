@@ -28,14 +28,19 @@ evalS (ReturnS x) = do
 
 evalE :: Expr -> State SS Expr
 evalE (AndE a b) = do
-    BitsE a' <- evalE a
-    BitsE b' <- evalE b
-    return (BitsE (a' `andB` b'))
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitsE (av `andB` bv)
+      (BitE av, BitE bv) -> return $ BitE (av && bv)
+      _ -> error $ "unexpected args to AndE: " ++ show (a', b')
 evalE (OrE a b) = do
-    BitsE a' <- evalE a
-    BitsE b' <- evalE b
-    return (BitsE (a' `orB` b'))
-evalE HoleE = error "HoleE in evalE"
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitsE (av `orB` bv)
+      (BitE av, BitE bv) -> return $ BitE (av || bv)
+evalE (HoleE {}) = error "HoleE in evalE"
 evalE x@(BitE {}) = return x
 evalE x@(BitsE {}) = return x
 evalE x@(IntE {}) = return x

@@ -72,7 +72,7 @@ expr :: { Expr }
  : '(' expr ')'     { $2 }
  | expr '&' expr    { AndE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
- | '??' { HoleE }
+ | '??' { HoleE UnknownT }
  | int { IntE $1 }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }

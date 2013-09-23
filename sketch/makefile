@@ -11,4 +11,4 @@ Smten/Compiled/Main.hs: test.hs S2QBF.hs Isolate0.hs
 	ghc --make -osuf smten_o -prof -c -fplugin=Smten.Plugin.Plugin test.hs -fwarn-unused-binds -fwarn-unused-imports
 
 clean:
-	rm -rf *.hi *.smten_o Smten test test_prof
+	rm -rf *.hi *.smten_o Smten test test_prof build/*

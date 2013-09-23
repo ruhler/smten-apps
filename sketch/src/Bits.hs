@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit,
-    Bits, andB, orB, accessB,
+    Bits, andB, orB, accessB, valB,
     freeBits,
     ) where
 
@@ -18,6 +18,9 @@ data Bits = Bits {
 
 instance Eq Bits where
     (==) a b = bits a == bits b
+
+instance Show Bits where
+    show (Bits w b) = "Bits " ++ show b
 
 padto :: Bits -> Int -> Bits
 padto (Bits w bs) w' = Bits w' (replicate (w'-w) False ++ bs)
@@ -43,4 +46,12 @@ freeBits :: Int -> Symbolic Bits
 freeBits n = do
   vals <- sequence $ replicate n free
   return (Bits n vals)
+
+valB :: Bits -> Int
+valB (Bits _ vals) = 
+  let f :: [Bit] -> Int
+      f [] = 0
+      f (True:xs) = 1 + 2 * (f xs)
+      f (False:xs) = 0 + 2 * (f xs)
+  in f vals
 

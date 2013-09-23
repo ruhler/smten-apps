@@ -67,7 +67,7 @@ deHoleExpr (OrE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b
     return (OrE a' b')
-deHoleExpr HoleE = IntE <$> freeInt
+deHoleExpr (HoleE ty) = mkFreeArg ty
 deHoleExpr x@(BitE {}) = return x
 deHoleExpr x@(BitsE {}) = return x
 deHoleExpr x@(IntE {}) = return x

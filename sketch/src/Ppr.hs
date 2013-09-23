@@ -5,7 +5,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 module Ppr (pretty) where
 
+
 import Smten.Prelude
+import Bits
 import Sketch
 
 class Ppr a where
@@ -31,12 +33,14 @@ instance Ppr Int where
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
-   pretty HoleE = "??"
+   pretty (HoleE _) = "??"
+   pretty (BitE b) = if b then "true" else "false"
+   pretty (BitsE n) = show (valB n)
    pretty (IntE n) = pretty n
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
 
-   prettya HoleE = "??"
+   prettya (HoleE _) = "??"
    prettya (IntE n) = pretty n
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"
