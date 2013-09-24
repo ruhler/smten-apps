@@ -25,6 +25,24 @@ evalS :: Stmt -> State SS ()
 evalS (ReturnS x) = do
   x' <- evalE x
   modify $ \s -> s { ss_out = x' }
+evalS (DeclS _ nm e) = do
+  e' <- evalE e
+  modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
+evalS (UpdateS nm e) = do
+  e' <- evalE e
+  modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
+evalS (ArrUpdateS nm i e) = do
+  env <- gets ss_vars
+  ir <- evalE i
+  er <- evalE e
+  case (ir, er) of
+     (IntE i', BitE e') -> do
+          let arr' = case Map.lookup nm env of
+                           Just (BitsE arr) -> updB arr i' e'
+                           Just x -> error $ "array update: expected array of bits, but got: " ++ show x
+                           Nothing -> error $ "array update: variable " ++ show nm ++ " not found"
+          modify $ \s -> s { ss_vars = Map.insert nm (BitsE arr') (ss_vars s) }
+     _ -> error $ "expecting: types int, bit for array update, but got: " ++ show (ir, er)
 
 evalE :: Expr -> State SS Expr
 evalE (AndE a b) = do

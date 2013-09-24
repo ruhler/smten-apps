@@ -70,6 +70,7 @@ stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
  | type id '=' expr ';' { DeclS $1 $2 $4 }
  | id '=' expr ';' { UpdateS $1 $3 }
+ | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

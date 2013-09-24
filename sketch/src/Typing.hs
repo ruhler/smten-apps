@@ -4,10 +4,24 @@ module Typing (tinferP) where
 
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
+import Smten.Control.Monad.State
 
+import Bits
 import Sketch
 
 type TypeEnv = Map.Map Name Type
+
+data TS = TS {
+    -- | The type environment.
+    ts_env :: TypeEnv,
+
+    -- | The target output type.
+    ts_oty :: Type
+}
+
+type TM = State TS
+
+
 
 -- Perform type inference and checking on the given program.
 -- Returns the type inferred program, or goes BOOM if there's a type error.
@@ -22,10 +36,34 @@ tinferP p =
 tinferD :: Map.Map Name Decl -> Decl -> Decl
 tinferD specs d =
    let m = Map.fromList (map (\(a, b) -> (b, a)) $ fd_args d) 
-   in d { fd_stmts = map (tinferS m (fd_outty d)) (fd_stmts d)}
+       stmts' = evalState (mapM tinferS (fd_stmts d)) (TS m (fd_outty d))
+   in d { fd_stmts = stmts' }
 
-tinferS :: TypeEnv -> Type -> Stmt -> Stmt
-tinferS m t (ReturnS x) = ReturnS (tinferE m t x)
+tinferS :: Stmt -> TM Stmt
+tinferS (ReturnS x) = do
+    oty <- gets ts_oty
+    env <- gets ts_env
+    return (ReturnS (tinferE env oty x))
+tinferS (DeclS ty nm e) = do
+    oty <- gets ts_oty
+    env <- gets ts_env
+    let env' = Map.insert nm ty env
+    modify $ \s -> s { ts_env = env' }
+    let e' = tinferE env' oty e
+    return (DeclS ty nm e')
+tinferS (UpdateS nm e) = do
+    env <- gets ts_env
+    case Map.lookup nm env of
+        Nothing -> error $ "variable " ++ nm ++ " not declared"
+        Just ty -> return $ UpdateS nm (tinferE env ty e)
+tinferS (ArrUpdateS nm i e) = do
+    env <- gets ts_env
+    case Map.lookup nm env of
+        Nothing -> error $ "variable " ++ nm ++ " not declared"
+        Just _ -> do
+          let i' = tinferE env IntT i
+              e' = tinferE env BitT e
+          return $ ArrUpdateS nm i' e'
 
 -- tinferE tyenv tytgt x
 --   tyenv - the type environment
@@ -41,7 +79,20 @@ tinferE m t x =
     HoleE _ -> HoleE t
     BitE {} -> x -- TODO: verify x has type t
     BitsE {} -> x -- TODO: verify x has type t
-    IntE {} -> x -- TODO: verify x has type t
+    IntE v ->
+      -- The front end uses IntE for integer literals, but they may not have
+      -- type int. Change to the appropriate expression if a different type is
+      -- expected here.
+      -- TODO: this is a bit hackish. Can we clean it up please?
+      case t of
+        IntT -> x
+        BitT -> case v of
+                  0 -> BitE False
+                  1 -> BitE True
+                  _ -> error $ "literal " ++ show v ++ " is too big for bit type"
+        BitsT w -> BitsE (intB w v)
+        _ -> error $ "integer literal used where non-int type expected"
+                
     VarE {} -> x -- TODO: verify the variable has type t
                     -- TODO: don't use UnknownT here
     AccessE a b -> AccessE (tinferE m UnknownT a) (tinferE m IntT b)

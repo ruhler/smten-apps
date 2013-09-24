@@ -1,4 +1,5 @@
 
+* represent bit arrays with lsb first like in sketch
 * clean up type inference (leverage an smt solver?)
 
 Document Behaviors of sketch:

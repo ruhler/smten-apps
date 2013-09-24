@@ -57,6 +57,12 @@ deHoleStmts = mapM deHoleStmt
 
 deHoleStmt :: Stmt -> Symbolic Stmt
 deHoleStmt (ReturnS x) = ReturnS <$> deHoleExpr x
+deHoleStmt (DeclS ty nm e) = DeclS ty nm <$> deHoleExpr e
+deHoleStmt (UpdateS nm e) = UpdateS nm <$> deHoleExpr e
+deHoleStmt (ArrUpdateS nm idx e) = do
+    idx' <- deHoleExpr idx
+    e' <- deHoleExpr e
+    return (ArrUpdateS nm idx' e')
 
 deHoleExpr :: Expr -> Symbolic Expr
 deHoleExpr (AndE a b) = do

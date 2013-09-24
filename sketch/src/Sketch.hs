@@ -45,14 +45,16 @@ instance Show Expr where
     show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
 
 data Stmt =
-     ReturnS Expr
-   | DeclS Type Name Expr
-   | UpdateS Name Expr
+     ReturnS Expr                   -- ^ return e;
+   | DeclS Type Name Expr           -- ^ ty foo = e;
+   | UpdateS Name Expr              -- ^ foo = e;
+   | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
 
 instance Show Stmt where
     show (ReturnS x) = "ReturnS " ++ show x
     show (DeclS ty nm ex) = "DeclS " ++ show ty ++ " " ++ show nm ++ " " ++ show ex
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
+    show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex
 
 data Decl = FunD {
   fd_name :: Name,

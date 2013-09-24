@@ -49,6 +49,7 @@ instance Ppr Stmt where
    pretty (ReturnS x) = "return " ++ prettya x ++ ";"
    pretty (DeclS ty nm ex) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty ex ++ ";"
    pretty (UpdateS nm ex) = pretty nm ++ " = " ++ pretty ex ++ ";"
+   pretty (ArrUpdateS nm i ex) = pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"
 
 instance Ppr Decl where
    pretty (FunD nm oty xs stmts spec) = 
