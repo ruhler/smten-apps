@@ -42,11 +42,11 @@ evalS (ArrUpdateS nm i e) = do
                            Nothing -> error $ "array update: variable " ++ show nm ++ " not found"
           modify $ \s -> s { ss_vars = Map.insert nm (BitsE arr') (ss_vars s) }
      _ -> error $ "expecting: types int, bit for array update, but got: " ++ show (ir, er)
-evalS (IfS p v) = do
+evalS (IfS p a b) = do
   p' <- evalE p
   case p' of
-    BitE True -> evalS v
-    BitE False -> return ()
+    BitE True -> evalS a
+    BitE False -> evalS b
     _ -> error $ "expected bit type for if condition, but got: " ++ show p'
 evalS (BlockS xs) = mapM_ evalS xs
 

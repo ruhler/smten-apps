@@ -1,11 +1,14 @@
 
+* assert array index in bound (miniTest13.sk)
+
+* cast bit to int (miniTest15.sk)
+* support 'repeat' keyword (miniTest14.sk)
 * support for specified width holes (miniTest10.sk)
 * support for assert statements (miniTest10.sk)
 * support generators (miniTest5.sk)
-* support ^ operator (miniTest5.sk)
 * support + operator (miniTest6.sk)
 * support - operator (miniTest12.sk)
-* support * operator (miniTest13.sk)
+* support < operator (miniTest18.sk)
 * support static global variables (miniTest6.sk)
 * support array initializers (miniTest6.sk)
 * support bit[3*4] as a type (miniTest3.sk)

@@ -63,10 +63,11 @@ deHoleStmt (ArrUpdateS nm idx e) = do
     idx' <- deHoleExpr idx
     e' <- deHoleExpr e
     return (ArrUpdateS nm idx' e')
-deHoleStmt (IfS p s) = do
+deHoleStmt (IfS p a b) = do
     p' <- deHoleExpr p
-    s' <- deHoleStmt s
-    return (IfS p' s')
+    a' <- deHoleStmt a
+    b' <- deHoleStmt b
+    return (IfS p' a' b')
 deHoleStmt (BlockS xs) = BlockS <$> mapM deHoleStmt xs
 
 deHoleExpr :: Expr -> Symbolic Expr

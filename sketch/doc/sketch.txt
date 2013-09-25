@@ -79,10 +79,10 @@ Statements
       where lval can be:    <name>          - update the variable
                      or:    <name>[<expr>]  - update a specific array element
 
-    if (<expr>) <stmt>
+    if (<expr>) <stmt>  [else <stmt>]
       - evaluate the condition. If it is true, evaluate the statement,
-        otherwise do nothing.
-        <expr> has type bit (??)
+        otherwise, if there is an else block, execute that, otherwise do
+        nothing.  <expr> has type bit (and others?)
 
     { <stmts> }
       - evaluate each statement in turn.

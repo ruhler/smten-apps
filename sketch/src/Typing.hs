@@ -64,11 +64,12 @@ tinferS (ArrUpdateS nm i e) = do
           let i' = tinferE env IntT i
               e' = tinferE env BitT e
           return $ ArrUpdateS nm i' e'
-tinferS (IfS p s) = do
+tinferS (IfS p a b) = do
     env <- gets ts_env
     let p' = tinferE env BitT p
-    s' <- tinferS s
-    return (IfS p' s')
+    a' <- tinferS a
+    b' <- tinferS b
+    return (IfS p' a' b')
 tinferS (BlockS xs) = BlockS <$> mapM tinferS xs
 
 -- tinferE tyenv tytgt x

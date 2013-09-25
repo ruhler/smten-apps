@@ -60,7 +60,7 @@ data Stmt =
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
-   | IfS Expr Stmt                  -- ^ if (e) s
+   | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
    
 
@@ -69,7 +69,7 @@ instance Show Stmt where
     show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
     show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex
-    show (IfS p s) = "IfS " ++ show p ++ " " ++ show s
+    show (IfS p a b) = "IfS " ++ show p ++ " " ++ show a ++ " " ++ show b
     show (BlockS xs) = "BlockS " ++ show xs
 
 data Decl = FunD {

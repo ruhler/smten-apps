@@ -39,6 +39,7 @@ import Sketch
     '<<'    { TkDoubleLt }
     '??'    { TkDoubleQuestionMark }
     'if'    { TkIf }
+    'else'  { TkElse }
     'bit'   { TkBit }
     'int'   { TkInt }
     'implements'   { TkImplements }
@@ -81,7 +82,8 @@ stmt :: { Stmt }
  | id '=' expr ';' { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
  | '{' stmts '}' { BlockS $2 }
- | 'if' '(' expr ')' stmt { IfS $3 $5 }
+ | 'if' '(' expr ')' stmt { IfS $3 $5 (BlockS [])}
+ | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }
