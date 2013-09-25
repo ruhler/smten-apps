@@ -32,6 +32,7 @@ data Expr =
  | NotE Expr             -- ^ ! a
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b
+ | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Type            -- ^ ??
  | BitE Bit              -- ^ 1
  | BitsE Bits            -- ^ 4'h2
@@ -42,6 +43,7 @@ data Expr =
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
+    show (ArrayE b) = "ArrayE " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
     show (MulE a b) = "MulE " ++ show a ++ " " ++ show b
     show (XorE a b) = "XorE " ++ show a ++ " " ++ show b

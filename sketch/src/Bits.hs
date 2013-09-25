@@ -3,7 +3,7 @@
 module Bits (
     Bit,
     Bits, andB, orB, notB, accessB, valB, updB, intB,
-    shlB, shrB, xor, xorB,
+    shlB, shrB, xor, xorB, mkbits,
     freeBits,
     ) where
 
@@ -16,6 +16,9 @@ data Bits = Bits {
     width :: Int,   -- the length of bits
     bits :: [Bit]  -- head is the least significant bit
 }
+
+mkbits :: [Bit] -> Bits
+mkbits l = Bits (length l) l
 
 instance Eq Bits where
     (==) a b = bits a == bits b

@@ -99,6 +99,11 @@ expr :: { Expr }
  | integer { IntE $1 }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
+ | '{' exprs '}' { ArrayE $2 }
+
+exprs :: { [Expr] }
+ : expr { [$1] }
+ | exprs ',' expr { $1 ++ [$3] }
 
 
 {

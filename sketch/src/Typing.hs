@@ -82,6 +82,7 @@ tinferE m t x =
     -- TODO: for AndE and OrE and NotE: verify the target type is bit or
     -- bit[n] or whatever else it can be.
     AndE a b -> AndE (tinferE m t a) (tinferE m t b)
+    ArrayE xs -> ArrayE (map (tinferE m BitT) xs)
     OrE a b -> OrE (tinferE m t a) (tinferE m t b)
     XorE a b -> XorE (tinferE m t a) (tinferE m t b)
     ShlE a b -> ShlE (tinferE m t a) (tinferE m IntT b)

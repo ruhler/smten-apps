@@ -30,8 +30,13 @@ instance Ppr Int where
    pretty = show
    prettya = show
 
+arrayargs :: [Expr] -> String
+arrayargs [x] = pretty x
+arrayargs (x:xs) = pretty x ++ ", " ++ arrayargs xs
+
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
+   pretty (ArrayE xs) = "{" ++ arrayargs xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
    pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
    pretty (MulE a b) = prettya a ++ " * " ++ prettya b

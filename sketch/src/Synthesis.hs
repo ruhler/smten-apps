@@ -75,6 +75,9 @@ deHoleExpr (AndE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b
     return (AndE a' b')
+deHoleExpr (ArrayE a) = do
+    a' <- mapM deHoleExpr a
+    return (ArrayE a')
 deHoleExpr (XorE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b

@@ -56,6 +56,9 @@ Expressions
          if there is any input that will cause the assertion to fail."
         (I'm not sure what that means though)
 
+    {<expr>, <expr>, ..., <expr>}
+        Array literal.
+
 Holes
 -----
     ??       - a free bit, char, bits, or int expression (and others?)

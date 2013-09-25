@@ -1,6 +1,13 @@
 
 * assert array index in bound (miniTest13.sk)
+  - To do this we want to have array length information in deHoleExpr at the
+    array access
+* support bit[3*4] as a type (miniTest3.sk)
+    - array widths are allowed to be generic expressions
+      When do we evaluate this?
 
+* support || operator (miniTest31.sk)
+* {|} hole generator (miniTest23.sk)
 * cast bit to int (miniTest15.sk)
 * support 'repeat' keyword (miniTest14.sk)
 * support for specified width holes (miniTest10.sk)
@@ -10,8 +17,7 @@
 * support - operator (miniTest12.sk)
 * support < operator (miniTest18.sk)
 * support static global variables (miniTest6.sk)
-* support array initializers (miniTest6.sk)
-* support bit[3*4] as a type (miniTest3.sk)
+
 * support for loops (miniTest8.sk)
 * make the pretty printer print prettier
 * reuse BlockS for handling function bodies? 
