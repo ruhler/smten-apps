@@ -58,6 +58,11 @@ evalE (OrE a b) = do
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `orB` bv)
       (BitE av, BitE bv) -> return $ BitE (av || bv)
+evalE (NotE a) = do
+    a' <- evalE a
+    case a' of
+      BitsE av -> return $ BitsE (notB av)
+      BitE av -> return $ BitE (not av)
 evalE (HoleE {}) = error "HoleE in evalE"
 evalE x@(BitE {}) = return x
 evalE x@(BitsE {}) = return x

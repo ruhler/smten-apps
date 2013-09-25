@@ -72,10 +72,11 @@ tinferS (ArrUpdateS nm i e) = do
 tinferE :: TypeEnv -> Type -> Expr -> Expr
 tinferE m t x =
   case x of
-    -- TODO: for AndE and OrE: verify the target type is bit or bit[n] or
-    -- whatever else it can be.
+    -- TODO: for AndE and OrE and NotE: verify the target type is bit or
+    -- bit[n] or whatever else it can be.
     AndE a b -> AndE (tinferE m t a) (tinferE m t b)
     OrE a b -> OrE (tinferE m t a) (tinferE m t b)
+    NotE a -> NotE (tinferE m t a)
     HoleE _ -> HoleE t
     BitE {} -> x -- TODO: verify x has type t
     BitsE {} -> x -- TODO: verify x has type t

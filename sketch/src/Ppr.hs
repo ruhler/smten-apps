@@ -33,6 +33,7 @@ instance Ppr Int where
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
+   pretty (NotE a) = "!" ++ prettya a
    pretty (HoleE _) = "??"
    pretty (BitE b) = if b then "true" else "false"
    pretty (BitsE n) = show (valB n)

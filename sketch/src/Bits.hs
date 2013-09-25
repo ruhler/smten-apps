@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit,
-    Bits, andB, orB, accessB, valB, updB, intB,
+    Bits, andB, orB, notB, accessB, valB, updB, intB,
     freeBits,
     ) where
 
@@ -39,6 +39,9 @@ orB a b =
       a' = padto a nw
       b' = padto b nw
   in Bits nw (zipWith (||) (bits a') (bits b'))
+
+notB :: Bits -> Bits 
+notB (Bits w bs) = Bits w (map not bs)
 
 accessB :: Bits -> Int -> Bit
 accessB (Bits w bs) i = bs !! i

@@ -26,6 +26,9 @@ Expressions
         Logical AND. Works on bit, (others?).
         Has short circuit semantics.
 
+    ! <expr>
+        Logical NOT. Works on bit, (others?).
+
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[], (others?).
         Does not have short circuit semantics.
@@ -64,7 +67,8 @@ Statements
       where lval can be:    <name>          - update the variable
                      or:    <name>[<expr>]  - update a specific array element
 
-
-        
-
+    if (<expr>) { <stmts> }
+      - evaluate the condition. If it is true, evaluate the statements,
+        otherwise do nothing.
+        <expr> has type bit (??)
 
