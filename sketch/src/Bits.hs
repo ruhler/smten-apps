@@ -3,6 +3,7 @@
 module Bits (
     Bit,
     Bits, andB, orB, notB, accessB, valB, updB, intB,
+    shlB, shrB,
     freeBits,
     ) where
 
@@ -42,6 +43,14 @@ orB a b =
 
 notB :: Bits -> Bits 
 notB (Bits w bs) = Bits w (map not bs)
+
+-- Right shift removes the least significant bits
+shrB :: Bits -> Int -> Bits
+shrB (Bits w a) b = Bits w (drop b a ++ replicate b False)
+
+-- Left shift removes the most significant bits
+shlB :: Bits -> Int -> Bits
+shlB (Bits w a) b = Bits w (replicate b False ++ (take (w-b) a))
 
 accessB :: Bits -> Int -> Bit
 accessB (Bits w bs) i = bs !! i

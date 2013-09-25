@@ -28,6 +28,8 @@ data Expr =
    AndE Expr Expr        -- ^ a & b
  | OrE Expr Expr         -- ^ a | b
  | NotE Expr             -- ^ ! a
+ | ShrE Expr Expr        -- ^ a >> b
+ | ShlE Expr Expr        -- ^ a << b
  | HoleE Type            -- ^ ??
  | BitE Bit              -- ^ 1
  | BitsE Bits            -- ^ 4'h2
@@ -39,6 +41,8 @@ data Expr =
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
+    show (ShrE a b) = "ShrE " ++ show a ++ " " ++ show b
+    show (ShlE a b) = "ShlE " ++ show a ++ " " ++ show b
     show (NotE a) = "NotE " ++ show a
     show (HoleE _) = "HoleE"
     show (BitE b) = "BitE " ++ show b

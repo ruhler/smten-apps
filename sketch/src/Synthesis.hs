@@ -78,6 +78,14 @@ deHoleExpr (OrE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b
     return (OrE a' b')
+deHoleExpr (ShlE a b) = do
+    a' <- deHoleExpr a
+    b' <- deHoleExpr b
+    return (ShlE a' b')
+deHoleExpr (ShrE a b) = do
+    a' <- deHoleExpr a
+    b' <- deHoleExpr b
+    return (ShrE a' b')
 deHoleExpr (NotE a) = NotE <$> deHoleExpr a
 deHoleExpr (HoleE ty) = mkFreeArg ty
 deHoleExpr x@(BitE {}) = return x

@@ -69,6 +69,16 @@ evalE (NotE a) = do
     case a' of
       BitsE av -> return $ BitsE (notB av)
       BitE av -> return $ BitE (not av)
+evalE (ShlE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, IntE bv) -> return $ BitsE (av `shlB` bv)
+evalE (ShrE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, IntE bv) -> return $ BitsE (av `shrB` bv)
 evalE (HoleE {}) = error "HoleE in evalE"
 evalE x@(BitE {}) = return x
 evalE x@(BitsE {}) = return x

@@ -82,6 +82,8 @@ tinferE m t x =
     -- bit[n] or whatever else it can be.
     AndE a b -> AndE (tinferE m t a) (tinferE m t b)
     OrE a b -> OrE (tinferE m t a) (tinferE m t b)
+    ShlE a b -> ShlE (tinferE m t a) (tinferE m IntT b)
+    ShrE a b -> ShrE (tinferE m t a) (tinferE m IntT b)
     NotE a -> NotE (tinferE m t a)
     HoleE _ -> HoleE t
     BitE {} -> x -- TODO: verify x has type t

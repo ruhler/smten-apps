@@ -1,4 +1,5 @@
 
+* support bit[3*4] as a type (miniTest3.sk)
 * make the pretty printer print prettier
 * reuse BlockS for handling function bodies? 
 * clean up type inference (leverage an smt solver?)

@@ -34,6 +34,8 @@ import Sketch
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
+    '>>'    { TkDoubleGt }
+    '<<'    { TkDoubleLt }
     '??'    { TkDoubleQuestionMark }
     'if'    { TkIf }
     'bit'   { TkBit }
@@ -82,6 +84,8 @@ expr :: { Expr }
  : '(' expr ')'     { $2 }
  | expr '&' expr    { AndE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
+ | expr '>>' expr    { ShrE $1 $3 }
+ | expr '<<' expr    { ShlE $1 $3 }
  | '!' expr         { NotE $2 }
  | '??' { HoleE UnknownT }
  | '{' '*' '}' { HoleE UnknownT }   -- TODO: is {*} really the same as ??

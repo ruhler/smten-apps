@@ -37,6 +37,14 @@ Expressions
         Logical OR. Works on bit, (others?).
         Has short circuit semantics.
 
+    <expr> >> <expr>
+        Logical right shift. The left argument must be an array of bits. The
+        right argument has type int.
+
+    <expr> << <expr>
+        Logical left shift. The left argument must be an array of bits. The
+        right argument has type int.
+
     <expr> [<expr>]
         Array access. The array must have an array type (bit arrays are
         allowed). The index must have Int type. Returns the value of the array
