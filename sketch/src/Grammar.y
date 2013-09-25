@@ -29,6 +29,7 @@ import Sketch
     '}'     { TkCloseBrace }
     '|'     { TkBar }
     '&'     { TkAmp }
+    '*'     { TkStar }
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
@@ -77,6 +78,7 @@ expr :: { Expr }
  | expr '&' expr    { AndE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
  | '??' { HoleE UnknownT }
+ | '{' '*' '}' { HoleE UnknownT }   -- TODO: is {*} really the same as ??
  | int { IntE $1 }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
