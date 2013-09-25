@@ -59,6 +59,10 @@ Statements
     return <expr> ;
       - set the result of the current function to the value of <expr>
 
+    <type> <name> ;
+      - Declare the variable <name> to have <type> and no initial value.
+        What happens if you try to use it before initializing it?
+
     <type> <name> = <expr> ;
       - Declare the variable <name> to have <type> and initial value <expr>
 
@@ -67,8 +71,11 @@ Statements
       where lval can be:    <name>          - update the variable
                      or:    <name>[<expr>]  - update a specific array element
 
-    if (<expr>) { <stmts> }
-      - evaluate the condition. If it is true, evaluate the statements,
+    if (<expr>) <stmt>
+      - evaluate the condition. If it is true, evaluate the statement,
         otherwise do nothing.
         <expr> has type bit (??)
+
+    { <stmts> }
+      - evaluate each statement in turn.
 

@@ -17,7 +17,7 @@ data Token =
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkBang | TkStar | TkEquals | TkComma | TkSemicolon   
   | TkDoubleQuestionMark
-  | TkBit | TkImplements | TkReturn
+  | TkIf | TkBit | TkImplements | TkReturn
   | TkID String
   | TkInt Int
   | TkEOF
@@ -37,6 +37,7 @@ instance Show Token where
     show TkComma = "TkComma"
     show TkSemicolon = "TkSemicolon"
     show TkDoubleQuestionMark = "TkDoubleQuestionMark"
+    show TkIf = "TkIf"
     show TkBit = "TkBit"
     show TkImplements = "TkImplements"
     show TkReturn = "TkReturn"
@@ -78,6 +79,7 @@ doubles = [
 
 keywords :: [(String, Token)]
 keywords = [
+    ("if", TkIf),
     ("bit", TkBit),
     ("implements", TkImplements),
     ("return", TkReturn)

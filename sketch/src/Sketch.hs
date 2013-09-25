@@ -34,6 +34,7 @@ data Expr =
  | IntE Int              -- ^ 42
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
+ | ErrE String           -- ^ used for errors
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
@@ -48,15 +49,20 @@ instance Show Expr where
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
-   | DeclS Type Name Expr           -- ^ ty foo = e;
+   | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
+   | IfS Expr Stmt                  -- ^ if (e) s
+   | BlockS [Stmt]                  -- ^ { stmts }
+   
 
 instance Show Stmt where
     show (ReturnS x) = "ReturnS " ++ show x
-    show (DeclS ty nm ex) = "DeclS " ++ show ty ++ " " ++ show nm ++ " " ++ show ex
+    show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
     show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex
+    show (IfS p s) = "IfS " ++ show p ++ " " ++ show s
+    show (BlockS xs) = "BlockS " ++ show xs
 
 data Decl = FunD {
   fd_name :: Name,

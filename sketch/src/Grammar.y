@@ -35,6 +35,7 @@ import Sketch
     ','     { TkComma }
     ';'     { TkSemicolon }
     '??'    { TkDoubleQuestionMark }
+    'if'    { TkIf }
     'bit'   { TkBit }
     'implements'   { TkImplements }
     'return'   { TkReturn }
@@ -70,9 +71,12 @@ stmts :: { [Stmt] }
 
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
- | type id '=' expr ';' { DeclS $1 $2 $4 }
+ | type id '=' expr ';' { BlockS [DeclS $1 $2, UpdateS $2 $4] }
+ | type id ';' { DeclS $1 $2 }
  | id '=' expr ';' { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
+ | '{' stmts '}' { BlockS $2 }
+ | 'if' '(' expr ')' stmt { IfS $3 $5 }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

@@ -1,5 +1,6 @@
 
-* represent bit arrays with lsb first like in sketch
+* make the pretty printer print prettier
+* reuse BlockS for handling function bodies? 
 * clean up type inference (leverage an smt solver?)
 
 Document Behaviors of sketch:

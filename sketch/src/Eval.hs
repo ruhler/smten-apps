@@ -25,9 +25,8 @@ evalS :: Stmt -> State SS ()
 evalS (ReturnS x) = do
   x' <- evalE x
   modify $ \s -> s { ss_out = x' }
-evalS (DeclS _ nm e) = do
-  e' <- evalE e
-  modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
+evalS (DeclS _ nm) =
+  modify $ \s -> s { ss_vars = Map.insert nm (error $ nm ++ " not initialized") (ss_vars s) }
 evalS (UpdateS nm e) = do
   e' <- evalE e
   modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
@@ -43,6 +42,13 @@ evalS (ArrUpdateS nm i e) = do
                            Nothing -> error $ "array update: variable " ++ show nm ++ " not found"
           modify $ \s -> s { ss_vars = Map.insert nm (BitsE arr') (ss_vars s) }
      _ -> error $ "expecting: types int, bit for array update, but got: " ++ show (ir, er)
+evalS (IfS p v) = do
+  p' <- evalE p
+  case p' of
+    BitE True -> evalS v
+    BitE False -> return ()
+    _ -> error $ "expected bit type for if condition, but got: " ++ show p'
+evalS (BlockS xs) = mapM_ evalS xs
 
 evalE :: Expr -> State SS Expr
 evalE (AndE a b) = do

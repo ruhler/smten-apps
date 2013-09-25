@@ -5,6 +5,7 @@ module Typing (tinferP) where
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import Smten.Control.Monad.State
+import Smten.Data.Functor
 
 import Bits
 import Sketch
@@ -44,13 +45,12 @@ tinferS (ReturnS x) = do
     oty <- gets ts_oty
     env <- gets ts_env
     return (ReturnS (tinferE env oty x))
-tinferS (DeclS ty nm e) = do
+tinferS (DeclS ty nm) = do
     oty <- gets ts_oty
     env <- gets ts_env
     let env' = Map.insert nm ty env
     modify $ \s -> s { ts_env = env' }
-    let e' = tinferE env' oty e
-    return (DeclS ty nm e')
+    return (DeclS ty nm)
 tinferS (UpdateS nm e) = do
     env <- gets ts_env
     case Map.lookup nm env of
@@ -64,6 +64,12 @@ tinferS (ArrUpdateS nm i e) = do
           let i' = tinferE env IntT i
               e' = tinferE env BitT e
           return $ ArrUpdateS nm i' e'
+tinferS (IfS p s) = do
+    env <- gets ts_env
+    let p' = tinferE env BitT p
+    s' <- tinferS s
+    return (IfS p' s')
+tinferS (BlockS xs) = BlockS <$> mapM tinferS xs
 
 -- tinferE tyenv tytgt x
 --   tyenv - the type environment
