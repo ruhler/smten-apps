@@ -74,6 +74,14 @@ deHoleExpr (AndE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b
     return (AndE a' b')
+deHoleExpr (XorE a b) = do
+    a' <- deHoleExpr a
+    b' <- deHoleExpr b
+    return (XorE a' b')
+deHoleExpr (MulE a b) = do
+    a' <- deHoleExpr a
+    b' <- deHoleExpr b
+    return (MulE a' b')
 deHoleExpr (OrE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b

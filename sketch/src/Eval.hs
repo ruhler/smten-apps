@@ -69,6 +69,17 @@ evalE (NotE a) = do
     case a' of
       BitsE av -> return $ BitsE (notB av)
       BitE av -> return $ BitE (not av)
+evalE (XorE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitsE (av `xorB` bv)
+      (BitE av, BitE bv) -> return $ BitE (av `xor` bv)
+evalE (MulE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (IntE av, IntE bv) -> return $ IntE (av * bv)
 evalE (ShlE a b) = do
     a' <- evalE a
     b' <- evalE b

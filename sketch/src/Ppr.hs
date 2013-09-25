@@ -33,6 +33,8 @@ instance Ppr Int where
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
+   pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
+   pretty (MulE a b) = prettya a ++ " * " ++ prettya b
    pretty (NotE a) = "!" ++ prettya a
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b

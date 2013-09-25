@@ -16,10 +16,11 @@ data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkBang | TkStar | TkEquals | TkComma | TkSemicolon   
+  | TkHat
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt
-  | TkIf | TkBit | TkImplements | TkReturn
+  | TkIf | TkBit | TkInt | TkImplements | TkReturn
   | TkID String
-  | TkInt Int
+  | TkInteger Int
   | TkEOF
 
 instance Show Token where
@@ -33,6 +34,7 @@ instance Show Token where
     show TkStar = "TkStar"
     show TkBang = "TkBang"
     show TkAmp = "TkAmp"
+    show TkHat = "TkHat"
     show TkEquals = "TkEquals"
     show TkComma = "TkComma"
     show TkSemicolon = "TkSemicolon"
@@ -41,10 +43,11 @@ instance Show Token where
     show TkDoubleGt = "TkDoubleGt"
     show TkIf = "TkIf"
     show TkBit = "TkBit"
+    show TkInt = "TkInt"
     show TkImplements = "TkImplements"
     show TkReturn = "TkReturn"
     show (TkID x) = "TkID " ++  show x
-    show (TkInt x) = "TkInt " ++ show x
+    show (TkInteger x) = "TkInteger " ++ show x
     show TkEOF = "TkEOF"
 
 -- | State is the text remaining to be parsed.
@@ -69,6 +72,7 @@ singles = [
     ('*', TkStar),
     ('!', TkBang),
     ('&', TkAmp),
+    ('^', TkHat),
     ('=', TkEquals),
     (',', TkComma),
     (';', TkSemicolon)
@@ -85,6 +89,7 @@ keywords :: [(String, Token)]
 keywords = [
     ("if", TkIf),
     ("bit", TkBit),
+    ("int", TkInt),
     ("implements", TkImplements),
     ("return", TkReturn)
   ]
@@ -112,7 +117,7 @@ lex = do
                  | otherwise -> put rest >> return (TkID $ id)
       (c:cs) | isDigit c ->
          let (ns, rest) = span isDigit cs
-         in put rest >> return (TkInt . read_int $ c:ns)
+         in put rest >> return (TkInteger . read_int $ c:ns)
       ('/':'*':cs) -> put (closeblockcomment cs) >> lex
       ('/':'/':cs) -> put (dropWhile (/= '\n') cs) >> lex
       cs -> failE $ "fail to lex: " ++ cs

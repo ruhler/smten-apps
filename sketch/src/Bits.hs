@@ -3,7 +3,7 @@
 module Bits (
     Bit,
     Bits, andB, orB, notB, accessB, valB, updB, intB,
-    shlB, shrB,
+    shlB, shrB, xor, xorB,
     freeBits,
     ) where
 
@@ -83,4 +83,17 @@ intB w x =
       f w v = case w `quotRem` 2 of
                (w2, b) -> (b == 1) : f (w-1) w2
   in Bits w (f w x)
+
+xor :: Bit -> Bit -> Bit
+xor True True = False
+xor True False = True
+xor False True = True
+xor False False = False
+
+xorB :: Bits -> Bits -> Bits
+xorB a b = 
+  let nw = max (width a) (width b)
+      a' = padto a nw
+      b' = padto b nw
+  in Bits nw (zipWith xor (bits a') (bits b'))
 

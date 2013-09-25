@@ -30,6 +30,7 @@ import Sketch
     '|'     { TkBar }
     '&'     { TkAmp }
     '!'     { TkBang }
+    '^'     { TkHat }
     '*'     { TkStar }
     '='     { TkEquals }
     ','     { TkComma }
@@ -39,10 +40,11 @@ import Sketch
     '??'    { TkDoubleQuestionMark }
     'if'    { TkIf }
     'bit'   { TkBit }
+    'int'   { TkInt }
     'implements'   { TkImplements }
     'return'   { TkReturn }
     id      { TkID $$ }
-    int     { TkInt $$ }
+    integer { TkInteger $$ }
 
 %%
 
@@ -58,7 +60,8 @@ decl :: { Decl }
 
 type :: { Type }
  : 'bit' { BitT }
- | 'bit' '[' int ']' { BitsT $3 }
+ | 'bit' '[' integer ']' { BitsT $3 }
+ | 'int' { IntT }
 
 args :: { [(Type, Name)] }
  : arg { [$1] }
@@ -83,13 +86,15 @@ stmt :: { Stmt }
 expr :: { Expr }
  : '(' expr ')'     { $2 }
  | expr '&' expr    { AndE $1 $3 }
+ | expr '*' expr    { MulE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
+ | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
  | '!' expr         { NotE $2 }
  | '??' { HoleE UnknownT }
  | '{' '*' '}' { HoleE UnknownT }   -- TODO: is {*} really the same as ??
- | int { IntE $1 }
+ | integer { IntE $1 }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
 
