@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit,
-    Bits, andB, orB, notB, accessB, valB, updB, intB,
+    Bits, andB, orB, notB, accessB, valB, updB, intB, addB,
     shlB, shrB, xor, xorB, mkbits,
     freeBits,
     ) where
@@ -27,22 +27,22 @@ instance Show Bits where
     show (Bits w b) = "Bits " ++ show b
 
 -- TOOD: pad zeros to the lsbs or msbs?
-padto :: Bits -> Int -> Bits
-padto (Bits w bs) w' = Bits w' (bs ++ replicate (w'-w) False)
+padto :: Bits -> Int -> [Bit]
+padto (Bits w bs) w' = bs ++ replicate (w'-w) False
 
 andB :: Bits -> Bits -> Bits
 andB a b = 
   let nw = max (width a) (width b)
       a' = padto a nw
       b' = padto b nw
-  in Bits nw (zipWith (&&) (bits a') (bits b'))
+  in Bits nw (zipWith (&&) a' b')
 
 orB :: Bits -> Bits -> Bits
 orB a b = 
   let nw = max (width a) (width b)
       a' = padto a nw
       b' = padto b nw
-  in Bits nw (zipWith (||) (bits a') (bits b'))
+  in Bits nw (zipWith (||) a' b')
 
 notB :: Bits -> Bits 
 notB (Bits w bs) = Bits w (map not bs)
@@ -98,5 +98,19 @@ xorB a b =
   let nw = max (width a) (width b)
       a' = padto a nw
       b' = padto b nw
-  in Bits nw (zipWith xor (bits a') (bits b'))
+  in Bits nw (zipWith xor a' b')
+
+addB :: Bits -> Bits -> Bits
+addB a b = 
+  let nw = max (width a) (width b)
+      a' = padto a nw
+      b' = padto b nw
+
+      add :: Bit -> [Bit] -> [Bit] -> [Bit]
+      add _ [] [] = []
+      add c (a:as) (b:bs) = 
+       let z = c `xor` a `xor` b
+           c' = (c && a) || (c && b) || (a && b)
+       in z : (add c' as bs)
+  in Bits nw (add False a' b')
 

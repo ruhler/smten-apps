@@ -27,18 +27,23 @@ type TM = State TS
 -- Perform type inference and checking on the given program.
 -- Returns the type inferred program, or goes BOOM if there's a type error.
 -- TODO: We probably ought to handle errors in a nicer way.
--- TODO: take the specs map as input rather than duplicate the work to create
+-- TODO: take the env map as input rather than duplicate the work to create
 -- it here and in synthesis?
 tinferP :: Prog -> Prog
 tinferP p = 
-  let specs = Map.fromList [(fd_name x, x) | x <- p]
-  in map (tinferD specs) p
+  let env = Map.fromList [(d_name x, x) | x <- p]
+  in map (tinferD env) p
 
 tinferD :: Map.Map Name Decl -> Decl -> Decl
-tinferD specs d =
+tinferD env d@(FunD {}) =
    let m = Map.fromList (map (\(a, b) -> (b, a)) $ fd_args d) 
        stmts' = evalState (mapM tinferS (fd_stmts d)) (TS m (fd_outty d))
    in d { fd_stmts = stmts' }
+tinferD env d@(VarD {}) = 
+   let -- TODO: make the right type environment from global variables.
+       m = Map.empty
+       e' = tinferE m (vd_ty d) (vd_val d)
+   in d { vd_val = e' }
 
 tinferS :: Stmt -> TM Stmt
 tinferS (ReturnS x) = do
@@ -82,6 +87,7 @@ tinferE m t x =
     -- TODO: for AndE and OrE and NotE: verify the target type is bit or
     -- bit[n] or whatever else it can be.
     AndE a b -> AndE (tinferE m t a) (tinferE m t b)
+    AddE a b -> AddE (tinferE m t a) (tinferE m t b)
     ArrayE xs -> ArrayE (map (tinferE m BitT) xs)
     OrE a b -> OrE (tinferE m t a) (tinferE m t b)
     XorE a b -> XorE (tinferE m t a) (tinferE m t b)

@@ -26,6 +26,7 @@ instance Show Type where
 
 data Expr = 
    AndE Expr Expr        -- ^ a & b
+ | AddE Expr Expr        -- ^ a + b
  | OrE Expr Expr         -- ^ a | b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
@@ -43,6 +44,7 @@ data Expr =
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
+    show (AddE a b) = "AddE " ++ show a ++ " " ++ show b
     show (ArrayE b) = "ArrayE " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
     show (MulE a b) = "MulE " ++ show a ++ " " ++ show b
@@ -74,24 +76,33 @@ instance Show Stmt where
     show (IfS p a b) = "IfS " ++ show p ++ " " ++ show a ++ " " ++ show b
     show (BlockS xs) = "BlockS " ++ show xs
 
-data Decl = FunD {
-  fd_name :: Name,
-  fd_outty :: Type,
-  fd_args :: [(Type, Name)],
-  fd_stmts :: [Stmt],
-  
-  -- | Nothing means this declaration is a specification
-  --   Just foo means this is a sketch with specification 'foo'
-  fd_spec :: Maybe Name
-}
+data Decl =
+   FunD {
+      d_name :: Name,
+      fd_outty :: Type,
+      fd_args :: [(Type, Name)],
+      fd_stmts :: [Stmt],
+      
+      -- | Nothing means this declaration is a specification
+      --   Just foo means this is a sketch with specification 'foo'
+      fd_spec :: Maybe Name }
+ | VarD {
+      vd_ty :: Type,
+      d_name :: Name,
+      vd_val :: Expr
+   }
 
 instance Show Decl where
-    show x = "FunD { " ++
-      "nm = " ++ show (fd_name x) ++ ", " ++
+    show x@(FunD {}) = "FunD { " ++
+      "nm = " ++ show (d_name x) ++ ", " ++
       "oty = " ++ show (fd_outty x) ++ ", " ++
       "args = " ++ show (fd_args x) ++ ", " ++
       "stmts = " ++ show (fd_stmts x) ++ ", " ++
       "spec = " ++ show (fd_spec x) ++ "}"
+    show x@(VarD {}) = "VarD { " ++
+      "ty = " ++ show (vd_ty x) ++ ", " ++
+      "nm = " ++ show (d_name x) ++ ", " ++
+      "val = " ++ show (vd_val x) ++ "}"
 
 type Prog = [Decl]
 

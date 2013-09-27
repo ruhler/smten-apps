@@ -36,6 +36,7 @@ arrayargs (x:xs) = pretty x ++ ", " ++ arrayargs xs
 
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
+   pretty (AddE a b) = prettya a ++ " + " ++ prettya b
    pretty (ArrayE xs) = "{" ++ arrayargs xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
    pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
@@ -69,6 +70,7 @@ instance Ppr Decl where
         ++ pprspec spec ++ "{\n"
          ++ (unlines (map (("   " ++) . pretty) stmts))
         ++ "\n}"
+   pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
 
 instance Ppr [(Type, Name)] where
    pretty [] = ""

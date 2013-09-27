@@ -18,21 +18,22 @@ import Sketch
 
 synthesize :: Prog -> SMT Prog
 synthesize p = do
-  let specs = Map.fromList [(fd_name x, x) | x <- p]
-  mapM (synthesizeD specs) p
+  let env = Map.fromList [(d_name x, x) | x <- p]
+  mapM (synthesizeD env) p
 
 -- Synthesize a single declaration
 synthesizeD :: Map.Map Name Decl -> Decl -> SMT Decl
-synthesizeD specs d =
+synthesizeD env d@(FunD {}) =
   case fd_spec d of
     Nothing -> return d
     Just s ->
-     case Map.lookup s specs of
-        Nothing -> error $ "Spec " ++ s ++ " not found for sketch " ++ show (fd_name d)
-        Just sd -> do
+     case Map.lookup s env of
+        Nothing -> error $ "Spec " ++ s ++ " not found for sketch " ++ show (d_name d)
+        Just sd@(FunD {}) -> do
           let p :: [Stmt] -> [Expr] -> Bool
               p stmts vars =
-                 let specargs = Map.fromList (zip (map snd (fd_args sd)) vars)
+                 let -- TODO: add global variables to the variable list   
+                     specargs = Map.fromList (zip (map snd (fd_args sd)) vars)
                      want = evalP (fd_stmts sd) specargs
                       
                      sketchargs = Map.fromList (zip (map snd (fd_args d)) vars)
@@ -41,7 +42,8 @@ synthesizeD specs d =
           res <- cegis (mkFreeArgs (map fst (fd_args d))) (deHoleStmts (fd_stmts d)) [] p
           case res of
             Just stmts' -> return (d { fd_stmts = stmts' })
-            Nothing -> error $ "Sketch " ++ show (fd_name d) ++ " unsatisfiable"
+            Nothing -> error $ "Sketch " ++ show (d_name d) ++ " unsatisfiable"
+synthesizeD env d@(VarD {}) = return d
                      
  
 mkFreeArgs :: [Type] -> Symbolic [Expr]
@@ -75,6 +77,10 @@ deHoleExpr (AndE a b) = do
     a' <- deHoleExpr a
     b' <- deHoleExpr b
     return (AndE a' b')
+deHoleExpr (AddE a b) = do
+    a' <- deHoleExpr a
+    b' <- deHoleExpr b
+    return (AddE a' b')
 deHoleExpr (ArrayE a) = do
     a' <- mapM deHoleExpr a
     return (ArrayE a')

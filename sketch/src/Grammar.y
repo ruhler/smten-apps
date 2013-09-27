@@ -29,6 +29,7 @@ import Sketch
     '}'     { TkCloseBrace }
     '|'     { TkBar }
     '&'     { TkAmp }
+    '+'     { TkPlus }
     '!'     { TkBang }
     '^'     { TkHat }
     '*'     { TkStar }
@@ -58,6 +59,7 @@ decl :: { Decl }
     { FunD $2 $1 $4 $7 Nothing }
  | type id '(' args ')' 'implements' id '{' stmts '}'
     { FunD $2 $1 $4 $9 (Just $7) }
+ | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }
  : 'bit' { BitT }
@@ -88,6 +90,7 @@ stmt :: { Stmt }
 expr :: { Expr }
  : '(' expr ')'     { $2 }
  | expr '&' expr    { AndE $1 $3 }
+ | expr '+' expr    { AddE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
  | expr '^' expr    { XorE $1 $3 }

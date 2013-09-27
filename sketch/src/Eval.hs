@@ -58,6 +58,12 @@ evalE (AndE a b) = do
       (BitsE av, BitsE bv) -> return $ BitsE (av `andB` bv)
       (BitE av, BitE bv) -> return $ BitE (av && bv)
       _ -> error $ "unexpected args to AndE: " ++ show (a', b')
+evalE (AddE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitsE (av `addB` bv)
+      _ -> error $ "unexpected args to AddE: " ++ show (a', b')
 evalE (ArrayE xs) = do
     let f x = do
           r <- evalE x
