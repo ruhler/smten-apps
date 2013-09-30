@@ -1,4 +1,5 @@
 *.hi
-*.smten_o
 *.prof
+*.smten_o
+*.smten_hi
 

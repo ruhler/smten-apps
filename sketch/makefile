@@ -7,12 +7,8 @@ check:
 	tclsh utils/test.tcl
 
 # Make the test case for the S2QBF and Isolate0
-test: Smten/Compiled/Main.hs
-	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
-	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<
-
-Smten/Compiled/Main.hs: test.hs S2QBF.hs Isolate0.hs
-	ghc --make -osuf smten_o -prof -c -fplugin=Smten.Plugin.Plugin test.hs -fwarn-unused-binds -fwarn-unused-imports
+test: test.hs S2QBF.hs Isolate0.hs
+	smten -o test test.hs
 
 clean:
 	rm -rf *.hi *.smten_o Smten test test_prof build/*

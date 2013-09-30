@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit,
-    Bits, andB, orB, notB, accessB, valB, updB, intB, addB,
+    Bits, andB, orB, notB, accessB, valB, updB, intB, addB, width,
     shlB, shrB, xor, xorB, mkbits,
     freeBits,
     ) where

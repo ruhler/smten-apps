@@ -1,8 +1,6 @@
 
-sudoku: Smten/Compiled/Main.hs Smten/Compiled/BitCell.hs Smten/Compiled/Board.hs Smten/Compiled/Cell.hs Smten/Compiled/EnumCell.hs Smten/Compiled/IntegerCell.hs
-	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
-	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<
+sudoku: sudoku.hs BitCell.hs Board.hs Cell.hs EnumCell.hs IntegerCell.hs
+	smten -o sudoku sudoku.hs
 
-Smten/Compiled/Main.hs: sudoku.hs BitCell.hs Board.hs Cell.hs EnumCell.hs IntegerCell.hs
-	ghc --make -osuf smten_o -prof -c -fplugin=Smten.Plugin.Plugin sudoku.hs -fwarn-unused-binds -fwarn-unused-imports
-
+clean: 
+	rm -rf *.o *.hi *.smten_o sudoku sudoku_prof Smten

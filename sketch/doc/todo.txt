@@ -1,30 +1,90 @@
 
-* assert array index in bound (miniTest13.sk)
+Features::
+BOUND_CHECK. assert array index in bound
   - To do this we want to have array length information in deHoleExpr at the
     array access
-* support bit[3*4] as a type (miniTest3.sk)
-    - array widths are allowed to be generic expressions
-      When do we evaluate this?
+    How do we do this? Merging deHoleExpr and Eval may solve this (if we also
+    have type information).
+    
 
-* support || operator (miniTest31.sk)
-* {|} hole generator (miniTest23.sk)
-* cast bit to int (miniTest15.sk)
-* support 'repeat' keyword (miniTest14.sk)
-* support for specified width holes (miniTest10.sk)
-* support for assert statements (miniTest10.sk)
-* support generators (miniTest5.sk)
-* support + operator (miniTest6.sk)
-* support - operator (miniTest12.sk)
-* support < operator (miniTest18.sk)
-* support static global variables (miniTest6.sk)
+DYNAMIC_WIDTH. support bit[3*4] as a type
+  - array widths are allowed to be generic expressions
+    When do we evaluate this?
 
-* support for loops (miniTest8.sk)
+CHOICE - {|} hole generator
+  - To implement: deHoleExpr should use mplus on both cases.
+    This is relatively easy to implement.
+    
+BIT2INT - case bit to int
+  - To implement: make an ite tree. Relatively easy.
+
+REPEAT - support the 'repeat' keyword
+  - Just another kind of statement. Relatively easy.
+
+ASSERT - support assert statements
+  - Assertions could be dynamic.
+    Make evaluation happen in symbolic?
+    This way we have access to the symbolic input variables for asserts.
+    We could merge evalS with deHoleExpr.
+
+HOLE_WIDTH - support for specified width holes
+  - To implement: easy, add a bound to a hole, handle in deHoleExpr.
+
+GENERATORS
+  - To implement:
+      Inline, then deHole. If we merge deHole with eval, we can do this at
+      evaluation time.
+    Note: needs syntax for function calls, and presumably support for normal
+    function calls (which deHole before inlining).
+
+FOR - support for loops
+  
+INTARRAY - int arrays
+
+Operators (easy to implement):
+ LOR: || boolean operator 
+ SUB - '-' operator
+ LT - '<' operator
+ EQ - '==' operator
+ PREINC - '++' prefix operator
+ INTPLUS - integer plus
+
+
+Features needed, by test case:;
+miniTest3.sk: DYNAMIC_WIDTH
+miniTest5.sk: GENERATORS
+miniTest8.sk: FOR
+miniTest10.sk: ASSERT, HOLE_WIDTH, GENERATOR, EQ
+miniTest11.sk: DYNAMIC_WIDTH, 
+miniTest12.sk: SUB, GENERATOR, 
+miniTest13.sk: BOUND_CHECK
+miniTest14.sk: REPEAT
+miniTest15.sk: BIT2INT
+miniTest16.sk: BIT2INT
+miniTest17.sk: GENERATOR, FOR, PREINC, LT
+miniTest18.sk: LT, ASSERT< BIT2INT
+miniTest19.sk: GENERATOR
+miniTest20.sk: HOLE_WIDTH
+miniTest21.sk: REPEAT, PREINC, BIT2INT
+miniTest22.sk: INTARRAY, FOR, CHOICE
+miniTest24.sk: LT, GT, ASSERT
+miniTest25.sk: GENERATOR
+miniTest28.sk: ASSERT,
+miniTest29.sk: REPEAT
+miniTest30.sk: INTPLUS, GENERATOR
+miniTest31.sk: CHOICE, LOR
+
+Other Todo::
 * make the pretty printer print prettier
 * reuse BlockS for handling function bodies? 
 * clean up type inference (leverage an smt solver?)
 
-Document Behaviors of sketch:
+Document Behaviors of sketch::
+* if you call a function in two different sketches, are it's holes shared or
+  duplicated? (that is, do we need to do everything at once, or one sketch at
+  a time?)
 * What happens to: ??[4] in terms of type inference?
     blows up
 * what happens to: 7[2] in terms of type inference?
     blows up
+

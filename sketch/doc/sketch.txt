@@ -37,6 +37,9 @@ Expressions
         Logical OR. Works on bit, (others?).
         Has short circuit semantics.
 
+    <expr> + <expr>
+        Addition. Works on bit[] and int. Does not work on bit.
+
     <expr> >> <expr>
         Logical right shift. The left argument must be an array of bits. The
         right argument has type int.
@@ -61,8 +64,10 @@ Expressions
 
 Holes
 -----
-    ??       - a free bit, char, bits, or int expression (and others?)
-    {*}      - ??? I don't know. Same as '??'?
+    ??       - a free bit, char, bits, int, or constant width array expression.
+    ??(N)    - a free constant between 0 and less than 2^N, with N an integer
+               constant. That is, N is the number of bits for the hole.
+    {*}      - Same as '??'     (is it really?)
 
 
 Statements
@@ -90,3 +95,30 @@ Statements
     { <stmts> }
       - evaluate each statement in turn.
 
+    repeat(<expr>) <stmt>
+      - The argument should be an int. Repeats the given statement that many
+        times.
+
+Declarations
+------------
+    <type> <name> (<type> <name>, <type <name>, ...) { <stmts> }
+        Define a function. If the function does not contain any holes, it may
+        be used as a specification.
+
+    <type> <name> (<type> <name>, <type <name>, ...) implements <name> { <stmts> }
+        Define a sketch with holes implementing the given specification.
+        The sketch tool will fill in the holes for each sketch such that the
+        behavior of the sketch matches the behavior of its specification.
+
+        The sketch tool will report an error if no assignment of holes makes
+        the behavior of the sketch match the behavior of its specification.
+
+    generator <type> <name> (<type> <name>, <type <name>, ...) { <stmts> }
+        Define a generator. The generator may contain holes. Whenever a
+        generator is called, it is inlined before assigning names to the
+        holes. That is, every place the generator is inlined makes a new,
+        independent copy of all the holes in the generator.
+
+    <type> <name> = <expr> ;
+        Global variable declaration.
+    

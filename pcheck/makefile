@@ -2,12 +2,8 @@
 all: test
 	./test
 
-test: Smten/Compiled/Main.hs
-	ghc --make -main-is Smten.Compiled.Main.main -o $@_prof -osuf o_prof -hisuf hi_prof $< -rtsopts -prof
-	ghc --make -main-is Smten.Compiled.Main.main -O -o $@ $<
-
-Smten/Compiled/Main.hs: test.hs PCheck.hs RingCounter.hs
-	ghc --make -osuf smten_o -prof -c -fplugin=Smten.Plugin.Plugin test.hs -fwarn-unused-binds -fwarn-unused-imports
+test: test.hs PCheck.hs RingCounter.hs
+	smten -o test test.hs
 
 clean:
 	rm -rf *.hi *.smten_o Smten test test_prof
