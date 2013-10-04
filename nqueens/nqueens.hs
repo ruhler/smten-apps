@@ -1,6 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-
 import Smten.Prelude
 import Smten.Data.Array
 import Smten.Symbolic
