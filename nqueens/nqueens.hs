@@ -1,70 +1,57 @@
 
 import Smten.Prelude
-import Smten.Data.Array
+import Smten.Control.Monad
 import Smten.Symbolic
+import Smten.Symbolic.Solver.Smten
+import Smten.Symbolic.Solver.STP
+import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2
+import Smten.Symbolic.Solver.MiniSat
+import Smten.Symbolic.Solver.Debug
+import Smten.Symbolic.Solver.Z3
 import Smten.System.Environment
 
 
--- Placement: for each column, list the row placement.
+-- Placement: A list of locations (row, col) for each queen.
 -- Indices go from 0 to n-1
-type Placement = Array Int Integer
+type Placement = [(Int, Int)]
+
+distinct :: (Eq a) => [a] -> Bool
+distinct [] = True
+distinct (x:xs) = x `notElem` xs && distinct xs
 
 issolution :: Placement -> Bool
-issolution x =
-  let nm1 = snd (bounds x)
-      pairs = [(i, j) | i <- [0..nm1-1], j <- [i+1 .. nm1]] :: [(Int, Int)]
-      valid (i, j) = and [
-            (x ! i) /= (x ! j),
-            (toEnum (j - i)) /= ((x ! j) - (x ! i)),
-            (toEnum (i - j)) /= ((x ! j) - (x ! i))]
-  in all valid pairs
+issolution places = and [
+  distinct (map fst places),
+  distinct (map snd places),
+  distinct (map (uncurry (+)) places),
+  distinct (map (uncurry (-)) places)]
 
-pretty :: [Integer] -> String
-pretty xs = 
-  let row i = replicate i '.' ++ "X" ++ replicate (length xs - 1 - i) '.'
-  in unlines (map row (map fromInteger xs))
+pretty :: Placement -> String
+pretty places = unlines [[if (r, c) `elem` places then 'X' else '.'
+                | c <- [0..(length places - 1)]]
+                | r <- [0..(length places - 1)]]
 
 nqueens :: Int -> IO ()
 nqueens n = do
   putStrLn $ "nqueens " ++ show n ++ "..."
-  r <- run_symbolic yices2 $ do
-         let freer = do
-                x <- free
-                assert (x >= 0 && x < (toEnum n))
-                return x
-         rs <- sequence (replicate n freer)
-         let place = listArray (0, n-1) rs
-         assert (issolution place)
-         return rs
-  case r of
+  result <- run_symbolic smten $ do
+         let rows = [0..(n-1)]
+         cols <- sequence $ replicate n (msum (map return [0..(n-1)]))
+         let places = zip rows cols
+         assert (issolution places)
+         return places
+  case result of
     Nothing -> putStrLn "no solution"
     Just v -> putStrLn (pretty v)
 
 usage :: IO ()
 usage = putStrLn "nqueens <n>"
 
-read_int' :: Int -> String -> Int
-read_int' x ('0':xs) = read_int' (x*10 + 0) xs
-read_int' x ('1':xs) = read_int' (x*10 + 1) xs
-read_int' x ('2':xs) = read_int' (x*10 + 2) xs
-read_int' x ('3':xs) = read_int' (x*10 + 3) xs
-read_int' x ('4':xs) = read_int' (x*10 + 4) xs
-read_int' x ('5':xs) = read_int' (x*10 + 5) xs
-read_int' x ('6':xs) = read_int' (x*10 + 6) xs
-read_int' x ('7':xs) = read_int' (x*10 + 7) xs
-read_int' x ('8':xs) = read_int' (x*10 + 8) xs
-read_int' x ('9':xs) = read_int' (x*10 + 9) xs
-read_int' x _ = x
-
-read_int :: String -> Int
-read_int ('-':xs) = negate (read_int xs)
-read_int xs = read_int' 0 xs
-
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-     [x] -> nqueens (read_int x)
+     [x] -> nqueens (read x)
      _ -> usage
 
