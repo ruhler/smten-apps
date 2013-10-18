@@ -94,6 +94,7 @@ stmt :: { Stmt }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }
+ | '(' type ')' expr { CastE $2 $4 }
  | expr '&' expr    { AndE $1 $3 }
  | expr '<' expr    { LtE $1 $3 }
  | expr '>' expr    { GtE $1 $3 }

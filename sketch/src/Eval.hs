@@ -185,4 +185,11 @@ evalE (AccessE a i) = do
     IntE i' <- evalE i
     assert (i' < width a')
     return (BitE (a' `accessB` i'))
+evalE (CastE t e) = do
+    e' <- evalE e
+    case (t, e') of
+        (IntT, BitsE v) -> return (IntE (valB v))
+        _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
+    
+    
 

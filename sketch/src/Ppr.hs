@@ -53,6 +53,7 @@ instance Ppr Expr where
    pretty (IntE n) = pretty n
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
+   pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
 
    prettya HoleE = "??"
    prettya (IntE n) = pretty n

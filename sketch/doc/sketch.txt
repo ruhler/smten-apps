@@ -40,6 +40,15 @@ Expressions
     <expr> + <expr>
         Addition. Works on bit[] and int. Does not work on bit.
 
+    <expr> - <expr>
+        Subtraction. Works on int. Does not work on bit or bit[].
+
+    <expr> < <expr>
+        Less than. Works on int. Does not work on bit or bit[].
+
+    <expr> > <expr>
+        Greater than. Works on int. Does not work on bit or bit[].
+
     <expr> >> <expr>
         Logical right shift. The left argument must be an array of bits. The
         right argument has type int.
@@ -62,6 +71,13 @@ Expressions
     {<expr>, <expr>, ..., <expr>}
         Array literal.
 
+    (<type>) <expr>
+        Explicit cast.
+        Casts supported are:
+          - T[N] to T[M] - expands or truncates as needed
+          - bit[N] to Int 
+          - float to integer, or integer to float
+
 Holes
 -----
     ??       - a free bit, char, bits, int, or constant width array expression.
@@ -74,6 +90,9 @@ Statements
 ----------
     return <expr> ;
       - set the result of the current function to the value of <expr>
+
+    assert <expr> ;
+      - assert the expression holds.
 
     <type> <name> ;
       - Declare the variable <name> to have <type> and no initial value.

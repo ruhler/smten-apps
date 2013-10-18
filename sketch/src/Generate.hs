@@ -101,10 +101,8 @@ genE x@(IntE v) = do
                _ -> x   -- TODO: is it okay to default to int?
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
-    -- TODO: don't use UnknownT here! 
-    --  The trouble is, we can't tell what the length of the array is at this
-    --  point.
     a' <- withty UnknownT $ genE a
     b' <- withty IntT (genE b)
     return (AccessE a' b')
+genE (CastE t e) = CastE t <$> withty UnknownT (genE e)
 
