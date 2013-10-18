@@ -9,9 +9,6 @@ CHOICE - {|} hole generator
   - To implement: deHoleExpr should use mplus on both cases.
     This is relatively easy to implement.
     
-REPEAT - support the 'repeat' keyword
-  - Just another kind of statement. Relatively easy.
-
 HOLE_WIDTH - support for specified width holes
   - To implement: easy, add a bound to a hole, handle in deHoleExpr.
 
@@ -32,14 +29,12 @@ miniTest8.sk: FOR
 miniTest10.sk: HOLE_WIDTH, GENERATOR, EQ
 miniTest11.sk: GENERATOR
 miniTest12.sk: GENERATOR, 
-miniTest14.sk: REPEAT
 miniTest16.sk: GENERATOR
-miniTest17.sk: GENERATOR, FOR, PREINC, LT
+miniTest17.sk: GENERATOR, FOR, PREINC
 miniTest19.sk: GENERATOR
 miniTest20.sk: HOLE_WIDTH, INTARRAY
-miniTest21.sk: REPEAT, PREINC
+miniTest21.sk: PREINC
 miniTest25.sk: GENERATOR
-miniTest29.sk: REPEAT
 miniTest30.sk: INTPLUS, GENERATOR
 miniTest31.sk: CHOICE, LOR
 

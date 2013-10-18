@@ -63,6 +63,7 @@ instance Ppr Expr where
 instance Ppr Stmt where
    pretty (ReturnS x) = "return " ++ prettya x ++ ";"
    pretty (AssertS x) = "assert " ++ prettya x ++ ";"
+   pretty (RepeatS n s) = "repeat (" ++ pretty n ++ ") " ++ pretty s
    pretty (DeclS ty nm) = pretty ty ++ " " ++ pretty nm ++ ";"
    pretty (UpdateS nm ex) = pretty nm ++ " = " ++ pretty ex ++ ";"
    pretty (ArrUpdateS nm i ex) = pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"

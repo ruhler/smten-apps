@@ -19,6 +19,7 @@ data Token =
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
+  | TkRepeat
   | TkID String
   | TkInteger Int
   | TkEOF
@@ -52,6 +53,7 @@ instance Show Token where
     show TkImplements = "TkImplements"
     show TkReturn = "TkReturn"
     show TkAssert = "TkAssert"
+    show TkRepeat = "TkRepeat"
     show (TkID x) = "TkID " ++  show x
     show (TkInteger x) = "TkInteger " ++ show x
     show TkEOF = "TkEOF"
@@ -103,7 +105,8 @@ keywords = [
     ("int", TkInt),
     ("implements", TkImplements),
     ("return", TkReturn),
-    ("assert", TkAssert)
+    ("assert", TkAssert),
+    ("repeat", TkRepeat)
   ]
 
 isIDChar :: Char -> Bool

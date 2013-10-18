@@ -73,6 +73,11 @@ evalS (AssertS p) = do
   case p' of
     BitE b -> assert b
     _ -> error $ "expected bit type for assert, but got: " ++ show p'
+evalS (RepeatS n s) = do
+  n' <- evalE n
+  case n' of
+    IntE nv -> mapM_ evalS (replicate nv s)
+    _ -> error $ "expected int type for repeat count, but got: " ++ show n'
 evalS (DeclS _ nm) =
   modify $ \s -> s { ss_vars = Map.insert nm (error $ nm ++ " not initialized") (ss_vars s) }
 evalS (UpdateS nm e) = do
@@ -111,12 +116,14 @@ evalE (AddE a b) = do
     b' <- evalE b
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `addB` bv)
+      (IntE av, IntE bv) -> return $ IntE (av + bv)
       _ -> error $ "unexpected args to AddE: " ++ show (a', b')
 evalE (SubE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `subB` bv)
+      (IntE av, IntE bv) -> return $ IntE (av - bv)
       _ -> error $ "unexpected args to SubE: " ++ show (a', b')
 evalE (LtE a b) = do
     a' <- evalE a
