@@ -70,6 +70,9 @@ genS (BlockS xs) = BlockS <$> mapM genS xs
 genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)
 genE (AddE a b) = liftM2 AddE (genE a) (genE b)
+genE (SubE a b) = liftM2 SubE (genE a) (genE b)
+genE (LtE a b) = liftM2 LtE (withty UnknownT $ genE a) (withty UnknownT $ genE b)
+genE (GtE a b) = liftM2 GtE (withty UnknownT $ genE a) (withty UnknownT $ genE b)
 genE (ArrayE a) = ArrayE <$> withty BitT (mapM genE a)
 genE (XorE a b) = liftM2 XorE (genE a) (genE b)
 genE (MulE a b) = liftM2 MulE (genE a) (genE b)
@@ -95,7 +98,7 @@ genE x@(IntE v) = do
                          1 -> BitE True
                          _ -> error $ "literal " ++ show v ++ " is too big for bit type"
                BitsT (IntE w) -> BitsE (intB w v)
-               _ -> error $ "integer literal used where non-int type expected"
+               _ -> x   -- TODO: is it okay to default to int?
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
     -- TODO: don't use UnknownT here! 

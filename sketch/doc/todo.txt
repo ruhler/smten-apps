@@ -24,28 +24,25 @@ INTARRAY - int arrays
 
 Operators (easy to implement):
  LOR: || boolean operator 
- SUB - '-' operator
- LT - '<' operator
  EQ - '==' operator
  PREINC - '++' prefix operator
  INTPLUS - integer plus
 
 
 Features needed, by test case:;
-miniTest5.sk: GENERATORS
+miniTest5.sk: GENERATOR
 miniTest8.sk: FOR
 miniTest10.sk: HOLE_WIDTH, GENERATOR, EQ
 miniTest11.sk: GENERATOR
-miniTest12.sk: SUB, GENERATOR, 
+miniTest12.sk: GENERATOR, 
 miniTest14.sk: REPEAT
 miniTest15.sk: BIT2INT
 miniTest16.sk: BIT2INT, GENERATOR
 miniTest17.sk: GENERATOR, FOR, PREINC, LT
-miniTest18.sk: LT, BIT2INT
+miniTest18.sk: BIT2INT
 miniTest19.sk: GENERATOR
 miniTest20.sk: HOLE_WIDTH, INTARRAY
 miniTest21.sk: REPEAT, PREINC, BIT2INT
-miniTest24.sk: LT, GT
 miniTest25.sk: GENERATOR
 miniTest29.sk: REPEAT
 miniTest30.sk: INTPLUS, GENERATOR
@@ -70,4 +67,5 @@ Document Behaviors of sketch::
     blows up
 * what happens to: 7[2] in terms of type inference?
     blows up
+* are < and > supported for bits?
 

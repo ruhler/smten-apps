@@ -28,6 +28,9 @@ instance Show Type where
 data Expr = 
    AndE Expr Expr        -- ^ a & b
  | AddE Expr Expr        -- ^ a + b
+ | SubE Expr Expr        -- ^ a - b
+ | LtE Expr Expr         -- ^ a < b
+ | GtE Expr Expr         -- ^ a > b
  | OrE Expr Expr         -- ^ a | b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
@@ -46,6 +49,9 @@ data Expr =
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
     show (AddE a b) = "AddE " ++ show a ++ " " ++ show b
+    show (SubE a b) = "SubE " ++ show a ++ " " ++ show b
+    show (GtE a b) = "GtE " ++ show a ++ " " ++ show b
+    show (LtE a b) = "LtE " ++ show a ++ " " ++ show b
     show (ArrayE b) = "ArrayE " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
     show (MulE a b) = "MulE " ++ show a ++ " " ++ show b

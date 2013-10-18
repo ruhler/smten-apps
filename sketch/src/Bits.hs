@@ -1,9 +1,10 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
-    Bit,
-    Bits, andB, orB, notB, accessB, valB, updB, intB, addB, width,
-    shlB, shrB, xor, xorB, mkbits,
+    Bit, Bits,
+    andB, orB, notB, accessB, valB, updB, intB, addB, subB, ltB, gtB,
+    shlB, shrB, xor, xorB,
+    mkbits, width,
     freeBits,
     ) where
 
@@ -43,6 +44,12 @@ orB a b =
       a' = padto a nw
       b' = padto b nw
   in Bits nw (zipWith (||) a' b')
+
+ltB :: Bits -> Bits -> Bit
+ltB a b = isneg (a `subB` b)
+
+gtB :: Bits -> Bits -> Bit
+gtB a b = isneg (b `subB` a)
 
 notB :: Bits -> Bits 
 notB (Bits w bs) = Bits w (map not bs)
@@ -105,12 +112,22 @@ addB a b =
   let nw = max (width a) (width b)
       a' = padto a nw
       b' = padto b nw
-
-      add :: Bit -> [Bit] -> [Bit] -> [Bit]
-      add _ [] [] = []
-      add c (a:as) (b:bs) = 
-       let z = c `xor` a `xor` b
-           c' = (c && a) || (c && b) || (a && b)
-       in z : (add c' as bs)
   in Bits nw (add False a' b')
+
+subB :: Bits -> Bits -> Bits
+subB a b = 
+  let nw = max (width a) (width b)
+      a' = padto a nw
+      b' = padto b nw
+  in Bits nw (add True a' (map not b'))
+
+add :: Bit -> [Bit] -> [Bit] -> [Bit]
+add _ [] [] = []
+add c (a:as) (b:bs) = 
+ let z = c `xor` a `xor` b
+     c' = (c && a) || (c && b) || (a && b)
+ in z : (add c' as bs)
+
+isneg :: Bits -> Bit
+isneg (Bits _ bs) = last bs
 

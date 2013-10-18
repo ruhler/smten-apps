@@ -112,6 +112,26 @@ evalE (AddE a b) = do
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `addB` bv)
       _ -> error $ "unexpected args to AddE: " ++ show (a', b')
+evalE (SubE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitsE (av `subB` bv)
+      _ -> error $ "unexpected args to SubE: " ++ show (a', b')
+evalE (LtE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitE (av `ltB` bv)
+      (IntE av, IntE bv) -> return $ BitE (av < bv)
+      _ -> error $ "unexpected args to LtE: " ++ show (a', b')
+evalE (GtE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitE (av `gtB` bv)
+      (IntE av, IntE bv) -> return $ BitE (av > bv)
+      _ -> error $ "unexpected args to GtE: " ++ show (a', b')
 evalE (ArrayE xs) = do
     let f x = do
           r <- evalE x

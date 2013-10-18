@@ -29,7 +29,10 @@ import Sketch
     '}'     { TkCloseBrace }
     '|'     { TkBar }
     '&'     { TkAmp }
+    '<'     { TkLT }
+    '>'     { TkGT }
     '+'     { TkPlus }
+    '-'     { TkMinus }
     '!'     { TkBang }
     '^'     { TkHat }
     '*'     { TkStar }
@@ -92,7 +95,10 @@ stmt :: { Stmt }
 expr :: { Expr }
  : '(' expr ')'     { $2 }
  | expr '&' expr    { AndE $1 $3 }
+ | expr '<' expr    { LtE $1 $3 }
+ | expr '>' expr    { GtE $1 $3 }
  | expr '+' expr    { AddE $1 $3 }
+ | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
  | expr '^' expr    { XorE $1 $3 }

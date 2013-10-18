@@ -37,6 +37,9 @@ arrayargs (x:xs) = pretty x ++ ", " ++ arrayargs xs
 instance Ppr Expr where
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
    pretty (AddE a b) = prettya a ++ " + " ++ prettya b
+   pretty (SubE a b) = prettya a ++ " - " ++ prettya b
+   pretty (LtE a b) = prettya a ++ " < " ++ prettya b
+   pretty (GtE a b) = prettya a ++ " > " ++ prettya b
    pretty (ArrayE xs) = "{" ++ arrayargs xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
    pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
