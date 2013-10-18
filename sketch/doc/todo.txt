@@ -1,11 +1,9 @@
-Next::
-* allow array length to be an expression, and evaluate it at generate time.
-    Should fix miniTest3.sk
-
 Features::
-DYNAMIC_WIDTH. support bit[3*4] as a type
-  - array widths are allowed to be generic expressions
-    When do we evaluate this?
+GENERATORS
+  - To implement:
+      Inline, then deHole. This should be done at generation time.
+    Note: needs syntax for function calls, and presumably support for normal
+    function calls (which deHole before inlining).
 
 CHOICE - {|} hole generator
   - To implement: deHoleExpr should use mplus on both cases.
@@ -24,13 +22,6 @@ ASSERT - support assert statements
 HOLE_WIDTH - support for specified width holes
   - To implement: easy, add a bound to a hole, handle in deHoleExpr.
 
-GENERATORS
-  - To implement:
-      Inline, then deHole. If we merge deHole with eval, we can do this at
-      evaluation time.
-    Note: needs syntax for function calls, and presumably support for normal
-    function calls (which deHole before inlining).
-
 FOR - support for loops
   
 INTARRAY - int arrays
@@ -45,11 +36,10 @@ Operators (easy to implement):
 
 
 Features needed, by test case:;
-miniTest3.sk: DYNAMIC_WIDTH
 miniTest5.sk: GENERATORS
 miniTest8.sk: FOR
 miniTest10.sk: ASSERT, HOLE_WIDTH, GENERATOR, EQ
-miniTest11.sk: DYNAMIC_WIDTH, 
+miniTest11.sk: DYNAMIC_WIDTH, GENERATOR
 miniTest12.sk: SUB, GENERATOR, 
 miniTest14.sk: REPEAT
 miniTest15.sk: BIT2INT

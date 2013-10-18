@@ -1,6 +1,6 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module Eval (evalP) where
+module Eval (evalP, evalT) where
 
 import Smten.Prelude
 import Smten.Control.Monad.State
@@ -29,6 +29,14 @@ evalP :: Prog -> ProgramInput -> Bool
 evalP p i =
   let env = Map.fromList [(d_name d, d) | d <- p]
   in all (evalD env i) p
+
+-- Evaluate a type.
+-- TODO: Don't we need to supply an environment here?
+evalT :: Type -> Type
+evalT BitT = BitT
+evalT (BitsT e) = BitsT $ evalState (evalE e) (SS Map.empty (error "evalT.ss_out") True)
+evalT IntT = IntT
+evalT UnknownT = UnknownT
 
 evalD :: ProgramEnv -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True

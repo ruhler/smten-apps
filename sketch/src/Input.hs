@@ -11,6 +11,7 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Bits
+import Eval
 import Sketch
 
 -- Construct a sample input for the given program.
@@ -34,9 +35,11 @@ mkFreeArgs = mapM mkFreeArg
 
 -- Given a type, construct a free expression of that type.
 mkFreeArg :: Type -> Symbolic Expr
-mkFreeArg BitT = BitE <$> free
-mkFreeArg (BitsT (IntE w)) = BitsE <$> freeBits w
-mkFreeArg IntT = IntE <$> freeInt
+mkFreeArg t =
+  case evalT t of
+    BitT -> BitE <$> free
+    BitsT (IntE w) -> BitsE <$> freeBits w
+    IntT -> IntE <$> freeInt
 
 -- TODO: Cover more of the space of integers!
 --       As determinied by appropriate input flags.
