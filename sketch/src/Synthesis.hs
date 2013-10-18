@@ -34,11 +34,11 @@ synthesizeD env d@(FunD {}) =
               p stmts vars =
                  let -- TODO: add global variables to the variable list   
                      specargs = Map.fromList (zip (map snd (fd_args sd)) vars)
-                     want = evalP (fd_stmts sd) specargs
+                     (want, gdw) = evalP (fd_stmts sd) specargs
                       
                      sketchargs = Map.fromList (zip (map snd (fd_args d)) vars)
-                     got = evalP stmts sketchargs
-                 in want `valEq` got
+                     (got, gdg) = evalP stmts sketchargs
+                 in and [gdw, gdg, want `valEq` got]
           res <- cegis (mkFreeArgs (map fst (fd_args d))) (deHoleStmts (fd_stmts d)) [] p
           case res of
             Just stmts' -> return (d { fd_stmts = stmts' })

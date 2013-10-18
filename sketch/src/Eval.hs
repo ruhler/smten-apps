@@ -14,11 +14,19 @@ data SS = SS {
     ss_vars :: Map.Map Name Expr,
 
     -- | The output of the statement if any.
-    ss_out :: Expr
+    ss_out :: Expr,
+
+    -- | Predicate which says if the result is valid.
+    ss_valid :: Bool
 }
 
-evalP :: [Stmt] -> Map.Map Name Expr -> Expr
-evalP stmts args = ss_out $ execState (mapM evalS stmts) (SS args (error "evalP: output not defined"))
+evalP :: [Stmt] -> Map.Map Name Expr -> (Expr, Bool)
+evalP stmts args =
+  case execState (mapM evalS stmts) (SS args (error "evalP: output not defined") True) of
+       SS _ e v -> (e, v)
+
+assert :: Bool -> State SS ()
+assert p = modify $ \s -> s { ss_valid = ss_valid s && p }
 
 -- | Evaluate a statement
 evalS :: Stmt -> State SS ()
@@ -115,5 +123,6 @@ evalE (VarE nm) = do
 evalE (AccessE a i) = do
     BitsE a' <- evalE a
     IntE i' <- evalE i
+    assert (i' < width a')
     return (BitE (a' `accessB` i'))
 

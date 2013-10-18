@@ -1,12 +1,5 @@
 
 Features::
-BOUND_CHECK. assert array index in bound
-  - To do this we want to have array length information in deHoleExpr at the
-    array access
-    How do we do this? Merging deHoleExpr and Eval may solve this (if we also
-    have type information).
-    
-
 DYNAMIC_WIDTH. support bit[3*4] as a type
   - array widths are allowed to be generic expressions
     When do we evaluate this?
@@ -51,15 +44,12 @@ Operators (easy to implement):
 
 
 Features needed, by test case:;
-miniTest2.sk: BOUND_CHECK
-miniTest2.s.sk: BOUND_CHECK
 miniTest3.sk: DYNAMIC_WIDTH
 miniTest5.sk: GENERATORS
 miniTest8.sk: FOR
 miniTest10.sk: ASSERT, HOLE_WIDTH, GENERATOR, EQ
 miniTest11.sk: DYNAMIC_WIDTH, 
 miniTest12.sk: SUB, GENERATOR, 
-miniTest13.sk: BOUND_CHECK
 miniTest14.sk: REPEAT
 miniTest15.sk: BIT2INT
 miniTest16.sk: BIT2INT
@@ -68,7 +58,6 @@ miniTest18.sk: LT, ASSERT< BIT2INT
 miniTest19.sk: GENERATOR
 miniTest20.sk: HOLE_WIDTH
 miniTest21.sk: REPEAT, PREINC, BIT2INT
-miniTest22.sk: BOUND_CHECK
 miniTest24.sk: LT, GT, ASSERT
 miniTest25.sk: GENERATOR
 miniTest28.sk: ASSERT,
