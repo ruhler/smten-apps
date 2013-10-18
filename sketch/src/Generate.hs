@@ -63,45 +63,18 @@ genS (ArrUpdateS nm idx e) = do
     idx' <- withty IntT $ genE idx
     e' <- withty BitT $ genE e
     return (ArrUpdateS nm idx' e')
-genS (IfS p a b) = do
-    p' <- withty BitT (genE p)
-    a' <- genS a
-    b' <- genS b
-    return (IfS p' a' b')
+genS (IfS p a b) = liftM3 IfS (withty BitT $ genE p) (genS a) (genS b)
 genS (BlockS xs) = BlockS <$> mapM genS xs
 
 genE :: Expr -> GM Expr
-genE (AndE a b) = do
-    a' <- genE a
-    b' <- genE b
-    return (AndE a' b')
-genE (AddE a b) = do
-    a' <- genE a
-    b' <- genE b
-    return (AddE a' b')
-genE (ArrayE a) = do
-    a' <- withty BitT (mapM genE a)
-    return (ArrayE a')
-genE (XorE a b) = do
-    a' <- genE a
-    b' <- genE b
-    return (XorE a' b')
-genE (MulE a b) = do
-    a' <- genE a
-    b' <- genE b
-    return (MulE a' b')
-genE (OrE a b) = do
-    a' <- genE a
-    b' <- genE b
-    return (OrE a' b')
-genE (ShlE a b) = do
-    a' <- genE a
-    b' <- withty IntT $ genE b
-    return (ShlE a' b')
-genE (ShrE a b) = do
-    a' <- genE a
-    b' <- withty IntT $ genE b
-    return (ShrE a' b')
+genE (AndE a b) = liftM2 AndE (genE a) (genE b)
+genE (AddE a b) = liftM2 AddE (genE a) (genE b)
+genE (ArrayE a) = ArrayE <$> withty BitT (mapM genE a)
+genE (XorE a b) = liftM2 XorE (genE a) (genE b)
+genE (MulE a b) = liftM2 MulE (genE a) (genE b)
+genE (OrE a b) = liftM2 OrE (genE a) (genE b)
+genE (ShlE a b) = liftM2 ShlE (genE a) (withty IntT $ genE b)
+genE (ShrE a b) = liftM2 ShrE (genE a) (withty IntT $ genE b)
 genE (NotE a) = NotE <$> genE a
 genE HoleE = do
   ty <- gets ts_oty

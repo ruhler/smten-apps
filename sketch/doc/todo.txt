@@ -1,7 +1,5 @@
 Next::
-1. do full program analysis instead of one function at a time.
-2. Merge typeing and dehole into a single 'generate' pass.
-3. allow array length to be an expression, and evaluate it at generate time.
+* allow array length to be an expression, and evaluate it at generate time.
     Should fix miniTest3.sk
 
 Features::
