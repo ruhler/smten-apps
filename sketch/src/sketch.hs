@@ -18,7 +18,8 @@ main = do
   sk <- case evalStateT parseSketch input of
             Left msg -> fail msg
             Right x -> return x
-  let sktyped = tinferP sk
-  sksynthed <- runSMT yices2 (synthesize sktyped)
-  putStrLn (pretty sksynthed)
+  syn <- runSMT yices2 (synthesize sk)
+  case syn of
+    Nothing -> fail "sketch not satisfiable"
+    Just v -> putStrLn (pretty v)
 

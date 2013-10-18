@@ -7,7 +7,10 @@ import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 
 import Bits
+import Input
 import Sketch
+
+type ProgramEnv = Map.Map String Decl
 
 data SS = SS {
     -- | Local variables. Already evaluated.
@@ -20,10 +23,35 @@ data SS = SS {
     ss_valid :: Bool
 }
 
-evalP :: [Stmt] -> Map.Map Name Expr -> (Expr, Bool)
-evalP stmts args =
-  case execState (mapM evalS stmts) (SS args (error "evalP: output not defined") True) of
+-- Evaluate a sketch program on the given program input.
+--   It runs each harness on the harness's input, and returns whether all the
+--   harnesses completed successfully.
+evalP :: Prog -> ProgramInput -> Bool
+evalP p i =
+  let env = Map.fromList [(d_name d, d) | d <- p]
+  in all (evalD env i) p
+
+evalD :: ProgramEnv -> ProgramInput -> Decl -> Bool
+evalD env i (VarD {}) = True
+evalD env i d@(FunD {}) =
+  case fd_spec d of
+    Nothing -> True
+    Just snm
+      | Just sd@(FunD {}) <- Map.lookup snm env
+      , Just args <- Map.lookup (d_name d) i ->
+          let -- TODO: add global variables to the variable list   
+              specargs = Map.fromList (zip (map snd (fd_args sd)) args)
+              (want, gdw) = evalSs (fd_stmts sd) specargs
+               
+              sketchargs = Map.fromList (zip (map snd (fd_args d)) args)
+              (got, gdg) = evalSs (fd_stmts d) sketchargs
+          in and [gdw, gdg, want `valEq` got]
+
+evalSs :: [Stmt] -> Map.Map Name Expr -> (Expr, Bool)
+evalSs stmts args =
+  case execState (mapM evalS stmts) (SS args (error "evalSs: output not defined") True) of
        SS _ e v -> (e, v)
+
 
 assert :: Bool -> State SS ()
 assert p = modify $ \s -> s { ss_valid = ss_valid s && p }

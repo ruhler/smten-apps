@@ -1,3 +1,8 @@
+Next::
+1. do full program analysis instead of one function at a time.
+2. Merge typeing and dehole into a single 'generate' pass.
+3. allow array length to be an expression, and evaluate it at generate time.
+    Should fix miniTest3.sk
 
 Features::
 DYNAMIC_WIDTH. support bit[3*4] as a type
@@ -15,10 +20,8 @@ REPEAT - support the 'repeat' keyword
   - Just another kind of statement. Relatively easy.
 
 ASSERT - support assert statements
-  - Assertions could be dynamic.
-    Make evaluation happen in symbolic?
-    This way we have access to the symbolic input variables for asserts.
-    We could merge evalS with deHoleExpr.
+  - Using the existing support for assertions during eval, this should be easy
+    to implement.
 
 HOLE_WIDTH - support for specified width holes
   - To implement: easy, add a bound to a hole, handle in deHoleExpr.
@@ -64,6 +67,12 @@ miniTest28.sk: ASSERT,
 miniTest29.sk: REPEAT
 miniTest30.sk: INTPLUS, GENERATOR
 miniTest31.sk: CHOICE, LOR
+
+Performance Ideas:: (consider only AFTER we run into performance problems)
+* split a program into independent pieces if there are any?
+* perform simplification at start to avoid re-evaluating things we know every
+  iteration of the CEGIS loop?
+* do incremental unrolling on the size of inputs and holes we try?
 
 Other Todo::
 * make the pretty printer print prettier
