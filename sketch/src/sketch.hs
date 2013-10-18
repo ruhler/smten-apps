@@ -4,6 +4,7 @@
 import Smten.Prelude
 import Smten.Control.Monad.State
 import Smten.Symbolic.SMT
+import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Yices2
 
 import Grammar

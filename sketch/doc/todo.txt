@@ -51,6 +51,8 @@ Operators (easy to implement):
 
 
 Features needed, by test case:;
+miniTest2.sk: BOUND_CHECK
+miniTest2.s.sk: BOUND_CHECK
 miniTest3.sk: DYNAMIC_WIDTH
 miniTest5.sk: GENERATORS
 miniTest8.sk: FOR
@@ -66,7 +68,7 @@ miniTest18.sk: LT, ASSERT< BIT2INT
 miniTest19.sk: GENERATOR
 miniTest20.sk: HOLE_WIDTH
 miniTest21.sk: REPEAT, PREINC, BIT2INT
-miniTest22.sk: INTARRAY, FOR, CHOICE
+miniTest22.sk: BOUND_CHECK
 miniTest24.sk: LT, GT, ASSERT
 miniTest25.sk: GENERATOR
 miniTest28.sk: ASSERT,

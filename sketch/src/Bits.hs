@@ -83,8 +83,8 @@ updB (Bits w vals) i v =
 intB :: Int -> Int -> Bits
 intB w x = 
   let f 0 _ = []
-      f w v = case w `quotRem` 2 of
-               (w2, b) -> (b == 1) : f (w-1) w2
+      f w v = case v `quotRem` 2 of
+               (v2, b) -> (b == 1) : f (w-1) v2
   in Bits w (f w x)
 
 xor :: Bit -> Bit -> Bit
