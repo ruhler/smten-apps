@@ -9,7 +9,6 @@ import Smten.Symbolic.Solver.Yices2
 
 import Grammar
 import Ppr
-import Typing
 import Synthesis
 
 main :: IO ()

@@ -97,8 +97,8 @@ expr :: { Expr }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
  | '!' expr         { NotE $2 }
- | '??' { HoleE UnknownT }
- | '{' '*' '}' { HoleE UnknownT }   -- TODO: is {*} really the same as ??
+ | '??' { HoleE }
+ | '{' '*' '}' { HoleE }   -- TODO: is {*} really the same as ??
  | integer { IntE $1 }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }

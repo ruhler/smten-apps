@@ -2,9 +2,13 @@
 module Generate (generate) where
 
 import Smten.Prelude
+import Smten.Control.Monad.State
 import Smten.Data.Functor
+import qualified Smten.Data.Map as Map
+import Smten.Data.Tuple
 import Smten.Symbolic
 
+import Bits
 import Input
 import Sketch
 
@@ -13,70 +17,117 @@ import Sketch
 generate :: Prog -> Symbolic Prog
 generate = mapM generateD
 
+type TypeEnv = Map.Map Name Type
+
+data TS = TS {
+    -- | The type environment.
+    ts_env :: TypeEnv,
+
+    -- | The target output type.
+    ts_oty :: Type
+}
+
+type GM = StateT TS Symbolic
+
 generateD :: Decl -> Symbolic Decl
 generateD d@(VarD {}) = return d
 generateD d@(FunD {}) = do
-    stmts' <- deHoleStmts (fd_stmts d)
+    let tyenv = Map.fromList (map swap $ fd_args d)
+    stmts' <- evalStateT (genSs (fd_stmts d)) (TS tyenv (fd_outty d))
     return $ d { fd_stmts = stmts' }
 
-deHoleStmts :: [Stmt] -> Symbolic [Stmt]
-deHoleStmts = mapM deHoleStmt
+withty :: Type -> GM a -> GM a
+withty t x = do
+  oldt <- gets ts_oty
+  modify $ \s -> s { ts_oty = t }
+  v <- x
+  modify $ \s -> s { ts_oty = oldt }
+  return v
 
-deHoleStmt :: Stmt -> Symbolic Stmt
-deHoleStmt (ReturnS x) = ReturnS <$> deHoleExpr x
-deHoleStmt s@(DeclS ty nm) = return s
-deHoleStmt (UpdateS nm e) = UpdateS nm <$> deHoleExpr e
-deHoleStmt (ArrUpdateS nm idx e) = do
-    idx' <- deHoleExpr idx
-    e' <- deHoleExpr e
+genSs :: [Stmt] -> GM [Stmt]
+genSs = mapM genS
+
+genS :: Stmt -> GM Stmt
+genS (ReturnS x) = ReturnS <$> genE x
+genS s@(DeclS ty nm) = do
+  env <- gets ts_env
+  let env' = Map.insert nm ty env
+  modify $ \s -> s { ts_env = env' }
+  return s
+genS (UpdateS nm e) = do
+  env <- gets ts_env
+  case Map.lookup nm env of
+    Nothing -> error $ "variable " ++ nm ++ " not in scope"
+    Just ty -> UpdateS nm <$> (withty ty (genE e))
+genS (ArrUpdateS nm idx e) = do
+    idx' <- withty IntT $ genE idx
+    e' <- withty BitT $ genE e
     return (ArrUpdateS nm idx' e')
-deHoleStmt (IfS p a b) = do
-    p' <- deHoleExpr p
-    a' <- deHoleStmt a
-    b' <- deHoleStmt b
+genS (IfS p a b) = do
+    p' <- withty BitT (genE p)
+    a' <- genS a
+    b' <- genS b
     return (IfS p' a' b')
-deHoleStmt (BlockS xs) = BlockS <$> mapM deHoleStmt xs
+genS (BlockS xs) = BlockS <$> mapM genS xs
 
-deHoleExpr :: Expr -> Symbolic Expr
-deHoleExpr (AndE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE :: Expr -> GM Expr
+genE (AndE a b) = do
+    a' <- genE a
+    b' <- genE b
     return (AndE a' b')
-deHoleExpr (AddE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (AddE a b) = do
+    a' <- genE a
+    b' <- genE b
     return (AddE a' b')
-deHoleExpr (ArrayE a) = do
-    a' <- mapM deHoleExpr a
+genE (ArrayE a) = do
+    a' <- withty BitT (mapM genE a)
     return (ArrayE a')
-deHoleExpr (XorE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (XorE a b) = do
+    a' <- genE a
+    b' <- genE b
     return (XorE a' b')
-deHoleExpr (MulE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (MulE a b) = do
+    a' <- genE a
+    b' <- genE b
     return (MulE a' b')
-deHoleExpr (OrE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (OrE a b) = do
+    a' <- genE a
+    b' <- genE b
     return (OrE a' b')
-deHoleExpr (ShlE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (ShlE a b) = do
+    a' <- genE a
+    b' <- withty IntT $ genE b
     return (ShlE a' b')
-deHoleExpr (ShrE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (ShrE a b) = do
+    a' <- genE a
+    b' <- withty IntT $ genE b
     return (ShrE a' b')
-deHoleExpr (NotE a) = NotE <$> deHoleExpr a
-deHoleExpr (HoleE ty) = mkFreeArg ty
-deHoleExpr x@(BitE {}) = return x
-deHoleExpr x@(BitsE {}) = return x
-deHoleExpr x@(IntE {}) = return x
-deHoleExpr x@(VarE {}) = return x
-deHoleExpr (AccessE a b) = do
-    a' <- deHoleExpr a
-    b' <- deHoleExpr b
+genE (NotE a) = NotE <$> genE a
+genE HoleE = do
+  ty <- gets ts_oty
+  lift $ mkFreeArg ty
+genE x@(BitE {}) = return x
+genE x@(BitsE {}) = return x
+genE x@(IntE v) = do
+    -- The front end uses IntE for integer literals, but they may not have
+    -- type int. Change to the appropriate expression if a different type is
+    -- expected here.
+    -- TODO: this is a bit hackish. Can we clean it up please?
+    t <- gets ts_oty
+    return $ case t of
+               IntT -> x
+               BitT -> case v of
+                         0 -> BitE False
+                         1 -> BitE True
+                         _ -> error $ "literal " ++ show v ++ " is too big for bit type"
+               BitsT w -> BitsE (intB w v)
+               _ -> error $ "integer literal used where non-int type expected"
+genE x@(VarE {}) = return x
+genE (AccessE a b) = do
+    -- TODO: don't use UnknownT here! 
+    --  The trouble is, we can't tell what the length of the array is at this
+    --  point.
+    a' <- withty UnknownT $ genE a
+    b' <- withty IntT (genE b)
     return (AccessE a' b')
 

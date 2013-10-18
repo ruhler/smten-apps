@@ -44,14 +44,14 @@ instance Ppr Expr where
    pretty (NotE a) = "!" ++ prettya a
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
-   pretty (HoleE _) = "??"
+   pretty (HoleE) = "??"
    pretty (BitE b) = if b then "true" else "false"
    pretty (BitsE n) = show (valB n)
    pretty (IntE n) = pretty n
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
 
-   prettya (HoleE _) = "??"
+   prettya HoleE = "??"
    prettya (IntE n) = pretty n
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"
