@@ -9,7 +9,7 @@ import Smten.Prelude
 import Smten.Control.Monad.Error
 import Smten.Control.Monad.State
 
-import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
+import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit)
 import Smten.Data.Functor ((<$>))
 
 data Token =

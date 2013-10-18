@@ -7,7 +7,6 @@ import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 
 import Bits
-import Input
 import Sketch
 
 type ProgramEnv = Map.Map String Decl

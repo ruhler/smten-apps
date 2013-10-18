@@ -3,6 +3,7 @@
 module Sketch (
     Prog, Decl(..), Type(..), Name, Stmt(..),
     Expr(..),
+    FunctionInput, ProgramInput,
     valEq,
     ) where
 
@@ -15,9 +16,9 @@ type Name = String
 
 data Type = 
     BitT              -- bit
-  | BitsT Int         -- bit[n]
+  | BitsT Expr        -- bit[n]
   | IntT              -- int
-  | UnknownT          -- type to be inferred during type inference.
+  | UnknownT          -- type is not known
 
 instance Show Type where
     show BitT = "BitT"
@@ -112,4 +113,11 @@ valEq (BitsE a) (BitsE b) = a == b
 valEq (IntE a) (IntE b) = a == b
 valEq _ _ = error "valEq: bad args"
 
+
+-- The input to a function is the list of its arguments.
+type FunctionInput = [Expr]
+
+-- The input to a program is a sample function input for each of its top level
+-- harnesses.
+type ProgramInput = Map.Map String FunctionInput
 

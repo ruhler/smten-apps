@@ -13,13 +13,6 @@ import Smten.Symbolic
 import Bits
 import Sketch
 
--- The input to a function is the list of its arguments.
-type FunctionInput = [Expr]
-
--- The input to a program is a sample function input for each of its top level
--- harnesses.
-type ProgramInput = Map.Map String FunctionInput
-
 -- Construct a sample input for the given program.
 mkFreeProgramInput :: Prog -> Symbolic ProgramInput
 mkFreeProgramInput p = do
@@ -42,7 +35,7 @@ mkFreeArgs = mapM mkFreeArg
 -- Given a type, construct a free expression of that type.
 mkFreeArg :: Type -> Symbolic Expr
 mkFreeArg BitT = BitE <$> free
-mkFreeArg (BitsT w) = BitsE <$> freeBits w
+mkFreeArg (BitsT (IntE w)) = BitsE <$> freeBits w
 mkFreeArg IntT = IntE <$> freeInt
 
 -- TODO: Cover more of the space of integers!

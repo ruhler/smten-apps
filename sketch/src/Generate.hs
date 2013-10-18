@@ -93,7 +93,7 @@ genE x@(IntE v) = do
                          0 -> BitE False
                          1 -> BitE True
                          _ -> error $ "literal " ++ show v ++ " is too big for bit type"
-               BitsT w -> BitsE (intB w v)
+               BitsT (IntE w) -> BitsE (intB w v)
                _ -> error $ "integer literal used where non-int type expected"
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
