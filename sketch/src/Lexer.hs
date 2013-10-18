@@ -1,7 +1,7 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Lexer (
-    Token(..), ParserMonad, lexer, failE, read_int,
+    Token(..), ParserMonad, lexer, failE,
     ) where
 
 import Smten.Prelude
@@ -121,7 +121,7 @@ lex = do
                  | otherwise -> put rest >> return (TkID $ id)
       (c:cs) | isDigit c ->
          let (ns, rest) = span isDigit cs
-         in put rest >> return (TkInteger . read_int $ c:ns)
+         in put rest >> return (TkInteger . read $ c:ns)
       ('/':'*':cs) -> put (closeblockcomment cs) >> lex
       ('/':'/':cs) -> put (dropWhile (/= '\n') cs) >> lex
       cs -> failE $ "fail to lex: " ++ cs
@@ -136,21 +136,4 @@ tokens = do
 
 lexer :: (Token -> ParserMonad a) -> ParserMonad a
 lexer output = lex >>= output
-
-read_int' :: Int -> String -> Int
-read_int' x ('0':xs) = read_int' (x*10 + 0) xs
-read_int' x ('1':xs) = read_int' (x*10 + 1) xs
-read_int' x ('2':xs) = read_int' (x*10 + 2) xs
-read_int' x ('3':xs) = read_int' (x*10 + 3) xs
-read_int' x ('4':xs) = read_int' (x*10 + 4) xs
-read_int' x ('5':xs) = read_int' (x*10 + 5) xs
-read_int' x ('6':xs) = read_int' (x*10 + 6) xs
-read_int' x ('7':xs) = read_int' (x*10 + 7) xs
-read_int' x ('8':xs) = read_int' (x*10 + 8) xs
-read_int' x ('9':xs) = read_int' (x*10 + 9) xs
-read_int' x _ = x
-
-read_int :: String -> Int
-read_int ('-':xs) = negate (read_int xs)
-read_int xs = read_int' 0 xs
 
