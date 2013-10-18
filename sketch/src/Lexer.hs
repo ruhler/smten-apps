@@ -15,10 +15,10 @@ import Smten.Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
-  | TkBar | TkAmp | TkPlus | TkBang | TkStar | TkEquals | TkComma | TkSemicolon   
+  | TkBar | TkAmp | TkPlus | TkBang | TkStar | TkEquals | TkComma | TkSemicolon
   | TkHat
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt
-  | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn
+  | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkID String
   | TkInteger Int
   | TkEOF
@@ -48,6 +48,7 @@ instance Show Token where
     show TkInt = "TkInt"
     show TkImplements = "TkImplements"
     show TkReturn = "TkReturn"
+    show TkAssert = "TkAssert"
     show (TkID x) = "TkID " ++  show x
     show (TkInteger x) = "TkInteger " ++ show x
     show TkEOF = "TkEOF"
@@ -95,7 +96,8 @@ keywords = [
     ("bit", TkBit),
     ("int", TkInt),
     ("implements", TkImplements),
-    ("return", TkReturn)
+    ("return", TkReturn),
+    ("assert", TkAssert)
   ]
 
 isIDChar :: Char -> Bool

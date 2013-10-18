@@ -45,6 +45,7 @@ import Sketch
     'int'   { TkInt }
     'implements'   { TkImplements }
     'return'   { TkReturn }
+    'assert'   { TkAssert }
     id      { TkID $$ }
     integer { TkInteger $$ }
 
@@ -79,6 +80,7 @@ stmts :: { [Stmt] }
 
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
+ | 'assert' expr ';' { AssertS $2 }
  | type id '=' expr ';' { BlockS [DeclS $1 $2, UpdateS $2 $4] }
  | type id ';' { DeclS $1 $2 }
  | id '=' expr ';' { UpdateS $1 $3 }

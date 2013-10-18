@@ -15,10 +15,6 @@ BIT2INT - case bit to int
 REPEAT - support the 'repeat' keyword
   - Just another kind of statement. Relatively easy.
 
-ASSERT - support assert statements
-  - Using the existing support for assertions during eval, this should be easy
-    to implement.
-
 HOLE_WIDTH - support for specified width holes
   - To implement: easy, add a bound to a hole, handle in deHoleExpr.
 
@@ -38,20 +34,19 @@ Operators (easy to implement):
 Features needed, by test case:;
 miniTest5.sk: GENERATORS
 miniTest8.sk: FOR
-miniTest10.sk: ASSERT, HOLE_WIDTH, GENERATOR, EQ
-miniTest11.sk: DYNAMIC_WIDTH, GENERATOR
+miniTest10.sk: HOLE_WIDTH, GENERATOR, EQ
+miniTest11.sk: GENERATOR
 miniTest12.sk: SUB, GENERATOR, 
 miniTest14.sk: REPEAT
 miniTest15.sk: BIT2INT
-miniTest16.sk: BIT2INT
+miniTest16.sk: BIT2INT, GENERATOR
 miniTest17.sk: GENERATOR, FOR, PREINC, LT
-miniTest18.sk: LT, ASSERT< BIT2INT
+miniTest18.sk: LT, BIT2INT
 miniTest19.sk: GENERATOR
-miniTest20.sk: HOLE_WIDTH
+miniTest20.sk: HOLE_WIDTH, INTARRAY
 miniTest21.sk: REPEAT, PREINC, BIT2INT
-miniTest24.sk: LT, GT, ASSERT
+miniTest24.sk: LT, GT
 miniTest25.sk: GENERATOR
-miniTest28.sk: ASSERT,
 miniTest29.sk: REPEAT
 miniTest30.sk: INTPLUS, GENERATOR
 miniTest31.sk: CHOICE, LOR

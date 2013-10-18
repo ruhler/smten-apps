@@ -62,6 +62,7 @@ instance Show Expr where
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
+   | AssertS Expr                   -- ^ assert e;
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
@@ -71,6 +72,7 @@ data Stmt =
 
 instance Show Stmt where
     show (ReturnS x) = "ReturnS " ++ show x
+    show (AssertS x) = "AssertS " ++ show x
     show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
     show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex

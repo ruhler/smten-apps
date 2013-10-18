@@ -49,6 +49,7 @@ genSs = mapM genS
 
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
+genS (AssertS x) = AssertS <$> withty BitT (genE x)
 genS s@(DeclS ty nm) = do
   env <- gets ts_env
   let env' = Map.insert nm ty env

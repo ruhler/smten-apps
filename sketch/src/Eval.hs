@@ -68,6 +68,11 @@ evalS :: Stmt -> State SS ()
 evalS (ReturnS x) = do
   x' <- evalE x
   modify $ \s -> s { ss_out = x' }
+evalS (AssertS p) = do
+  p' <- evalE p
+  case p' of
+    BitE b -> assert b
+    _ -> error $ "expected bit type for assert, but got: " ++ show p'
 evalS (DeclS _ nm) =
   modify $ \s -> s { ss_vars = Map.insert nm (error $ nm ++ " not initialized") (ss_vars s) }
 evalS (UpdateS nm e) = do
