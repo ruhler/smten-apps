@@ -79,6 +79,7 @@ data Stmt =
    | AssertS Expr                   -- ^ assert e;
    | RepeatS Expr Stmt              -- ^ repeat (n) s
    | WhileS Expr Stmt               -- ^ while (c) s
+   | ForS Stmt Expr Stmt Stmt       -- ^ for (init ; cond ; incr ) body
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
@@ -91,6 +92,7 @@ instance Show Stmt where
     show (AssertS x) = "AssertS " ++ show x
     show (RepeatS n s) = "RepeatS " ++ show n ++ " " ++ show s
     show (WhileS c s) = "WhileS " ++ show c ++ " " ++ show s
+    show (ForS a b c d) = "ForS " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d
     show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
     show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex
@@ -152,7 +154,7 @@ valEq :: Expr -> Expr -> Bool
 valEq (BitE a) (BitE b) = a == b
 valEq (BitsE a) (BitsE b) = a == b
 valEq (IntE a) (IntE b) = a == b
-valEq _ _ = error "valEq: bad args"
+valEq a b = error $ "valEq: bad args: " ++ show (a, b)
 
 
 -- The input to a function is the list of its arguments.

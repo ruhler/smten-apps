@@ -71,6 +71,9 @@ instance Ppr Stmt where
    pretty (ReturnS x) = "return " ++ prettya x ++ ";"
    pretty (AssertS x) = "assert " ++ prettya x ++ ";"
    pretty (RepeatS n s) = "repeat (" ++ pretty n ++ ") " ++ pretty s
+   pretty (ForS init cond incr b)
+     = "for (" ++ pretty init ++ pretty cond ++ ";" ++ pretty incr ++
+            ") " ++ pretty b
    pretty (WhileS c s) = "while (" ++ pretty c ++ ") " ++ pretty s
    pretty (DeclS ty nm) = pretty ty ++ " " ++ pretty nm ++ ";"
    pretty (UpdateS nm ex) = pretty nm ++ " = " ++ pretty ex ++ ";"

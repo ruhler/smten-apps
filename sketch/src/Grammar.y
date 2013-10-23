@@ -47,6 +47,7 @@ import Sketch
     'if'    { TkIf }
     'repeat'    { TkRepeat }
     'while'    { TkWhile }
+    'for'    { TkFor }
     'else'  { TkElse }
     'bit'   { TkBit }
     'int'   { TkInt }
@@ -100,8 +101,18 @@ stmt :: { Stmt }
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
  | 'repeat' '(' expr ')' stmt { RepeatS $3 $5 }
  | 'while' '(' expr ')' stmt { WhileS $3 $5 }
+ | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { BlockS [] }
  | '++' id ';' { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
+
+for_init :: { Stmt }
+ : type id '=' expr { BlockS [DeclS $1 $2, UpdateS $2 $4] }
+ | id '=' expr { UpdateS $1 $3 }
+ | id '[' expr ']' '=' expr { ArrUpdateS $1 $3 $6 }
+
+for_incr :: { Stmt }
+ : id '=' expr { UpdateS $1 $3 }
+ | '++' id { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

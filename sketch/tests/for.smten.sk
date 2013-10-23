@@ -1,0 +1,13 @@
+
+int sketch1(int in) implements spec {
+    return in + ??;
+}
+   
+int spec(int in) {
+    int r = in;
+    for (int x = 0; x < 3 ; ++x) {
+       r = r + 1;
+    }
+    return r;
+}
+

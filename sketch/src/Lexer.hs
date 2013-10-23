@@ -21,7 +21,7 @@ data Token =
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
-  | TkRepeat | TkWhile | TkGenerator
+  | TkRepeat | TkWhile | TkFor | TkGenerator
   | TkID String
   | TkInteger Int
   | TkEOF
@@ -60,6 +60,7 @@ instance Show Token where
     show TkGenerator = "TkGenerator"
     show TkRepeat = "TkRepeat"
     show TkWhile = "TkWhile"
+    show TkFor = "TkFor"
     show (TkID x) = "TkID " ++  show x
     show (TkInteger x) = "TkInteger " ++ show x
     show TkEOF = "TkEOF"
@@ -116,6 +117,7 @@ keywords = [
     ("assert", TkAssert),
     ("generator", TkGenerator),
     ("repeat", TkRepeat),
+    ("for", TkFor),
     ("while", TkWhile)
   ]
 

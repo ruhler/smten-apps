@@ -73,6 +73,8 @@ genS (ReturnS x) = ReturnS <$> genE x
 genS (AssertS x) = AssertS <$> withty BitT (genE x)
 genS (RepeatS n s) = liftM2 RepeatS (withty IntT (genE n)) (genS s)
 genS (WhileS c s) = liftM2 WhileS (withty BitT (genE c)) (genS s)
+genS (ForS init cond incr body) =
+    liftM4 ForS (genS init) (withty BitT (genE cond)) (genS incr) (genS body)
 genS s@(DeclS ty nm) = do
   env <- gets ts_tyenv
   let env' = Map.insert nm ty env
