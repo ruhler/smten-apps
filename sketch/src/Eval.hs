@@ -44,9 +44,10 @@ evalT UnknownT = UnknownT
 evalD :: ProgramEnv -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True
 evalD env i d@(FunD {}) =
-  case fd_spec d of
-    Nothing -> True
-    Just snm
+  case fd_kind d of
+    NormalF -> True
+    GeneratorF -> True
+    WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just args <- Map.lookup (d_name d) i ->
           let run = do

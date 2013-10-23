@@ -77,9 +77,9 @@ instance Ppr Stmt where
    pretty (IfS p a b) = "if (" ++ pretty p ++ ") " ++ pretty a ++ " else " ++ pretty b
 
 instance Ppr Decl where
-   pretty (FunD nm (Function oty xs stmts) spec) = 
-     pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
-        ++ pprspec spec ++ pretty stmts
+   pretty (FunD nm (Function oty xs body) kind) = 
+     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
+        ++ pprkindr kind ++ pretty body
    pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
 
 instance Ppr [(Type, Name)] where
@@ -90,7 +90,13 @@ instance Ppr [(Type, Name)] where
 instance Ppr Prog where
    pretty xs = unlines (map pretty xs)
 
-pprspec :: Maybe Name -> String
-pprspec Nothing = " "
-pprspec (Just v) = " implements " ++ pretty v ++ " "
+pprkindl :: FunctionKind -> String
+pprkindl NormalF = ""
+pprkindl GeneratorF = "generator "
+pprkindl (WithSpecF {}) = ""
+
+pprkindr :: FunctionKind -> String
+pprkindr NormalF = " "
+pprkindr GeneratorF = " "
+pprkindr (WithSpecF v) = " implements " ++ pretty v ++ " "
 

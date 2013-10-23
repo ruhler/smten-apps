@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
     Prog, Decl(..), Type(..), Name, Stmt(..),
-    Expr(..), Function(..),
+    Expr(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     valEq,
     ) where
@@ -105,14 +105,20 @@ instance Show Function where
     "args = " ++ show (f_args x) ++ ", " ++
     "body = " ++ show (f_body x) ++ "}"
 
+data FunctionKind = NormalF          -- ^ a normal function
+                  | WithSpecF Name   -- ^ the function has a spec
+                  | GeneratorF       -- ^ the function is a generator
+
+instance Show FunctionKind where
+    show NormalF = "NormalF"
+    show (WithSpecF nm) = "WithSpecF " ++ nm
+    show GeneratorF = "GeneratorF"
+
 data Decl =
    FunD {
       d_name :: Name,
       fd_val :: Function,
-      
-      -- | Nothing means this declaration is a specification
-      --   Just foo means this is a sketch with specification 'foo'
-      fd_spec :: Maybe Name }
+      fd_kind :: FunctionKind }
  | VarD {
       vd_ty :: Type,
       d_name :: Name,
@@ -123,7 +129,7 @@ instance Show Decl where
     show x@(FunD {}) = "FunD { " ++
       "nm = " ++ show (d_name x) ++ ", " ++
       "val = " ++ show (fd_val x) ++ ", " ++
-      "spec = " ++ show (fd_spec x) ++ "}"
+      "kind = " ++ show (fd_kind x) ++ "}"
     show x@(VarD {}) = "VarD { " ++
       "ty = " ++ show (vd_ty x) ++ ", " ++
       "nm = " ++ show (d_name x) ++ ", " ++

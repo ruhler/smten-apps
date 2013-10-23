@@ -19,9 +19,10 @@ mkFreeProgramInput :: Prog -> Symbolic ProgramInput
 mkFreeProgramInput p = do
   let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) =
-        case fd_spec d of
-          Nothing -> return Nothing  -- No input needed for non-harness
-          Just _ -> do
+        case fd_kind d of
+          NormalF -> return Nothing
+          GeneratorF -> return Nothing
+          WithSpecF _ -> do
             i <- mkFreeArgs (map fst (f_args . fd_val $ d))
             return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing

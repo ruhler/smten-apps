@@ -50,6 +50,7 @@ import Sketch
     'implements'   { TkImplements }
     'return'   { TkReturn }
     'assert'   { TkAssert }
+    'generator'{ TkGenerator }
     id      { TkID $$ }
     integer { TkInteger $$ }
 
@@ -61,9 +62,11 @@ sketch :: { Prog }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'
-    { FunD $2 (Function $1 $4 (BlockS $7)) Nothing }
+    { FunD $2 (Function $1 $4 (BlockS $7)) NormalF }
  | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 (Function $1 $4 (BlockS $9)) (Just $7) }
+    { FunD $2 (Function $1 $4 (BlockS $9)) (WithSpecF $7) }
+ | 'generator' type id '(' args ')' '{' stmts '}'
+    { FunD $3 (Function $2 $5 (BlockS $8)) GeneratorF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }
