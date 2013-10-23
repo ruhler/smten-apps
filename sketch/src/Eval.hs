@@ -87,8 +87,11 @@ evalS (RepeatS n s) = do
   case n' of
     IntE nv -> mapM_ evalS (replicate nv s)
     _ -> error $ "expected int type for repeat count, but got: " ++ show n'
-evalS (DeclS _ nm) =
-  modify $ \s -> s { ss_vars = Map.insert nm (error $ nm ++ " not initialized") (ss_vars s) }
+evalS (DeclS ty nm) = do
+  let v0 = case evalT ty of
+              BitsT (IntE w) -> BitsE (intB w 0)
+              _ -> error $ nm ++ " not initialized"
+  modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
 evalS (UpdateS nm e) = do
   e' <- evalE e
   modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }

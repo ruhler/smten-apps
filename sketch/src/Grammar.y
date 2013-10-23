@@ -96,6 +96,7 @@ stmt :: { Stmt }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (BlockS [])}
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
  | 'repeat' '(' expr ')' stmt { RepeatS $3 $5 }
+ | ';' { BlockS [] }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

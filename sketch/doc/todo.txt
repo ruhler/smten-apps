@@ -1,7 +1,4 @@
 Features::
-EMPTY_STATEMENT
-  - extra semicolons. Ex: return foo;;
-
 GLOBALVAR_FOR_TYPE
   - use of global variables in types.
 
@@ -28,8 +25,7 @@ Operators (easy to implement):
 Features needed, by test case:;
 miniTest8.sk: FOR
 miniTest10.sk: HOLE_WIDTH, GENERATOR, EQ
-miniTest11.sk: EMPTY_STATEMENT
-miniTest12.sk: EMPTY_STATEMENT, 
+miniTest12.sk: ???
 miniTest16.sk: GLOBALVAR_FOR_TYPE
 miniTest17.sk: GENERATOR, FOR, PREINC
 miniTest19.sk: XOR_ARGS_BUG

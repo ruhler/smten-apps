@@ -95,8 +95,11 @@ Statements
       - assert the expression holds.
 
     <type> <name> ;
-      - Declare the variable <name> to have <type> and no initial value.
-        What happens if you try to use it before initializing it?
+      - Declare the variable <name> to have <type>.
+        The value of the variable is initialized to:
+           bit[]:  initial value is 0.
+           bit: no initial value is provided (it is an error to use it).
+           int: no initial value is provided (it is an error to use it).
         Note: local variables may NOT be shadowed.
 
     <type> <name> = <expr> ;
