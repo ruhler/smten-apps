@@ -114,6 +114,8 @@ expr :: { Expr }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
  | '{' exprs '}' { ArrayE $2 }
+ | id '(' ')' { AppE (VarE $1) [] }
+ | id '(' exprs ')' { AppE (VarE $1) $3 }
 
 exprs :: { [Expr] }
  : expr { [$1] }

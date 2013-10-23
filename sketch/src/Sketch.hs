@@ -46,6 +46,8 @@ data Expr =
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | ErrE String           -- ^ used for errors
  | CastE Type Expr       -- ^ (T) e
+ | FunE Function         -- ^ anonymous function literal
+ | AppE Expr [Expr]      -- ^ f(x, y, ...)
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
@@ -67,6 +69,8 @@ instance Show Expr where
     show (VarE n) = "VarE " ++ show n
     show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
     show (CastE t e) = "CastE " ++ show t ++ " " ++ show e
+    show (FunE f) = "FunE " ++ show f
+    show (AppE f xs) = "AppE " ++ show f ++ " " ++ show xs
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;

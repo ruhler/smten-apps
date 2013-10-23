@@ -1,0 +1,13 @@
+
+bit foo(bit[4] x) {
+	return x[??];
+}
+
+bit sketch1(bit[4] in) implements spec {
+    return foo(in);
+}
+   
+bit spec(bit[4] in) {
+    return in[1];
+}
+

@@ -1,15 +1,4 @@
 Features::
-GLOBAL VARS
-  - How do they work? When are they in scope? Can they be modified?
-    Observations:
-     - they can be shadowed by local declarations
-    For now:
-     - Keep Global and Local vars separate. 
-
-FUNCTIONS
-  - To implement:
-      * Add AppE and FunE expressions.
-
 GENERATORS
   - To implement:
       * copy the generator into a new function declaration.

@@ -198,6 +198,7 @@ evalE (VarE nm) = do
             env <- gets ss_env
             case Map.lookup nm env of
                 Just (VarD _ _ v) -> return v
+                Just (FunD _ v _) -> return (FunE v)
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     BitsE a' <- evalE a
@@ -209,6 +210,12 @@ evalE (CastE t e) = do
     case (t, e') of
         (IntT, BitsE v) -> return (IntE (valB v))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
+evalE x@(FunE {}) = return x
+evalE (AppE f xs) = do
+    f' <- evalE f
+    case f' of
+        FunE fv -> apply fv xs
+        _ -> error $ "Expected function, but got: " ++ show f'
     
     
 

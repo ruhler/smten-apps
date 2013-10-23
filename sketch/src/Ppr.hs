@@ -54,6 +54,12 @@ instance Ppr Expr where
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
+   pretty (AppE f xs) =
+     let pargs [] = ""
+         pargs [x] = pretty x
+         pargs (x:xs) = pretty x ++ ", " ++ pargs xs
+     in pretty f ++ "(" ++ pargs xs ++ ")"
+   pretty (FunE f) = error $ "No way to pretty print an anonymous function"
 
    prettya HoleE = "??"
    prettya (IntE n) = pretty n

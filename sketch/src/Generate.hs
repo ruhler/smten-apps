@@ -104,4 +104,7 @@ genE (AccessE a b) = do
     b' <- withty IntT (genE b)
     return (AccessE a' b')
 genE (CastE t e) = CastE t <$> withty UnknownT (genE e)
+genE (AppE f xs) = liftM2 AppE (withty UnknownT $ genE f)
+                               (withty UnknownT $ mapM genE xs)
+genE x@(FunE f) = return x
 
