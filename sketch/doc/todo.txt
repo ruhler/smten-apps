@@ -4,9 +4,6 @@ RECURSIVE_GENERATOR
     How to deal with this?
     Use the inlining bound?
 
-GLOBALVAR_FOR_TYPE
-  - use of global variables in types.
-
 XOR_ARGS_BUG
   - miniTest19.sk is getting the wrong type of args to xor for some reason.
 
@@ -31,7 +28,6 @@ Features needed, by test case:;
 miniTest8.sk: FOR
 miniTest10.sk: HOLE_WIDTH, EQ
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest16.sk: GLOBALVAR_FOR_TYPE
 miniTest17.sk: FOR, PREINC
 miniTest19.sk: XOR_ARGS_BUG
 miniTest20.sk: HOLE_WIDTH, INTARRAY
@@ -44,9 +40,8 @@ miniTest36.sk: INTARRAY
 miniTest37.sk: INTARRAY
 miniTest40.sk: FOR
 miniTest41.sk: FOR, PREINC
-miniTest42.sk: GLOBALVAR_FOR_TYPE
 miniTest43.sk: LOR, FOR, PREINC,
-miniTest44.sk: LOR, GLOBALVAR_FOR_TYPE, FOR, PREINC
+miniTest44.sk: LOR, FOR, PREINC
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?

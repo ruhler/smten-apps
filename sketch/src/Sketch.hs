@@ -1,10 +1,10 @@
 
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
-    Prog, Decl(..), Type(..), Name, Stmt(..),
+    Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
     Expr(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
-    valEq,
+    valEq, envof, declsof,
     ) where
 
 import Smten.Prelude
@@ -136,6 +136,13 @@ instance Show Decl where
       "val = " ++ show (vd_val x) ++ "}"
 
 type Prog = [Decl]
+type ProgEnv = Map.Map String Decl
+
+envof :: Prog -> ProgEnv
+envof p = Map.fromList [(d_name d, d) | d <- p]
+
+declsof :: ProgEnv -> Prog
+declsof p = Map.elems p
 
 valEq :: Expr -> Expr -> Bool
 valEq (BitE a) (BitE b) = a == b

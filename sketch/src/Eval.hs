@@ -9,8 +9,6 @@ import qualified Smten.Data.Map as Map
 import Bits
 import Sketch
 
-type ProgramEnv = Map.Map String Decl
-
 data SS = SS {
     -- | The Global Environment
     ss_env :: Map.Map Name Decl,
@@ -29,19 +27,16 @@ data SS = SS {
 --   It runs each harness on the harness's input, and returns whether all the
 --   harnesses completed successfully.
 evalP :: Prog -> ProgramInput -> Bool
-evalP p i =
-  let env = Map.fromList [(d_name d, d) | d <- p]
-  in all (evalD env i) p
+evalP p i = all (evalD (envof p) i) p
 
 -- Evaluate a type.
--- TODO: Don't we need to supply an environment here?
-evalT :: Type -> Type
-evalT BitT = BitT
-evalT (BitsT e) = BitsT $ evalState (evalE e) (SS Map.empty Map.empty (error "evalT.ss_out") True)
-evalT IntT = IntT
-evalT UnknownT = UnknownT
+evalT :: ProgEnv -> Type -> Type
+evalT env BitT = BitT
+evalT env (BitsT e) = BitsT $ evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True)
+evalT env IntT = IntT
+evalT env UnknownT = UnknownT
 
-evalD :: ProgramEnv -> ProgramInput -> Decl -> Bool
+evalD :: ProgEnv -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True
 evalD env i d@(FunD {}) =
   case fd_kind d of
@@ -88,7 +83,8 @@ evalS (RepeatS n s) = do
     IntE nv -> mapM_ evalS (replicate nv s)
     _ -> error $ "expected int type for repeat count, but got: " ++ show n'
 evalS (DeclS ty nm) = do
-  let v0 = case evalT ty of
+  env <- gets ss_env
+  let v0 = case evalT env ty of
               BitsT (IntE w) -> BitsE (intB w 0)
               _ -> error $ nm ++ " not initialized"
   modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }

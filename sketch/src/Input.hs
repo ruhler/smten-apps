@@ -15,15 +15,16 @@ import Eval
 import Sketch
 
 -- Construct a sample input for the given program.
-mkFreeProgramInput :: Prog -> Symbolic ProgramInput
-mkFreeProgramInput p = do
-  let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
+mkFreeProgramInput :: ProgEnv -> Symbolic ProgramInput
+mkFreeProgramInput env = do
+  let p = declsof env
+      mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) =
         case fd_kind d of
           NormalF -> return Nothing
           GeneratorF -> return Nothing
           WithSpecF _ -> do
-            i <- mkFreeArgs (map fst (f_args . fd_val $ d))
+            i <- mkFreeArgs env (map fst (f_args . fd_val $ d))
             return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p
@@ -31,13 +32,13 @@ mkFreeProgramInput p = do
 
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
-mkFreeArgs :: [Type] -> Symbolic FunctionInput
-mkFreeArgs = mapM mkFreeArg
+mkFreeArgs :: ProgEnv -> [Type] -> Symbolic FunctionInput
+mkFreeArgs env = mapM (mkFreeArg env)
 
 -- Given a type, construct a free expression of that type.
-mkFreeArg :: Type -> Symbolic Expr
-mkFreeArg t =
-  case evalT t of
+mkFreeArg :: ProgEnv -> Type -> Symbolic Expr
+mkFreeArg env t =
+  case evalT env t of
     BitT -> BitE <$> free
     BitsT (IntE w) -> BitsE <$> freeBits w
     IntT -> IntE <$> freeInt

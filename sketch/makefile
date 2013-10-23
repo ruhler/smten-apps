@@ -2,6 +2,7 @@
 .PHONY: all
 all: 
 	tclsh utils/make.tcl
+	tclsh utils/test.tcl
 
 check:
 	tclsh utils/test.tcl

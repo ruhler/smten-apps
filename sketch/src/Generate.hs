@@ -15,10 +15,9 @@ import Sketch
 
 -- Given a program with explicit holes, generate a corrisponding symbolic
 -- candidate program without holes.
-generate :: Prog -> Symbolic Prog
+generate :: ProgEnv -> Symbolic Prog
 generate p = do
-  let env = Map.fromList [(d_name d, d) | d <- p]
-      readed = runReaderT (mapM genD p) (GR env (error "no top level output type"))
+  let readed = runReaderT (mapM genD (declsof p)) (GR p (error "no top level output type"))
   (ds, s) <- runStateT readed (TS (error "TODO: generate with global tyenv") [])
   return $ ts_decls s ++ ds
 
@@ -26,7 +25,7 @@ type TypeEnv = Map.Map Name Type
 
 data GR = GR {
     -- | The program environment.
-    gr_env :: Map.Map Name Decl,
+    gr_env :: ProgEnv,
 
     -- | The target output type.
     gr_oty :: Type
@@ -105,7 +104,8 @@ genE (ShrE a b) = liftM2 ShrE (genE a) (withty IntT $ genE b)
 genE (NotE a) = NotE <$> genE a
 genE HoleE = do
   ty <- asks gr_oty
-  liftSymbolic $ mkFreeArg ty
+  env <- asks gr_env
+  liftSymbolic $ mkFreeArg env ty
 genE x@(BitE {}) = return x
 genE x@(BitsE {}) = return x
 genE x@(IntE v) = do

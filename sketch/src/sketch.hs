@@ -9,6 +9,7 @@ import Smten.Symbolic.Solver.Yices2
 
 import Grammar
 import Ppr
+import Sketch
 import Synthesis
 
 main :: IO ()
@@ -17,7 +18,7 @@ main = do
   sk <- case evalStateT parseSketch input of
             Left msg -> fail msg
             Right x -> return x
-  syn <- runSMT yices2 (synthesize sk)
+  syn <- runSMT yices2 (synthesize (envof sk))
   case syn of
     Nothing -> fail "sketch not satisfiable"
     Just v -> putStrLn (pretty v)
