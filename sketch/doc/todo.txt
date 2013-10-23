@@ -1,10 +1,12 @@
 Features::
-GENERATORS
-  - To implement:
-      * copy the generator into a new function declaration.
-      * then generate a value for the hole of that new declaration
-      If it's easier, we can declare the new declaration as a local function.
-    We should start by adding support for standard functions.
+EMPTY_STATEMENT
+  - extra semicolons. Ex: return foo;;
+
+GLOBALVAR_FOR_TYPE
+  - use of global variables in types.
+
+XOR_ARGS_BUG
+  - miniTest19.sk is getting the wrong type of args to xor for some reason.
 
 CHOICE - {|} hole generator
   - To implement: deHoleExpr should use mplus on both cases.
@@ -24,18 +26,15 @@ Operators (easy to implement):
 
 
 Features needed, by test case:;
-miniTest5.sk: GENERATOR
 miniTest8.sk: FOR
 miniTest10.sk: HOLE_WIDTH, GENERATOR, EQ
-miniTest11.sk: GENERATOR
-miniTest12.sk: GENERATOR, 
-miniTest16.sk: GENERATOR
+miniTest11.sk: EMPTY_STATEMENT
+miniTest12.sk: EMPTY_STATEMENT, 
+miniTest16.sk: GLOBALVAR_FOR_TYPE
 miniTest17.sk: GENERATOR, FOR, PREINC
-miniTest19.sk: GENERATOR
+miniTest19.sk: XOR_ARGS_BUG
 miniTest20.sk: HOLE_WIDTH, INTARRAY
 miniTest21.sk: PREINC, INTARRAY
-miniTest25.sk: GENERATOR
-miniTest30.sk: GENERATOR
 miniTest31.sk: CHOICE, LOR
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
