@@ -20,7 +20,7 @@ data Token =
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
-  | TkRepeat | TkGenerator
+  | TkRepeat | TkWhile | TkGenerator
   | TkID String
   | TkInteger Int
   | TkEOF
@@ -57,6 +57,7 @@ instance Show Token where
     show TkAssert = "TkAssert"
     show TkGenerator = "TkGenerator"
     show TkRepeat = "TkRepeat"
+    show TkWhile = "TkWhile"
     show (TkID x) = "TkID " ++  show x
     show (TkInteger x) = "TkInteger " ++ show x
     show TkEOF = "TkEOF"
@@ -111,7 +112,8 @@ keywords = [
     ("return", TkReturn),
     ("assert", TkAssert),
     ("generator", TkGenerator),
-    ("repeat", TkRepeat)
+    ("repeat", TkRepeat),
+    ("while", TkWhile)
   ]
 
 isIDChar :: Char -> Bool

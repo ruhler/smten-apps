@@ -78,6 +78,7 @@ data Stmt =
      ReturnS Expr                   -- ^ return e;
    | AssertS Expr                   -- ^ assert e;
    | RepeatS Expr Stmt              -- ^ repeat (n) s
+   | WhileS Expr Stmt               -- ^ while (c) s
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
@@ -89,6 +90,7 @@ instance Show Stmt where
     show (ReturnS x) = "ReturnS " ++ show x
     show (AssertS x) = "AssertS " ++ show x
     show (RepeatS n s) = "RepeatS " ++ show n ++ " " ++ show s
+    show (WhileS c s) = "WhileS " ++ show c ++ " " ++ show s
     show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
     show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
     show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex

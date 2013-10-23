@@ -82,6 +82,14 @@ evalS (RepeatS n s) = do
   case n' of
     IntE nv -> mapM_ evalS (replicate nv s)
     _ -> error $ "expected int type for repeat count, but got: " ++ show n'
+evalS w@(WhileS c s) = do
+  c' <- evalE c
+  case c' of
+    BitE False -> return ()
+    BitE True -> do
+      evalS s
+      evalS w
+    _ -> error $ "expected bit type for while condition, but got: " ++ show c'
 evalS (DeclS ty nm) = do
   env <- gets ss_env
   let v0 = case evalT env ty of
