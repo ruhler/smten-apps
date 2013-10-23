@@ -47,7 +47,7 @@ instance Ppr Expr where
    pretty (NotE a) = "!" ++ prettya a
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
-   pretty (HoleE) = "??"
+   pretty (HoleE v) = "??(" ++ show v ++ ")"
    pretty (BitE b) = if b then "true" else "false"
    pretty (BitsE n) = show (valB n)
    pretty (IntE n) = pretty n
@@ -61,7 +61,7 @@ instance Ppr Expr where
      in pretty f ++ "(" ++ pargs xs ++ ")"
    pretty (FunE f) = error $ "No way to pretty print an anonymous function"
 
-   prettya HoleE = "??"
+   prettya (HoleE v) = "??(" ++ show v ++ ")"
    prettya (IntE n) = pretty n
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"

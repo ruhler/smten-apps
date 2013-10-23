@@ -33,18 +33,22 @@ mkFreeProgramInput env = do
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
 mkFreeArgs :: ProgEnv -> [Type] -> Symbolic FunctionInput
-mkFreeArgs env = mapM (mkFreeArg env)
+mkFreeArgs env = mapM (mkFreeArg env bnd_ctrlbits)
 
 -- Given a type, construct a free expression of that type.
-mkFreeArg :: ProgEnv -> Type -> Symbolic Expr
-mkFreeArg env t =
+-- Takes a bound on the number of bits used for the expression.
+mkFreeArg :: ProgEnv -> Int -> Type -> Symbolic Expr
+mkFreeArg env bnd t =
   case evalT env t of
     BitT -> BitE <$> free
-    BitsT (IntE w) -> BitsE <$> freeBits w
-    IntT -> IntE <$> freeInt
+    BitsT (IntE w) -> BitsE <$> freeBits w bnd
+    IntT -> IntE <$> freeInt bnd
 
--- TODO: Cover more of the space of integers!
---       As determinied by appropriate input flags.
-freeInt :: Symbolic Int
-freeInt = msum (map return [0..10])
+-- Compute 2^n
+exp2 :: Int -> Int
+exp2 0 = 1
+exp2 n = 2 * exp2 (n-1)
+
+freeInt :: Int -> Symbolic Int
+freeInt n = msum (map return [0..(exp2 n - 1)])
 

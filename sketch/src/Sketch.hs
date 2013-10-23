@@ -5,6 +5,7 @@ module Sketch (
     Expr(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     valEq, envof, declsof,
+    bnd_ctrlbits,
     ) where
 
 import Smten.Prelude
@@ -38,7 +39,7 @@ data Expr =
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b
  | ArrayE [Expr]         -- ^ {a, b, ... }
- | HoleE                 -- ^ ??
+ | HoleE Int             -- ^ ??(n)      n is the number of bits to use
  | BitE Bit              -- ^ 1
  | BitsE Bits            -- ^ 4'h2
  | IntE Int              -- ^ 42
@@ -62,7 +63,7 @@ instance Show Expr where
     show (ShrE a b) = "ShrE " ++ show a ++ " " ++ show b
     show (ShlE a b) = "ShlE " ++ show a ++ " " ++ show b
     show (NotE a) = "NotE " ++ show a
-    show HoleE = "HoleE"
+    show (HoleE m) = "HoleE " ++ show m
     show (BitE b) = "BitE " ++ show b
     show (BitsE b) = "BitsE " ++ show b
     show (IntE x) = "IntE " ++ show x
@@ -157,4 +158,8 @@ type FunctionInput = [Expr]
 -- The input to a program is a sample function input for each of its top level
 -- harnesses.
 type ProgramInput = Map.Map String FunctionInput
+
+-- TODO: don't hardcode --bnd-ctrlbits like this.
+bnd_ctrlbits :: Int
+bnd_ctrlbits = 5
 

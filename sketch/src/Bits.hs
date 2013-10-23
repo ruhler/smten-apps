@@ -65,10 +65,15 @@ shlB (Bits w a) b = Bits w (replicate b False ++ (take (w-b) a))
 accessB :: Bits -> Int -> Bit
 accessB (Bits w bs) i = bs !! i
 
-freeBits :: Int -> Symbolic Bits
-freeBits n = do
-  vals <- sequence $ replicate n free
-  return (Bits n vals)
+-- freeBits w n
+-- Construct a symbolic bit vector
+--  w - the width of the vector
+--  n - the number of free bits (the rest of the bits are 0)
+freeBits :: Int -> Int -> Symbolic Bits
+freeBits w n = do
+  let n' = min n w
+  vals <- sequence $ replicate n' free
+  return $ Bits w (vals ++ replicate (w - n') False)
 
 valB :: Bits -> Int
 valB (Bits _ vals) = 

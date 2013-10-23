@@ -102,10 +102,10 @@ genE (OrE a b) = liftM2 OrE (genE a) (genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (withty IntT $ genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (withty IntT $ genE b)
 genE (NotE a) = NotE <$> genE a
-genE HoleE = do
+genE (HoleE bnd) = do
   ty <- asks gr_oty
   env <- asks gr_env
-  liftSymbolic $ mkFreeArg env ty
+  liftSymbolic $ mkFreeArg env bnd ty
 genE x@(BitE {}) = return x
 genE x@(BitsE {}) = return x
 genE x@(IntE v) = do
