@@ -40,6 +40,8 @@ import Sketch
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
+    '||'    { TkDoubleBar }
+    '&&'    { TkDoubleAmp }
     '=='    { TkDoubleEq }
     '>>'    { TkDoubleGt }
     '<<'    { TkDoubleLt }
@@ -57,6 +59,8 @@ import Sketch
     'return'   { TkReturn }
     'assert'   { TkAssert }
     'generator'{ TkGenerator }
+    'true'  { TkTrue }
+    'false' { TkFalse }
     id      { TkID $$ }
     integer { TkInteger $$ }
 
@@ -127,10 +131,14 @@ expr :: { Expr }
  | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
+ | expr '||' expr    { LOrE $1 $3 }
+ | expr '&&' expr    { LAndE $1 $3 }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
  | expr '{|}' expr   { BitChooseE $1 $3 }
+ | 'true'           { BitE True }
+ | 'false'          { BitE False }
  | '!' expr         { NotE $2 }
  | '~' expr         { NotE $2 }
  | '??' { HoleE bnd_ctrlbits }

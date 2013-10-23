@@ -94,7 +94,7 @@ Holes
         - Bitwise choose between the bits of the given expressions.
           Both arguments must have type bit[].
           The expression (a {|} b), is like saying:
-            bit[] x = ??;
+            bit[N] x = ??;
             (a & x) | (b & ~x)
             
         
@@ -144,6 +144,9 @@ Statements
     for (<init> ; <expr> ; <incr>) <body>
       - Standard for loop.
         Question: What exactly can go in <init> and <incr> slots?
+
+    ++<name> 
+      - Sugar for: <name> = <name> + 1
 
 Declarations
 ------------

@@ -178,6 +178,18 @@ evalE (OrE a b) = do
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `orB` bv)
       (BitE av, BitE bv) -> return $ BitE (av || bv)
+evalE (LOrE a b) = do
+    a' <- evalE a
+    case a' of
+        BitE True -> return a'
+        BitE False -> evalE b
+        _ -> error $ "unexpected first argument to logical or: " ++ show a'
+evalE (LAndE a b) = do
+    a' <- evalE a
+    case a' of
+        BitE True -> evalE b
+        BitE False -> return a'
+        _ -> error $ "unexpected first argument to logical and: " ++ show a'
 evalE (NotE a) = do
     a' <- evalE a
     case a' of

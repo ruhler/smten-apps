@@ -14,10 +14,6 @@ XOR_ARGS_BUG
 
 INTARRAY - int arrays
 
-Operators (easy to implement):
- LOR: || boolean operator 
-
-
 Features needed, by test case::
 miniTest8.sk: TYPE_BUG
 miniTest12.sk: RECURSIVE_GENERATOR
@@ -25,7 +21,7 @@ miniTest17.sk: ???
 miniTest19.sk: XOR_ARGS_BUG
 miniTest20.sk: INTARRAY
 miniTest21.sk: INTARRAY
-miniTest31.sk: LOR
+miniTest31.sk: ???
 miniTest32.sk: ???
 miniTest34.sk: INTARRAY
 miniTest35.sk: INTARRAY
@@ -33,8 +29,8 @@ miniTest36.sk: INTARRAY
 miniTest37.sk: INTARRAY
 miniTest40.sk: ???
 miniTest41.sk: ???
-miniTest43.sk: LOR
-miniTest44.sk: LOR
+miniTest43.sk: ???
+miniTest44.sk: ???
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?

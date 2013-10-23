@@ -34,6 +34,8 @@ data Expr =
  | GtE Expr Expr         -- ^ a > b
  | EqE Expr Expr         -- ^ a == b
  | OrE Expr Expr         -- ^ a | b
+ | LOrE Expr Expr        -- ^ a || b
+ | LAndE Expr Expr       -- ^ a && b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
  | NotE Expr             -- ^ ! a
@@ -60,6 +62,8 @@ instance Show Expr where
     show (LtE a b) = "LtE " ++ show a ++ " " ++ show b
     show (ArrayE b) = "ArrayE " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
+    show (LOrE a b) = "LOrE " ++ show a ++ " " ++ show b
+    show (LAndE a b) = "LAndE " ++ show a ++ " " ++ show b
     show (MulE a b) = "MulE " ++ show a ++ " " ++ show b
     show (XorE a b) = "XorE " ++ show a ++ " " ++ show b
     show (ShrE a b) = "ShrE " ++ show a ++ " " ++ show b

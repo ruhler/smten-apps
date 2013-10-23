@@ -19,9 +19,9 @@ data Token =
   | TkStar | TkEquals | TkComma | TkSemicolon
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
-  | TkDoublePlus | TkBitChoose 
+  | TkDoublePlus | TkBitChoose  | TkDoubleBar | TkDoubleAmp
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
-  | TkRepeat | TkWhile | TkFor | TkGenerator
+  | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse
   | TkID String
   | TkInteger Int
   | TkEOF
@@ -51,6 +51,8 @@ instance Show Token where
     show TkDoubleGt = "TkDoubleGt"
     show TkDoubleEq = "TkDoubleEq"
     show TkDoublePlus = "TkDoublePlus"
+    show TkDoubleBar = "TkDoubleBar"
+    show TkDoubleAmp = "TkDoubleAmp"
     show TkBitChoose = "TkBitChoose"
     show TkIf = "TkIf"
     show TkElse = "TkElse"
@@ -60,6 +62,8 @@ instance Show Token where
     show TkReturn = "TkReturn"
     show TkAssert = "TkAssert"
     show TkGenerator = "TkGenerator"
+    show TkTrue = "TkTrue"
+    show TkFalse = "TkFalse"
     show TkRepeat = "TkRepeat"
     show TkWhile = "TkWhile"
     show TkFor = "TkFor"
@@ -106,7 +110,9 @@ doubles = [
     (">>", TkDoubleGt),
     ("<<", TkDoubleLt),
     ("==", TkDoubleEq),
-    ("++", TkDoublePlus)
+    ("++", TkDoublePlus),
+    ("||", TkDoubleBar),
+    ("&&", TkDoubleAmp)
   ]
 
 triples :: [(String, Token)]
@@ -124,6 +130,8 @@ keywords = [
     ("return", TkReturn),
     ("assert", TkAssert),
     ("generator", TkGenerator),
+    ("true", TkTrue),
+    ("false", TkFalse),
     ("repeat", TkRepeat),
     ("for", TkFor),
     ("while", TkWhile)
