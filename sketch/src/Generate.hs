@@ -2,6 +2,7 @@
 module Generate (generate) where
 
 import Smten.Prelude
+import Smten.Control.Monad.Reader
 import Smten.Control.Monad.State
 import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
@@ -19,31 +20,32 @@ generate = mapM generateD
 
 type TypeEnv = Map.Map Name Type
 
-data TS = TS {
-    -- | The type environment.
-    ts_env :: TypeEnv,
-
+data GR = GR {
     -- | The target output type.
-    ts_oty :: Type
+    gr_oty :: Type
 }
 
-type GM = StateT TS Symbolic
+data TS = TS {
+    -- | The type environment.
+    ts_env :: TypeEnv
+}
+
+type GM = ReaderT GR (StateT TS Symbolic)
+
+withty :: Type -> GM a -> GM a
+withty t = local (\r -> r { gr_oty = t })
+
+liftSymbolic :: Symbolic a -> GM a
+liftSymbolic = lift . lift
 
 generateD :: Decl -> Symbolic Decl
 generateD d@(VarD {}) = return d
 generateD d@(FunD {}) = do
     let tyenv = Map.fromList (map swap . f_args . fd_val $ d)
-    body' <- evalStateT (genS (f_body . fd_val $ d)) (TS tyenv (f_outty . fd_val $ d))
+        readed = runReaderT (genS (f_body . fd_val $ d)) (GR (f_outty . fd_val $ d))
+    body' <- evalStateT readed (TS tyenv )
     let val' = (fd_val d) { f_body = body' }
     return $ d { fd_val = val' }
-
-withty :: Type -> GM a -> GM a
-withty t x = do
-  oldt <- gets ts_oty
-  modify $ \s -> s { ts_oty = t }
-  v <- x
-  modify $ \s -> s { ts_oty = oldt }
-  return v
 
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
@@ -80,8 +82,8 @@ genE (ShlE a b) = liftM2 ShlE (genE a) (withty IntT $ genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (withty IntT $ genE b)
 genE (NotE a) = NotE <$> genE a
 genE HoleE = do
-  ty <- gets ts_oty
-  lift $ mkFreeArg ty
+  ty <- asks gr_oty
+  liftSymbolic $ mkFreeArg ty
 genE x@(BitE {}) = return x
 genE x@(BitsE {}) = return x
 genE x@(IntE v) = do
@@ -89,7 +91,7 @@ genE x@(IntE v) = do
     -- type int. Change to the appropriate expression if a different type is
     -- expected here.
     -- TODO: this is a bit hackish. Can we clean it up please?
-    t <- gets ts_oty
+    t <- asks gr_oty
     return $ case t of
                IntT -> x
                BitT -> case v of
