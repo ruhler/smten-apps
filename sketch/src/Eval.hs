@@ -46,19 +46,24 @@ evalD env i d@(FunD {}) =
     Just snm
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just args <- Map.lookup (d_name d) i ->
-          let -- TODO: add global variables to the variable list   
-              specargs = Map.fromList (zip (map snd (f_args . fd_val $ sd)) args)
-              (want, gdw) = evalSs [f_body . fd_val $ sd] specargs
-               
-              sketchargs = Map.fromList (zip (map snd (f_args . fd_val $  d)) args)
-              (got, gdg) = evalSs [f_body . fd_val $ d] sketchargs
-          in and [gdw, gdg, want `valEq` got]
+          let run = do
+                want <- apply (fd_val sd) args
+                got <- apply (fd_val d) args
+                assert (want `valEq` got)
+          in ss_valid $ execState run (SS Map.empty (error "evalD: no output produces") True)
 
-evalSs :: [Stmt] -> Map.Map Name Expr -> (Expr, Bool)
-evalSs stmts args =
-  case execState (mapM evalS stmts) (SS args (error "evalSs: output not defined") True) of
-       SS _ e v -> (e, v)
-
+-- Apply a function to the given arguments.
+apply :: Function -> [Expr] -> State SS Expr
+apply f xs = do
+    xs' <- mapM evalE xs
+    let args = Map.fromList (zip (map snd (f_args f)) xs')
+    olds <- get
+    put (SS args (error "apply: no output returned") (ss_valid olds))
+    evalS (f_body f)
+    r <- gets ss_out
+    p <- gets ss_valid
+    modify $ \s -> s { ss_out = ss_out olds, ss_vars = ss_vars olds }
+    return r
 
 assert :: Bool -> State SS ()
 assert p = modify $ \s -> s { ss_valid = ss_valid s && p }
