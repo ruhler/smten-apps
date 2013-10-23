@@ -61,9 +61,9 @@ sketch :: { Prog }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'
-    { FunD $2 $1 $4 $7 Nothing }
+    { FunD $2 (Function $1 $4 (BlockS $7)) Nothing }
  | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 $1 $4 $9 (Just $7) }
+    { FunD $2 (Function $1 $4 (BlockS $9)) (Just $7) }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }

@@ -47,11 +47,11 @@ evalD env i d@(FunD {}) =
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just args <- Map.lookup (d_name d) i ->
           let -- TODO: add global variables to the variable list   
-              specargs = Map.fromList (zip (map snd (fd_args sd)) args)
-              (want, gdw) = evalSs (fd_stmts sd) specargs
+              specargs = Map.fromList (zip (map snd (f_args . fd_val $ sd)) args)
+              (want, gdw) = evalSs [f_body . fd_val $ sd] specargs
                
-              sketchargs = Map.fromList (zip (map snd (fd_args d)) args)
-              (got, gdg) = evalSs (fd_stmts d) sketchargs
+              sketchargs = Map.fromList (zip (map snd (f_args . fd_val $  d)) args)
+              (got, gdg) = evalSs [f_body . fd_val $ d] sketchargs
           in and [gdw, gdg, want `valEq` got]
 
 evalSs :: [Stmt] -> Map.Map Name Expr -> (Expr, Bool)

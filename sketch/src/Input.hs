@@ -22,7 +22,7 @@ mkFreeProgramInput p = do
         case fd_spec d of
           Nothing -> return Nothing  -- No input needed for non-harness
           Just _ -> do
-            i <- mkFreeArgs (map fst (fd_args d))
+            i <- mkFreeArgs (map fst (f_args . fd_val $ d))
             return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p

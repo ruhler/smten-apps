@@ -71,11 +71,9 @@ instance Ppr Stmt where
    pretty (IfS p a b) = "if (" ++ pretty p ++ ") " ++ pretty a ++ " else " ++ pretty b
 
 instance Ppr Decl where
-   pretty (FunD nm oty xs stmts spec) = 
+   pretty (FunD nm (Function oty xs stmts) spec) = 
      pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
-        ++ pprspec spec ++ "{\n"
-         ++ (unlines (map (("   " ++) . pretty) stmts))
-        ++ "\n}"
+        ++ pprspec spec ++ pretty stmts
    pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
 
 instance Ppr [(Type, Name)] where

@@ -32,9 +32,10 @@ type GM = StateT TS Symbolic
 generateD :: Decl -> Symbolic Decl
 generateD d@(VarD {}) = return d
 generateD d@(FunD {}) = do
-    let tyenv = Map.fromList (map swap $ fd_args d)
-    stmts' <- evalStateT (genSs (fd_stmts d)) (TS tyenv (fd_outty d))
-    return $ d { fd_stmts = stmts' }
+    let tyenv = Map.fromList (map swap . f_args . fd_val $ d)
+    body' <- evalStateT (genS (f_body . fd_val $ d)) (TS tyenv (f_outty . fd_val $ d))
+    let val' = (fd_val d) { f_body = body' }
+    return $ d { fd_val = val' }
 
 withty :: Type -> GM a -> GM a
 withty t x = do
@@ -43,9 +44,6 @@ withty t x = do
   v <- x
   modify $ \s -> s { ts_oty = oldt }
   return v
-
-genSs :: [Stmt] -> GM [Stmt]
-genSs = mapM genS
 
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x

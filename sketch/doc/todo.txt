@@ -1,9 +1,10 @@
 Features::
 GENERATORS
   - To implement:
-      Inline, then deHole. This should be done at generation time.
-    Note: needs syntax for function calls, and presumably support for normal
-    function calls (which deHole before inlining).
+      * copy the generator into a new function declaration.
+      * then generate a value for the hole of that new declaration
+      If it's easier, we can declare the new declaration as a local function.
+    We should start by adding support for standard functions.
 
 CHOICE - {|} hole generator
   - To implement: deHoleExpr should use mplus on both cases.
@@ -20,7 +21,6 @@ Operators (easy to implement):
  LOR: || boolean operator 
  EQ - '==' operator
  PREINC - '++' prefix operator
- INTPLUS - integer plus
 
 
 Features needed, by test case:;
@@ -33,9 +33,9 @@ miniTest16.sk: GENERATOR
 miniTest17.sk: GENERATOR, FOR, PREINC
 miniTest19.sk: GENERATOR
 miniTest20.sk: HOLE_WIDTH, INTARRAY
-miniTest21.sk: PREINC
+miniTest21.sk: PREINC, INTARRAY
 miniTest25.sk: GENERATOR
-miniTest30.sk: INTPLUS, GENERATOR
+miniTest30.sk: GENERATOR
 miniTest31.sk: CHOICE, LOR
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
@@ -58,4 +58,7 @@ Document Behaviors of sketch::
 * what happens to: 7[2] in terms of type inference?
     blows up
 * are < and > supported for bits?
+* if you have a generate call inside a repeat block, is the generate call made
+  repeatedly producing new holes each time, or is it called once with the same
+  holes replicated?
 

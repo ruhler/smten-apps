@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
     Prog, Decl(..), Type(..), Name, Stmt(..),
-    Expr(..),
+    Expr(..), Function(..),
     FunctionInput, ProgramInput,
     valEq,
     ) where
@@ -89,12 +89,22 @@ instance Show Stmt where
     show (IfS p a b) = "IfS " ++ show p ++ " " ++ show a ++ " " ++ show b
     show (BlockS xs) = "BlockS " ++ show xs
 
+data Function = Function {
+    f_outty :: Type,
+    f_args :: [(Type, Name)],
+    f_body :: Stmt
+}
+
+instance Show Function where
+  show x = "Function { " ++
+    "oty = " ++ show (f_outty x) ++ ", " ++
+    "args = " ++ show (f_args x) ++ ", " ++
+    "body = " ++ show (f_body x) ++ "}"
+
 data Decl =
    FunD {
       d_name :: Name,
-      fd_outty :: Type,
-      fd_args :: [(Type, Name)],
-      fd_stmts :: [Stmt],
+      fd_val :: Function,
       
       -- | Nothing means this declaration is a specification
       --   Just foo means this is a sketch with specification 'foo'
@@ -108,9 +118,7 @@ data Decl =
 instance Show Decl where
     show x@(FunD {}) = "FunD { " ++
       "nm = " ++ show (d_name x) ++ ", " ++
-      "oty = " ++ show (fd_outty x) ++ ", " ++
-      "args = " ++ show (fd_args x) ++ ", " ++
-      "stmts = " ++ show (fd_stmts x) ++ ", " ++
+      "val = " ++ show (fd_val x) ++ ", " ++
       "spec = " ++ show (fd_spec x) ++ "}"
     show x@(VarD {}) = "VarD { " ++
       "ty = " ++ show (vd_ty x) ++ ", " ++
