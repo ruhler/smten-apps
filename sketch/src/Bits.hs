@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit, Bits,
-    andB, orB, notB, accessB, valB, updB, intB, addB, subB, ltB, gtB,
+    andB, orB, notB, accessB, valB, updB, intB, addB, subB, ltB, gtB, eqB,
     shlB, shrB, xor, xorB,
     mkbits, width,
     freeBits,
@@ -50,6 +50,9 @@ ltB a b = isneg (a `subB` b)
 
 gtB :: Bits -> Bits -> Bit
 gtB a b = isneg (b `subB` a)
+
+eqB :: Bits -> Bits -> Bit
+eqB a b = and $ zipWith (==) (bits a) (bits b)
 
 notB :: Bits -> Bits 
 notB (Bits w bs) = Bits w (map not bs)

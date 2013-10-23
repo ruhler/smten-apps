@@ -32,6 +32,7 @@ data Expr =
  | SubE Expr Expr        -- ^ a - b
  | LtE Expr Expr         -- ^ a < b
  | GtE Expr Expr         -- ^ a > b
+ | EqE Expr Expr         -- ^ a == b
  | OrE Expr Expr         -- ^ a | b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b

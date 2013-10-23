@@ -147,6 +147,13 @@ evalE (GtE a b) = do
       (BitsE av, BitsE bv) -> return $ BitE (av `gtB` bv)
       (IntE av, IntE bv) -> return $ BitE (av > bv)
       _ -> error $ "unexpected args to GtE: " ++ show (a', b')
+evalE (EqE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsE av, BitsE bv) -> return $ BitE (av `eqB` bv)
+      (IntE av, IntE bv) -> return $ BitE (av == bv)
+      _ -> error $ "unexpected args to EqE: " ++ show (a', b')
 evalE (ArrayE xs) = do
     let f x = do
           r <- evalE x

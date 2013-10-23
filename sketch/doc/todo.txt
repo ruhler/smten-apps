@@ -17,13 +17,11 @@ INTARRAY - int arrays
 
 Operators (easy to implement):
  LOR: || boolean operator 
- EQ - '==' operator
  PREINC - '++' prefix operator
 
 
 Features needed, by test case:;
 miniTest8.sk: FOR
-miniTest10.sk: EQ
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest17.sk: FOR, PREINC
 miniTest19.sk: XOR_ARGS_BUG

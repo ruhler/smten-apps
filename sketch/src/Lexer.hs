@@ -15,9 +15,10 @@ import Smten.Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
-  | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkStar | TkEquals | TkComma | TkSemicolon
+  | TkBar | TkAmp | TkPlus | TkMinus | TkBang
+  | TkStar | TkEquals | TkComma | TkSemicolon
   | TkHat | TkLT | TkGT
-  | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt
+  | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkGenerator
   | TkID String
@@ -46,6 +47,7 @@ instance Show Token where
     show TkDoubleQuestionMark = "TkDoubleQuestionMark"
     show TkDoubleLt = "TkDoubleLt"
     show TkDoubleGt = "TkDoubleGt"
+    show TkDoubleEq = "TkDoubleEq"
     show TkIf = "TkIf"
     show TkElse = "TkElse"
     show TkBit = "TkBit"
@@ -95,7 +97,8 @@ doubles :: [(String, Token)]
 doubles = [
     ("??", TkDoubleQuestionMark),
     (">>", TkDoubleGt),
-    ("<<", TkDoubleLt)
+    ("<<", TkDoubleLt),
+    ("==", TkDoubleEq)
   ]
 
 keywords :: [(String, Token)]

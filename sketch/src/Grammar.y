@@ -39,6 +39,7 @@ import Sketch
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
+    '=='    { TkDoubleEq }
     '>>'    { TkDoubleGt }
     '<<'    { TkDoubleLt }
     '??'    { TkDoubleQuestionMark }
@@ -104,6 +105,7 @@ expr :: { Expr }
  | expr '&' expr    { AndE $1 $3 }
  | expr '<' expr    { LtE $1 $3 }
  | expr '>' expr    { GtE $1 $3 }
+ | expr '==' expr   { EqE $1 $3 }
  | expr '+' expr    { AddE $1 $3 }
  | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
