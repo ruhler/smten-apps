@@ -110,6 +110,14 @@ genE (HoleE bnd) = do
   ty <- asks gr_oty
   env <- asks gr_env
   liftSymbolic $ mkFreeArg env bnd ty
+genE (BitChooseE a b) = do
+  env <- asks gr_env
+  ty <- asks gr_oty
+  -- TODO: use the bit width of a and b, not 32.
+  x <- liftSymbolic $ mkFreeArg env 32 ty
+  a' <- genE a
+  b' <- genE b
+  return (OrE (AndE a' x) (AndE b' (NotE x)))
 genE x@(BitE {}) = return x
 genE x@(BitsE {}) = return x
 genE x@(IntE v) = do

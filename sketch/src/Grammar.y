@@ -34,6 +34,7 @@ import Sketch
     '+'     { TkPlus }
     '-'     { TkMinus }
     '!'     { TkBang }
+    '~'     { TkTilde }
     '^'     { TkHat }
     '*'     { TkStar }
     '='     { TkEquals }
@@ -44,6 +45,7 @@ import Sketch
     '<<'    { TkDoubleLt }
     '++'    { TkDoublePlus }
     '??'    { TkDoubleQuestionMark }
+    '{|}'    { TkBitChoose }
     'if'    { TkIf }
     'repeat'    { TkRepeat }
     'while'    { TkWhile }
@@ -128,7 +130,9 @@ expr :: { Expr }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
+ | expr '{|}' expr   { BitChooseE $1 $3 }
  | '!' expr         { NotE $2 }
+ | '~' expr         { NotE $2 }
  | '??' { HoleE bnd_ctrlbits }
  | '??' '(' integer ')' { HoleE $3 }
  | '{' '*' '}' { HoleE bnd_ctrlbits }   -- TODO: is {*} really the same as ??

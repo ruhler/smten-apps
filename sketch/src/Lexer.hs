@@ -15,11 +15,11 @@ import Smten.Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
-  | TkBar | TkAmp | TkPlus | TkMinus | TkBang
+  | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
   | TkStar | TkEquals | TkComma | TkSemicolon
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
-  | TkDoublePlus
+  | TkDoublePlus | TkBitChoose 
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator
   | TkID String
@@ -36,6 +36,7 @@ instance Show Token where
     show TkBar = "TkBar"
     show TkStar = "TkStar"
     show TkBang = "TkBang"
+    show TkTilde = "TkTilde"
     show TkAmp = "TkAmp"
     show TkPlus = "TkPlus"
     show TkMinus = "TkMinus"
@@ -50,6 +51,7 @@ instance Show Token where
     show TkDoubleGt = "TkDoubleGt"
     show TkDoubleEq = "TkDoubleEq"
     show TkDoublePlus = "TkDoublePlus"
+    show TkBitChoose = "TkBitChoose"
     show TkIf = "TkIf"
     show TkElse = "TkElse"
     show TkBit = "TkBit"
@@ -86,6 +88,7 @@ singles = [
     ('|', TkBar),
     ('*', TkStar),
     ('!', TkBang),
+    ('~', TkTilde),
     ('&', TkAmp),
     ('+', TkPlus),
     ('-', TkMinus),
@@ -104,6 +107,11 @@ doubles = [
     ("<<", TkDoubleLt),
     ("==", TkDoubleEq),
     ("++", TkDoublePlus)
+  ]
+
+triples :: [(String, Token)]
+triples = [
+    ("{|}", TkBitChoose)
   ]
 
 keywords :: [(String, Token)]
@@ -134,6 +142,7 @@ lex = do
     text <- get
     case text of
       [] -> return TkEOF
+      (a:b:c:cs) | Just tok <- lookup [a, b, c] triples -> put cs >> return tok
       (a:b:cs) | Just tok <- lookup [a, b] doubles -> put cs >> return tok
       (c:cs) | Just tok <- lookup c singles -> put cs >> return tok
       (c:cs) | isSpace c -> put cs >> lex

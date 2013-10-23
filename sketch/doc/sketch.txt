@@ -27,7 +27,10 @@ Expressions
         Has short circuit semantics.
 
     ! <expr>
-        Logical NOT. Works on bit, (others?).
+        Logical NOT. Works on bit, bit[].
+
+    ~ <expr>
+        Logical Not. Same as '!' operator. (really?).
 
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[], (others?).
@@ -87,6 +90,14 @@ Holes
     ??(N)    - a free constant between 0 and less than 2^N, with N an integer
                constant. That is, N is the number of bits for the hole.
     {*}      - Same as '??'     (is it really?)
+    <expr> {|} <expr>
+        - Bitwise choose between the bits of the given expressions.
+          Both arguments must have type bit[].
+          The expression (a {|} b), is like saying:
+            bit[] x = ??;
+            (a & x) | (b & ~x)
+            
+        
 
 
 Statements
@@ -129,6 +140,10 @@ Statements
     while (<expr>) <stmt>
       - The argument should be a bit. Repeatedly executes the given statement
         while the argument evaluates to True.
+
+    for (<init> ; <expr> ; <incr>) <body>
+      - Standard for loop.
+        Question: What exactly can go in <init> and <incr> slots?
 
 Declarations
 ------------

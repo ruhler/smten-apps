@@ -1,0 +1,14 @@
+
+bit[4] sketch1(bit[4] a, bit[4] b) implements spec {
+    return (a {|} b);
+}
+   
+bit[4] spec(bit[4] a, bit[4] b) {
+    bit[4] r;
+    r[0] = a[0];
+    r[1] = b[1];
+    r[2] = b[2];
+    r[3] = a[3];
+    return r;
+}
+

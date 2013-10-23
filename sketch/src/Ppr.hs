@@ -49,6 +49,7 @@ instance Ppr Expr where
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
    pretty (HoleE v) = "??(" ++ show v ++ ")"
+   pretty (BitChooseE a b) = prettya a ++ " {|} " ++ prettya b
    pretty (BitE b) = if b then "true" else "false"
    pretty (BitsE n) = show (valB n)
    pretty (IntE n) = pretty n

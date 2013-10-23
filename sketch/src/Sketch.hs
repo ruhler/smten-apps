@@ -41,6 +41,7 @@ data Expr =
  | ShlE Expr Expr        -- ^ a << b
  | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Int             -- ^ ??(n)      n is the number of bits to use
+ | BitChooseE Expr Expr  -- ^ a {|} b
  | BitE Bit              -- ^ 1
  | BitsE Bits            -- ^ 4'h2
  | IntE Int              -- ^ 42
@@ -65,6 +66,7 @@ instance Show Expr where
     show (ShlE a b) = "ShlE " ++ show a ++ " " ++ show b
     show (NotE a) = "NotE " ++ show a
     show (HoleE m) = "HoleE " ++ show m
+    show (BitChooseE a b) = "BitChooseE " ++ show a ++ " " ++ show b
     show (BitE b) = "BitE " ++ show b
     show (BitsE b) = "BitsE " ++ show b
     show (IntE x) = "IntE " ++ show x
