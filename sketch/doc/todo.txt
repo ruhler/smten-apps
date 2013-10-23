@@ -1,4 +1,15 @@
 Features::
+GLOBAL VARS
+  - How do they work? When are they in scope? Can they be modified?
+    Observations:
+     - they can be shadowed by local declarations
+    For now:
+     - Keep Global and Local vars separate. 
+
+FUNCTIONS
+  - To implement:
+      * Add AppE and FunE expressions.
+
 GENERATORS
   - To implement:
       * copy the generator into a new function declaration.
@@ -46,8 +57,6 @@ Performance Ideas:: (consider only AFTER we run into performance problems)
 
 Other Todo::
 * make the pretty printer print prettier
-* reuse BlockS for handling function bodies? 
-* clean up type inference (leverage an smt solver?)
 
 Document Behaviors of sketch::
 * if you call a function in two different sketches, are it's holes shared or

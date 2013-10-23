@@ -97,9 +97,11 @@ Statements
     <type> <name> ;
       - Declare the variable <name> to have <type> and no initial value.
         What happens if you try to use it before initializing it?
+        Note: local variables may NOT be shadowed.
 
     <type> <name> = <expr> ;
       - Declare the variable <name> to have <type> and initial value <expr>
+        Note: local variables may NOT be shadowed.
 
     <lval> = <expr> ;
       - Update the left hand side value <lval> to have value <expr>

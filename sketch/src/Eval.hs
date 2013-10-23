@@ -12,6 +12,9 @@ import Sketch
 type ProgramEnv = Map.Map String Decl
 
 data SS = SS {
+    -- | The Global Environment
+    ss_env :: Map.Map Name Decl,
+
     -- | Local variables. Already evaluated.
     ss_vars :: Map.Map Name Expr,
 
@@ -34,7 +37,7 @@ evalP p i =
 -- TODO: Don't we need to supply an environment here?
 evalT :: Type -> Type
 evalT BitT = BitT
-evalT (BitsT e) = BitsT $ evalState (evalE e) (SS Map.empty (error "evalT.ss_out") True)
+evalT (BitsT e) = BitsT $ evalState (evalE e) (SS Map.empty Map.empty (error "evalT.ss_out") True)
 evalT IntT = IntT
 evalT UnknownT = UnknownT
 
@@ -50,7 +53,7 @@ evalD env i d@(FunD {}) =
                 want <- apply (fd_val sd) args
                 got <- apply (fd_val d) args
                 assert (want `valEq` got)
-          in ss_valid $ execState run (SS Map.empty (error "evalD: no output produces") True)
+          in ss_valid $ execState run (SS env Map.empty (error "evalD: no output produces") True)
 
 -- Apply a function to the given arguments.
 apply :: Function -> [Expr] -> State SS Expr
@@ -58,7 +61,7 @@ apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip (map snd (f_args f)) xs')
     olds <- get
-    put (SS args (error "apply: no output returned") (ss_valid olds))
+    put (SS (ss_env olds) args (error "apply: no output returned") (ss_valid olds))
     evalS (f_body f)
     r <- gets ss_out
     p <- gets ss_valid
@@ -191,7 +194,11 @@ evalE (VarE nm) = do
     vars <- gets ss_vars
     case Map.lookup nm vars of
         Just v -> return v
-        Nothing -> error $ "Var " ++ nm ++ " not in scope"
+        Nothing -> do
+            env <- gets ss_env
+            case Map.lookup nm env of
+                Just (VarD _ _ v) -> return v
+                Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     BitsE a' <- evalE a
     IntE i' <- evalE i
