@@ -16,7 +16,10 @@ import Sketch
 -- Given a program with explicit holes, generate a corrisponding symbolic
 -- candidate program without holes.
 generate :: Prog -> Symbolic Prog
-generate = mapM generateD
+generate p = do
+  let readed = runReaderT (mapM genD p) (GR (error "no top level output type"))
+  (ds, s) <- runStateT readed (TS (error "TODO: generate with global tyenv") [])
+  return $ ts_decls s ++ ds
 
 type TypeEnv = Map.Map Name Type
 
@@ -27,7 +30,10 @@ data GR = GR {
 
 data TS = TS {
     -- | The type environment.
-    ts_env :: TypeEnv
+    ts_env :: TypeEnv,
+
+    -- | Emmitted (generated) declarations
+    ts_decls :: [Decl]
 }
 
 type GM = ReaderT GR (StateT TS Symbolic)
@@ -35,15 +41,19 @@ type GM = ReaderT GR (StateT TS Symbolic)
 withty :: Type -> GM a -> GM a
 withty t = local (\r -> r { gr_oty = t })
 
+emit :: Decl -> GM ()
+emit d = modify $ \s -> s { ts_decls = d : ts_decls s }
+
 liftSymbolic :: Symbolic a -> GM a
 liftSymbolic = lift . lift
 
-generateD :: Decl -> Symbolic Decl
-generateD d@(VarD {}) = return d
-generateD d@(FunD {}) = do
+genD :: Decl -> GM Decl
+genD d@(VarD {}) = return d
+genD d@(FunD {}) = do
     let tyenv = Map.fromList (map swap . f_args . fd_val $ d)
-        readed = runReaderT (genS (f_body . fd_val $ d)) (GR (f_outty . fd_val $ d))
-    body' <- evalStateT readed (TS tyenv )
+        oty = f_outty . fd_val $ d
+    modify $ \s -> s { ts_env = tyenv }
+    body' <- withty oty $ genS (f_body . fd_val $ d)
     let val' = (fd_val d) { f_body = body' }
     return $ d { fd_val = val' }
 
