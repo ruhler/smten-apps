@@ -42,6 +42,7 @@ import Sketch
     '=='    { TkDoubleEq }
     '>>'    { TkDoubleGt }
     '<<'    { TkDoubleLt }
+    '++'    { TkDoublePlus }
     '??'    { TkDoubleQuestionMark }
     'if'    { TkIf }
     'repeat'    { TkRepeat }
@@ -100,6 +101,7 @@ stmt :: { Stmt }
  | 'repeat' '(' expr ')' stmt { RepeatS $3 $5 }
  | 'while' '(' expr ')' stmt { WhileS $3 $5 }
  | ';' { BlockS [] }
+ | '++' id ';' { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

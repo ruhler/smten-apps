@@ -19,6 +19,7 @@ data Token =
   | TkStar | TkEquals | TkComma | TkSemicolon
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
+  | TkDoublePlus
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkGenerator
   | TkID String
@@ -48,6 +49,7 @@ instance Show Token where
     show TkDoubleLt = "TkDoubleLt"
     show TkDoubleGt = "TkDoubleGt"
     show TkDoubleEq = "TkDoubleEq"
+    show TkDoublePlus = "TkDoublePlus"
     show TkIf = "TkIf"
     show TkElse = "TkElse"
     show TkBit = "TkBit"
@@ -99,7 +101,8 @@ doubles = [
     ("??", TkDoubleQuestionMark),
     (">>", TkDoubleGt),
     ("<<", TkDoubleLt),
-    ("==", TkDoubleEq)
+    ("==", TkDoubleEq),
+    ("++", TkDoublePlus)
   ]
 
 keywords :: [(String, Token)]

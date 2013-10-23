@@ -49,6 +49,9 @@ Expressions
     <expr> > <expr>
         Greater than. Works on int. Does not work on bit or bit[].
 
+    <expr> == <expr>
+        Equal to. Works on int, bit, and bit[]. (??)
+
     <expr> >> <expr>
         Logical right shift. The left argument must be an array of bits. The
         right argument has type int.
@@ -122,6 +125,10 @@ Statements
     repeat(<expr>) <stmt>
       - The argument should be an int. Repeats the given statement that many
         times.
+
+    while (<expr>) <stmt>
+      - The argument should be a bit. Repeatedly executes the given statement
+        while the argument evaluates to True.
 
 Declarations
 ------------
