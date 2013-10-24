@@ -3,7 +3,7 @@
 module Bits (
     Bit, Bits,
     andB, orB, notB, accessB, valB, updB, intB, addB, subB, ltB, gtB, eqB,
-    shlB, shrB, xor, xorB,
+    shlB, shrB, xor, xorB, castB,
     mkbits, width,
     freeBits,
     ) where
@@ -138,4 +138,13 @@ add c (a:as) (b:bs) =
 
 isneg :: Bits -> Bit
 isneg (Bits _ bs) = last bs
+
+-- | Cast a bit vector to the given width.
+-- Truncates if the width is smaller than the bit vector width.
+-- Appends 0 bits if the width is greater than the bit vector width.
+castB :: Int -> Bits -> Bits
+castB nw b@(Bits w bs)
+  | nw < w = Bits nw (take nw bs)
+  | nw == w = b
+  | otherwise = Bits nw (bs ++ replicate (nw - w) False)
 

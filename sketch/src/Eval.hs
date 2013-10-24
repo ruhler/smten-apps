@@ -238,9 +238,11 @@ evalE (AccessE a i) = do
     assert (i' < width a')
     return (BitE (a' `accessB` i'))
 evalE (CastE t e) = do
+    env <- gets ss_env
     e' <- evalE e
-    case (t, e') of
+    case (evalT env t, e') of
         (IntT, BitsE v) -> return (IntE (valB v))
+        (BitsT (IntE w), BitsE v) -> return (BitsE (castB w v))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE x@(FunE {}) = return x
 evalE (AppE f xs) = do

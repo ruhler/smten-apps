@@ -9,9 +9,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-BIT_CAST
-  - support casting from one bit type to another.
-
 FUNTYPE_INFO
   - foo(1), where foo takes a bit[4] as an argument.
     We don't infer the right type for '1'.
@@ -28,7 +25,6 @@ INTARRAY - int arrays
 
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest17.sk: BIT_CAST
 miniTest19.sk: FUNTYPE_INFO
 miniTest20.sk: INTARRAY
 miniTest21.sk: INTARRAY
@@ -47,7 +43,14 @@ Performance Ideas:: (consider only AFTER we run into performance problems)
 * perform simplification at start to avoid re-evaluating things we know every
   iteration of the CEGIS loop?
 * do incremental unrolling on the size of inputs and holes we try?
-
+* 'repeat' does a lot of extra work.
+    For example, it tries repeating 0 through 32, say.
+    Which means, worst case, executing the statement 
+    0 + 1 + 2 + 3 + 4 + 5 + ... + 32 times.
+    But if we just conditionally execute the repeated statement, we could only
+    need to execute it worst case 32 times, right? Nested repeats compound the
+    issue.
+    
 Other Todo::
 * make the pretty printer print prettier
 
