@@ -18,9 +18,6 @@ FUNTYPE_INFO
 BITCHOICE
    - support {|} operator with bit operands
 
-BITINDEX
-   - support array access where index is a bit.
-
 INTARRAY - int arrays
 
 Features needed, by test case::
@@ -28,8 +25,8 @@ miniTest12.sk: RECURSIVE_GENERATOR
 miniTest19.sk: FUNTYPE_INFO
 miniTest20.sk: INTARRAY
 miniTest21.sk: INTARRAY
-miniTest31.sk: BITCHOICE, BITINDEX
-miniTest32.sk: BITCHOICE, BITINDEX
+miniTest31.sk: BITCHOICE
+miniTest32.sk: BITCHOICE
 miniTest34.sk: INTARRAY
 miniTest35.sk: INTARRAY
 miniTest36.sk: INTARRAY

@@ -234,9 +234,14 @@ evalE (VarE nm) = do
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     BitsE a' <- evalE a
-    IntE i' <- evalE i
-    assert (i' < width a')
-    return (BitE (a' `accessB` i'))
+    i' <- evalE i
+    let idx = case i' of
+               BitE False -> 0
+               BitE True -> 1
+               BitsE b -> valB b
+               IntE iv -> iv
+    assert (idx < width a')
+    return (BitE (a' `accessB` idx))
 evalE (CastE t e) = do
     env <- gets ss_env
     e' <- evalE e
