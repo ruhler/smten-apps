@@ -144,13 +144,12 @@ genE (AccessE a b) = do
 genE (CastE t e) = CastE t <$> withty UnknownT (genE e)
 genE (AppE f xs) = do
     env <- asks gr_env
-    case f of
-       VarE gnm | Just (FunD _ gf GeneratorF) <- Map.lookup gnm env -> do
-           generated <- genD (FunD gnm gf NormalF)
-           gnm' <- emit generated
-           AppE (VarE gnm') <$> (withty UnknownT $ mapM genE xs)
-       _ -> liftM2 AppE (withty UnknownT $ genE f)
-                        (withty UnknownT $ mapM genE xs)
+    case Map.lookup f env of
+       Just (FunD _ gf GeneratorF) -> do
+           generated <- genD (FunD f gf NormalF)
+           f' <- emit generated
+           AppE f' <$> (withty UnknownT $ mapM genE xs)
+       _ -> AppE f <$> (withty UnknownT $ mapM genE xs)
 genE x@(FunE f) = return x
 
 -- Generate a binary operator, where the only thing we know about the operand
@@ -194,12 +193,11 @@ typeof (VarE nm) = do
                       Nothing -> return UnknownT
 typeof (AccessE a b) = return BitT
 typeof (CastE t e) = return t
-typeof (AppE (VarE nm) xs) = do
+typeof (AppE nm xs) = do
     env <- asks gr_env
     case Map.lookup nm env of
        Just (FunD _ v _) -> return $ f_outty v
        Nothing -> return UnknownT
-typeof (AppE f xs) = return UnknownT
 typeof (FunE f) = return UnknownT
 
 

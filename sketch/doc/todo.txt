@@ -1,5 +1,4 @@
 Cleanup::
- * function application: the function should be Name instead of Expr?
  * have a function type?
 
 Features::

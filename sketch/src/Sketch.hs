@@ -52,7 +52,7 @@ data Expr =
  | ErrE String           -- ^ used for errors
  | CastE Type Expr       -- ^ (T) e
  | FunE Function         -- ^ anonymous function literal
- | AppE Expr [Expr]      -- ^ f(x, y, ...)
+ | AppE Name [Expr]      -- ^ f(x, y, ...)
 
 instance Show Expr where
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b

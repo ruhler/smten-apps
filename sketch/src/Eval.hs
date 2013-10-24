@@ -243,7 +243,7 @@ evalE (CastE t e) = do
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE x@(FunE {}) = return x
 evalE (AppE f xs) = do
-    f' <- evalE f
+    f' <- evalE (VarE f)
     case f' of
         FunE fv -> apply fv xs
         _ -> error $ "Expected function, but got: " ++ show f'
