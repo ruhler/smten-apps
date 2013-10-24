@@ -162,6 +162,7 @@ evalE (EqE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
+      (BitE av, BitE bv) -> return $ BitE (av == bv)
       (BitsE av, BitsE bv) -> return $ BitE (av `eqB` bv)
       (IntE av, IntE bv) -> return $ BitE (av == bv)
       _ -> error $ "unexpected args to EqE: " ++ show (a', b')

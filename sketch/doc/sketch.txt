@@ -46,6 +46,9 @@ Expressions
     <expr> - <expr>
         Subtraction. Works on int. Does not work on bit or bit[].
 
+    <expr> * <expr>
+        Multiplication. Works on int. Does not work on bit or bit[].
+
     <expr> < <expr>
         Less than. Works on int. Does not work on bit or bit[].
 
@@ -53,7 +56,7 @@ Expressions
         Greater than. Works on int. Does not work on bit or bit[].
 
     <expr> == <expr>
-        Equal to. Works on int, bit, and bit[]. (??)
+        Equal to. Works on int, bit, and bit[].
 
     <expr> >> <expr>
         Logical right shift. The left argument must be an array of bits. The

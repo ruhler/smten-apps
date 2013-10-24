@@ -96,9 +96,9 @@ genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)
 genE (AddE a b) = liftM2 AddE (genE a) (genE b)
 genE (SubE a b) = liftM2 SubE (genE a) (genE b)
-genE (LtE a b) = liftM2 LtE (withty UnknownT $ genE a) (withty UnknownT $ genE b)
-genE (GtE a b) = liftM2 GtE (withty UnknownT $ genE a) (withty UnknownT $ genE b)
-genE (EqE a b) = liftM2 EqE (withty UnknownT $ genE a) (withty UnknownT $ genE b)
+genE (LtE a b) = withsamety LtE a b
+genE (GtE a b) = withsamety GtE a b
+genE (EqE a b) = withsamety EqE a b
 genE (ArrayE a) = ArrayE <$> withty BitT (mapM genE a)
 genE (XorE a b) = liftM2 XorE (genE a) (genE b)
 genE (MulE a b) = liftM2 MulE (genE a) (genE b)
@@ -152,4 +152,60 @@ genE (AppE f xs) = do
        _ -> liftM2 AppE (withty UnknownT $ genE f)
                         (withty UnknownT $ mapM genE xs)
 genE x@(FunE f) = return x
+
+-- Generate a binary operator, where the only thing we know about the operand
+-- types is that they must be the same.
+withsamety :: (Expr -> Expr -> Expr) -> Expr -> Expr -> GM Expr
+withsamety f a b = do
+    t <- liftM2 unify (typeof a) (typeof b)
+    liftM2 f (withty t $ genE a) (withty t $ genE b)
+
+-- Determine as best as possible the type of the given expression.
+-- Returns 'UnknownT' if the type is not certain.
+typeof :: Expr -> GM Type
+typeof (AndE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (AddE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (SubE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (LtE a b) = return BitT
+typeof (GtE a b) = return BitT
+typeof (EqE a b) = return BitT
+typeof (ArrayE a) = return UnknownT
+typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (MulE a b) = return IntT
+typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (LOrE a b) = return BitT
+typeof (LAndE a b) = return BitT
+typeof (ShlE a b) = typeof a
+typeof (ShrE a b) = typeof a
+typeof (NotE a) = typeof a
+typeof (HoleE bnd) = return UnknownT
+typeof (BitChooseE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BitE {}) = return BitT
+typeof (BitsE b) = return (BitsT (IntE $ width b))
+typeof (IntE v) = return UnknownT -- could be any integer literal
+typeof (VarE nm) = do
+    env <- asks gr_env
+    tyenv <- gets ts_tyenv
+    case Map.lookup nm tyenv of
+        Just v -> return v
+        Nothing -> case Map.lookup nm env of    
+                      Just (VarD ty _ _) -> return ty
+                      Just (FunD _ _ _) -> return UnknownT   -- TODO: can we have a function type which we can return?
+                      Nothing -> return UnknownT
+typeof (AccessE a b) = return BitT
+typeof (CastE t e) = return t
+typeof (AppE (VarE nm) xs) = do
+    env <- asks gr_env
+    case Map.lookup nm env of
+       Just (FunD _ v _) -> return $ f_outty v
+       Nothing -> return UnknownT
+typeof (AppE f xs) = return UnknownT
+typeof (FunE f) = return UnknownT
+
+
+-- Try to unify the given types.
+unify :: Type -> Type -> Type
+unify UnknownT t = t
+unify t UnknownT = t
+unify x _ = x
 

@@ -1,13 +1,12 @@
+Cleanup::
+ * function application: the function should be Name instead of Expr?
+ * have a function type?
+
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
     How to deal with this?
     Use the inlining bound?
-
-TYPE_BUG
-  - bit[4] x = ...
-    if (x == 1) ...
-      Currently we don't infer the type of '1' properly.
 
 XOR_ARGS_BUG
   - miniTest19.sk is getting the wrong type of args to xor for some reason.
@@ -15,7 +14,6 @@ XOR_ARGS_BUG
 INTARRAY - int arrays
 
 Features needed, by test case::
-miniTest8.sk: TYPE_BUG
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest17.sk: ???
 miniTest19.sk: XOR_ARGS_BUG

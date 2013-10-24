@@ -6,6 +6,6 @@ bit sketch1(bit in) implements spec {
 }
    
 bit spec(bit in) {
-    return in || false;
+    return in;
 }
 
