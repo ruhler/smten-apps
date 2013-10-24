@@ -95,9 +95,9 @@ evalS w@(WhileS c s) = do
     _ -> error $ "expected bit type for while condition, but got: " ++ show c'
 evalS (DeclS ty nm) = do
   env <- gets ss_env
-  let v0 = case evalT env ty of
-              ArrT BitT (IntE w) -> BitsE (intB w 0)
-              _ -> error $ nm ++ " not initialized"
+  v0 <- case evalT env ty of
+          t@(ArrT {}) -> evalE $ pad ty
+          _ -> return (error $ nm ++ " not initialized")
   modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
 evalS (UpdateS nm e) = do
   e' <- evalE e
@@ -267,4 +267,8 @@ evalE (AppE f xs) = do
         _ -> error $ "Expected function, but got: " ++ show f'
     
     
+pad :: Type -> Expr
+pad BitT = BitE False
+pad IntT = IntE 0
+pad (ArrT t (IntE w)) = ArrayE (replicate w (pad t))
 

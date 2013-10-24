@@ -134,7 +134,7 @@ Statements
     <type> <name> ;
       - Declare the variable <name> to have <type>.
         The value of the variable is initialized to:
-           bit[]:  initial value is 0.
+           array:  initial value is 0.
            bit: no initial value is provided (it is an error to use it).
            int: no initial value is provided (it is an error to use it).
         Note: local variables may NOT be shadowed.

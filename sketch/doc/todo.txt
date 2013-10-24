@@ -53,4 +53,5 @@ Document Behaviors of sketch::
   repeatedly producing new holes each time, or is it called once with the same
   holes replicated?
 * are all arrays initialized to {0}, or just bit vectors?
+    All arrays are.
 
