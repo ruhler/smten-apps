@@ -84,6 +84,10 @@ genS (UpdateS nm e) = do
   env <- gets ts_tyenv
   case Map.lookup nm env of
     Nothing -> error $ "variable " ++ nm ++ " not in scope"
+    Just ty@(ArrT {}) -> do
+        -- insert an explicit cast here so padding is performed as needed.
+        e' <- withty ty (genE e)
+        return $ UpdateS nm (CastE ty e')
     Just ty -> UpdateS nm <$> (withty ty (genE e))
 genS (ArrUpdateS nm idx e) = do
     env <- gets ts_tyenv

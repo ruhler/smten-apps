@@ -96,7 +96,7 @@ evalS w@(WhileS c s) = do
 evalS (DeclS ty nm) = do
   env <- gets ss_env
   v0 <- case evalT env ty of
-          t@(ArrT {}) -> evalE $ pad ty
+          t@(ArrT {}) -> evalE $ pad t
           _ -> return (error $ nm ++ " not initialized")
   modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
 evalS (UpdateS nm e) = do
@@ -258,6 +258,7 @@ evalE (CastE t e) = do
     case (evalT env t, e') of
         (IntT, BitsE v) -> return (IntE (valB v))
         (ArrT BitT (IntE w), BitsE v) -> return (BitsE (castB w v))
+        (ArrT t (IntE w), ArrayE xs) -> return (ArrayE (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE x@(FunE {}) = return x
 evalE (AppE f xs) = do

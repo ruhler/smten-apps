@@ -1,3 +1,6 @@
+
+* Pretty print bit vectors like arrays, not as integers!
+
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
@@ -6,16 +9,11 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-AUTO_ARRAY_PAD 
-  - int [8] foo = {1, 2}
-        foo should automatically be padded with 6 zeros here.
+BIT_TO_BITS
+  * automatically promote bit to bit[1] if needed.
 
 Features needed, by test case::
-broken/arrscalar.smten.sk: AUTO_ARRAY_PAD
-broken/miniTest8.sk: AUTO_ARRAY_PAD
-broken/miniTest15.sk: AUTO_ARRAY_PAD
-broken/miniTest17.sk: AUTO_ARRAY_PAD
-broken/miniTest40.sk: AUTO_ARRAY_PAD
+broken/miniTest3.sk: BIT_TO_BITS
 
 
 miniTest12.sk: RECURSIVE_GENERATOR
