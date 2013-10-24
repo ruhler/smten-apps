@@ -138,14 +138,19 @@ genE x@(IntE v) = do
     -- TODO: this is a bit hackish. Can we clean it up please?
     env <- asks gr_env
     t <- asks gr_oty
-    return $ case evalT env t of
-               IntT -> x
-               BitT -> case v of
+    case evalT env t of
+      IntT -> return x
+      BitT -> return $ case v of
                          0 -> BitE False
                          1 -> BitE True
                          _ -> error $ "literal " ++ show v ++ " is too big for bit type"
-               ArrT BitT (IntE w) -> BitsE (intB w v)
-               _ -> x   -- TODO: is it okay to default to int?
+       -- TODO: This case is wrong! Bit vectors should be handled
+       -- like ordinary arrays here.
+      ArrT BitT (IntE w) -> return $ BitsE (intB w v)
+      ArrT t _ -> do
+        x <- withty t (genE x)
+        return $ ArrayE [x]
+      _ -> return x   -- TODO: is it okay to default to int?
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
     a' <- withty UnknownT $ genE a

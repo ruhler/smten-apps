@@ -1,0 +1,11 @@
+
+int sketch1(bit in) implements spec {
+    int [4] x = {??, ??, ??, ??};
+    return x[in];
+}
+   
+int spec(bit in) {
+    int [4] x = 5;
+    return x[in];
+}
+
