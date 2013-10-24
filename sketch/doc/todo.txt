@@ -15,9 +15,6 @@ ARRAY_UPDATE_BOUNDS
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest21.sk: ZERO_ARRAY_INIT
-miniTest34.sk: ARRAY_UPDATE_BOUNDS
-miniTest35.sk: ARRAY_UPDATE_BOUNDS
-miniTest37.sk: ARRAY_UPDATE_BOUNDS
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest43.sk: CLAIMS UNSAT - not sure why
 miniTest44.sk: CLAIMS UNSAT - not sure why

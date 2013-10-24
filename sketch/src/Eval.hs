@@ -106,15 +106,18 @@ evalS (ArrUpdateS nm i e) = do
   env <- gets ss_vars
   ir <- evalE i
   er <- evalE e
-  let arr' = case (Map.lookup nm env, ir, er) of
-                (Just (BitsE arr), IntE i', BitE e') -> BitsE $ updB arr i' e'
-                (Just (ArrayE xs), IntE i', e') -> 
-                    let f _ [] = error "array update out of bounds"
-                        f 0 (v:vs) = e':vs
-                        f n (v:vs) = v : f (n-1) vs
-                    in ArrayE $ f i' xs
-                (Just v, _, _) -> error $ "array update into non-array: " ++ show v
-                (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
+  arr' <- case (Map.lookup nm env, ir, er) of
+             (Just (BitsE arr), IntE i', BitE e') -> do
+                assert (i' < width arr)
+                return (BitsE $ updB arr i' e')
+             (Just (ArrayE xs), IntE i', e') -> do
+                 let f _ [] = error "array update out of bounds"
+                     f 0 (v:vs) = e':vs
+                     f n (v:vs) = v : f (n-1) vs
+                 assert (i' < length xs)
+                 return (ArrayE $ f i' xs)
+             (Just v, _, _) -> error $ "array update into non-array: " ++ show v
+             (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
 
 evalS (IfS p a b) = do
