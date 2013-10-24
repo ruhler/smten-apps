@@ -6,27 +6,18 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-ZERO_ARRAY_INIT
-  - int [8] fu = 0;     Handle this properly.
-    I believe the proper handling is:
-      * 0 is implicitly converted into the array: { 0 }
-      * The array { 0 } is implicitly padded when you assign it to fu, which
-        has a greater width
-
 AUTO_ARRAY_PAD 
   - int [8] foo = {1, 2}
         foo should automatically be padded with 6 zeros here.
 
-BITS_LITERAL_BUG
-  - bit[4] x = 2
-        does NOT mean make x = {0, 1, 0, 0}. It means make 
-        x = {2, 0, 0, 0}, but 2 is not a valid bit, so this should not be
-        allowed.
-     Question: but don't we use integer literals for bit vectors elsewhere?
-
 Features needed, by test case::
-broken/expectfail/bitsscalar.smten.sk: BITS_LITERAL_BUG
 broken/arrscalar.smten.sk: AUTO_ARRAY_PAD
+broken/miniTest8.sk: AUTO_ARRAY_PAD
+broken/miniTest15.sk: AUTO_ARRAY_PAD
+broken/miniTest17.sk: AUTO_ARRAY_PAD
+broken/miniTest40.sk: AUTO_ARRAY_PAD
+
+
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest21.sk: AUTO_ARRAY_PAD
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)

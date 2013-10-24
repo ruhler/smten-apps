@@ -144,9 +144,6 @@ genE x@(IntE v) = do
                          0 -> BitE False
                          1 -> BitE True
                          _ -> error $ "literal " ++ show v ++ " is too big for bit type"
-       -- TODO: This case is wrong! Bit vectors should be handled
-       -- like ordinary arrays here.
-      ArrT BitT (IntE w) -> return $ BitsE (intB w v)
       ArrT t _ -> do
         x <- withty t (genE x)
         return $ ArrayE [x]
