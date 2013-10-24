@@ -4,30 +4,43 @@ Cleanup::
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
-    How to deal with this?
-    Use the inlining bound?
+    To deal with this:
+        bound number of appearances of a function on the stack to
+        --bnd-inline-amount. Assert no more are needed.
+        So, if you exceed the limit, assert false and return error.
 
-XOR_ARGS_BUG
-  - miniTest19.sk is getting the wrong type of args to xor for some reason.
+BIT_CAST
+  - support casting from one bit type to another.
+
+FUNTYPE_INFO
+  - foo(1), where foo takes a bit[4] as an argument.
+    We don't infer the right type for '1'.
+    This is straight-forward to fix: keep track of function types where
+    possible. Having an explicit function Type would be helpful here.
+
+BITCHOICE
+   - support {|} operator with bit operands
+
+BITINDEX
+   - support array access where index is a bit.
 
 INTARRAY - int arrays
 
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest17.sk: ???
-miniTest19.sk: XOR_ARGS_BUG
+miniTest17.sk: BIT_CAST
+miniTest19.sk: FUNTYPE_INFO
 miniTest20.sk: INTARRAY
 miniTest21.sk: INTARRAY
-miniTest31.sk: ???
-miniTest32.sk: ???
+miniTest31.sk: BITCHOICE, BITINDEX
+miniTest32.sk: BITCHOICE, BITINDEX
 miniTest34.sk: INTARRAY
 miniTest35.sk: INTARRAY
 miniTest36.sk: INTARRAY
 miniTest37.sk: INTARRAY
-miniTest40.sk: ???
-miniTest41.sk: ???
-miniTest43.sk: ???
-miniTest44.sk: ???
+miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
+miniTest43.sk: CLAIMS UNSAT - not sure why
+miniTest44.sk: CLAIMS UNSAT - not sure why
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?

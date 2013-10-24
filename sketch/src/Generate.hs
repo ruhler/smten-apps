@@ -10,6 +10,7 @@ import Smten.Data.Tuple
 import Smten.Symbolic
 
 import Bits
+import Eval
 import Input
 import Sketch
 
@@ -127,8 +128,9 @@ genE x@(IntE v) = do
     -- type int. Change to the appropriate expression if a different type is
     -- expected here.
     -- TODO: this is a bit hackish. Can we clean it up please?
+    env <- asks gr_env
     t <- asks gr_oty
-    return $ case t of
+    return $ case evalT env t of
                IntT -> x
                BitT -> case v of
                          0 -> BitE False

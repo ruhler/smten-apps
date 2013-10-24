@@ -202,6 +202,7 @@ evalE (XorE a b) = do
     case (a', b') of
       (BitsE av, BitsE bv) -> return $ BitsE (av `xorB` bv)
       (BitE av, BitE bv) -> return $ BitE (av `xor` bv)
+      _ -> error $ "unexpected args to XorE: " ++ show (a', b')
 evalE (MulE a b) = do
     a' <- evalE a
     b' <- evalE b

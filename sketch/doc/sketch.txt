@@ -87,6 +87,11 @@ Expressions
           - bit[N] to Int 
           - float to integer, or integer to float
 
+    <name> (<expr>, <expr>,..., <expr>)
+        Function application.
+        For normal functions: does a normal function call.
+        For generator functions: inlines the function before filling in holes.
+
 Holes
 -----
     ??       - a free bit, char, bits, int, or constant width array expression.
@@ -95,7 +100,7 @@ Holes
     {*}      - Same as '??'     (is it really?)
     <expr> {|} <expr>
         - Bitwise choose between the bits of the given expressions.
-          Both arguments must have type bit[].
+          Both arguments must have type bit or bit[].
           The expression (a {|} b), is like saying:
             bit[N] x = ??;
             (a & x) | (b & ~x)
