@@ -81,7 +81,7 @@ decl :: { Decl }
 
 type :: { Type }
  : 'bit' { BitT }
- | 'bit' '[' expr ']' { BitsT $3 }
+ | type '[' expr ']' { ArrT $1 $3 }
  | 'int' { IntT }
 
 args :: { [(Type, Name)] }

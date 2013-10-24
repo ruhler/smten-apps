@@ -32,7 +32,7 @@ evalP p i = all (evalD (envof p) i) p
 -- Evaluate a type.
 evalT :: ProgEnv -> Type -> Type
 evalT env BitT = BitT
-evalT env (BitsT e) = BitsT $ evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True)
+evalT env (ArrT t e) = ArrT (evalT env t) $ evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True)
 evalT env IntT = IntT
 evalT env UnknownT = UnknownT
 
@@ -96,7 +96,7 @@ evalS w@(WhileS c s) = do
 evalS (DeclS ty nm) = do
   env <- gets ss_env
   let v0 = case evalT env ty of
-              BitsT (IntE w) -> BitsE (intB w 0)
+              ArrT BitT (IntE w) -> BitsE (intB w 0)
               _ -> error $ nm ++ " not initialized"
   modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
 evalS (UpdateS nm e) = do
@@ -106,14 +106,17 @@ evalS (ArrUpdateS nm i e) = do
   env <- gets ss_vars
   ir <- evalE i
   er <- evalE e
-  case (ir, er) of
-     (IntE i', BitE e') -> do
-          let arr' = case Map.lookup nm env of
-                           Just (BitsE arr) -> updB arr i' e'
-                           Just x -> error $ "array update: expected array of bits, but got: " ++ show x
-                           Nothing -> error $ "array update: variable " ++ show nm ++ " not found"
-          modify $ \s -> s { ss_vars = Map.insert nm (BitsE arr') (ss_vars s) }
-     _ -> error $ "expecting: types int, bit for array update, but got: " ++ show (ir, er)
+  let arr' = case (Map.lookup nm env, ir, er) of
+                (Just (BitsE arr), IntE i', BitE e') -> BitsE $ updB arr i' e'
+                (Just (ArrayE xs), IntE i', e') -> 
+                    let f _ [] = error "array update out of bounds"
+                        f 0 (v:vs) = e':vs
+                        f n (v:vs) = v : f (n-1) vs
+                    in ArrayE $ f i' xs
+                (Just v, _, _) -> error $ "array update into non-array: " ++ show v
+                (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
+  modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
+
 evalS (IfS p a b) = do
   p' <- evalE p
   case p' of
@@ -166,13 +169,12 @@ evalE (EqE a b) = do
       (BitsE av, BitsE bv) -> return $ BitE (av `eqB` bv)
       (IntE av, IntE bv) -> return $ BitE (av == bv)
       _ -> error $ "unexpected args to EqE: " ++ show (a', b')
+evalE x@(ArrayE []) = return x
 evalE (ArrayE xs) = do
-    let f x = do
-          r <- evalE x
-          case r of
-            BitE v -> return v
-    bs <- mapM f xs
-    return (BitsE (mkbits bs))
+    xs' <- mapM evalE xs
+    case head xs' of
+        BitE _ -> return $ BitsE (mkbits [v | BitE v <- xs'])
+        _ -> return $ ArrayE xs'
 evalE (OrE a b) = do
     a' <- evalE a
     b' <- evalE b
@@ -233,21 +235,26 @@ evalE (VarE nm) = do
                 Just (FunD _ v _) -> return (FunE v)
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
-    BitsE a' <- evalE a
+    a' <- evalE a
     i' <- evalE i
     let idx = case i' of
                BitE False -> 0
                BitE True -> 1
                BitsE b -> valB b
                IntE iv -> iv
-    assert (idx < width a')
-    return (BitE (a' `accessB` idx))
+    case a' of
+        BitsE av -> do
+          assert (idx < width av)
+          return (BitE (av `accessB` idx))
+        ArrayE xs -> do
+          assert (idx < length xs)
+          return (xs !! idx)
 evalE (CastE t e) = do
     env <- gets ss_env
     e' <- evalE e
     case (evalT env t, e') of
         (IntT, BitsE v) -> return (IntE (valB v))
-        (BitsT (IntE w), BitsE v) -> return (BitsE (castB w v))
+        (ArrT BitT (IntE w), BitsE v) -> return (BitsE (castB w v))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE x@(FunE {}) = return x
 evalE (AppE f xs) = do

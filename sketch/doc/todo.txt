@@ -6,16 +6,18 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-INTARRAY - int arrays
+ZERO_ARRAY_INIT
+  - int [8] fu = 0;     Handle this properly.
+
+ARRAY_UPDATE_BOUNDS
+  - fu[??] = 4, should restrict the hole to those which are in bounds.
 
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest20.sk: INTARRAY
-miniTest21.sk: INTARRAY
-miniTest34.sk: INTARRAY
-miniTest35.sk: INTARRAY
-miniTest36.sk: INTARRAY
-miniTest37.sk: INTARRAY
+miniTest21.sk: ZERO_ARRAY_INIT
+miniTest34.sk: ARRAY_UPDATE_BOUNDS
+miniTest35.sk: ARRAY_UPDATE_BOUNDS
+miniTest37.sk: ARRAY_UPDATE_BOUNDS
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest43.sk: CLAIMS UNSAT - not sure why
 miniTest44.sk: CLAIMS UNSAT - not sure why

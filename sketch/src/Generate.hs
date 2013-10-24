@@ -86,8 +86,13 @@ genS (UpdateS nm e) = do
     Nothing -> error $ "variable " ++ nm ++ " not in scope"
     Just ty -> UpdateS nm <$> (withty ty (genE e))
 genS (ArrUpdateS nm idx e) = do
+    env <- gets ts_tyenv
+    let t = case Map.lookup nm env of
+                Just (ArrT t _) -> t
+                Just _ -> error $ "variable " ++ nm ++ " is not an array"
+                Nothing -> error $ "variable " ++ nm ++ " not in scope"
     idx' <- withty IntT $ genE idx
-    e' <- withty BitT $ genE e
+    e' <- withty t $ genE e
     return (ArrUpdateS nm idx' e')
 genS (IfS p a b) = liftM3 IfS (withty BitT $ genE p) (genS a) (genS b)
 genS (BlockS xs) = BlockS <$> mapM genS xs
@@ -99,7 +104,11 @@ genE (SubE a b) = liftM2 SubE (genE a) (genE b)
 genE (LtE a b) = withsamety LtE a b
 genE (GtE a b) = withsamety GtE a b
 genE (EqE a b) = withsamety EqE a b
-genE (ArrayE a) = ArrayE <$> withty BitT (mapM genE a)
+genE (ArrayE a) = do
+    ty <- asks gr_oty
+    case ty of
+        ArrT t _ -> ArrayE <$> withty t (mapM genE a)
+        _ -> ArrayE <$> withty UnknownT (mapM genE a)
 genE (XorE a b) = liftM2 XorE (genE a) (genE b)
 genE (MulE a b) = liftM2 MulE (genE a) (genE b)
 genE (OrE a b) = liftM2 OrE (genE a) (genE b)
@@ -135,7 +144,7 @@ genE x@(IntE v) = do
                          0 -> BitE False
                          1 -> BitE True
                          _ -> error $ "literal " ++ show v ++ " is too big for bit type"
-               BitsT (IntE w) -> BitsE (intB w v)
+               ArrT BitT (IntE w) -> BitsE (intB w v)
                _ -> x   -- TODO: is it okay to default to int?
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
@@ -185,7 +194,7 @@ typeof (NotE a) = typeof a
 typeof (HoleE bnd) = return UnknownT
 typeof (BitChooseE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (BitE {}) = return BitT
-typeof (BitsE b) = return (BitsT (IntE $ width b))
+typeof (BitsE b) = return (ArrT BitT (IntE $ width b))
 typeof (IntE v) = return UnknownT -- could be any integer literal
 typeof (VarE nm) = do
     env <- asks gr_env
@@ -195,7 +204,11 @@ typeof (VarE nm) = do
         Nothing -> case Map.lookup nm env of    
                       Just d -> return (d_type d)
                       Nothing -> return UnknownT
-typeof (AccessE a b) = return BitT
+typeof (AccessE a b) = do
+    ta <- typeof a
+    case ta of
+        ArrT t _ -> return t
+        _ -> return UnknownT
 typeof (CastE t e) = return t
 typeof (AppE nm xs) = do
     env <- asks gr_env
@@ -209,5 +222,6 @@ typeof (FunE f) = return UnknownT
 unify :: Type -> Type -> Type
 unify UnknownT t = t
 unify t UnknownT = t
+unify (ArrT a x) (ArrT b _) = ArrT (unify a b) x
 unify x _ = x
 

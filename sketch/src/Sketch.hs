@@ -17,14 +17,14 @@ type Name = String
 
 data Type = 
     BitT              -- bit
-  | BitsT Expr        -- bit[n]
+  | ArrT Type Expr    -- T[n]
   | IntT              -- int
   | FunT Type [Type]  -- function type: output and argument types
   | UnknownT          -- type is not known
 
 instance Show Type where
     show BitT = "BitT"
-    show (BitsT n) = "BitsT " ++ show n
+    show (ArrT t n) = "ArrT " ++ show t ++ " " ++ show n
     show IntT = "IntT"
     show (FunT x xs) = "FunT " ++ show x ++ " " ++ show xs
     show UnknownT = "UnknownT"

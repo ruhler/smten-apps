@@ -43,7 +43,7 @@ mkFreeArg :: ProgEnv -> Int -> Type -> Symbolic Expr
 mkFreeArg env bnd t =
   case evalT env t of
     BitT -> BitE <$> free
-    BitsT (IntE w) -> BitsE <$> freeBits w bnd
+    ArrT BitT (IntE w) -> BitsE <$> freeBits w bnd
     IntT -> IntE <$> freeInt bnd
 
 -- Compute 2^n
