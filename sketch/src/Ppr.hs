@@ -85,8 +85,8 @@ instance Ppr Stmt where
    pretty (IfS p a b) = "if (" ++ pretty p ++ ") " ++ pretty a ++ " else " ++ pretty b
 
 instance Ppr Decl where
-   pretty (FunD nm (Function oty xs body) kind) = 
-     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
+   pretty (FunD nm (Function (FunT oty xtys) xs body) kind) = 
+     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty (zip xtys xs) ++ ")"
         ++ pprkindr kind ++ pretty body
    pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
 

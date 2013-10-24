@@ -55,7 +55,7 @@ evalD env i d@(FunD {}) =
 apply :: Function -> [Expr] -> State SS Expr
 apply f xs = do
     xs' <- mapM evalE xs
-    let args = Map.fromList (zip (map snd (f_args f)) xs')
+    let args = Map.fromList (zip (f_args f) xs')
     olds <- get
     put (SS (ss_env olds) args (error "apply: no output returned") (ss_valid olds))
     evalS (f_body f)

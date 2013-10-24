@@ -24,8 +24,10 @@ mkFreeProgramInput env = do
           NormalF -> return Nothing
           GeneratorF -> return Nothing
           WithSpecF _ -> do
-            i <- mkFreeArgs env (map fst (f_args . fd_val $ d))
-            return $ Just (d_name d, i)
+            case (f_type . fd_val $ d) of
+                FunT _ ts -> do
+                  i <- mkFreeArgs env ts
+                  return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p
   return $ Map.fromList (catMaybes inputs)

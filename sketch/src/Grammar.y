@@ -72,11 +72,11 @@ sketch :: { Prog }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'
-    { FunD $2 (Function $1 $4 (BlockS $7)) NormalF }
+    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (BlockS $7)) NormalF }
  | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 (Function $1 $4 (BlockS $9)) (WithSpecF $7) }
+    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (BlockS $9)) (WithSpecF $7) }
  | 'generator' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function $2 $5 (BlockS $8)) GeneratorF }
+    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (BlockS $8)) GeneratorF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }

@@ -6,7 +6,6 @@ import Smten.Control.Monad.Reader
 import Smten.Control.Monad.State
 import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
-import Smten.Data.Tuple
 import Smten.Symbolic
 
 import Bits
@@ -60,8 +59,8 @@ liftSymbolic = lift . lift
 genD :: Decl -> GM Decl
 genD d@(VarD {}) = return d
 genD d@(FunD {}) = do
-    let tyenv = Map.fromList (map swap . f_args . fd_val $ d)
-        oty = f_outty . fd_val $ d
+    let FunT oty argtys = f_type . fd_val $ d
+        tyenv = Map.fromList (zip (f_args . fd_val $ d) argtys)
     tyenvold <- gets ts_tyenv
     modify $ \s -> s { ts_tyenv = tyenv }
     body' <- withty oty $ genS (f_body . fd_val $ d)
@@ -144,14 +143,18 @@ genE (AccessE a b) = do
     b' <- withty IntT (genE b)
     return (AccessE a' b')
 genE (CastE t e) = CastE t <$> withty UnknownT (genE e)
-genE (AppE f xs) = do
+genE (AppE fnm xs) = do
     env <- asks gr_env
-    case Map.lookup f env of
-       Just (FunD _ gf GeneratorF) -> do
-           generated <- genD (FunD f gf NormalF)
-           f' <- emit generated
-           AppE f' <$> (withty UnknownT $ mapM genE xs)
-       _ -> AppE f <$> (withty UnknownT $ mapM genE xs)
+    case Map.lookup fnm env of
+       Just (FunD _ f kind) -> do
+          let FunT _ txs = f_type f
+          xs' <- sequence [withty t (genE x) | (t, x) <- zip txs xs]
+          fnm' <- case kind of
+                 GeneratorF -> do
+                    generated <- genD (FunD fnm f NormalF)
+                    emit generated
+                 _ -> return fnm
+          return $ AppE fnm' xs'
 genE x@(FunE f) = return x
 
 -- Generate a binary operator, where the only thing we know about the operand
@@ -190,15 +193,14 @@ typeof (VarE nm) = do
     case Map.lookup nm tyenv of
         Just v -> return v
         Nothing -> case Map.lookup nm env of    
-                      Just (VarD ty _ _) -> return ty
-                      Just (FunD _ _ _) -> return UnknownT   -- TODO: can we have a function type which we can return?
+                      Just d -> return (d_type d)
                       Nothing -> return UnknownT
 typeof (AccessE a b) = return BitT
 typeof (CastE t e) = return t
 typeof (AppE nm xs) = do
     env <- asks gr_env
     case Map.lookup nm env of
-       Just (FunD _ v _) -> return $ f_outty v
+       Just (FunD _ (Function (FunT v _) _ _) _) -> return v
        Nothing -> return UnknownT
 typeof (FunE f) = return UnknownT
 

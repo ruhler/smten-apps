@@ -1,6 +1,3 @@
-Cleanup::
- * have a function type?
-
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
@@ -9,17 +6,10 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-FUNTYPE_INFO
-  - foo(1), where foo takes a bit[4] as an argument.
-    We don't infer the right type for '1'.
-    This is straight-forward to fix: keep track of function types where
-    possible. Having an explicit function Type would be helpful here.
-
 INTARRAY - int arrays
 
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest19.sk: FUNTYPE_INFO
 miniTest20.sk: INTARRAY
 miniTest21.sk: INTARRAY
 miniTest34.sk: INTARRAY

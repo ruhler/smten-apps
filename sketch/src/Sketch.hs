@@ -5,7 +5,7 @@ module Sketch (
     Expr(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     valEq, envof, declsof,
-    bnd_ctrlbits,
+    bnd_ctrlbits, d_type,
     ) where
 
 import Smten.Prelude
@@ -19,12 +19,16 @@ data Type =
     BitT              -- bit
   | BitsT Expr        -- bit[n]
   | IntT              -- int
+  | FunT Type [Type]  -- function type: output and argument types
   | UnknownT          -- type is not known
 
 instance Show Type where
     show BitT = "BitT"
     show (BitsT n) = "BitsT " ++ show n
     show IntT = "IntT"
+    show (FunT x xs) = "FunT " ++ show x ++ " " ++ show xs
+    show UnknownT = "UnknownT"
+
 
 data Expr = 
    AndE Expr Expr        -- ^ a & b
@@ -106,14 +110,14 @@ instance Show Stmt where
     show (BlockS xs) = "BlockS " ++ show xs
 
 data Function = Function {
-    f_outty :: Type,
-    f_args :: [(Type, Name)],
+    f_type :: Type,
+    f_args :: [Name],
     f_body :: Stmt
 }
 
 instance Show Function where
   show x = "Function { " ++
-    "oty = " ++ show (f_outty x) ++ ", " ++
+    "type = " ++ show (f_type x) ++ ", " ++
     "args = " ++ show (f_args x) ++ ", " ++
     "body = " ++ show (f_body x) ++ "}"
 
@@ -136,6 +140,10 @@ data Decl =
       d_name :: Name,
       vd_val :: Expr
    }
+
+d_type :: Decl -> Type
+d_type d@(FunD {}) = f_type $ fd_val d
+d_type d@(VarD {}) = vd_ty d
 
 instance Show Decl where
     show x@(FunD {}) = "FunD { " ++
