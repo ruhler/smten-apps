@@ -85,8 +85,12 @@ type :: { Type }
  | 'int' { IntT }
 
 args :: { [(Type, Name)] }
+ : { [] }       -- Empty list is allowed
+ | someargs { $1 }
+
+someargs :: { [(Type, Name)] }
  : arg { [$1] }
- | args ',' arg { $1 ++ [$3] }
+ | someargs ',' arg { $1 ++ [$3] }
 
 arg :: { (Type, Name) }
  : type id { ($1, $2) }
@@ -152,8 +156,12 @@ expr :: { Expr }
  | id '(' exprs ')' { AppE $1 $3 }
 
 exprs :: { [Expr] }
+ : { [] }       -- empty list is allowed
+ | someexprs { $1 }
+
+someexprs :: { [Expr] }
  : expr { [$1] }
- | exprs ',' expr { $1 ++ [$3] }
+ | someexprs ',' expr { $1 ++ [$3] }
 
 
 {

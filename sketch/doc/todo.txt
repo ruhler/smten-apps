@@ -1,5 +1,6 @@
 
 * Pretty print bit vectors like arrays, not as integers!
+* Accept the same command line arguments as sketch.
 
 Features::
 RECURSIVE_GENERATOR
@@ -18,15 +19,14 @@ ASSIGN_BUG
     Currently the implementation will assign a bigger array to a smaller by
     truncating, but that should be illegal.
 
+    To fix this? I think we need to have type information at assignment at
+    evaluation time. Is there an easy way to get this?
+
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
 SUB_ARRAY
   * tmp[1::2] = ...;  Should be allowed.
-
-ZERO_ARGS
-  * functions need not take any arguments.
-    Support this in the parser.
 
 MOD_OPERATOR
   * support: t % ?? for int type.
@@ -63,7 +63,7 @@ miniTest54.sk: SUB_ARRAY
 miniTest55.sk: SUB_ARRAY
 miniTest56.sk: POST_INCR
 miniTest60.sk: SUB_ARRAY
-miniTest62.sk: ZERO_ARGS
+miniTest62.sk: POST_INCR
 miniTest63.sk: SLOW. Probably a type error that's being abstracted over.
 miniTest67.sk: SCALAR_ARRAY
 miniTest68.sk: SUB_ARRAY
