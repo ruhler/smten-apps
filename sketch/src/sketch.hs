@@ -7,7 +7,6 @@ import Smten.Symbolic.SMT
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Yices2
 import Smten.System.Environment
-import Smten.System.Exit
 import Smten.System.IO
 
 import Grammar

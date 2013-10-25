@@ -36,15 +36,21 @@ POST_DECR
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
 
-FAIL_NICELY
+FAIL_EAGER
   * type errors sometimes cause things to hang rather than report the error.
     Is this a problem with smten?
     It's: do you want to treat error as anything, or raise errors right away,
     or what?
 
+FAIL_LAZY
+  * divide by zero failure is not lazy for rem.
+    We could fix this by: explicitly saying rem with 0 as the divider is
+    error.
+    Or by: in the threaded runtime, it should just work hopefully.
+
 Features needed, by test case::
 tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
-tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_NICELY
+tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_EAGER
 tests/broken/miniTest3.sk: SCALAR_ARRAY
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest21.sk: CLAIMS UNSAT - not sure why
@@ -54,9 +60,9 @@ miniTest44.sk: CLAIMS UNSAT - not sure why
 miniTest45.sk: CLAIMS UNSAT - not sure why
 miniTest46.sk: CLAIMS UNSAT - not sure why
 miniTest49.sk: PRAGMA
-miniTest50.sk: MOD_OPERATOR
+miniTest50.sk: FAIL_LAZY
 miniTest51.sk: ARRAY_HOLE
-miniTest52.sk: MOD_OPERATOR
+miniTest52.sk: DIV_OPERATOR
 miniTest53.sk: SUB_ARRAY
 miniTest54.sk: SUB_ARRAY
 miniTest55.sk: SUB_ARRAY

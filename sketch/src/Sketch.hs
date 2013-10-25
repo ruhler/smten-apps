@@ -42,6 +42,7 @@ data Expr =
  | LAndE Expr Expr       -- ^ a && b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
+ | ModE Expr Expr        -- ^ a % b
  | NotE Expr             -- ^ ! a
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b
@@ -69,6 +70,7 @@ instance Show Expr where
     show (LOrE a b) = "LOrE " ++ show a ++ " " ++ show b
     show (LAndE a b) = "LAndE " ++ show a ++ " " ++ show b
     show (MulE a b) = "MulE " ++ show a ++ " " ++ show b
+    show (ModE a b) = "ModE " ++ show a ++ " " ++ show b
     show (XorE a b) = "XorE " ++ show a ++ " " ++ show b
     show (ShrE a b) = "ShrE " ++ show a ++ " " ++ show b
     show (ShlE a b) = "ShlE " ++ show a ++ " " ++ show b

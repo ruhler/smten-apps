@@ -16,7 +16,7 @@ data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
-  | TkStar | TkEquals | TkComma | TkSemicolon
+  | TkStar | TkEquals | TkComma | TkSemicolon | TkPercent
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkBitChoose  | TkDoubleBar | TkDoubleAmp
@@ -39,6 +39,7 @@ instance Show Token where
     show TkTilde = "TkTilde"
     show TkAmp = "TkAmp"
     show TkPlus = "TkPlus"
+    show TkPercent = "TkPercent"
     show TkMinus = "TkMinus"
     show TkHat = "TkHat"
     show TkLT = "TkLT"
@@ -95,6 +96,7 @@ singles = [
     ('~', TkTilde),
     ('&', TkAmp),
     ('+', TkPlus),
+    ('%', TkPercent),
     ('-', TkMinus),
     ('^', TkHat),
     ('<', TkLT),

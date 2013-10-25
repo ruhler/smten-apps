@@ -37,6 +37,7 @@ import Sketch
     '~'     { TkTilde }
     '^'     { TkHat }
     '*'     { TkStar }
+    '%'     { TkPercent }
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
@@ -135,6 +136,7 @@ expr :: { Expr }
  | expr '+' expr    { AddE $1 $3 }
  | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
+ | expr '%' expr    { ModE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
  | expr '||' expr    { LOrE $1 $3 }
  | expr '&&' expr    { LAndE $1 $3 }

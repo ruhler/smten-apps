@@ -115,6 +115,7 @@ genE (ArrayE a) = do
         _ -> ArrayE <$> withty UnknownT (mapM genE a)
 genE (XorE a b) = liftM2 XorE (genE a) (genE b)
 genE (MulE a b) = liftM2 MulE (genE a) (genE b)
+genE (ModE a b) = liftM2 ModE (genE a) (genE b)
 genE (OrE a b) = liftM2 OrE (genE a) (genE b)
 genE (LOrE a b) = liftM2 LOrE (withty BitT $ genE a) (withty BitT $ genE b)
 genE (LAndE a b) = liftM2 LAndE (withty BitT $ genE a) (withty BitT $ genE b)
@@ -191,6 +192,7 @@ typeof (EqE a b) = return BitT
 typeof (ArrayE a) = return UnknownT
 typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (MulE a b) = return IntT
+typeof (ModE a b) = return IntT
 typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (LOrE a b) = return BitT
 typeof (LAndE a b) = return BitT

@@ -71,6 +71,9 @@ Expressions
     <expr> * <expr>
         Multiplication. Works on int. Does not work on bit or bit[].
 
+    <expr> % <expr>
+        Modulo operator. Works on int.
+
     <expr> < <expr>
         Less than. Works on int. Does not work on bit[].
 

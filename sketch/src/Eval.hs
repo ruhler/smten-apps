@@ -212,6 +212,13 @@ evalE (MulE a b) = do
     b' <- evalE b
     case (a', b') of
       (IntE av, IntE bv) -> return $ IntE (av * bv)
+evalE (ModE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (IntE av, IntE bv) -> do
+         assert (bv /= 0)
+         return $ IntE (av `rem` bv)
 evalE (ShlE a b) = do
     a' <- evalE a
     b' <- evalE b
