@@ -152,17 +152,15 @@ evalE (SubE a b) = do
       (IntE av, IntE bv) -> return $ IntE (av - bv)
       _ -> error $ "unexpected args to SubE: " ++ show (a', b')
 evalE (LtE a b) = do
-    a' <- evalE a
-    b' <- evalE b
+    a' <- asint <$> evalE a
+    b' <- asint <$> evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitE (av `ltB` bv)
       (IntE av, IntE bv) -> return $ BitE (av < bv)
       _ -> error $ "unexpected args to LtE: " ++ show (a', b')
 evalE (GtE a b) = do
-    a' <- evalE a
-    b' <- evalE b
+    a' <- asint <$> evalE a
+    b' <- asint <$> evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitE (av `gtB` bv)
       (IntE av, IntE bv) -> return $ BitE (av > bv)
       _ -> error $ "unexpected args to GtE: " ++ show (a', b')
 evalE (EqE a b) = do

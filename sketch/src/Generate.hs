@@ -105,8 +105,8 @@ genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)
 genE (AddE a b) = liftM2 AddE (genE a) (genE b)
 genE (SubE a b) = liftM2 SubE (genE a) (genE b)
-genE (LtE a b) = withsamety LtE a b
-genE (GtE a b) = withsamety GtE a b
+genE (LtE a b) = liftM2 LtE (withty IntT $ genE a) (withty IntT $ genE b)
+genE (GtE a b) = liftM2 GtE (withty IntT $ genE a) (withty IntT $ genE b)
 genE (EqE a b) = withsamety EqE a b
 genE (ArrayE a) = do
     ty <- asks gr_oty

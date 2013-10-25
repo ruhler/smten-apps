@@ -18,11 +18,6 @@ ASSIGN_BUG
     Currently the implementation will assign a bigger array to a smaller by
     truncating, but that should be illegal.
 
-PROMOTE_BIT
-  * bit should be promoted to int where needed.
-    In particular: when args to Gt are int and bit.
-    Note: unifying the types int and bit as int is not enough.
-
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
@@ -42,24 +37,23 @@ POST_INCR
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
 
-GT_BITS
-  * gt and lt should not be supported for bit[].
+FAIL_NICELY
+  * type errors sometimes cause things to hang rather than report the error.
+    Is this a problem with smten?
+    It's: do you want to treat error as anything, or raise errors right away,
+    or what?
 
 Features needed, by test case::
-broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
-broken/expectfail/gtbitsbits.smten.sk: GT_BITS
-broken/miniTest3.sk: SCALAR_ARRAY
-broken/gtintbit.smten.sk: PROMOTE_BIT
-broken/gtbitbit.smten.sk: PROMOTE_BIT
-
-
+tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
+tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_NICELY
+tests/broken/miniTest3.sk: SCALAR_ARRAY
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest21.sk: CLAIMS UNSAT - not sure why
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest43.sk: CLAIMS UNSAT - not sure why
 miniTest44.sk: CLAIMS UNSAT - not sure why
 miniTest45.sk: CLAIMS UNSAT - not sure why
-miniTest46.sk: PROMOTE_BIT
+miniTest46.sk: CLAIMS UNSAT - not sure why
 miniTest49.sk: PRAGMA
 miniTest50.sk: MOD_OPERATOR
 miniTest51.sk: ARRAY_HOLE
@@ -71,7 +65,6 @@ miniTest56.sk: POST_INCR
 miniTest60.sk: SUB_ARRAY
 miniTest62.sk: ZERO_ARGS
 miniTest63.sk: SLOW. Probably a type error that's being abstracted over.
-miniTest64.sk: PROMOTE_BIT
 miniTest67.sk: SCALAR_ARRAY
 miniTest68.sk: SUB_ARRAY
 miniTest69.sk: SUB_ARRAY
