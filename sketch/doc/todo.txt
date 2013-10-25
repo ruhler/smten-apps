@@ -9,15 +9,22 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-BIT_TO_BITS
-  * automatically promote bit to bit[1] if needed.
+SCALAR_ARRAY
+  * automatically promote arbitrary scalars to one element arrays
+    if needed. Not just integer literal scalars.
+
+ASSIGN_BUG
+  * there is a bug in array assignment.
+    Currently the implementation will assign a bigger array to a smaller by
+    truncating, but that should be illegal.
 
 Features needed, by test case::
-broken/miniTest3.sk: BIT_TO_BITS
+broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
+broken/miniTest3.sk: SCALAR_ARRAY
 
 
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest21.sk: AUTO_ARRAY_PAD
+miniTest21.sk: CLAIMS UNSAT - not sure why
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest43.sk: CLAIMS UNSAT - not sure why
 miniTest44.sk: CLAIMS UNSAT - not sure why

@@ -1,0 +1,12 @@
+
+
+bit sketch1(bit[4] in, bit idx) implements spec {
+    bit x = idx ^ ??;
+    return in[x];
+}
+   
+bit spec(bit[4] in, bit idx) {
+    bit x = idx ^ true; 
+    return in[x];
+}
+

@@ -4,6 +4,7 @@ module Eval (evalP, evalT) where
 
 import Smten.Prelude
 import Smten.Control.Monad.State
+import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
 
 import Bits
@@ -104,7 +105,7 @@ evalS (UpdateS nm e) = do
   modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
 evalS (ArrUpdateS nm i e) = do
   env <- gets ss_vars
-  ir <- evalE i
+  ir <- asint <$> evalE i
   er <- evalE e
   arr' <- case (Map.lookup nm env, ir, er) of
              (Just (BitsE arr), IntE i', BitE e') -> do
@@ -239,11 +240,8 @@ evalE (VarE nm) = do
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     a' <- evalE a
-    i' <- evalE i
+    i' <- asint <$> evalE i
     let idx = case i' of
-               BitE False -> 0
-               BitE True -> 1
-               BitsE b -> valB b
                IntE iv -> iv
     case a' of
         BitsE av -> do
@@ -272,4 +270,11 @@ pad :: Type -> Expr
 pad BitT = BitE False
 pad IntT = IntE 0
 pad (ArrT t (IntE w)) = ArrayE (replicate w (pad t))
+
+-- promote to int as needed
+-- Returns the expression unchanged if it can't be promoted to int.
+asint :: Expr -> Expr
+asint (BitE False) = IntE 0
+asint (BitE True) = IntE 1
+asint x = x
 

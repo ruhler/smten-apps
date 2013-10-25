@@ -12,10 +12,18 @@ Types
 ------
   bit     - a single bit: true or false
   char    - a character: (8 bit?)
+            values of type bit are automatically promoted to type char if
+            needed.
   int     - an integer: range specified by --bnd-inbits flag. Defaults to 5,
             in practice works up to 7 or 8 bits.
+            values of type bit or char are automatically promoted to type int
+            if needed.
   T[<n>]   - an array of n elements of type T
              Note: The type bit[<n>] is often treated specially.
+             values of type T will automatically be promoted to an array if
+             needed. If <n> is 0, the value will be promoted into an empty
+             array. If <n> is greater than 0, the value will be promoted to
+             the array with the value as its single element with length 1.
 
 Expressions
 -----------
@@ -26,13 +34,12 @@ Expressions
         An integer literal. This can be used for
             int: as expected
             bit: 0 means false, 1 means true, others not allowed.
-            T[]: An array with a single element whose value is the value of
-                 the literal.
             Note: integer literals do not behave as you might expect for bit
                   vectors. They are treated like arrays in this case. So, for
                   example, 5 may not be used as a bit[], because it would mean
-                  the array {5}, but 5 is not a valid literal for the bit type.
-            
+                  the array {5} due to automatic array scalar promotion, but 5
+                  is not a valid literal for the bit type.
+
     <expr> & <expr> 
         Bitwise AND. Works on bit, bit[], (others?).
         Does not have short circuit semantics.
