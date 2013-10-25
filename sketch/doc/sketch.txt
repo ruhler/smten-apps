@@ -178,6 +178,15 @@ Statements
     ++<name> 
       - Sugar for: <name> = <name> + 1
 
+    <name>++
+      - Sugar for: <name> = <name> + 1
+
+    --<name> 
+      - Sugar for: <name> = <name> - 1
+
+    <name>--
+      - Sugar for: <name> = <name> - 1
+
 Declarations
 ------------
     <type> <name> (<type> <name>, <type <name>, ...) { <stmts> }
