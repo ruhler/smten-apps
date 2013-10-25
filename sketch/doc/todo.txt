@@ -18,9 +18,39 @@ ASSIGN_BUG
     Currently the implementation will assign a bigger array to a smaller by
     truncating, but that should be illegal.
 
+PROMOTE_BIT
+  * bit should be promoted to int where needed.
+    In particular: when args to Gt are int and bit.
+    Note: unifying the types int and bit as int is not enough.
+
+ARRAY_HOLE
+  * int [8] fu = ??;  Should be allowed.
+
+SUB_ARRAY
+  * tmp[1::2] = ...;  Should be allowed.
+
+ZERO_ARGS
+  * functions need not take any arguments.
+    Support this in the parser.
+
+MOD_OPERATOR
+  * support: t % ?? for int type.
+
+POST_INCR
+  * support: i++ in for increment.
+
+PRAGMA
+  * support: pragma options "--bnd-intbits 6";
+
+GT_BITS
+  * gt and lt should not be supported for bit[].
+
 Features needed, by test case::
 broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
+broken/expectfail/gtbitsbits.smten.sk: GT_BITS
 broken/miniTest3.sk: SCALAR_ARRAY
+broken/gtintbit.smten.sk: PROMOTE_BIT
+broken/gtbitbit.smten.sk: PROMOTE_BIT
 
 
 miniTest12.sk: RECURSIVE_GENERATOR
@@ -28,6 +58,25 @@ miniTest21.sk: CLAIMS UNSAT - not sure why
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest43.sk: CLAIMS UNSAT - not sure why
 miniTest44.sk: CLAIMS UNSAT - not sure why
+miniTest45.sk: CLAIMS UNSAT - not sure why
+miniTest46.sk: PROMOTE_BIT
+miniTest49.sk: PRAGMA
+miniTest50.sk: MOD_OPERATOR
+miniTest51.sk: ARRAY_HOLE
+miniTest52.sk: MOD_OPERATOR
+miniTest53.sk: SUB_ARRAY
+miniTest54.sk: SUB_ARRAY
+miniTest55.sk: SUB_ARRAY
+miniTest56.sk: POST_INCR
+miniTest60.sk: SUB_ARRAY
+miniTest62.sk: ZERO_ARGS
+miniTest63.sk: SLOW. Probably a type error that's being abstracted over.
+miniTest64.sk: PROMOTE_BIT
+miniTest67.sk: SCALAR_ARRAY
+miniTest68.sk: SUB_ARRAY
+miniTest69.sk: SUB_ARRAY
+miniTest70.sk: SUB_ARRAY
+
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?
@@ -53,10 +102,7 @@ Document Behaviors of sketch::
     blows up
 * what happens to: 7[2] in terms of type inference?
     blows up
-* are < and > supported for bits?
 * if you have a generate call inside a repeat block, is the generate call made
   repeatedly producing new holes each time, or is it called once with the same
   holes replicated?
-* are all arrays initialized to {0}, or just bit vectors?
-    All arrays are.
 

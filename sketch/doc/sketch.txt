@@ -72,10 +72,10 @@ Expressions
         Multiplication. Works on int. Does not work on bit or bit[].
 
     <expr> < <expr>
-        Less than. Works on int. Does not work on bit or bit[].
+        Less than. Works on int. Does not work on bit[].
 
     <expr> > <expr>
-        Greater than. Works on int. Does not work on bit or bit[].
+        Greater than. Works on int. Does not work on bit[].
 
     <expr> == <expr>
         Equal to. Works on int, bit, and bit[].
