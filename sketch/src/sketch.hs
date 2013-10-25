@@ -6,6 +6,9 @@ import Smten.Control.Monad.State
 import Smten.Symbolic.SMT
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Yices2
+import Smten.System.Environment
+import Smten.System.Exit
+import Smten.System.IO
 
 import Grammar
 import Ppr
@@ -14,7 +17,10 @@ import Synthesis
 
 main :: IO ()
 main = do
-  input <- getContents
+  args <- getArgs
+  input <- case args of 
+             [f] -> readFile f
+             _ -> error "usage: sketch FILE"
   sk <- case evalStateT parseSketch input of
             Left msg -> fail msg
             Right x -> return x

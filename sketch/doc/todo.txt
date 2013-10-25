@@ -1,6 +1,5 @@
 
 * Pretty print bit vectors like arrays, not as integers!
-* Accept the same command line arguments as sketch.
 
 Features::
 RECURSIVE_GENERATOR
