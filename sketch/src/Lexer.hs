@@ -19,7 +19,7 @@ data Token =
   | TkStar | TkEquals | TkComma | TkSemicolon | TkPercent
   | TkHat | TkLT | TkGT
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
-  | TkDoublePlus | TkBitChoose  | TkDoubleBar | TkDoubleAmp
+  | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse
   | TkID String
@@ -52,6 +52,7 @@ instance Show Token where
     show TkDoubleGt = "TkDoubleGt"
     show TkDoubleEq = "TkDoubleEq"
     show TkDoublePlus = "TkDoublePlus"
+    show TkDoubleDash = "TkDoubleDash"
     show TkDoubleBar = "TkDoubleBar"
     show TkDoubleAmp = "TkDoubleAmp"
     show TkBitChoose = "TkBitChoose"
@@ -113,6 +114,7 @@ doubles = [
     ("<<", TkDoubleLt),
     ("==", TkDoubleEq),
     ("++", TkDoublePlus),
+    ("--", TkDoubleDash),
     ("||", TkDoubleBar),
     ("&&", TkDoubleAmp)
   ]

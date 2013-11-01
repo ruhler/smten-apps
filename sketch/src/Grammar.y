@@ -47,6 +47,7 @@ import Sketch
     '>>'    { TkDoubleGt }
     '<<'    { TkDoubleLt }
     '++'    { TkDoublePlus }
+    '--'    { TkDoubleDash }
     '??'    { TkDoubleQuestionMark }
     '{|}'    { TkBitChoose }
     'if'    { TkIf }
@@ -137,6 +138,7 @@ for_incr :: { Stmt }
  : id '=' expr { UpdateS $1 $3 }
  | '++' id { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
  | id '++' { UpdateS $1 (AddE (VarE $1) (IntE 1)) }
+ | id '--' { UpdateS $1 (SubE (VarE $1) (IntE 1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }
