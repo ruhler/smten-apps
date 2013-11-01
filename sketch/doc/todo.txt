@@ -9,6 +9,9 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
+REPEAT_BUG
+  * holes inside of repeat statements should be duplicated, not shared.
+
 SCALAR_ARRAY
   * automatically promote arbitrary scalars to one element arrays
     if needed. Not just integer literal scalars.
@@ -20,6 +23,8 @@ ASSIGN_BUG
 
     To fix this? I think we need to have type information at assignment at
     evaluation time. Is there an easy way to get this?
+
+    Yes. There is. Include the type in the local variable environment.
 
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
@@ -45,20 +50,17 @@ FAIL_EAGER
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
-    error.
+    error. (except, this doesn't seem to have actually fixed it...)
     Or by: in the threaded runtime, it should just work hopefully.
 
 Features needed, by test case::
 tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
 tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_EAGER
+tests/broken/repeat.smtn.sk: REPEAT_BUG
 tests/broken/miniTest3.sk: SCALAR_ARRAY
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest21.sk: CLAIMS UNSAT - not sure why
+miniTest21.sk: REPEAT_BUG
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
-miniTest43.sk: CLAIMS UNSAT - not sure why
-miniTest44.sk: CLAIMS UNSAT - not sure why
-miniTest45.sk: CLAIMS UNSAT - not sure why
-miniTest46.sk: CLAIMS UNSAT - not sure why
 miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
 miniTest51.sk: ARRAY_HOLE

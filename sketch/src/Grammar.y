@@ -65,6 +65,18 @@ import Sketch
     id      { TkID $$ }
     integer { TkInteger $$ }
 
+%left '||'
+%left '&&'
+%left '|'
+%left '^'
+%left '&'
+%left '=='
+%left '<' '>'
+%left '<<' '>>'
+%left '+' '-'
+%left '*' '%'
+%right '!' '~'
+
 %%
 
 sketch :: { Prog }

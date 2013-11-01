@@ -17,13 +17,18 @@ import Synthesis
 main :: IO ()
 main = do
   args <- getArgs
-  input <- case args of 
-             [f] -> readFile f
-             _ -> error "usage: sketch FILE"
+  (fin, dbg) <- case args of 
+                 [f, "-d", df] -> return (f, Just df)
+                 [f] -> return (f, Nothing)
+                 _ -> error "usage: sketch FILE [-d debug.dbg]"
+  input <- readFile fin
   sk <- case evalStateT parseSketch input of
-            Left msg -> fail msg
-            Right x -> return x
-  syn <- runSMT yices2 (synthesize (envof sk))
+           Left msg -> fail msg
+           Right x -> return x
+  solver <- case dbg of
+               Just fnm -> debug fnm yices2
+               Nothing -> return yices2
+  syn <- runSMT solver (synthesize (envof sk))
   case syn of
     Nothing -> fail "sketch not satisfiable"
     Just v -> putStrLn (pretty v)

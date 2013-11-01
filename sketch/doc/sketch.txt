@@ -52,7 +52,7 @@ Expressions
         Logical NOT. Works on bit, bit[].
 
     ~ <expr>
-        Logical Not. Same as '!' operator. (really?).
+        Bitwise Not. (Same as '!' operator ?)
 
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[], (others?).
