@@ -41,7 +41,10 @@ instance Ppr Expr where
    pretty (ModE a b) = prettya a ++ " % " ++ prettya b
    pretty (LtE a b) = prettya a ++ " < " ++ prettya b
    pretty (GtE a b) = prettya a ++ " > " ++ prettya b
+   pretty (LeE a b) = prettya a ++ " <= " ++ prettya b
+   pretty (GeE a b) = prettya a ++ " >= " ++ prettya b
    pretty (EqE a b) = prettya a ++ " == " ++ prettya b
+   pretty (NeqE a b) = prettya a ++ " != " ++ prettya b
    pretty (ArrayE xs) = "{" ++ arrayargs xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
    pretty (LOrE a b) = prettya a ++ " || " ++ prettya b

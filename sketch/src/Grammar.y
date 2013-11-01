@@ -31,6 +31,8 @@ import Sketch
     '&'     { TkAmp }
     '<'     { TkLT }
     '>'     { TkGT }
+    '<='    { TkLE }
+    '>='    { TkGE }
     '+'     { TkPlus }
     '-'     { TkMinus }
     '!'     { TkBang }
@@ -44,6 +46,7 @@ import Sketch
     '||'    { TkDoubleBar }
     '&&'    { TkDoubleAmp }
     '=='    { TkDoubleEq }
+    '!='    { TkBangEq }
     '>>'    { TkDoubleGt }
     '<<'    { TkDoubleLt }
     '++'    { TkDoublePlus }
@@ -71,8 +74,8 @@ import Sketch
 %left '|'
 %left '^'
 %left '&'
-%left '=='
-%left '<' '>'
+%left '==' '!='
+%left '<' '>' '<=' '>='
 %left '<<' '>>'
 %left '+' '-'
 %left '*' '%'
@@ -146,7 +149,10 @@ expr :: { Expr }
  | expr '&' expr    { AndE $1 $3 }
  | expr '<' expr    { LtE $1 $3 }
  | expr '>' expr    { GtE $1 $3 }
+ | expr '<=' expr   { LeE $1 $3 }
+ | expr '>=' expr   { GeE $1 $3 }
  | expr '==' expr   { EqE $1 $3 }
+ | expr '!=' expr   { NeqE $1 $3 }
  | expr '+' expr    { AddE $1 $3 }
  | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }

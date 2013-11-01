@@ -29,9 +29,6 @@ ASSIGN_BUG
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
-GE_OP
-  * >= operator (and presumably <= operator too)
-
 SUB_ARRAY
   * tmp[1::2] = ...;  Should be allowed.
 
@@ -69,7 +66,7 @@ miniTest53.sk: SUB_ARRAY
 miniTest54.sk: SUB_ARRAY
 miniTest55.sk: SUB_ARRAY
 miniTest60.sk: SUB_ARRAY
-miniTest62.sk: GE_OP
+miniTest62.sk: SUB_ARRAY
 miniTest63.sk: SLOW. Probably a type error that's being abstracted over.
 miniTest67.sk: SCALAR_ARRAY
 miniTest68.sk: SUB_ARRAY

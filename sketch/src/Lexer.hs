@@ -17,7 +17,7 @@ data Token =
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
   | TkStar | TkEquals | TkComma | TkSemicolon | TkPercent
-  | TkHat | TkLT | TkGT
+  | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
@@ -44,6 +44,8 @@ instance Show Token where
     show TkHat = "TkHat"
     show TkLT = "TkLT"
     show TkGT = "TkGT"
+    show TkLE = "TkLE"
+    show TkGE = "TkGE"
     show TkEquals = "TkEquals"
     show TkComma = "TkComma"
     show TkSemicolon = "TkSemicolon"
@@ -51,6 +53,7 @@ instance Show Token where
     show TkDoubleLt = "TkDoubleLt"
     show TkDoubleGt = "TkDoubleGt"
     show TkDoubleEq = "TkDoubleEq"
+    show TkBangEq = "TkBangEq"
     show TkDoublePlus = "TkDoublePlus"
     show TkDoubleDash = "TkDoubleDash"
     show TkDoubleBar = "TkDoubleBar"
@@ -110,9 +113,12 @@ singles = [
 doubles :: [(String, Token)]
 doubles = [
     ("??", TkDoubleQuestionMark),
+    (">=", TkGE),
+    ("<=", TkLE),
     (">>", TkDoubleGt),
     ("<<", TkDoubleLt),
     ("==", TkDoubleEq),
+    ("!=", TkBangEq),
     ("++", TkDoublePlus),
     ("--", TkDoubleDash),
     ("||", TkDoubleBar),

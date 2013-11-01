@@ -107,7 +107,10 @@ genE (AddE a b) = liftM2 AddE (genE a) (genE b)
 genE (SubE a b) = liftM2 SubE (genE a) (genE b)
 genE (LtE a b) = liftM2 LtE (withty IntT $ genE a) (withty IntT $ genE b)
 genE (GtE a b) = liftM2 GtE (withty IntT $ genE a) (withty IntT $ genE b)
+genE (LeE a b) = liftM2 LeE (withty IntT $ genE a) (withty IntT $ genE b)
+genE (GeE a b) = liftM2 GeE (withty IntT $ genE a) (withty IntT $ genE b)
 genE (EqE a b) = withsamety EqE a b
+genE (NeqE a b) = withsamety NeqE a b
 genE (ArrayE a) = do
     ty <- asks gr_oty
     case ty of
@@ -188,7 +191,10 @@ typeof (AddE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (SubE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (LtE a b) = return BitT
 typeof (GtE a b) = return BitT
+typeof (LeE a b) = return BitT
+typeof (GeE a b) = return BitT
 typeof (EqE a b) = return BitT
+typeof (NeqE a b) = return BitT
 typeof (ArrayE a) = return UnknownT
 typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (MulE a b) = return IntT

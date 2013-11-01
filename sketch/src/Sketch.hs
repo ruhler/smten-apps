@@ -36,7 +36,10 @@ data Expr =
  | SubE Expr Expr        -- ^ a - b
  | LtE Expr Expr         -- ^ a < b
  | GtE Expr Expr         -- ^ a > b
+ | LeE Expr Expr         -- ^ a <= b
+ | GeE Expr Expr         -- ^ a >= b
  | EqE Expr Expr         -- ^ a == b
+ | NeqE Expr Expr        -- ^ a != b
  | OrE Expr Expr         -- ^ a | b
  | LOrE Expr Expr        -- ^ a || b
  | LAndE Expr Expr       -- ^ a && b
@@ -65,6 +68,10 @@ instance Show Expr where
     show (SubE a b) = "SubE " ++ show a ++ " " ++ show b
     show (GtE a b) = "GtE " ++ show a ++ " " ++ show b
     show (LtE a b) = "LtE " ++ show a ++ " " ++ show b
+    show (GeE a b) = "GeE " ++ show a ++ " " ++ show b
+    show (EqE a b) = "EqE " ++ show a ++ " " ++ show b
+    show (NeqE a b) = "NeqE " ++ show a ++ " " ++ show b
+    show (LeE a b) = "LeE " ++ show a ++ " " ++ show b
     show (ArrayE b) = "ArrayE " ++ show b
     show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
     show (LOrE a b) = "LOrE " ++ show a ++ " " ++ show b
