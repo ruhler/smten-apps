@@ -79,6 +79,8 @@ evalS (AssertS p) = do
     BitE b -> assert b
     _ -> error $ "expected bit type for assert, but got: " ++ show p'
 evalS (RepeatS n s) = do
+  -- Note: The generator inlines repeats, so we don't expect this case to ever
+  -- occur.
   n' <- evalE n
   case n' of
     IntE nv -> mapM_ evalS (replicate nv s)

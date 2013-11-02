@@ -9,9 +9,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-REPEAT_BUG
-  * holes inside of repeat statements should be duplicated, not shared.
-
 SCALAR_ARRAY
   * automatically promote arbitrary scalars to one element arrays
     if needed. Not just integer literal scalars.
@@ -53,10 +50,8 @@ FAIL_LAZY
 Features needed, by test case::
 tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
 tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_EAGER
-tests/broken/repeat.smtn.sk: REPEAT_BUG
 tests/broken/miniTest3.sk: SCALAR_ARRAY
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest21.sk: REPEAT_BUG
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY

@@ -168,7 +168,12 @@ Statements
 
     repeat(<expr>) <stmt>
       - The argument should be an int. Repeats the given statement that many
-        times.
+        times. Any holes in <stmt> will be duplicated: repeat is unrolled
+        before holes are assigned and generators are inlined.
+      If <expr> is statically known, the repeat will happen that many times.
+      Otherwise the repeat will happen at most --bnd-unroll-amnt times, which
+      defaults to 8.
+        
 
     while (<expr>) <stmt>
       - The argument should be a bit. Repeatedly executes the given statement

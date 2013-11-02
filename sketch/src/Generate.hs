@@ -71,7 +71,23 @@ genD d@(FunD {}) = do
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
 genS (AssertS x) = AssertS <$> withty BitT (genE x)
-genS (RepeatS n s) = liftM2 RepeatS (withty IntT (genE n)) (genS s)
+genS (RepeatS en s) = do
+  -- TODO: evaluate n statically as much as possible here
+  -- Perhaps a 'simplify' operation on expressions would be useful, both here
+  -- and for evalT?
+  --
+  -- TODO: what if the statement changes the condition? How do we keep track
+  -- of the original condition?
+  let count = case en of
+                IntE v -> v
+                _ -> bnd_unroll_amnt
+  en' <- withty IntT $ genE en
+  let unroll n
+        | n >= count = BlockS []
+        | otherwise = IfS (GtE en' (IntE n)) (BlockS [s, unroll (n+1)])
+                                             (BlockS [])
+  genS (unroll 0)
+
 genS (WhileS c s) = liftM2 WhileS (withty BitT (genE c)) (genS s)
 genS (ForS init cond incr body) =
     liftM4 ForS (genS init) (withty BitT (genE cond)) (genS incr) (genS body)

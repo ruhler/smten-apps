@@ -4,8 +4,8 @@ module Sketch (
     Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
     Expr(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
-    valEq, envof, declsof,
-    bnd_ctrlbits, d_type,
+    valEq, envof, declsof, d_type,
+    bnd_ctrlbits, bnd_unroll_amnt,
     ) where
 
 import Smten.Prelude
@@ -190,4 +190,7 @@ type ProgramInput = Map.Map String FunctionInput
 -- TODO: don't hardcode --bnd-ctrlbits like this.
 bnd_ctrlbits :: Int
 bnd_ctrlbits = 5
+
+bnd_unroll_amnt :: Int
+bnd_unroll_amnt = 8
 
