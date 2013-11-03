@@ -1,6 +1,4 @@
 
-* Pretty print bit vectors like arrays, not as integers!
-
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
@@ -9,19 +7,12 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
+ASSIGN_BUG
+  * keep type information for update.
+
 SCALAR_ARRAY
   * automatically promote arbitrary scalars to one element arrays
     if needed. Not just integer literal scalars.
-
-ASSIGN_BUG
-  * there is a bug in array assignment.
-    Currently the implementation will assign a bigger array to a smaller by
-    truncating, but that should be illegal.
-
-    To fix this? I think we need to have type information at assignment at
-    evaluation time. Is there an easy way to get this?
-
-    Yes. There is. Include the type in the local variable environment.
 
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
@@ -31,6 +22,9 @@ SUB_ARRAY
 
 MOD_OPERATOR
   * support: t % ?? for int type.
+
+LAND_BITS
+  * && operator should work on bits.
 
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
@@ -50,7 +44,9 @@ FAIL_LAZY
 Features needed, by test case::
 tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
 tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_EAGER
+tests/broken/landbitsbits.smten.sk: LAND_BITS
 tests/broken/miniTest3.sk: SCALAR_ARRAY
+
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest49.sk: PRAGMA
@@ -68,32 +64,36 @@ miniTest68.sk: SUB_ARRAY
 miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
 
+Refactor Ideas::
+* Separate Expr from Value
+    So we can express at the type level when values are expected.
+    * evalE should return a value
+    * asint, astype should transform Value to Value
+    * typeOf value should give a completely known type
+* Have a separate Simplify pass before generate
+    * We don't need 'evalT' all over the place anymore.
+    * This computes everything we know statically.
+    * Loops can be unrolled properly if bounds known statically.
+    * We can inline generator functions here.
+
+Pretty Printer::
+* maintain tabs
+* print empty statement as ";" instead of "{ }"
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?
 * perform simplification at start to avoid re-evaluating things we know every
   iteration of the CEGIS loop?
+    This would also help with implementing repeat properly, and static
+    evaluation of types.
 * do incremental unrolling on the size of inputs and holes we try?
-* 'repeat' does a lot of extra work.
-    For example, it tries repeating 0 through 32, say.
-    Which means, worst case, executing the statement 
-    0 + 1 + 2 + 3 + 4 + 5 + ... + 32 times.
-    But if we just conditionally execute the repeated statement, we could only
-    need to execute it worst case 32 times, right? Nested repeats compound the
-    issue.
     
 Other Todo::
 * make the pretty printer print prettier
 
 Document Behaviors of sketch::
-* if you call a function in two different sketches, are it's holes shared or
-  duplicated? (that is, do we need to do everything at once, or one sketch at
-  a time?)
 * What happens to: ??[4] in terms of type inference?
     blows up
 * what happens to: 7[2] in terms of type inference?
     blows up
-* if you have a generate call inside a repeat block, is the generate call made
-  repeatedly producing new holes each time, or is it called once with the same
-  holes replicated?
 

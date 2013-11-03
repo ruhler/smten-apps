@@ -1,0 +1,9 @@
+
+int sketch1(int in) implements spec {
+    return ~in;
+}
+   
+int spec(int in) {
+    return ~in;
+}
+

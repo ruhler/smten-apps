@@ -41,18 +41,28 @@ Expressions
                   is not a valid literal for the bit type.
 
     <expr> & <expr> 
-        Bitwise AND. Works on bit, bit[], (others?).
+        Bitwise AND. Works on bit, bit[].
         Does not have short circuit semantics.
+        Reference: andbitbit.smten.sk
+                   andbitsbits.smten.sk
+                   expectfail/andintint.smten.sk
 
     <expr> && <expr>
-        Logical AND. Works on bit, (others?).
+        Logical AND. Works on bit, bit[].
         Has short circuit semantics.
+        Reference: landbitbit.smten.sk
+                   landbitsbits.smten.sk
+                   expectfail/landintint.smten.sk
+
+    ~ <expr>
+        Bitwise Not. Works on bit, bit[].
+        Reference: notbit.smten.sk
+                   notbits.smten.sk
+                   expectfail/notint.smten.sk
+
 
     ! <expr>
         Logical NOT. Works on bit, bit[].
-
-    ~ <expr>
-        Bitwise Not. (Same as '!' operator ?)
 
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[], (others?).

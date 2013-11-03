@@ -1,0 +1,10 @@
+
+
+bit[2] sketch1(bit[2] in) implements spec {
+    return in & ??;
+}
+   
+bit[2] spec(bit[2] in) {
+    return in;
+}
+

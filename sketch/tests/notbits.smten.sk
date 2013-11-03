@@ -1,0 +1,16 @@
+
+bit[2] sketch1(bit[2] in) implements spec {
+    bit[2] x = {true, true};
+    if (in[0]) {
+        x[0] = ??;
+    }
+    if (in[1]) {
+        x[1] = ??;
+    }
+    return x;
+}
+   
+bit[2] spec(bit[2] in) {
+    return ~in;
+}
+

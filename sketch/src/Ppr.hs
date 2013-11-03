@@ -57,7 +57,7 @@ instance Ppr Expr where
    pretty (HoleE v) = "??(" ++ show v ++ ")"
    pretty (BitChooseE a b) = prettya a ++ " {|} " ++ prettya b
    pretty (BitE b) = if b then "true" else "false"
-   pretty (BitsE n) = show (valB n)
+   pretty (BitsE n) = pretty (ArrayE (map BitE $ bits n))
    pretty (IntE n) = pretty n
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
@@ -86,6 +86,7 @@ instance Ppr Stmt where
    pretty (UpdateS nm ex) = pretty nm ++ " = " ++ pretty ex ++ ";"
    pretty (ArrUpdateS nm i ex) = pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"
    pretty (BlockS xs) = "{\n" ++ (unlines (map (("   " ++) . pretty) xs)) ++ "\n}"
+   pretty (IfS p a (BlockS [])) = "if (" ++ pretty p ++ ") " ++ pretty a
    pretty (IfS p a b) = "if (" ++ pretty p ++ ") " ++ pretty a ++ " else " ++ pretty b
 
 instance Ppr Decl where

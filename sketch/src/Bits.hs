@@ -5,7 +5,7 @@ module Bits (
     andB, orB, notB, accessB, valB, updB, intB, addB, subB,
     ltB, gtB, leB, geB, eqB, neqB,
     shlB, shrB, xor, xorB, castB,
-    mkbits, width,
+    mkbits, bits, width,
     freeBits,
     ) where
 
