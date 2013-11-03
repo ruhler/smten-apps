@@ -7,7 +7,7 @@ module Sketch (
     FunctionInput, ProgramInput,
     envof, declsof, d_type,
     bnd_ctrlbits, bnd_unroll_amnt,
-    blockS,
+    blockS, typeofV, arrayV,
     ) where
 
 import Smten.Prelude
@@ -37,6 +37,24 @@ data Value =
   | BitsV Bits
   | IntV Int
   | FunV Function
+
+-- Make an array value.
+-- Automatically constructs a BitsV if the argument type is Bit.
+arrayV :: [Value] -> Value
+arrayV xs =
+  case xs of
+    (BitV {} : _) -> BitsV (mkbits [v | BitV v <- xs])
+    _ -> ArrayV xs
+
+typeofV :: Value -> Type
+typeofV (ArrayV []) = UnknownT
+typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
+typeofV (BitV {}) = BitT
+typeofV (BitsV b) = ArrT BitT (ValE (IntV $ width b))
+typeofV (IntV v) = UnknownT -- could be any integer literal
+typeofV (FunV f) = UnknownT
+
+
 
 showsPrecValue :: Int -> Value -> ShowS
 showsPrecValue = $(derive_showsPrec ''Value) 

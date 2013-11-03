@@ -8,7 +8,6 @@ import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
-import Bits
 import Eval
 import Input
 import Sketch
@@ -243,15 +242,6 @@ typeof (AppE nm xs) = do
     case Map.lookup nm env of
        Just (FunD _ (Function (FunT v _) _ _) _) -> return v
        Nothing -> return UnknownT
-
-typeofV :: Value -> Type
-typeofV (ArrayV []) = UnknownT
-typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
-typeofV (BitV {}) = BitT
-typeofV (BitsV b) = ArrT BitT (ValE (IntV $ width b))
-typeofV (IntV v) = UnknownT -- could be any integer literal
-typeofV (FunV f) = UnknownT
-
 
 -- Try to unify the given types.
 unify :: Type -> Type -> Type

@@ -194,12 +194,7 @@ evalE (NeqE a b) = do
       (BitsV av, BitsV bv) -> return $ BitV (av `neqB` bv)
       (IntV av, IntV bv) -> return $ BitV (av /= bv)
       _ -> error $ "unexpected args to NeqE: " ++ show (a', b')
-evalE (ArrayE []) = return (ArrayV [])
-evalE (ArrayE xs) = do
-    xs' <- mapM evalE xs
-    case head xs' of
-        BitV _ -> return $ BitsV (mkbits [v | BitV v <- xs'])
-        _ -> return $ ArrayV xs'
+evalE (ArrayE xs) = arrayV <$> mapM evalE xs
 evalE (OrE a b) = do
     a' <- evalE a
     b' <- evalE b
@@ -293,13 +288,19 @@ evalE (AppE f xs) = do
 pad :: Type -> Value
 pad BitT = BitV False
 pad IntT = IntV 0
-pad (ArrT BitT (ValE (IntV w))) = BitsV (mkbits (replicate w False))
-pad (ArrT t (ValE (IntV w))) = ArrayV (replicate w (pad t))
+pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
 
 -- promote to int as needed
--- Returns the expression unchanged if it can't be promoted to int.
+-- It's an error if the value can't be implicitly converted to an Int.
 asint :: Value -> Value
 asint (BitV False) = IntV 0
 asint (BitV True) = IntV 1
-asint x = x
+asint x@(IntV {})  = x
+asint x = error $ "cannot implicitly convert to int: " ++ show x
+
+dimension :: Type -> Int
+dimension BitT = 1
+dimension (ArrT t _) = 1 + dimension t
+dimension IntT = 1
+dimension (FunT {}) = 1
 
