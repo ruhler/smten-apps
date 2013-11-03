@@ -1,4 +1,5 @@
 
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
     Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
@@ -10,6 +11,7 @@ module Sketch (
     ) where
 
 import Smten.Prelude
+import Smten.Derive.Show
 import qualified Smten.Data.Map as Map
 
 import Bits
@@ -23,12 +25,11 @@ data Type =
   | FunT Type [Type]  -- function type: output and argument types
   | UnknownT          -- type is not known
 
+showsPrecType :: Int -> Type -> ShowS
+showsPrecType = $(derive_showsPrec ''Type)
+
 instance Show Type where
-    show BitT = "BitT"
-    show (ArrT t n) = "ArrT " ++ show t ++ " " ++ show n
-    show IntT = "IntT"
-    show (FunT x xs) = "FunT " ++ show x ++ " " ++ show xs
-    show UnknownT = "UnknownT"
+    showsPrec = showsPrecType
 
 data Value = 
     ArrayV [Value]
@@ -37,12 +38,11 @@ data Value =
   | IntV Int
   | FunV Function
 
+showsPrecValue :: Int -> Value -> ShowS
+showsPrecValue = $(derive_showsPrec ''Value) 
+
 instance Show Value where
-    show (ArrayV b) = "ArrayV " ++ show b
-    show (BitV b) = "BitV " ++ show b
-    show (BitsV b) = "BitsV " ++ show b
-    show (IntV x) = "IntV " ++ show x
-    show (FunV f) = "FunV " ++ show f
+    showsPrec = showsPrecValue
 
 instance Eq Value where
     (==) (BitV a) (BitV b) = a == b
@@ -78,33 +78,11 @@ data Expr =
  | CastE Type Expr       -- ^ (T) e
  | AppE Name [Expr]      -- ^ f(x, y, ...)
 
+showsPrecExpr :: Int -> Expr -> ShowS
+showsPrecExpr = $(derive_showsPrec ''Expr)
+
 instance Show Expr where
-    show (ValE v) = "ValE " ++ show v
-    show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
-    show (AddE a b) = "AddE " ++ show a ++ " " ++ show b
-    show (SubE a b) = "SubE " ++ show a ++ " " ++ show b
-    show (GtE a b) = "GtE " ++ show a ++ " " ++ show b
-    show (LtE a b) = "LtE " ++ show a ++ " " ++ show b
-    show (GeE a b) = "GeE " ++ show a ++ " " ++ show b
-    show (EqE a b) = "EqE " ++ show a ++ " " ++ show b
-    show (NeqE a b) = "NeqE " ++ show a ++ " " ++ show b
-    show (LeE a b) = "LeE " ++ show a ++ " " ++ show b
-    show (ArrayE b) = "ArrayE " ++ show b
-    show (OrE a b) = "OrE " ++ show a ++ " " ++ show b
-    show (LOrE a b) = "LOrE " ++ show a ++ " " ++ show b
-    show (LAndE a b) = "LAndE " ++ show a ++ " " ++ show b
-    show (MulE a b) = "MulE " ++ show a ++ " " ++ show b
-    show (ModE a b) = "ModE " ++ show a ++ " " ++ show b
-    show (XorE a b) = "XorE " ++ show a ++ " " ++ show b
-    show (ShrE a b) = "ShrE " ++ show a ++ " " ++ show b
-    show (ShlE a b) = "ShlE " ++ show a ++ " " ++ show b
-    show (NotE a) = "NotE " ++ show a
-    show (HoleE m) = "HoleE " ++ show m
-    show (BitChooseE a b) = "BitChooseE " ++ show a ++ " " ++ show b
-    show (VarE n) = "VarE " ++ show n
-    show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
-    show (CastE t e) = "CastE " ++ show t ++ " " ++ show e
-    show (AppE f xs) = "AppE " ++ show f ++ " " ++ show xs
+    showsPrec = showsPrecExpr
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
@@ -126,19 +104,12 @@ blockS xs =
       f (BlockS xs) = concatMap f xs
       f s = [s]
   in BlockS (concatMap f xs)
-   
 
+showsPrecStmt :: Int -> Stmt -> ShowS
+showsPrecStmt = $(derive_showsPrec ''Stmt)
+   
 instance Show Stmt where
-    show (ReturnS x) = "ReturnS " ++ show x
-    show (AssertS x) = "AssertS " ++ show x
-    show (RepeatS n s) = "RepeatS " ++ show n ++ " " ++ show s
-    show (WhileS c s) = "WhileS " ++ show c ++ " " ++ show s
-    show (ForS a b c d) = "ForS " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d
-    show (DeclS ty nm) = "DeclS " ++ show ty ++ " " ++ show nm
-    show (UpdateS nm ex) = "UpdateS " ++ show nm ++ " " ++ show ex
-    show (ArrUpdateS nm i ex) = "ArrUpdateS " ++ show nm ++ " " ++ show i ++ " " ++ show ex
-    show (IfS p a b) = "IfS " ++ show p ++ " " ++ show a ++ " " ++ show b
-    show (BlockS xs) = "BlockS " ++ show xs
+    showsPrec = showsPrecStmt
 
 data Function = Function {
     f_type :: Type,
@@ -146,20 +117,21 @@ data Function = Function {
     f_body :: Stmt
 }
 
+showsPrecFunction :: Int -> Function -> ShowS
+showsPrecFunction = $(derive_showsPrec ''Function)
+
 instance Show Function where
-  show x = "Function { " ++
-    "type = " ++ show (f_type x) ++ ", " ++
-    "args = " ++ show (f_args x) ++ ", " ++
-    "body = " ++ show (f_body x) ++ "}"
+  showsPrec = showsPrecFunction
 
 data FunctionKind = NormalF          -- ^ a normal function
                   | WithSpecF Name   -- ^ the function has a spec
                   | GeneratorF       -- ^ the function is a generator
 
+showsPrecFunctionKind :: Int -> FunctionKind -> ShowS
+showsPrecFunctionKind = $(derive_showsPrec ''FunctionKind)
+
 instance Show FunctionKind where
-    show NormalF = "NormalF"
-    show (WithSpecF nm) = "WithSpecF " ++ nm
-    show GeneratorF = "GeneratorF"
+    showsPrec = showsPrecFunctionKind
 
 data Decl =
    FunD {
@@ -176,15 +148,11 @@ d_type :: Decl -> Type
 d_type d@(FunD {}) = f_type $ fd_val d
 d_type d@(VarD {}) = vd_ty d
 
+showsPrecDecl :: Int -> Decl -> ShowS
+showsPrecDecl = $(derive_showsPrec ''Decl)
+
 instance Show Decl where
-    show x@(FunD {}) = "FunD { " ++
-      "nm = " ++ show (d_name x) ++ ", " ++
-      "val = " ++ show (fd_val x) ++ ", " ++
-      "kind = " ++ show (fd_kind x) ++ "}"
-    show x@(VarD {}) = "VarD { " ++
-      "ty = " ++ show (vd_ty x) ++ ", " ++
-      "nm = " ++ show (d_name x) ++ ", " ++
-      "val = " ++ show (vd_val x) ++ "}"
+    showsPrec = showsPrecDecl
 
 type Prog = [Decl]
 type ProgEnv = Map.Map String Decl
