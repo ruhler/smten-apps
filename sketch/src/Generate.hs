@@ -79,13 +79,15 @@ genS (RepeatS en s) = do
   -- TODO: what if the statement changes the condition? How do we keep track
   -- of the original condition?
   let count = case en of
-                IntE v -> v
+                ValE (IntV v) -> v
                 _ -> bnd_unroll_amnt
   en' <- withty IntT $ genE en
   let unroll n
         | n >= count = blockS []
-        | otherwise = IfS (GtE en' (IntE n)) (blockS [s, unroll (n+1)])
-                                             (blockS [])
+        | otherwise =
+            let ifthen = blockS [s, unroll (n+1)]
+                ifelse = (blockS [])
+            in IfS (GtE en' (ValE (IntV n))) ifthen ifelse
   genS (unroll 0)
 
 genS (WhileS c s) = liftM2 WhileS (withty BitT (genE c)) (genS s)
@@ -144,18 +146,16 @@ genE (NotE a) = NotE <$> genE a
 genE (HoleE bnd) = do
   ty <- asks gr_oty
   env <- asks gr_env
-  liftSymbolic $ mkFreeArg env bnd ty
+  ValE <$> (liftSymbolic $ mkFreeArg env bnd ty)
 genE (BitChooseE a b) = do
   env <- asks gr_env
   ty <- asks gr_oty
   -- TODO: use the bit width of a and b, not 32.
-  x <- liftSymbolic $ mkFreeArg env 32 ty
+  x <- ValE <$> (liftSymbolic $ mkFreeArg env 32 ty)
   a' <- genE a
   b' <- genE b
   return (OrE (AndE a' x) (AndE b' (NotE x)))
-genE x@(BitE {}) = return x
-genE x@(BitsE {}) = return x
-genE x@(IntE v) = do
+genE x@(ValE (IntV v)) = do
     -- The front end uses IntE for integer literals, but they may not have
     -- type int. Change to the appropriate expression if a different type is
     -- expected here.
@@ -164,14 +164,15 @@ genE x@(IntE v) = do
     t <- asks gr_oty
     case evalT env t of
       IntT -> return x
-      BitT -> return $ case v of
-                         0 -> BitE False
-                         1 -> BitE True
-                         _ -> error $ "literal " ++ show v ++ " is too big for bit type"
+      BitT -> return . ValE $ case v of
+                                 0 -> BitV False
+                                 1 -> BitV True
+                                 _ -> error $ "literal " ++ show v ++ " is too big for bit type"
       ArrT t _ -> do
         x <- withty t (genE x)
         return $ ArrayE [x]
       _ -> return x   -- TODO: is it okay to default to int?
+genE x@(ValE {}) = return x
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do
     a' <- withty UnknownT $ genE a
@@ -190,7 +191,6 @@ genE (AppE fnm xs) = do
                     emit generated
                  _ -> return fnm
           return $ AppE fnm' xs'
-genE x@(FunE f) = return x
 
 -- Generate a binary operator, where the only thing we know about the operand
 -- types is that they must be the same.
@@ -202,6 +202,7 @@ withsamety f a b = do
 -- Determine as best as possible the type of the given expression.
 -- Returns 'UnknownT' if the type is not certain.
 typeof :: Expr -> GM Type
+typeof (ValE v) = return $ typeofV v
 typeof (AndE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (AddE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (SubE a b) = liftM2 unify (typeof a) (typeof b)
@@ -223,9 +224,6 @@ typeof (ShrE a b) = typeof a
 typeof (NotE a) = typeof a
 typeof (HoleE bnd) = return UnknownT
 typeof (BitChooseE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (BitE {}) = return BitT
-typeof (BitsE b) = return (ArrT BitT (IntE $ width b))
-typeof (IntE v) = return UnknownT -- could be any integer literal
 typeof (VarE nm) = do
     env <- asks gr_env
     tyenv <- gets ts_tyenv
@@ -245,7 +243,14 @@ typeof (AppE nm xs) = do
     case Map.lookup nm env of
        Just (FunD _ (Function (FunT v _) _ _) _) -> return v
        Nothing -> return UnknownT
-typeof (FunE f) = return UnknownT
+
+typeofV :: Value -> Type
+typeofV (ArrayV []) = UnknownT
+typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
+typeofV (BitV {}) = BitT
+typeofV (BitsV b) = ArrT BitT (ValE (IntV $ width b))
+typeofV (IntV v) = UnknownT -- could be any integer literal
+typeofV (FunV f) = UnknownT
 
 
 -- Try to unify the given types.

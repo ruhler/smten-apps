@@ -2,9 +2,9 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
     Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
-    Expr(..), Function(..), FunctionKind(..),
+    Expr(..), Value(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
-    valEq, envof, declsof, d_type,
+    envof, declsof, d_type,
     bnd_ctrlbits, bnd_unroll_amnt,
     blockS,
     ) where
@@ -30,9 +30,29 @@ instance Show Type where
     show (FunT x xs) = "FunT " ++ show x ++ " " ++ show xs
     show UnknownT = "UnknownT"
 
+data Value = 
+    ArrayV [Value]
+  | BitV Bit
+  | BitsV Bits
+  | IntV Int
+  | FunV Function
+
+instance Show Value where
+    show (ArrayV b) = "ArrayV " ++ show b
+    show (BitV b) = "BitV " ++ show b
+    show (BitsV b) = "BitsV " ++ show b
+    show (IntV x) = "IntV " ++ show x
+    show (FunV f) = "FunV " ++ show f
+
+instance Eq Value where
+    (==) (BitV a) (BitV b) = a == b
+    (==) (BitsV a) (BitsV b) = a == b
+    (==) (IntV a) (IntV b) = a == b
+    (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
 
 data Expr = 
-   AndE Expr Expr        -- ^ a & b
+   ValE Value
+ | AndE Expr Expr        -- ^ a & b
  | AddE Expr Expr        -- ^ a + b
  | SubE Expr Expr        -- ^ a - b
  | LtE Expr Expr         -- ^ a < b
@@ -53,17 +73,13 @@ data Expr =
  | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Int             -- ^ ??(n)      n is the number of bits to use
  | BitChooseE Expr Expr  -- ^ a {|} b
- | BitE Bit              -- ^ 1
- | BitsE Bits            -- ^ 4'h2
- | IntE Int              -- ^ 42
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
- | ErrE String           -- ^ used for errors
  | CastE Type Expr       -- ^ (T) e
- | FunE Function         -- ^ anonymous function literal
  | AppE Name [Expr]      -- ^ f(x, y, ...)
 
 instance Show Expr where
+    show (ValE v) = "ValE " ++ show v
     show (AndE a b) = "AndE " ++ show a ++ " " ++ show b
     show (AddE a b) = "AddE " ++ show a ++ " " ++ show b
     show (SubE a b) = "SubE " ++ show a ++ " " ++ show b
@@ -85,13 +101,9 @@ instance Show Expr where
     show (NotE a) = "NotE " ++ show a
     show (HoleE m) = "HoleE " ++ show m
     show (BitChooseE a b) = "BitChooseE " ++ show a ++ " " ++ show b
-    show (BitE b) = "BitE " ++ show b
-    show (BitsE b) = "BitsE " ++ show b
-    show (IntE x) = "IntE " ++ show x
     show (VarE n) = "VarE " ++ show n
     show (AccessE a b) = "AccessE " ++ show a ++ " " ++ show b
     show (CastE t e) = "CastE " ++ show t ++ " " ++ show e
-    show (FunE f) = "FunE " ++ show f
     show (AppE f xs) = "AppE " ++ show f ++ " " ++ show xs
 
 data Stmt =
@@ -183,15 +195,8 @@ envof p = Map.fromList [(d_name d, d) | d <- p]
 declsof :: ProgEnv -> Prog
 declsof p = Map.elems p
 
-valEq :: Expr -> Expr -> Bool
-valEq (BitE a) (BitE b) = a == b
-valEq (BitsE a) (BitsE b) = a == b
-valEq (IntE a) (IntE b) = a == b
-valEq a b = error $ "valEq: bad args: " ++ show (a, b)
-
-
 -- The input to a function is the list of its arguments.
-type FunctionInput = [Expr]
+type FunctionInput = [Value]
 
 -- The input to a program is a sample function input for each of its top level
 -- harnesses.

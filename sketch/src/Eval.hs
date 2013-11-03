@@ -14,11 +14,11 @@ data SS = SS {
     -- | The Global Environment
     ss_env :: Map.Map Name Decl,
 
-    -- | Local variables. Already evaluated.
-    ss_vars :: Map.Map Name Expr,
+    -- | Local variables.
+    ss_vars :: Map.Map Name Value,
 
     -- | The output of the statement if any.
-    ss_out :: Expr,
+    ss_out :: Value,
 
     -- | Predicate which says if the result is valid.
     ss_valid :: Bool
@@ -33,7 +33,7 @@ evalP p i = all (evalD (envof p) i) p
 -- Evaluate a type.
 evalT :: ProgEnv -> Type -> Type
 evalT env BitT = BitT
-evalT env (ArrT t e) = ArrT (evalT env t) $ evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True)
+evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True))
 evalT env IntT = IntT
 evalT env UnknownT = UnknownT
 
@@ -45,15 +45,15 @@ evalD env i d@(FunD {}) =
     GeneratorF -> True
     WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
-      , Just args <- Map.lookup (d_name d) i ->
+      , Just args <- map ValE <$> Map.lookup (d_name d) i ->
           let run = do
                 want <- apply (fd_val sd) args
                 got <- apply (fd_val d) args
-                assert (want `valEq` got)
+                assert (want == got)
           in ss_valid $ execState run (SS env Map.empty (error "evalD: no output produces") True)
 
 -- Apply a function to the given arguments.
-apply :: Function -> [Expr] -> State SS Expr
+apply :: Function -> [Expr] -> State SS Value
 apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip (f_args f) xs')
@@ -76,14 +76,14 @@ evalS (ReturnS x) = do
 evalS (AssertS p) = do
   p' <- evalE p
   case p' of
-    BitE b -> assert b
+    BitV b -> assert b
     _ -> error $ "expected bit type for assert, but got: " ++ show p'
 evalS (RepeatS n s) = do
   -- Note: The generator inlines repeats, so we don't expect this case to ever
   -- occur.
   n' <- evalE n
   case n' of
-    IntE nv -> mapM_ evalS (replicate nv s)
+    IntV nv -> mapM_ evalS (replicate nv s)
     _ -> error $ "expected int type for repeat count, but got: " ++ show n'
 evalS (ForS init cond incr body) = do
   evalS init
@@ -91,15 +91,15 @@ evalS (ForS init cond incr body) = do
 evalS w@(WhileS c s) = do
   c' <- evalE c
   case c' of
-    BitE False -> return ()
-    BitE True -> do
+    BitV False -> return ()
+    BitV True -> do
       evalS s
       evalS w
     _ -> error $ "expected bit type for while condition, but got: " ++ show c'
 evalS (DeclS ty nm) = do
   env <- gets ss_env
   v0 <- case evalT env ty of
-          t@(ArrT {}) -> evalE $ pad t
+          t@(ArrT {}) -> return $ pad t
           _ -> return (error $ nm ++ " not initialized")
   modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
 evalS (UpdateS nm e) = do
@@ -110,15 +110,15 @@ evalS (ArrUpdateS nm i e) = do
   ir <- asint <$> evalE i
   er <- evalE e
   arr' <- case (Map.lookup nm env, ir, er) of
-             (Just (BitsE arr), IntE i', BitE e') -> do
+             (Just (BitsV arr), IntV i', BitV e') -> do
                 assert (i' < width arr)
-                return (BitsE $ updB arr i' e')
-             (Just (ArrayE xs), IntE i', e') -> do
+                return (BitsV $ updB arr i' e')
+             (Just (ArrayV xs), IntV i', e') -> do
                  let f _ [] = error "array update out of bounds"
                      f 0 (v:vs) = e':vs
                      f n (v:vs) = v : f (n-1) vs
                  assert (i' < length xs)
-                 return (ArrayE $ f i' xs)
+                 return (ArrayV $ f i' xs)
              (Just v, _, _) -> error $ "array update into non-array: " ++ show v
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
@@ -126,135 +126,133 @@ evalS (ArrUpdateS nm i e) = do
 evalS (IfS p a b) = do
   p' <- evalE p
   case p' of
-    BitE True -> evalS a
-    BitE False -> evalS b
+    BitV True -> evalS a
+    BitV False -> evalS b
     _ -> error $ "expected bit type for if condition, but got: " ++ show p'
 evalS (BlockS xs) = mapM_ evalS xs
 
-evalE :: Expr -> State SS Expr
+evalE :: Expr -> State SS Value
+evalE (ValE v) = return v
 evalE (AndE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitsE (av `andB` bv)
-      (BitE av, BitE bv) -> return $ BitE (av && bv)
+      (BitsV av, BitsV bv) -> return $ BitsV (av `andB` bv)
+      (BitV av, BitV bv) -> return $ BitV (av && bv)
       _ -> error $ "unexpected args to AndE: " ++ show (a', b')
 evalE (AddE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitsE (av `addB` bv)
-      (IntE av, IntE bv) -> return $ IntE (av + bv)
+      (BitsV av, BitsV bv) -> return $ BitsV (av `addB` bv)
+      (IntV av, IntV bv) -> return $ IntV (av + bv)
       _ -> error $ "unexpected args to AddE: " ++ show (a', b')
 evalE (SubE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitsE (av `subB` bv)
-      (IntE av, IntE bv) -> return $ IntE (av - bv)
+      (BitsV av, BitsV bv) -> return $ BitsV (av `subB` bv)
+      (IntV av, IntV bv) -> return $ IntV (av - bv)
       _ -> error $ "unexpected args to SubE: " ++ show (a', b')
 evalE (LtE a b) = do
     a' <- asint <$> evalE a
     b' <- asint <$> evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> return $ BitE (av < bv)
+      (IntV av, IntV bv) -> return $ BitV (av < bv)
       _ -> error $ "unexpected args to LtE: " ++ show (a', b')
 evalE (GtE a b) = do
     a' <- asint <$> evalE a
     b' <- asint <$> evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> return $ BitE (av > bv)
+      (IntV av, IntV bv) -> return $ BitV (av > bv)
       _ -> error $ "unexpected args to GtE: " ++ show (a', b')
 evalE (LeE a b) = do
     a' <- asint <$> evalE a
     b' <- asint <$> evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> return $ BitE (av <= bv)
+      (IntV av, IntV bv) -> return $ BitV (av <= bv)
       _ -> error $ "unexpected args to LeE: " ++ show (a', b')
 evalE (GeE a b) = do
     a' <- asint <$> evalE a
     b' <- asint <$> evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> return $ BitE (av >= bv)
+      (IntV av, IntV bv) -> return $ BitV (av >= bv)
       _ -> error $ "unexpected args to GeE: " ++ show (a', b')
 evalE (EqE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitE av, BitE bv) -> return $ BitE (av == bv)
-      (BitsE av, BitsE bv) -> return $ BitE (av `eqB` bv)
-      (IntE av, IntE bv) -> return $ BitE (av == bv)
+      (BitV av, BitV bv) -> return $ BitV (av == bv)
+      (BitsV av, BitsV bv) -> return $ BitV (av `eqB` bv)
+      (IntV av, IntV bv) -> return $ BitV (av == bv)
       _ -> error $ "unexpected args to EqE: " ++ show (a', b')
 evalE (NeqE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitE av, BitE bv) -> return $ BitE (av /= bv)
-      (BitsE av, BitsE bv) -> return $ BitE (av `neqB` bv)
-      (IntE av, IntE bv) -> return $ BitE (av /= bv)
+      (BitV av, BitV bv) -> return $ BitV (av /= bv)
+      (BitsV av, BitsV bv) -> return $ BitV (av `neqB` bv)
+      (IntV av, IntV bv) -> return $ BitV (av /= bv)
       _ -> error $ "unexpected args to NeqE: " ++ show (a', b')
-evalE x@(ArrayE []) = return x
+evalE (ArrayE []) = return (ArrayV [])
 evalE (ArrayE xs) = do
     xs' <- mapM evalE xs
     case head xs' of
-        BitE _ -> return $ BitsE (mkbits [v | BitE v <- xs'])
-        _ -> return $ ArrayE xs'
+        BitV _ -> return $ BitsV (mkbits [v | BitV v <- xs'])
+        _ -> return $ ArrayV xs'
 evalE (OrE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitsE (av `orB` bv)
-      (BitE av, BitE bv) -> return $ BitE (av || bv)
+      (BitsV av, BitsV bv) -> return $ BitsV (av `orB` bv)
+      (BitV av, BitV bv) -> return $ BitV (av || bv)
 evalE (LOrE a b) = do
     a' <- evalE a
     case a' of
-        BitE True -> return a'
-        BitE False -> evalE b
+        BitV True -> return a'
+        BitV False -> evalE b
         _ -> error $ "unexpected first argument to logical or: " ++ show a'
 evalE (LAndE a b) = do
     a' <- evalE a
     case a' of
-        BitE True -> evalE b
-        BitE False -> return a'
+        BitV True -> evalE b
+        BitV False -> return a'
         _ -> error $ "unexpected first argument to logical and: " ++ show a'
 evalE (NotE a) = do
     a' <- evalE a
     case a' of
-      BitsE av -> return $ BitsE (notB av)
-      BitE av -> return $ BitE (not av)
+      BitsV av -> return $ BitsV (notB av)
+      BitV av -> return $ BitV (not av)
 evalE (XorE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, BitsE bv) -> return $ BitsE (av `xorB` bv)
-      (BitE av, BitE bv) -> return $ BitE (av `xor` bv)
+      (BitsV av, BitsV bv) -> return $ BitsV (av `xorB` bv)
+      (BitV av, BitV bv) -> return $ BitV (av `xor` bv)
       _ -> error $ "unexpected args to XorE: " ++ show (a', b')
 evalE (MulE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> return $ IntE (av * bv)
+      (IntV av, IntV bv) -> return $ IntV (av * bv)
 evalE (ModE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (IntE av, IntE bv) -> do
+      (IntV av, IntV bv) -> do
          assert (bv /= 0)
-         return $ IntE (av `rem` bv)
+         return $ IntV (av `rem` bv)
 evalE (ShlE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, IntE bv) -> return $ BitsE (av `shlB` bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shlB` bv)
 evalE (ShrE a b) = do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsE av, IntE bv) -> return $ BitsE (av `shrB` bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
 evalE (HoleE {}) = error "HoleE in evalE"
-evalE x@(BitE {}) = return x
-evalE x@(BitsE {}) = return x
-evalE x@(IntE {}) = return x
 evalE (VarE nm) = do
     vars <- gets ss_vars
     case Map.lookup nm vars of
@@ -262,46 +260,46 @@ evalE (VarE nm) = do
         Nothing -> do
             env <- gets ss_env
             case Map.lookup nm env of
-                Just (VarD _ _ v) -> return v
-                Just (FunD _ v _) -> return (FunE v)
+                Just (VarD _ _ v) -> evalE v
+                Just (FunD _ v _) -> return (FunV v)
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     a' <- evalE a
     i' <- asint <$> evalE i
     let idx = case i' of
-               IntE iv -> iv
+               IntV iv -> iv
     case a' of
-        BitsE av -> do
+        BitsV av -> do
           assert (idx < width av)
-          return (BitE (av `accessB` idx))
-        ArrayE xs -> do
+          return (BitV (av `accessB` idx))
+        ArrayV xs -> do
           assert (idx < length xs)
           return (xs !! idx)
 evalE (CastE t e) = do
     env <- gets ss_env
     e' <- evalE e
     case (evalT env t, e') of
-        (IntT, BitsE v) -> return (IntE (valB v))
-        (ArrT BitT (IntE w), BitsE v) -> return (BitsE (castB w v))
-        (ArrT t (IntE w), ArrayE xs) -> return (ArrayE (take w (xs ++ replicate w (pad t))))
+        (IntT, BitsV v) -> return (IntV (valB v))
+        (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
+        (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
-evalE x@(FunE {}) = return x
 evalE (AppE f xs) = do
     f' <- evalE (VarE f)
     case f' of
-        FunE fv -> apply fv xs
+        FunV fv -> apply fv xs
         _ -> error $ "Expected function, but got: " ++ show f'
     
     
-pad :: Type -> Expr
-pad BitT = BitE False
-pad IntT = IntE 0
-pad (ArrT t (IntE w)) = ArrayE (replicate w (pad t))
+pad :: Type -> Value
+pad BitT = BitV False
+pad IntT = IntV 0
+pad (ArrT BitT (ValE (IntV w))) = BitsV (mkbits (replicate w False))
+pad (ArrT t (ValE (IntV w))) = ArrayV (replicate w (pad t))
 
 -- promote to int as needed
 -- Returns the expression unchanged if it can't be promoted to int.
-asint :: Expr -> Expr
-asint (BitE False) = IntE 0
-asint (BitE True) = IntE 1
+asint :: Value -> Value
+asint (BitV False) = IntV 0
+asint (BitV True) = IntV 1
 asint x = x
 

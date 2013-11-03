@@ -65,19 +65,14 @@ miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
 
 Refactor Ideas::
-* Separate Expr from Value
-    So we can express at the type level when values are expected.
-    * evalE should return a value
-    * asint, astype should transform Value to Value
-    * typeOf value should give a completely known type
-* Have a separate Simplify pass before generate
+* Add type information to operators whose types aren't known
+    * initially we can add at Generate, then move to Static
+    * This way we can promote values to proper types
+* Have a separate Static pass before Generate
     * We don't need 'evalT' all over the place anymore.
     * This computes everything we know statically.
     * Loops can be unrolled properly if bounds known statically.
     * We can inline generator functions here.
-
-Pretty Printer::
-* print empty statement as ";" instead of "{ }"
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?
@@ -86,9 +81,6 @@ Performance Ideas:: (consider only AFTER we run into performance problems)
     This would also help with implementing repeat properly, and static
     evaluation of types.
 * do incremental unrolling on the size of inputs and holes we try?
-    
-Other Todo::
-* make the pretty printer print prettier
 
 Document Behaviors of sketch::
 * What happens to: ??[4] in terms of type inference?

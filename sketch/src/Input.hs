@@ -39,12 +39,12 @@ mkFreeArgs env = mapM (mkFreeArg env bnd_ctrlbits)
 
 -- Given a type, construct a free expression of that type.
 -- Takes a bound on the number of bits used for the expression.
-mkFreeArg :: ProgEnv -> Int -> Type -> Symbolic Expr
+mkFreeArg :: ProgEnv -> Int -> Type -> Symbolic Value
 mkFreeArg env bnd t =
   case evalT env t of
-    BitT -> BitE <$> free
-    ArrT BitT (IntE w) -> BitsE <$> freeBits w bnd
-    IntT -> IntE <$> freeInt bnd
+    BitT -> BitV <$> free
+    ArrT BitT (ValE (IntV w)) -> BitsV <$> freeBits w bnd
+    IntT -> IntV <$> freeInt bnd
 
 -- Compute 2^n
 exp2 :: Int -> Int

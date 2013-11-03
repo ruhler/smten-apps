@@ -130,7 +130,7 @@ stmt :: { Stmt }
  | 'while' '(' expr ')' stmt { WhileS $3 $5 }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
- | '++' id ';' { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
+ | '++' id ';' { UpdateS $2 (AddE (VarE $2) (ValE $ IntV 1)) }
 
 for_init :: { Stmt }
  : type id '=' expr { blockS [DeclS $1 $2, UpdateS $2 $4] }
@@ -139,9 +139,9 @@ for_init :: { Stmt }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS $1 $3 }
- | '++' id { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
- | id '++' { UpdateS $1 (AddE (VarE $1) (IntE 1)) }
- | id '--' { UpdateS $1 (SubE (VarE $1) (IntE 1)) }
+ | '++' id { UpdateS $2 (AddE (VarE $2) (ValE $ IntV 1)) }
+ | id '++' { UpdateS $1 (AddE (VarE $1) (ValE $ IntV 1)) }
+ | id '--' { UpdateS $1 (SubE (VarE $1) (ValE $ IntV 1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }
@@ -164,14 +164,14 @@ expr :: { Expr }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
  | expr '{|}' expr   { BitChooseE $1 $3 }
- | 'true'           { BitE True }
- | 'false'          { BitE False }
+ | 'true'           { ValE (BitV True) }
+ | 'false'          { ValE (BitV False) }
  | '!' expr         { NotE $2 }
  | '~' expr         { NotE $2 }
  | '??' { HoleE bnd_ctrlbits }
  | '??' '(' integer ')' { HoleE $3 }
  | '{' '*' '}' { HoleE bnd_ctrlbits }   -- TODO: is {*} really the same as ??
- | integer { IntE $1 }
+ | integer { ValE (IntV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
  | '{' exprs '}' { ArrayE $2 }

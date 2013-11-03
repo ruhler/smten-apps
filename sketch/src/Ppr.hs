@@ -30,11 +30,19 @@ instance Ppr Int where
    pretty = show
    prettya = show
 
-arrayargs :: [Expr] -> String
-arrayargs [x] = pretty x
-arrayargs (x:xs) = pretty x ++ ", " ++ arrayargs xs
+commas :: (Ppr a) => [a] -> String
+commas [x] = pretty x
+commas (x:xs) = pretty x ++ ", " ++ commas xs
+
+instance Ppr Value where
+   pretty (ArrayV xs) = "{" ++ commas xs ++ "}"
+   pretty (BitV b) = if b then "true" else "false"
+   pretty (BitsV n) = pretty (ArrayV (map BitV $ bits n))
+   pretty (IntV n) = pretty n
+   pretty (FunV f) = error $ "No way to pretty print an anonymous function"
 
 instance Ppr Expr where
+   pretty (ValE v) = pretty v
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
    pretty (AddE a b) = prettya a ++ " + " ++ prettya b
    pretty (SubE a b) = prettya a ++ " - " ++ prettya b
@@ -45,7 +53,7 @@ instance Ppr Expr where
    pretty (GeE a b) = prettya a ++ " >= " ++ prettya b
    pretty (EqE a b) = prettya a ++ " == " ++ prettya b
    pretty (NeqE a b) = prettya a ++ " != " ++ prettya b
-   pretty (ArrayE xs) = "{" ++ arrayargs xs ++ "}"
+   pretty (ArrayE xs) = "{" ++ commas xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
    pretty (LOrE a b) = prettya a ++ " || " ++ prettya b
    pretty (LAndE a b) = prettya a ++ " && " ++ prettya b
@@ -56,9 +64,6 @@ instance Ppr Expr where
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
    pretty (HoleE v) = "??(" ++ show v ++ ")"
    pretty (BitChooseE a b) = prettya a ++ " {|} " ++ prettya b
-   pretty (BitE b) = if b then "true" else "false"
-   pretty (BitsE n) = pretty (ArrayE (map BitE $ bits n))
-   pretty (IntE n) = pretty n
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
@@ -67,10 +72,8 @@ instance Ppr Expr where
          pargs [x] = pretty x
          pargs (x:xs) = pretty x ++ ", " ++ pargs xs
      in pretty f ++ "(" ++ pargs xs ++ ")"
-   pretty (FunE f) = error $ "No way to pretty print an anonymous function"
 
    prettya (HoleE v) = "??(" ++ show v ++ ")"
-   prettya (IntE n) = pretty n
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"
 
