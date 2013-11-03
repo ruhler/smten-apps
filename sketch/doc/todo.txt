@@ -77,7 +77,6 @@ Refactor Ideas::
     * We can inline generator functions here.
 
 Pretty Printer::
-* maintain tabs
 * print empty statement as ";" instead of "{ }"
 
 Performance Ideas:: (consider only AFTER we run into performance problems)

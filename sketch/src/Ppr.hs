@@ -74,20 +74,31 @@ instance Ppr Expr where
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"
 
+infirst :: String -> [String] -> [String]
+infirst x [] = [x]
+infirst x (l:ls) = (x ++ l) : ls
+
+-- A statement is printed as a list of lines
+pprS :: Stmt -> [String]
+pprS (ReturnS x) = ["return " ++ prettya x ++ ";"]
+pprS (AssertS x) = ["assert " ++ prettya x ++ ";"]
+pprS (RepeatS n s) = infirst ("repeat (" ++ pretty n ++ ") ") (pprS s)
+pprS (ForS init cond incr b)
+ = infirst ("for (" ++ pretty init ++ pretty cond ++ ";" ++ pretty incr ++ ") ") (pprS b)
+pprS (WhileS c s) = infirst ("while (" ++ pretty c ++ ") ") (pprS s)
+pprS (DeclS ty nm) = [pretty ty ++ " " ++ pretty nm ++ ";"]
+pprS (UpdateS nm ex) = [pretty nm ++ " = " ++ pretty ex ++ ";"]
+pprS (ArrUpdateS nm i ex) = [pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"]
+pprS (BlockS xs) = concat [["{"], map ("   " ++) (concatMap pprS xs), ["}"]]
+pprS (IfS p a (BlockS []))
+ = infirst ("if (" ++ pretty p ++ ") ") (pprS a)
+pprS (IfS p a b)
+ = infirst ("if (" ++ pretty p ++ ") ") $
+     case (pprS a) of
+        ls -> init ls ++ (infirst (last ls ++ " else ") (pprS b))
+
 instance Ppr Stmt where
-   pretty (ReturnS x) = "return " ++ prettya x ++ ";"
-   pretty (AssertS x) = "assert " ++ prettya x ++ ";"
-   pretty (RepeatS n s) = "repeat (" ++ pretty n ++ ") " ++ pretty s
-   pretty (ForS init cond incr b)
-     = "for (" ++ pretty init ++ pretty cond ++ ";" ++ pretty incr ++
-            ") " ++ pretty b
-   pretty (WhileS c s) = "while (" ++ pretty c ++ ") " ++ pretty s
-   pretty (DeclS ty nm) = pretty ty ++ " " ++ pretty nm ++ ";"
-   pretty (UpdateS nm ex) = pretty nm ++ " = " ++ pretty ex ++ ";"
-   pretty (ArrUpdateS nm i ex) = pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"
-   pretty (BlockS xs) = "{\n" ++ (unlines (map (("   " ++) . pretty) xs)) ++ "\n}"
-   pretty (IfS p a (BlockS [])) = "if (" ++ pretty p ++ ") " ++ pretty a
-   pretty (IfS p a b) = "if (" ++ pretty p ++ ") " ++ pretty a ++ " else " ++ pretty b
+   pretty s = unlines (pprS s)
 
 instance Ppr Decl where
    pretty (FunD nm (Function (FunT oty xtys) xs body) kind) = 
