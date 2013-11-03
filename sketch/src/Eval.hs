@@ -87,7 +87,7 @@ evalS (RepeatS n s) = do
     _ -> error $ "expected int type for repeat count, but got: " ++ show n'
 evalS (ForS init cond incr body) = do
   evalS init
-  evalS $ WhileS cond (BlockS [body, incr])
+  evalS $ WhileS cond (blockS [body, incr])
 evalS w@(WhileS c s) = do
   c' <- evalE c
   case c' of

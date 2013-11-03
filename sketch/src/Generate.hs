@@ -83,9 +83,9 @@ genS (RepeatS en s) = do
                 _ -> bnd_unroll_amnt
   en' <- withty IntT $ genE en
   let unroll n
-        | n >= count = BlockS []
-        | otherwise = IfS (GtE en' (IntE n)) (BlockS [s, unroll (n+1)])
-                                             (BlockS [])
+        | n >= count = blockS []
+        | otherwise = IfS (GtE en' (IntE n)) (blockS [s, unroll (n+1)])
+                                             (blockS [])
   genS (unroll 0)
 
 genS (WhileS c s) = liftM2 WhileS (withty BitT (genE c)) (genS s)
@@ -115,7 +115,7 @@ genS (ArrUpdateS nm idx e) = do
     e' <- withty t $ genE e
     return (ArrUpdateS nm idx' e')
 genS (IfS p a b) = liftM3 IfS (withty BitT $ genE p) (genS a) (genS b)
-genS (BlockS xs) = BlockS <$> mapM genS xs
+genS (BlockS xs) = blockS <$> mapM genS xs
 
 genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)

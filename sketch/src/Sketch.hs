@@ -6,6 +6,7 @@ module Sketch (
     FunctionInput, ProgramInput,
     valEq, envof, declsof, d_type,
     bnd_ctrlbits, bnd_unroll_amnt,
+    blockS,
     ) where
 
 import Smten.Prelude
@@ -104,6 +105,15 @@ data Stmt =
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
    | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
+
+-- Construct a block of statements.
+-- This flattens any blocks into the higher level.
+blockS :: [Stmt] -> Stmt
+blockS xs =
+  let f :: Stmt -> [Stmt]
+      f (BlockS xs) = concatMap f xs
+      f s = [s]
+  in BlockS (concatMap f xs)
    
 
 instance Show Stmt where

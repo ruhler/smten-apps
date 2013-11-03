@@ -89,11 +89,11 @@ sketch :: { Prog }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'
-    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (BlockS $7)) NormalF }
+    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (blockS $7)) NormalF }
  | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (BlockS $9)) (WithSpecF $7) }
+    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (blockS $9)) (WithSpecF $7) }
  | 'generator' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (BlockS $8)) GeneratorF }
+    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (blockS $8)) GeneratorF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }
@@ -119,21 +119,21 @@ stmts :: { [Stmt] }
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
  | 'assert' expr ';' { AssertS $2 }
- | type id '=' expr ';' { BlockS [DeclS $1 $2, UpdateS $2 $4] }
+ | type id '=' expr ';' { blockS [DeclS $1 $2, UpdateS $2 $4] }
  | type id ';' { DeclS $1 $2 }
  | id '=' expr ';' { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
- | '{' stmts '}' { BlockS $2 }
- | 'if' '(' expr ')' stmt { IfS $3 $5 (BlockS [])}
+ | '{' stmts '}' { blockS $2 }
+ | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
  | 'repeat' '(' expr ')' stmt { RepeatS $3 $5 }
  | 'while' '(' expr ')' stmt { WhileS $3 $5 }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
- | ';' { BlockS [] }
+ | ';' { blockS [] }
  | '++' id ';' { UpdateS $2 (AddE (VarE $2) (IntE 1)) }
 
 for_init :: { Stmt }
- : type id '=' expr { BlockS [DeclS $1 $2, UpdateS $2 $4] }
+ : type id '=' expr { blockS [DeclS $1 $2, UpdateS $2 $4] }
  | id '=' expr { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr { ArrUpdateS $1 $3 $6 }
 
