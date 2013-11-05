@@ -93,13 +93,14 @@ instance Static Stmt where
     tyenv <- gets ss_tyenv
     case Map.lookup nm tyenv of
       Nothing -> error $ "variable " ++ nm ++ " not in scope"
-      Just ty -> UpdateS nm <$> (withty (evalT env ty) (staticM e))
+      Just ty -> do
+        ty' <- staticM ty
+        UpdateS nm <$> (withty ty' (staticM e))
 
   staticM (ArrUpdateS nm idx e) = do
-    env <- asks sr_env
     tyenv <- gets ss_tyenv
-    let t = case Map.lookup nm tyenv of
-                Just (ArrT t _) -> evalT env t
+    t <- case Map.lookup nm tyenv of
+                Just (ArrT t _) -> staticM t
                 Just _ -> error $ "variable " ++ nm ++ " is not an array"
                 Nothing -> error $ "variable " ++ nm ++ " not in scope"
     idx' <- withty IntT $ staticM idx
@@ -206,7 +207,7 @@ staticE (AppE fnm xs) = do
   env <- asks sr_env
   case Map.lookup fnm env of
      Just (FunD _ f _) -> do
-        let FunT foty txs = evalT env $ f_type f
+        FunT foty txs <- staticM $ f_type f
         if oty == foty
            then return ()
            else error $ "expected type " ++ show oty ++ " but found type: " ++ show foty
@@ -369,9 +370,9 @@ typeof (VarE nm) = do
     env <- asks sr_env
     tyenv <- gets ss_tyenv
     case Map.lookup nm tyenv of
-        Just v -> return (evalT env v)
+        Just v -> staticM v
         Nothing -> case Map.lookup nm env of    
-                      Just d -> return (evalT env $ d_type d)
+                      Just d -> staticM $ d_type d
                       Nothing -> return UnknownT
 typeof (AccessE a b) = do
     ta <- typeof a
@@ -382,7 +383,7 @@ typeof (CastE t e) = return t
 typeof (AppE nm xs) = do
     env <- asks sr_env
     case Map.lookup nm env of
-       Just (FunD _ (Function (FunT v _) _ _) _) -> return (evalT env v)
+       Just (FunD _ (Function (FunT v _) _ _) _) -> staticM v
        Nothing -> return UnknownT
 
 -- subtype a b

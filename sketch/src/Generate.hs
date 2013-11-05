@@ -8,7 +8,6 @@ import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
-import Eval
 import Input
 import Sketch
 
@@ -72,8 +71,7 @@ genS (ReturnS x) = ReturnS <$> genE x
 genS (AssertS x) = AssertS <$> withty BitT (genE x)
 genS (RepeatS en s) = do
   -- TODO: evaluate n statically as much as possible here
-  -- Perhaps a 'simplify' operation on expressions would be useful, both here
-  -- and for evalT?
+  -- Perhaps a 'simplify' operation on expressions would be useful
   --
   -- TODO: what if the statement changes the condition? How do we keep track
   -- of the original condition?
@@ -154,23 +152,6 @@ genE (BitChooseE a b) = do
   a' <- genE a
   b' <- genE b
   return (OrE (AndE a' x) (AndE b' (NotE x)))
-genE x@(ValE (IntV v)) = do
-    -- The front end uses IntE for integer literals, but they may not have
-    -- type int. Change to the appropriate expression if a different type is
-    -- expected here.
-    -- TODO: this is a bit hackish. Can we clean it up please?
-    env <- asks gr_env
-    t <- asks gr_oty
-    case evalT env t of
-      IntT -> return x
-      BitT -> return . ValE $ case v of
-                                 0 -> BitV False
-                                 1 -> BitV True
-                                 _ -> error $ "literal " ++ show v ++ " is too big for bit type"
-      ArrT t _ -> do
-        x <- withty t (genE x)
-        return $ ArrayE [x]
-      _ -> return x   -- TODO: is it okay to default to int?
 genE x@(ValE {}) = return x
 genE x@(VarE {}) = return x
 genE (AccessE a b) = do

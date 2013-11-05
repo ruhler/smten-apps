@@ -43,7 +43,6 @@ FAIL_LAZY
 
 Features needed, by test case::
 tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
-tests/broken/expectfail/gtbitsbits.smten.sk: FAIL_EAGER
 tests/broken/landbitsbits.smten.sk: LAND_BITS
 tests/broken/miniTest3.sk: SCALAR_ARRAY
 
@@ -65,12 +64,10 @@ miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
 
 Refactor Ideas::
-* Add type information to operators whose types aren't known
-    * initially we can add at Generate, then move to Static
-    * This way we can promote values to proper types
-* Have a separate Static pass before Generate
-    * We don't need 'evalT' all over the place anymore.
-    * This computes everything we know statically.
+* Generate should not need to keep track of types.
+   ** add a type to HoleE
+   ** Get rid of BitChooseE in Static phase
+* Do more stuff in Static pass
     * Loops can be unrolled properly if bounds known statically.
     * We can inline generator functions here.
 
