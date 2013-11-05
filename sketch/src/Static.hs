@@ -152,7 +152,9 @@ staticE (LOrE a b) = bitwiseop LOrE "||" a b
 staticE (LAndE a b) = bitwiseop LAndE "&&" a b
 staticE (ShlE a b) = shiftop ShlE "<<" a b
 staticE (ShrE a b) = shiftop ShrE ">>" a b
-staticE (BitChooseE a b) = bitwiseop BitChooseE "{|}" a b
+staticE (BitChooseE _ a b) = do
+  ty <- asks sr_oty
+  bitwiseop (BitChooseE ty) "{|}" a b
 
 staticE (NotE a) = do
   ty <- asks sr_oty
@@ -162,7 +164,9 @@ staticE (NotE a) = do
     _ -> error $ "unsupported type for not operator: " ++ show ty
   NotE <$> staticM a
 
-staticE x@(HoleE bnd) = return x
+staticE (HoleE _ bnd) = do
+  oty <- asks sr_oty
+  return $ HoleE oty bnd
 staticE (ValE v) = ValE <$> staticM v
 staticE x@(VarE nm) = do
   oty <- asks sr_oty
@@ -364,8 +368,8 @@ typeof (LAndE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (ShlE a b) = typeof a
 typeof (ShrE a b) = typeof a
 typeof (NotE a) = typeof a
-typeof (HoleE bnd) = return UnknownT
-typeof (BitChooseE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (HoleE ty bnd) = return ty
+typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)
 typeof (VarE nm) = do
     env <- asks sr_env
     tyenv <- gets ss_tyenv

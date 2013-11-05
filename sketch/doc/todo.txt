@@ -67,6 +67,7 @@ Refactor Ideas::
 * Generate should not need to keep track of types.
    ** add a type to HoleE
    ** Get rid of BitChooseE in Static phase
+      - requires a way to introduce new variables.
 * Do more stuff in Static pass
     * Loops can be unrolled properly if bounds known statically.
     * We can inline generator functions here.

@@ -163,14 +163,14 @@ expr :: { Expr }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
- | expr '{|}' expr   { BitChooseE $1 $3 }
+ | expr '{|}' expr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }
  | 'false'          { ValE (BitV False) }
  | '!' expr         { NotE $2 }
  | '~' expr         { NotE $2 }
- | '??' { HoleE bnd_ctrlbits }
- | '??' '(' integer ')' { HoleE $3 }
- | '{' '*' '}' { HoleE bnd_ctrlbits }   -- TODO: is {*} really the same as ??
+ | '??' { HoleE UnknownT bnd_ctrlbits }
+ | '??' '(' integer ')' { HoleE UnknownT $3 }
+ | '{' '*' '}' { HoleE UnknownT bnd_ctrlbits }
  | integer { ValE (IntV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }

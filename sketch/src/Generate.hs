@@ -140,13 +140,11 @@ genE (LAndE a b) = liftM2 LAndE (withty BitT $ genE a) (withty BitT $ genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (withty IntT $ genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (withty IntT $ genE b)
 genE (NotE a) = NotE <$> genE a
-genE (HoleE bnd) = do
-  ty <- asks gr_oty
+genE (HoleE ty bnd) = do
   env <- asks gr_env
   ValE <$> (liftSymbolic $ mkFreeArg env bnd ty)
-genE (BitChooseE a b) = do
+genE (BitChooseE ty a b) = do
   env <- asks gr_env
-  ty <- asks gr_oty
   -- TODO: use the bit width of a and b, not 32.
   x <- ValE <$> (liftSymbolic $ mkFreeArg env 32 ty)
   a' <- genE a
@@ -203,8 +201,8 @@ typeof (LAndE a b) = return BitT
 typeof (ShlE a b) = typeof a
 typeof (ShrE a b) = typeof a
 typeof (NotE a) = typeof a
-typeof (HoleE bnd) = return UnknownT
-typeof (BitChooseE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (HoleE ty bnd) = return ty
+typeof (BitChooseE ty a b) = return ty
 typeof (VarE nm) = do
     env <- asks gr_env
     tyenv <- gets ts_tyenv

@@ -62,8 +62,8 @@ instance Ppr Expr where
    pretty (NotE a) = "!" ++ prettya a
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
-   pretty (HoleE v) = "??(" ++ show v ++ ")"
-   pretty (BitChooseE a b) = prettya a ++ " {|} " ++ prettya b
+   pretty (HoleE _ v) = "??(" ++ show v ++ ")"
+   pretty (BitChooseE _ a b) = prettya a ++ " {|} " ++ prettya b
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
@@ -74,7 +74,7 @@ instance Ppr Expr where
          pargs (x:xs) = pretty x ++ ", " ++ pargs xs
      in pretty f ++ "(" ++ pargs xs ++ ")"
 
-   prettya (HoleE v) = "??(" ++ show v ++ ")"
+   prettya (HoleE _ v) = "??(" ++ show v ++ ")"
    prettya (VarE nm) = pretty nm
    prettya x = "(" ++ pretty x ++ ")"
 

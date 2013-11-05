@@ -99,8 +99,8 @@ data Expr =
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b
  | ArrayE [Expr]         -- ^ {a, b, ... }
- | HoleE Int             -- ^ ??(n)      n is the number of bits to use
- | BitChooseE Expr Expr  -- ^ a {|} b
+ | HoleE Type Int        -- ^ ??(n)      n is the number of bits to use
+ | BitChooseE Type Expr Expr  -- ^ a {|} b
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | CastE Type Expr       -- ^ (T) e
