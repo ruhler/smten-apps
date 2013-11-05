@@ -14,5 +14,5 @@ import Generate
 import Sketch
 
 synthesize :: ProgEnv -> SMT (Maybe Prog)
-synthesize p = cegis (mkFreeProgramInput p) (generate p) [] evalP
+synthesize p = cegis (mkFreeProgramInput (declsof p)) (generate p) [] evalP
 

@@ -11,14 +11,12 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Bits
-import Eval
 import Sketch
 
 -- Construct a sample input for the given program.
-mkFreeProgramInput :: ProgEnv -> Symbolic ProgramInput
-mkFreeProgramInput env = do
-  let p = declsof env
-      mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
+mkFreeProgramInput :: Prog -> Symbolic ProgramInput
+mkFreeProgramInput p = do
+  let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) =
         case fd_kind d of
           NormalF -> return Nothing
@@ -26,7 +24,7 @@ mkFreeProgramInput env = do
           WithSpecF _ -> do
             case (f_type . fd_val $ d) of
                 FunT _ ts -> do
-                  i <- mkFreeArgs env ts
+                  i <- mkFreeArgs ts
                   return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p
@@ -34,14 +32,14 @@ mkFreeProgramInput env = do
 
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
-mkFreeArgs :: ProgEnv -> [Type] -> Symbolic FunctionInput
-mkFreeArgs env = mapM (mkFreeArg env bnd_ctrlbits)
+mkFreeArgs :: [Type] -> Symbolic FunctionInput
+mkFreeArgs = mapM (mkFreeArg bnd_ctrlbits)
 
 -- Given a type, construct a free expression of that type.
 -- Takes a bound on the number of bits used for the expression.
-mkFreeArg :: ProgEnv -> Int -> Type -> Symbolic Value
-mkFreeArg env bnd t =
-  case evalT env t of
+mkFreeArg :: Int -> Type -> Symbolic Value
+mkFreeArg bnd t =
+  case t of
     BitT -> BitV <$> free
     ArrT BitT (ValE (IntV w)) -> BitsV <$> freeBits w bnd
     IntT -> IntV <$> freeInt bnd

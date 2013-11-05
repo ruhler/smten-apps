@@ -122,13 +122,10 @@ genE (LAndE a b) = liftM2 LAndE (genE a) (genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)
 genE (NotE a) = NotE <$> genE a
-genE (HoleE ty bnd) = do
-  env <- asks gr_env
-  ValE <$> (liftSymbolic $ mkFreeArg env bnd ty)
+genE (HoleE ty bnd) = ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
 genE (BitChooseE ty a b) = do
-  env <- asks gr_env
   -- TODO: use the bit width of a and b, not 32.
-  x <- ValE <$> (liftSymbolic $ mkFreeArg env 32 ty)
+  x <- ValE <$> (liftSymbolic $ mkFreeArg 32 ty)
   a' <- genE a
   b' <- genE b
   return (OrE (AndE a' x) (AndE b' (NotE x)))
