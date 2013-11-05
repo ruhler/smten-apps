@@ -63,9 +63,12 @@ miniTest68.sk: SUB_ARRAY
 miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
 
+Cleanup::
+* Does mkFreeArg really need the program environment?
+* Does Generate really need to keep track of types? (see UpdateS)
+
 Refactor Ideas::
 * Generate should not need to keep track of types.
-   ** add a type to HoleE
    ** Get rid of BitChooseE in Static phase
       - requires a way to introduce new variables.
 * Do more stuff in Static pass
