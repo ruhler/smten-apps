@@ -64,7 +64,9 @@ miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
 
 Cleanup::
-* Does Generate really need to keep track of types? (see UpdateS)
+* Does Generate really need to keep track of types?
+   - To get rid of this, first we need:
+      Generate proper width for integer literal array value
 
 Refactor Ideas::
 * Generate should not need to keep track of types.

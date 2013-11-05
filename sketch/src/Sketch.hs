@@ -7,7 +7,7 @@ module Sketch (
     FunctionInput, ProgramInput,
     envof, declsof, d_type,
     bnd_ctrlbits, bnd_unroll_amnt,
-    blockS, typeofV, arrayV,
+    blockS, typeofV, arrayV, pad,
     ) where
 
 import Smten.Prelude
@@ -205,4 +205,9 @@ bnd_ctrlbits = 5
 
 bnd_unroll_amnt :: Int
 bnd_unroll_amnt = 8
+
+pad :: Type -> Value
+pad BitT = BitV False
+pad IntT = IntV 0
+pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
 

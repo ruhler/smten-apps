@@ -233,12 +233,13 @@ instance Static Value where
                 0 -> return $ BitV False
                 1 -> return $ BitV True
                 _ -> error $ "cannot use integer literal as a bit: " ++ show v
-      ArrT BitT _ ->
-              case v of
-                0 -> staticM (arrayV [BitV False])
-                1 -> staticM (arrayV [BitV True])
-                _ -> error $ "cannot use integer literal for bits: " ++ show v
-      ArrT t _ -> staticM (arrayV [x])
+      ArrT _ (ValE (IntV 0)) -> error $ "TODO: integer literal for 0 length array"
+      ArrT BitT (ValE (IntV w)) ->
+         case v of
+           0 -> staticM (arrayV $ BitV False : replicate (w-1) (pad BitT))
+           1 -> staticM (arrayV $ BitV True : replicate (w-1) (pad BitT))
+           _ -> error $ "cannot use integer literal for bits: " ++ show v
+      ArrT t (ValE (IntV w)) -> staticM (arrayV $ x : replicate (w-1) (pad t))
       _ -> error $ "unsupported type for integer literal: " ++ show ty
 
   staticM x@(BitV _) = do

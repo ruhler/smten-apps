@@ -292,11 +292,6 @@ evalE (AppE f xs) = do
         _ -> error $ "Expected function, but got: " ++ show f'
     
     
-pad :: Type -> Value
-pad BitT = BitV False
-pad IntT = IntV 0
-pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
-
 -- promote to int as needed
 -- It's an error if the value can't be implicitly converted to an Int.
 asint :: Value -> Value

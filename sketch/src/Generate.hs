@@ -89,15 +89,7 @@ genS s@(DeclS ty nm) = do
   let env' = Map.insert nm ty env
   modify $ \s -> s { ts_tyenv = env' }
   return s
-genS (UpdateS nm e) = do
-  env <- gets ts_tyenv
-  case Map.lookup nm env of
-    Nothing -> error $ "variable " ++ nm ++ " not in scope"
-    Just ty@(ArrT {}) -> do
-        -- insert an explicit cast here so padding is performed as needed.
-        e' <- genE e
-        return $ UpdateS nm (CastE ty e')
-    Just ty -> UpdateS nm <$> (genE e)
+genS (UpdateS nm e) = UpdateS nm <$> genE e
 genS (ArrUpdateS nm idx e) = liftM2 (ArrUpdateS nm) (genE idx) (genE e)
 genS (IfS p a b) = liftM3 IfS (genE p) (genS a) (genS b)
 genS (BlockS xs) = blockS <$> mapM genS xs
@@ -138,7 +130,6 @@ genE (AppE fnm xs) = do
     env <- asks gr_env
     case Map.lookup fnm env of
        Just (FunD _ f kind) -> do
-          let FunT _ txs = f_type f
           xs' <- mapM genE xs
           fnm' <- case kind of
                  GeneratorF -> do
