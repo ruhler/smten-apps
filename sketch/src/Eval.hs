@@ -35,6 +35,7 @@ evalT :: ProgEnv -> Type -> Type
 evalT env BitT = BitT
 evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True))
 evalT env IntT = IntT
+evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env UnknownT = UnknownT
 
 evalD :: ProgEnv -> ProgramInput -> Decl -> Bool

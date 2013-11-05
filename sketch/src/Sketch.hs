@@ -31,6 +31,15 @@ showsPrecType = $(derive_showsPrec ''Type)
 instance Show Type where
     showsPrec = showsPrecType
 
+instance Eq Type where
+    (==) BitT BitT = True
+    (==) (ArrT a (ValE (IntV aw))) (ArrT b (ValE (IntV bw))) =
+        a == b && aw == bw
+    (==) (ArrT {}) (ArrT {}) = error $ "equality on arrays with unknown width"
+    (==) IntT IntT = True
+    (==) (FunT a as) (FunT b bs) = a == b && as == bs
+    (==) _ _ = False
+
 data Value = 
     ArrayV [Value]
   | BitV Bit
