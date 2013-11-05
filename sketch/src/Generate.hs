@@ -178,6 +178,7 @@ genE (AccessE a b) = do
     b' <- withty IntT (genE b)
     return (AccessE a' b')
 genE (CastE t e) = CastE t <$> withty UnknownT (genE e)
+genE (ICastE s d e) = ICastE s d <$> withty s (genE e)
 genE (AppE fnm xs) = do
     env <- asks gr_env
     case Map.lookup fnm env of
@@ -237,6 +238,7 @@ typeof (AccessE a b) = do
         ArrT t _ -> return t
         _ -> return UnknownT
 typeof (CastE t e) = return t
+typeof (ICastE s d e) = return d
 typeof (AppE nm xs) = do
     env <- asks gr_env
     case Map.lookup nm env of

@@ -89,15 +89,17 @@ instance Static Stmt where
     return $ DeclS ty' nm
 
   staticM (UpdateS nm e) = do
-    env <- gets ss_tyenv
-    case Map.lookup nm env of
+    env <- asks sr_env
+    tyenv <- gets ss_tyenv
+    case Map.lookup nm tyenv of
       Nothing -> error $ "variable " ++ nm ++ " not in scope"
-      Just ty -> UpdateS nm <$> (withty ty (staticM e))
+      Just ty -> UpdateS nm <$> (withty (evalT env ty) (staticM e))
 
   staticM (ArrUpdateS nm idx e) = do
-    env <- gets ss_tyenv
-    let t = case Map.lookup nm env of
-                Just (ArrT t _) -> t
+    env <- asks sr_env
+    tyenv <- gets ss_tyenv
+    let t = case Map.lookup nm tyenv of
+                Just (ArrT t _) -> evalT env t
                 Just _ -> error $ "variable " ++ nm ++ " is not an array"
                 Nothing -> error $ "variable " ++ nm ++ " not in scope"
     idx' <- withty IntT $ staticM idx
@@ -108,95 +110,114 @@ instance Static Stmt where
   staticM (BlockS xs) = blockS <$> mapM staticM xs
 
 instance Static Expr where
-  staticM (AndE a b) = bitwiseop AndE "and" a b
+  staticM e = do
+    dst <- asks sr_oty
+    src <- typeof e
+    case src of
+     UnknownT -> staticE e
+     _ | src == dst -> staticE e
+       | src `subtype` dst -> ICastE src dst <$> (withty src $ staticE e)
+       | otherwise -> error $ "expected type " ++ show dst ++ " but found type " ++ show src
 
-  staticM (AddE a b) = do
-    ty <- asks sr_oty
-    case ty of
-      IntT -> return ()
-      ArrT BitT _ -> return ()
-      _ -> error $ "unsupported type for addition: " ++ show ty
-    liftM2 AddE (staticM a) (staticM b)
+staticE :: Expr -> SM Expr
+staticE (AndE a b) = bitwiseop AndE "and" a b
 
-  staticM (SubE a b) = intop SubE "-" a b
-  staticM (LtE a b) = cmpop LtE "<" a b
-  staticM (GtE a b) = cmpop GtE ">" a b
-  staticM (LeE a b) = cmpop LeE "<=" a b
-  staticM (GeE a b) = cmpop GeE ">=" a b
-  staticM (EqE a b) = eqop EqE "==" a b
-  staticM (NeqE a b) = eqop NeqE "!=" a b
-  staticM (ArrayE a) = do
-    ty <- asks sr_oty
-    case ty of
-        ArrT t _ -> ArrayE <$> withty t (mapM staticM a)
-        _ -> error $ "expected array type for array expression, but got: " ++ show ty
+staticE (AddE a b) = do
+  ty <- asks sr_oty
+  case ty of
+    IntT -> return ()
+    ArrT BitT _ -> return ()
+    _ -> error $ "unsupported type for addition: " ++ show ty
+  liftM2 AddE (staticM a) (staticM b)
 
-  staticM (XorE a b) = bitwiseop XorE "xor" a b
-  staticM (MulE a b) = intop MulE "*" a b
-  staticM (ModE a b) = intop ModE "%" a b
-  staticM (OrE a b) = bitwiseop OrE "or" a b
-  staticM (LOrE a b) = bitwiseop LOrE "||" a b
-  staticM (LAndE a b) = bitwiseop LAndE "&&" a b
-  staticM (ShlE a b) = shiftop ShlE "<<" a b
-  staticM (ShrE a b) = shiftop ShrE ">>" a b
-  staticM (BitChooseE a b) = bitwiseop BitChooseE "{|}" a b
+staticE (SubE a b) = intop SubE "-" a b
+staticE (LtE a b) = cmpop LtE "<" a b
+staticE (GtE a b) = cmpop GtE ">" a b
+staticE (LeE a b) = cmpop LeE "<=" a b
+staticE (GeE a b) = cmpop GeE ">=" a b
+staticE (EqE a b) = eqop EqE "==" a b
+staticE (NeqE a b) = eqop NeqE "!=" a b
+staticE (ArrayE a) = do
+  ty <- asks sr_oty
+  case ty of
+      ArrT t _ -> ArrayE <$> withty t (mapM staticM a)
+      _ -> error $ "expected array type for array expression, but got: " ++ show ty
 
-  staticM (NotE a) = do
-    ty <- asks sr_oty
-    case ty of
-      BitT -> return ()
-      ArrT BitT _ -> return ()
-      _ -> error $ "unsupported type for not operator: " ++ show ty
-    NotE <$> staticM a
+staticE (XorE a b) = bitwiseop XorE "xor" a b
+staticE (MulE a b) = intop MulE "*" a b
+staticE (ModE a b) = intop ModE "%" a b
+staticE (OrE a b) = bitwiseop OrE "or" a b
+staticE (LOrE a b) = bitwiseop LOrE "||" a b
+staticE (LAndE a b) = bitwiseop LAndE "&&" a b
+staticE (ShlE a b) = shiftop ShlE "<<" a b
+staticE (ShrE a b) = shiftop ShrE ">>" a b
+staticE (BitChooseE a b) = bitwiseop BitChooseE "{|}" a b
 
-  staticM x@(HoleE bnd) = return x
-  staticM (ValE v) = ValE <$> staticM v
-  staticM x@(VarE nm) = do
-    oty <- asks sr_oty
-    ty <- typeof x
-    if (ty `subtype` oty)
-      then return x
-      else error $ "expected type " ++ show oty ++ " but " ++ show nm ++ " has type " ++ show ty
+staticE (NotE a) = do
+  ty <- asks sr_oty
+  case ty of
+    BitT -> return ()
+    ArrT BitT _ -> return ()
+    _ -> error $ "unsupported type for not operator: " ++ show ty
+  NotE <$> staticM a
 
-  staticM (AccessE a b) = do
-    oty <- asks sr_oty
-    -- We don't know the width of the array, so we must try to infer it.
-    tarr <- typeof a
-    case tarr of
-      ArrT ty _
-        | ty == oty -> liftM2 AccessE (withty tarr $ staticM a) (withty IntT $ staticM b)
-        | otherwise -> error $ "expected type " ++ show oty
-                               ++ " but found type: " ++ show ty
-      _ -> error $ "expected array type, but found type: " ++ show tarr
+staticE x@(HoleE bnd) = return x
+staticE (ValE v) = ValE <$> staticM v
+staticE x@(VarE nm) = do
+  oty <- asks sr_oty
+  ty <- typeof x
+  if (ty == oty)
+    then return x
+    else error $ "expected type " ++ show oty ++ " but " ++ show nm ++ " has type " ++ show ty
 
-  staticM (CastE t e) = do
-    oty <- asks sr_oty
-    t' <- staticM t
-    if t' == oty
+staticE (AccessE a b) = do
+  oty <- asks sr_oty
+  -- We don't know the width of the array, so we must try to infer it.
+  tarr <- typeof a
+  case tarr of
+    ArrT ty _
+      | ty == oty -> liftM2 AccessE (withty tarr $ staticM a) (withty IntT $ staticM b)
+      | otherwise -> error $ "expected type " ++ show oty
+                             ++ " but found type: " ++ show ty
+    _ -> error $ "expected array type, but found type: " ++ show tarr
+
+staticE (CastE t e) = do
+  oty <- asks sr_oty
+  t' <- staticM t
+  if t' == oty
+    then return ()
+    else error $ "expected type " ++ show oty ++ " but found type: " ++ show t
+  te <- typeof e
+  case te of
+    UnknownT -> error $ "unable to determine type of cast argument"
+    _ -> CastE t' <$> (withty te $ staticM e)
+
+-- Note: I don't expect this case to happen, because implicit casts are not
+-- introduced before this phase.
+staticE (ICastE src dst e) = do
+  oty <- asks sr_oty
+  if oty == dst
       then return ()
-      else error $ "expected type " ++ show oty ++ " but found type: " ++ show t
-    te <- typeof e
-    case te of
-      UnknownT -> error $ "unable to determine type of cast argument"
-      _ -> CastE t' <$> (withty te $ staticM e)
+      else error $ "destination type of implicit cast is wrong"
+  ICastE src dst <$> (withty src $ staticM e)
+  
+staticE (AppE fnm xs) = do
+  oty <- asks sr_oty
+  env <- asks sr_env
+  case Map.lookup fnm env of
+     Just (FunD _ f _) -> do
+        let FunT foty txs = evalT env $ f_type f
+        if oty == foty
+           then return ()
+           else error $ "expected type " ++ show oty ++ " but found type: " ++ show foty
 
-  staticM (AppE fnm xs) = do
-    oty <- asks sr_oty
-    env <- asks sr_env
-    case Map.lookup fnm env of
-       Just (FunD _ f _) -> do
-          let FunT foty txs = evalT env $ f_type f
-          if oty == foty
-             then return ()
-             else error $ "expected type " ++ show oty ++ " but found type: " ++ show foty
+        if length txs == length xs
+           then return ()
+           else error $ "wrong number of arguments passed to function " ++ fnm
 
-          if length txs == length xs
-             then return ()
-             else error $ "wrong number of arguments passed to function " ++ fnm
-
-          xs' <- sequence [withty t (staticM x) | (t, x) <- zip txs xs]
-          return $ AppE fnm xs'
-       Nothing -> error $ "function " ++ show fnm ++ " not found"
+        xs' <- sequence [withty t (staticM x) | (t, x) <- zip txs xs]
+        return $ AppE fnm xs'
+     Nothing -> error $ "function " ++ show fnm ++ " not found"
 
 instance Static Value where
   staticM x@(IntV v) = do
@@ -242,6 +263,8 @@ unify :: Type -> Type -> Type
 unify a b | a == b = a
 unify UnknownT b = b
 unify a UnknownT = a
+unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
+  | a == b = ArrT a (ValE (IntV (max wa wb)))
 unify a b = error $ "unable to unify types: " ++ show (a, b)
 
 
@@ -346,9 +369,9 @@ typeof (VarE nm) = do
     env <- asks sr_env
     tyenv <- gets ss_tyenv
     case Map.lookup nm tyenv of
-        Just v -> return v
+        Just v -> return (evalT env v)
         Nothing -> case Map.lookup nm env of    
-                      Just d -> return (d_type d)
+                      Just d -> return (evalT env $ d_type d)
                       Nothing -> return UnknownT
 typeof (AccessE a b) = do
     ta <- typeof a
@@ -359,7 +382,7 @@ typeof (CastE t e) = return t
 typeof (AppE nm xs) = do
     env <- asks sr_env
     case Map.lookup nm env of
-       Just (FunD _ (Function (FunT v _) _ _) _) -> return v
+       Just (FunD _ (Function (FunT v _) _ _) _) -> return (evalT env v)
        Nothing -> return UnknownT
 
 -- subtype a b
@@ -367,5 +390,7 @@ typeof (AppE nm xs) = do
 subtype :: Type -> Type -> Bool
 subtype a b | a == b = True
 subtype BitT IntT = True
+subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
+  | ta == tb && wa < wb = True
 subtype _ _ = False
 

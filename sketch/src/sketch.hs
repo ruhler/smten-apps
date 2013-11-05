@@ -26,10 +26,14 @@ main = do
   sk <- case evalStateT parseSketch input of
            Left msg -> fail msg
            Right x -> return x
+  --putStrLn $ "POST PARSE: " ++ show sk
+
+  let st = static (envof sk)
+  --putStrLn $ "POST STATIC: " ++ show st
+
   solver <- case dbg of
                Just fnm -> debug fnm yices2
                Nothing -> return yices2
-  let st = static (envof sk)
   syn <- runSMT solver (synthesize (envof st))
   case syn of
     Nothing -> fail "sketch not satisfiable"

@@ -279,6 +279,14 @@ evalE (CastE t e) = do
         (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
         (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
+evalE (ICastE src dst e) = do
+    e' <- evalE e
+    case (dst, e') of
+       (IntT, BitV False) -> return $ IntV 0
+       (IntT, BitV True) -> return $ IntV 1
+       (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
+       (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
+       _ -> error $ "TODO: implement implicit cast of " ++ show e' ++ " to " ++ show dst
 evalE (AppE f xs) = do
     f' <- evalE (VarE f)
     case f' of

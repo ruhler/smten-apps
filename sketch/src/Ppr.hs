@@ -67,6 +67,7 @@ instance Ppr Expr where
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
+   pretty (ICastE _ _ e) = pretty e
    pretty (AppE f xs) =
      let pargs [] = ""
          pargs [x] = pretty x

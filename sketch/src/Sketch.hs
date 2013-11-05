@@ -35,7 +35,8 @@ instance Eq Type where
     (==) BitT BitT = True
     (==) (ArrT a (ValE (IntV aw))) (ArrT b (ValE (IntV bw))) =
         a == b && aw == bw
-    (==) (ArrT {}) (ArrT {}) = error $ "equality on arrays with unknown width"
+    (==) (ArrT a wa) (ArrT b wb)
+       | a == b = error $ "type equality on arrays with unknown width: " ++ show (wa, wb)
     (==) IntT IntT = True
     (==) (FunT a as) (FunT b bs) = a == b && as == bs
     (==) _ _ = False
@@ -103,6 +104,7 @@ data Expr =
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | CastE Type Expr       -- ^ (T) e
+ | ICastE Type Type Expr -- ^ implicit cast from src type to dst type
  | AppE Name [Expr]      -- ^ f(x, y, ...)
 
 showsPrecExpr :: Int -> Expr -> ShowS
