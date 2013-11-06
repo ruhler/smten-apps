@@ -271,6 +271,8 @@ evalE (ICastE src dst e) = do
        (IntT, BitV False) -> return $ IntV 0
        (IntT, BitV True) -> return $ IntV 1
        (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
+       _ | dimension dst > dimension (typeofV e') -> do
+           evalE (ICastE src dst (ArrayE [ValE e']))
        (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
        _ -> error $ "TODO: implement implicit cast of " ++ show e' ++ " to " ++ show dst
 evalE (AppE f xs) = do

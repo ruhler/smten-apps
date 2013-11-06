@@ -7,13 +7,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-ASSIGN_BUG
-  * keep type information for update.
-
-SCALAR_ARRAY
-  * automatically promote arbitrary scalars to one element arrays
-    if needed. Not just integer literal scalars.
-
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
@@ -33,8 +26,6 @@ FAIL_LAZY
     Or by: in the threaded runtime, it should just work hopefully.
 
 Features needed, by test case::
-tests/broken/miniTest3.sk: SCALAR_ARRAY
-
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest49.sk: PRAGMA
@@ -46,8 +37,6 @@ miniTest54.sk: SUB_ARRAY
 miniTest55.sk: SUB_ARRAY
 miniTest60.sk: SUB_ARRAY
 miniTest62.sk: SUB_ARRAY
-miniTest63.sk: SLOW. Probably a type error that's being abstracted over.
-miniTest67.sk: SCALAR_ARRAY
 miniTest68.sk: SUB_ARRAY
 miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY

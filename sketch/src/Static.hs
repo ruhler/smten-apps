@@ -394,5 +394,7 @@ subtype a b | a == b = True
 subtype BitT IntT = True
 subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
   | ta == tb && wa < wb = True
+subtype ta (ArrT tb _)
+  | ta == tb = True
 subtype _ _ = False
 
