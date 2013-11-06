@@ -90,8 +90,6 @@ data Expr =
  | EqE Expr Expr         -- ^ a == b
  | NeqE Expr Expr        -- ^ a != b
  | OrE Expr Expr         -- ^ a | b
- | LOrE Expr Expr        -- ^ a || b
- | LAndE Expr Expr       -- ^ a && b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
  | ModE Expr Expr        -- ^ a % b

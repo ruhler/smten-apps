@@ -23,17 +23,8 @@ SUB_ARRAY
 MOD_OPERATOR
   * support: t % ?? for int type.
 
-LAND_BITS
-  * && operator should work on bits.
-
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
-
-FAIL_EAGER
-  * type errors sometimes cause things to hang rather than report the error.
-    Is this a problem with smten?
-    It's: do you want to treat error as anything, or raise errors right away,
-    or what?
 
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
@@ -42,8 +33,6 @@ FAIL_LAZY
     Or by: in the threaded runtime, it should just work hopefully.
 
 Features needed, by test case::
-tests/broken/expectfail/assigntosmaller.smten.sk: ASSIGN_BUG
-tests/broken/landbitsbits.smten.sk: LAND_BITS
 tests/broken/miniTest3.sk: SCALAR_ARRAY
 
 miniTest12.sk: RECURSIVE_GENERATOR

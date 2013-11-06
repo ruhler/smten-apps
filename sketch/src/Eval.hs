@@ -201,18 +201,6 @@ evalE (OrE a b) = do
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `orB` bv)
       (BitV av, BitV bv) -> return $ BitV (av || bv)
-evalE (LOrE a b) = do
-    a' <- evalE a
-    case a' of
-        BitV True -> return a'
-        BitV False -> evalE b
-        _ -> error $ "unexpected first argument to logical or: " ++ show a'
-evalE (LAndE a b) = do
-    a' <- evalE a
-    case a' of
-        BitV True -> evalE b
-        BitV False -> return a'
-        _ -> error $ "unexpected first argument to logical and: " ++ show a'
 evalE (NotE a) = do
     a' <- evalE a
     case a' of

@@ -42,17 +42,24 @@ Expressions
 
     <expr> & <expr> 
         Bitwise AND. Works on bit, bit[].
-        Does not have short circuit semantics.
         Reference: andbitbit.smten.sk
                    andbitsbits.smten.sk
                    expectfail/andintint.smten.sk
 
     <expr> && <expr>
         Logical AND. Works on bit, bit[].
-        Has short circuit semantics.
         Reference: landbitbit.smten.sk
                    landbitsbits.smten.sk
                    expectfail/landintint.smten.sk
+        Same as bitwise and?
+
+    <expr> | <expr> 
+        Bitwise OR. Works on bit, bit[]
+
+    <expr> || <expr>
+        Logical OR. Works on bit, bit[]
+        Same as bitwise or?
+
 
     ~ <expr>
         Bitwise Not. Works on bit, bit[].
@@ -60,17 +67,9 @@ Expressions
                    notbits.smten.sk
                    expectfail/notint.smten.sk
 
-
     ! <expr>
         Logical NOT. Works on bit, bit[].
-
-    <expr> | <expr> 
-        Bitwise OR. Works on bit, bit[], (others?).
-        Does not have short circuit semantics.
-
-    <expr> || <expr>
-        Logical OR. Works on bit, (others?).
-        Has short circuit semantics.
+        Same as bitwise not?
 
     <expr> + <expr>
         Addition. Works on bit[] and int. Does not work on bit.

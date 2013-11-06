@@ -158,8 +158,8 @@ expr :: { Expr }
  | expr '*' expr    { MulE $1 $3 }
  | expr '%' expr    { ModE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
- | expr '||' expr    { LOrE $1 $3 }
- | expr '&&' expr    { LAndE $1 $3 }
+ | expr '||' expr    { OrE $1 $3 }
+ | expr '&&' expr    { AndE $1 $3 }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
