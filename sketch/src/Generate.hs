@@ -16,7 +16,7 @@ import Sketch
 generate :: ProgEnv -> Symbolic Prog
 generate p = do
   let readed = runReaderT (mapM genD (declsof p)) (GR p)
-  (ds, s) <- runStateT readed (TS (error "TODO: generate with global tyenv") [])
+  (ds, s) <- runStateT readed (TS [])
   return $ ts_decls s ++ ds
 
 type TypeEnv = Map.Map Name Type
@@ -27,9 +27,6 @@ data GR = GR {
 }
 
 data TS = TS {
-    -- | The type environment.
-    ts_tyenv :: TypeEnv,
-
     -- | Emmitted (generated) declarations
     ts_decls :: [Decl]
 }
@@ -53,11 +50,8 @@ genD d@(VarD {}) = return d
 genD d@(FunD {}) = do
     let FunT _ argtys = f_type . fd_val $ d
         tyenv = Map.fromList (zip (f_args . fd_val $ d) argtys)
-    tyenvold <- gets ts_tyenv
-    modify $ \s -> s { ts_tyenv = tyenv }
     body' <- genS (f_body . fd_val $ d)
     let val' = (fd_val d) { f_body = body' }
-    modify $ \s -> s { ts_tyenv = tyenvold }
     return $ d { fd_val = val' }
 
 genS :: Stmt -> GM Stmt
@@ -84,11 +78,7 @@ genS (RepeatS en s) = do
 genS (WhileS c s) = liftM2 WhileS (genE c) (genS s)
 genS (ForS init cond incr body) =
     liftM4 ForS (genS init) (genE cond) (genS incr) (genS body)
-genS s@(DeclS ty nm) = do
-  env <- gets ts_tyenv
-  let env' = Map.insert nm ty env
-  modify $ \s -> s { ts_tyenv = env' }
-  return s
+genS s@(DeclS {}) = return s
 genS (UpdateS nm e) = UpdateS nm <$> genE e
 genS (ArrUpdateS nm idx e) = liftM2 (ArrUpdateS nm) (genE idx) (genE e)
 genS (IfS p a b) = liftM3 IfS (genE p) (genS a) (genS b)
