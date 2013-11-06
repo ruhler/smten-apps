@@ -123,6 +123,23 @@ evalS (ArrUpdateS nm i e) = do
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
 
+evalS (ArrBulkUpdateS nm lo hi e) = do
+  env <- gets ss_vars
+  lor <- asint <$> evalE lo
+  hir <- asint <$> evalE hi
+  er <- evalE e
+  arr' <- case (Map.lookup nm env, lor, hir, er) of
+             (Just (BitsV arr), IntV lo', IntV hi', BitsV xs) -> do
+                return (BitsV $ bulkupdB arr lo' xs)
+             (Just (ArrayV xs), IntV lo', IntV hi', ArrayV xs') -> do
+                 let lo = take lo' xs
+                     mid = xs'
+                     hi = drop (lo' + length xs') xs
+                 return (ArrayV $ concat [lo, mid, hi])
+             (Just v, _, _, _) -> error $ "array update into non-array: " ++ show v
+             (Nothing, _, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
+  modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
+
 evalS (IfS p a b) = do
   p' <- evalE p
   case p' of

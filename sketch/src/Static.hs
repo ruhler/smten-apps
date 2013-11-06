@@ -107,6 +107,22 @@ instance Static Stmt where
     e' <- withty t $ staticM e
     return (ArrUpdateS nm idx' e')
 
+  staticM (ArrBulkUpdateS nm lo hi e) = do
+    tyenv <- gets ss_tyenv
+    t <- case Map.lookup nm tyenv of
+                Just t -> staticM t
+                Nothing -> error $ "variable " ++ nm ++ " not in scope"
+    lo' <- withty IntT $ staticM lo
+    hi' <- withty IntT $ staticM hi
+    case (lo', hi', t) of
+        (ValE (IntV lv), ValE (IntV hv), ArrT et (ValE (IntV w)))
+           | lv >= 0 && lv <= hv && hv < w -> do
+                e' <- withty (ArrT et (ValE (IntV (hv - lv + 1)))) $ staticM e
+                return (ArrBulkUpdateS nm lo' hi' e')
+           | otherwise -> error $ "invalid bounds for bulk update: " ++ show (lv, hv)
+        (_, _, ArrT {}) -> error $ "bulk update bounds could not be determined statically: " ++ show (lo', hi')
+        (_, _, _) -> error $ "variable " ++ show nm ++ " is not an array"
+
   staticM (IfS p a b) = liftM3 IfS (withty BitT $ staticM p) (staticM a) (staticM b)
   staticM (BlockS xs) = blockS <$> mapM staticM xs
 

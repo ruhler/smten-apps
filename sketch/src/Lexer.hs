@@ -1,4 +1,5 @@
 
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Lexer (
     Token(..), ParserMonad, lexer, failE,
@@ -12,6 +13,8 @@ import Smten.Control.Monad.State
 import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit)
 import Smten.Data.Functor ((<$>))
 
+import Smten.Derive.Show
+
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
@@ -20,61 +23,18 @@ data Token =
   | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
+  | TkDoubleColon
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse
   | TkID String
   | TkInteger Int
   | TkEOF
 
+showsPrecToken :: Int -> Token -> ShowS
+showsPrecToken = $(derive_showsPrec ''Token)
+
 instance Show Token where
-    show TkOpenParen = "TkOpenParen"
-    show TkCloseParen = "TkCloseParen"
-    show TkOpenBracket = "TkOpenBracket"
-    show TkCloseBracket = "TkCloseBracket"
-    show TkOpenBrace = "TkOpenBrace"
-    show TkCloseBrace = "TkCloseBrace"
-    show TkBar = "TkBar"
-    show TkStar = "TkStar"
-    show TkBang = "TkBang"
-    show TkTilde = "TkTilde"
-    show TkAmp = "TkAmp"
-    show TkPlus = "TkPlus"
-    show TkPercent = "TkPercent"
-    show TkMinus = "TkMinus"
-    show TkHat = "TkHat"
-    show TkLT = "TkLT"
-    show TkGT = "TkGT"
-    show TkLE = "TkLE"
-    show TkGE = "TkGE"
-    show TkEquals = "TkEquals"
-    show TkComma = "TkComma"
-    show TkSemicolon = "TkSemicolon"
-    show TkDoubleQuestionMark = "TkDoubleQuestionMark"
-    show TkDoubleLt = "TkDoubleLt"
-    show TkDoubleGt = "TkDoubleGt"
-    show TkDoubleEq = "TkDoubleEq"
-    show TkBangEq = "TkBangEq"
-    show TkDoublePlus = "TkDoublePlus"
-    show TkDoubleDash = "TkDoubleDash"
-    show TkDoubleBar = "TkDoubleBar"
-    show TkDoubleAmp = "TkDoubleAmp"
-    show TkBitChoose = "TkBitChoose"
-    show TkIf = "TkIf"
-    show TkElse = "TkElse"
-    show TkBit = "TkBit"
-    show TkInt = "TkInt"
-    show TkImplements = "TkImplements"
-    show TkReturn = "TkReturn"
-    show TkAssert = "TkAssert"
-    show TkGenerator = "TkGenerator"
-    show TkTrue = "TkTrue"
-    show TkFalse = "TkFalse"
-    show TkRepeat = "TkRepeat"
-    show TkWhile = "TkWhile"
-    show TkFor = "TkFor"
-    show (TkID x) = "TkID " ++  show x
-    show (TkInteger x) = "TkInteger " ++ show x
-    show TkEOF = "TkEOF"
+    showsPrec = showsPrecToken
 
 -- | State is the text remaining to be parsed.
 --   Left is parse failed with error message
@@ -122,7 +82,8 @@ doubles = [
     ("++", TkDoublePlus),
     ("--", TkDoubleDash),
     ("||", TkDoubleBar),
-    ("&&", TkDoubleAmp)
+    ("&&", TkDoubleAmp),
+    ("::", TkDoubleColon)
   ]
 
 triples :: [(String, Token)]

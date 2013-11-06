@@ -45,6 +45,7 @@ import Sketch
     ';'     { TkSemicolon }
     '||'    { TkDoubleBar }
     '&&'    { TkDoubleAmp }
+    '::'    { TkDoubleColon }
     '=='    { TkDoubleEq }
     '!='    { TkBangEq }
     '>>'    { TkDoubleGt }
@@ -123,6 +124,7 @@ stmt :: { Stmt }
  | type id ';' { DeclS $1 $2 }
  | id '=' expr ';' { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
+ | id '[' expr '::' expr ']' '=' expr ';' { ArrBulkUpdateS $1 $3 $5 $8 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }

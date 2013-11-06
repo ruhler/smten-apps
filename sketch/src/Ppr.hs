@@ -91,6 +91,8 @@ pprS (WhileS c s) = infirst ("while (" ++ pretty c ++ ") ") (pprS s)
 pprS (DeclS ty nm) = [pretty ty ++ " " ++ pretty nm ++ ";"]
 pprS (UpdateS nm ex) = [pretty nm ++ " = " ++ pretty ex ++ ";"]
 pprS (ArrUpdateS nm i ex) = [pretty nm ++ "[" ++ pretty i ++ "] = " ++ pretty ex ++ ";"]
+pprS (ArrBulkUpdateS nm lo hi ex) =
+    [pretty nm ++ "[" ++ pretty lo ++ "::" ++ pretty hi ++ "] = " ++ pretty ex ++ ";"]
 pprS (BlockS xs) = concat [["{"], map ("   " ++) (concatMap pprS xs), ["}"]]
 pprS (IfS p a (BlockS []))
  = infirst ("if (" ++ pretty p ++ ") ") (pprS a)

@@ -11,7 +11,7 @@ ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
 SUB_ARRAY
-  * tmp[1::2] = ...;  Should be allowed.
+  * tmp[1::2]  Should be allowed as an expression.
 
 MOD_OPERATOR
   * support: t % ?? for int type.
@@ -32,14 +32,17 @@ miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
 miniTest51.sk: ARRAY_HOLE
 miniTest52.sk: DIV_OPERATOR
-miniTest53.sk: SUB_ARRAY
-miniTest54.sk: SUB_ARRAY
+miniTest54.sk: PRAGMA, SUB_ARRAY
 miniTest55.sk: SUB_ARRAY
 miniTest60.sk: SUB_ARRAY
 miniTest62.sk: SUB_ARRAY
 miniTest68.sk: SUB_ARRAY
 miniTest69.sk: SUB_ARRAY
 miniTest70.sk: SUB_ARRAY
+
+Cleanup::
+* Eval should no longer need 'asint' function.
+    Because we have an implicit cast where-ever needed.
 
 Refactor Ideas::
 * Do more stuff in Static pass

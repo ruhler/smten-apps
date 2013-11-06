@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit, Bits,
-    andB, orB, notB, accessB, valB, updB, intB, addB, subB,
+    andB, orB, notB, accessB, valB, updB, bulkupdB, intB, addB, subB,
     ltB, gtB, leB, geB, eqB, neqB,
     shlB, shrB, xor, xorB, castB,
     mkbits, bits, width,
@@ -102,6 +102,14 @@ updB (Bits w vals) i v =
       f 0 (x:xs) = v:xs
       f n (x:xs) = x : f (n-1) xs
   in Bits w (f i vals)
+
+-- Do a bulk update of bits starting at the given index.
+bulkupdB :: Bits -> Int -> Bits -> Bits
+bulkupdB (Bits w vals) i (Bits w' vals') =
+  let lo = take i vals
+      mid = vals'
+      hi = drop (i + length vals') vals
+  in Bits w $ concat [lo, mid, hi]
 
 -- Create a bit array from an Int
 -- Least significant bit is first.

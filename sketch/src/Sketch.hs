@@ -120,6 +120,7 @@ data Stmt =
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS Name Expr              -- ^ foo = e;
    | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
+   | ArrBulkUpdateS Name Expr Expr Expr -- ^ foo[e1::e2] = e3;
    | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
 

@@ -166,6 +166,9 @@ Statements
       - Update the left hand side value <lval> to have value <expr>
       where lval can be:    <name>          - update the variable
                      or:    <name>[<expr>]  - update a specific array element
+                     or:    <name>[<expr>::<expr>]
+                                - update the range from lo to hi index of the
+                                  given array.
 
     if (<expr>) <stmt>  [else <stmt>]
       - evaluate the condition. If it is true, evaluate the statement,
