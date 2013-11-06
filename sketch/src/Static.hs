@@ -200,6 +200,18 @@ staticE (AccessE a b) = do
                              ++ " but found type: " ++ show ty
     _ -> error $ "expected array type, but found type: " ++ show tarr
 
+staticE (BulkAccessE x lo hi) = do
+  oty <- asks sr_oty
+  -- We don't know the width of the array, so we must try to infer it.
+  tarr <- typeof x
+  case (oty, tarr) of
+    (ArrT ta (ValE (IntV wa)), ArrT tb (ValE (IntV wb)))
+      | ta == tb && wa <= wb -> liftM3 BulkAccessE (withty tarr $ staticM x) (withty IntT $ staticM lo) (withty IntT $ staticM hi)
+      | ta == tb -> error $ "bulk array access out of bounds"
+      | otherwise -> error $ "expected type " ++ show oty
+                             ++ " but found type: " ++ show tarr
+    _ -> error $ "expected array type, but found type: " ++ show tarr
+
 staticE (CastE t e) = do
   oty <- asks sr_oty
   t' <- staticM t
@@ -395,6 +407,13 @@ typeof (AccessE a b) = do
     ta <- typeof a
     case ta of
         ArrT t _ -> return t
+        _ -> return UnknownT
+
+typeof (BulkAccessE a b c) = do
+    ta <- typeof a
+    case (ta, b, c) of
+        (ArrT t _, ValE (IntV lo), ValE (IntV hi)) -> do
+            return $ ArrT t (ValE (IntV $ (hi-lo)))
         _ -> return UnknownT
 typeof (CastE t e) = return t
 typeof (AppE nm xs) = do

@@ -113,6 +113,7 @@ genE (BitChooseE ty a b) = do
 genE x@(ValE {}) = return x
 genE x@(VarE {}) = return x
 genE (AccessE a b) = liftM2 AccessE (genE a) (genE b)
+genE (BulkAccessE a b c) = liftM3 BulkAccessE (genE a) (genE b) (genE c)
 genE (CastE t e) = CastE t <$> genE e
 genE (ICastE s d e) = ICastE s d <$> genE e
 genE (AppE fnm xs) = do

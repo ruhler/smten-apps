@@ -4,7 +4,7 @@ module Bits (
     Bit, Bits,
     andB, orB, notB, accessB, valB, updB, bulkupdB, intB, addB, subB,
     ltB, gtB, leB, geB, eqB, neqB,
-    shlB, shrB, xor, xorB, castB,
+    shlB, shrB, xor, xorB, castB, extractB,
     mkbits, bits, width,
     freeBits,
     ) where
@@ -165,4 +165,8 @@ castB nw b@(Bits w bs)
   | nw < w = Bits nw (take nw bs)
   | nw == w = b
   | otherwise = Bits nw (bs ++ replicate (nw - w) False)
+
+-- extractB bits lo hi
+extractB :: Bits -> Int -> Int -> Bits
+extractB (Bits w bs) lo hi = Bits (hi-lo) (drop lo (take hi bs))
 

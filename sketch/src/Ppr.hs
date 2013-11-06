@@ -64,6 +64,8 @@ instance Ppr Expr where
    pretty (BitChooseE _ a b) = prettya a ++ " {|} " ++ prettya b
    pretty (VarE nm) = pretty nm
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
+   pretty (BulkAccessE a b c)
+    = prettya a ++ "[" ++ pretty b ++ "::" ++ pretty c ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
    pretty (ICastE _ _ e) = pretty e
    pretty (AppE f xs) =

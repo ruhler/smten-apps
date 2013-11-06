@@ -10,14 +10,14 @@ RECURSIVE_GENERATOR
 ARRAY_HOLE
   * int [8] fu = ??;  Should be allowed.
 
-SUB_ARRAY
-  * tmp[1::2]  Should be allowed as an expression.
-
 MOD_OPERATOR
   * support: t % ?? for int type.
 
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
+
+BULK_ARRAY_EVAL
+  * evaluate (statically) as necessary to determine bulk array bounds.
 
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
@@ -32,17 +32,16 @@ miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
 miniTest51.sk: ARRAY_HOLE
 miniTest52.sk: DIV_OPERATOR
-miniTest54.sk: PRAGMA, SUB_ARRAY
-miniTest55.sk: SUB_ARRAY
-miniTest60.sk: SUB_ARRAY
-miniTest62.sk: SUB_ARRAY
-miniTest68.sk: SUB_ARRAY
-miniTest69.sk: SUB_ARRAY
-miniTest70.sk: SUB_ARRAY
+miniTest54.sk: PRAGMA
+miniTest60.sk: BULK_ARRAY_EVAL
+miniTest62.sk: BULK_ARRAY_EVAL
+miniTest68.sk: BULK_ARRAY_EVAL
 
 Cleanup::
 * Eval should no longer need 'asint' function.
     Because we have an implicit cast where-ever needed.
+* Many bits array operations don't depend on the width, can we 
+  share these implementations with the array operations?
 
 Refactor Ideas::
 * Do more stuff in Static pass

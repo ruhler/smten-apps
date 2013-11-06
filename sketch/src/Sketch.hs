@@ -101,6 +101,7 @@ data Expr =
  | BitChooseE Type Expr Expr  -- ^ a {|} b
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
+ | BulkAccessE Expr Expr Expr -- ^ foo[lo::hi]
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Type Expr -- ^ implicit cast from src type to dst type
  | AppE Name [Expr]      -- ^ f(x, y, ...)

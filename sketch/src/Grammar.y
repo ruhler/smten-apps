@@ -176,6 +176,7 @@ expr :: { Expr }
  | integer { ValE (IntV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
+ | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
  | '{' exprs '}' { ArrayE $2 }
  | id '(' ')' { AppE $1 [] }
  | id '(' exprs ')' { AppE $1 $3 }
