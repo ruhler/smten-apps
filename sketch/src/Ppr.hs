@@ -47,6 +47,7 @@ instance Ppr Expr where
    pretty (AddE a b) = prettya a ++ " + " ++ prettya b
    pretty (SubE a b) = prettya a ++ " - " ++ prettya b
    pretty (ModE a b) = prettya a ++ " % " ++ prettya b
+   pretty (DivE a b) = prettya a ++ " / " ++ prettya b
    pretty (LtE a b) = prettya a ++ " < " ++ prettya b
    pretty (GtE a b) = prettya a ++ " > " ++ prettya b
    pretty (LeE a b) = prettya a ++ " <= " ++ prettya b

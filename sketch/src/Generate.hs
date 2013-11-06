@@ -99,6 +99,7 @@ genE (ArrayE a) = ArrayE <$> mapM genE a
 genE (XorE a b) = liftM2 XorE (genE a) (genE b)
 genE (MulE a b) = liftM2 MulE (genE a) (genE b)
 genE (ModE a b) = liftM2 ModE (genE a) (genE b)
+genE (DivE a b) = liftM2 DivE (genE a) (genE b)
 genE (OrE a b) = liftM2 OrE (genE a) (genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)

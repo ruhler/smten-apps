@@ -40,6 +40,7 @@ import Sketch
     '^'     { TkHat }
     '*'     { TkStar }
     '%'     { TkPercent }
+    '/'     { TkSlash }
     '='     { TkEquals }
     ','     { TkComma }
     ';'     { TkSemicolon }
@@ -79,7 +80,7 @@ import Sketch
 %left '<' '>' '<=' '>='
 %left '<<' '>>'
 %left '+' '-'
-%left '*' '%'
+%left '*' '%' '/'
 %right '!' '~'
 
 %%
@@ -161,6 +162,7 @@ expr :: { Expr }
  | expr '-' expr    { SubE $1 $3 }
  | expr '*' expr    { MulE $1 $3 }
  | expr '%' expr    { ModE $1 $3 }
+ | expr '/' expr    { DivE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
  | expr '||' expr    { OrE $1 $3 }
  | expr '&&' expr    { AndE $1 $3 }

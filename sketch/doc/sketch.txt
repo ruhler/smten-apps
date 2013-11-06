@@ -83,6 +83,9 @@ Expressions
     <expr> % <expr>
         Modulo operator. Works on int.
 
+    <expr> / <expr>
+        Division operator. Works on int.
+
     <expr> < <expr>
         Less than. Works on int. Does not work on bit[].
 

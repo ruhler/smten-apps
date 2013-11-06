@@ -7,9 +7,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-MOD_OPERATOR
-  * support: t % ?? for int type.
-
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
 
@@ -39,7 +36,6 @@ miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
-miniTest52.sk: DIV_OPERATOR
 miniTest54.sk: PRAGMA
 miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
@@ -50,12 +46,15 @@ miniTest73.sk: BULK_ASSIGN_BUG
 miniTest77.sk: COND_OPERATOR
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest82.sk: BULK_ARRAY_EVAL
-miniTest83.sk: DIV_OPERATOR
-miniTest84.sk: DIV_OPERATOR
+miniTest83.sk: BULK_ARRAY_EVAL
+miniTest84.sk: BULK_ARRAY_EVAL
 miniTest86.sk: BULK_ARRAY_EVAL
-miniTest86.sk: DIV_OPERATOR
+miniTest86.sk: BULK_ARRAY_EVAL
 miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest90.sk: COND_OPERATOR
+
+Pretty Print::
+* for loop init and incr don't print properly
 
 Cleanup::
 * Many bits array operations don't depend on the width, can we 

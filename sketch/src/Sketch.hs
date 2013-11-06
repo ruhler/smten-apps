@@ -93,6 +93,7 @@ data Expr =
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
  | ModE Expr Expr        -- ^ a % b
+ | DivE Expr Expr        -- ^ a / b
  | NotE Expr             -- ^ ! a
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b

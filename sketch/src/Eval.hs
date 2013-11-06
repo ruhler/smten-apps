@@ -242,6 +242,13 @@ evalE (ModE a b) = do
       (IntV av, IntV bv) -> do
          assert (bv /= 0)
          return $ IntV (av `rem` bv)
+evalE (DivE a b) = do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (IntV av, IntV bv) -> do
+         assert (bv /= 0)
+         return $ IntV (av `quot` bv)
 evalE (ShlE a b) = do
     a' <- evalE a
     b' <- evalE b
