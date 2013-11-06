@@ -16,6 +16,18 @@ PRAGMA
 BULK_ARRAY_EVAL
   * evaluate (statically) as necessary to determine bulk array bounds.
 
+POOR_TYPE_BULK_ASSIGN
+  * support something like: out[36::92] = (bit[92]) in;
+
+POOR_TYPE_BIT_LITERAL
+  * bit N = 5;
+
+BULK_ASSIGN_BUG
+  * there must be a bug in bulk assignment, because it doesn't work right.
+
+COND_OPERATOR
+  * (foo ? a : b)
+
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
@@ -32,6 +44,18 @@ miniTest54.sk: PRAGMA
 miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
+miniTest71.sk: POOR_TYPE_BULK_ASSIGN
+miniTest72.sk: BULK_ASSIGN_BUG
+miniTest73.sk: BULK_ASSIGN_BUG
+miniTest77.sk: COND_OPERATOR
+miniTest78.sk: POOR_TYPE_BIT_LITERAL
+miniTest82.sk: BULK_ARRAY_EVAL
+miniTest83.sk: DIV_OPERATOR
+miniTest84.sk: DIV_OPERATOR
+miniTest86.sk: BULK_ARRAY_EVAL
+miniTest86.sk: DIV_OPERATOR
+miniTest89.sk: SLOW? (quadratic in int space?)
+miniTest90.sk: COND_OPERATOR
 
 Cleanup::
 * Many bits array operations don't depend on the width, can we 
