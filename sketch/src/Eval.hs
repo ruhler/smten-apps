@@ -107,7 +107,7 @@ evalS (UpdateS nm e) = do
   modify $ \s -> s { ss_vars = Map.insert nm e' (ss_vars s) }
 evalS (ArrUpdateS nm i e) = do
   env <- gets ss_vars
-  ir <- asint <$> evalE i
+  ir <- evalE i
   er <- evalE e
   arr' <- case (Map.lookup nm env, ir, er) of
              (Just (BitsV arr), IntV i', BitV e') -> do
@@ -125,8 +125,8 @@ evalS (ArrUpdateS nm i e) = do
 
 evalS (ArrBulkUpdateS nm lo hi e) = do
   env <- gets ss_vars
-  lor <- asint <$> evalE lo
-  hir <- asint <$> evalE hi
+  lor <- evalE lo
+  hir <- evalE hi
   er <- evalE e
   arr' <- case (Map.lookup nm env, lor, hir, er) of
              (Just (BitsV arr), IntV lo', IntV hi', BitsV xs) -> do
@@ -172,26 +172,26 @@ evalE (SubE a b) = do
       (IntV av, IntV bv) -> return $ IntV (av - bv)
       _ -> error $ "unexpected args to SubE: " ++ show (a', b')
 evalE (LtE a b) = do
-    a' <- asint <$> evalE a
-    b' <- asint <$> evalE b
+    a' <- evalE a
+    b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av < bv)
       _ -> error $ "unexpected args to LtE: " ++ show (a', b')
 evalE (GtE a b) = do
-    a' <- asint <$> evalE a
-    b' <- asint <$> evalE b
+    a' <- evalE a
+    b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av > bv)
       _ -> error $ "unexpected args to GtE: " ++ show (a', b')
 evalE (LeE a b) = do
-    a' <- asint <$> evalE a
-    b' <- asint <$> evalE b
+    a' <- evalE a
+    b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av <= bv)
       _ -> error $ "unexpected args to LeE: " ++ show (a', b')
 evalE (GeE a b) = do
-    a' <- asint <$> evalE a
-    b' <- asint <$> evalE b
+    a' <- evalE a
+    b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av >= bv)
       _ -> error $ "unexpected args to GeE: " ++ show (a', b')
@@ -265,7 +265,7 @@ evalE (VarE nm) = do
                 Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = do
     a' <- evalE a
-    i' <- asint <$> evalE i
+    i' <- evalE i
     let idx = case i' of
                IntV iv -> iv
     case a' of
@@ -277,8 +277,8 @@ evalE (AccessE a i) = do
           return (xs !! idx)
 evalE (BulkAccessE a lo hi) = do
     a' <- evalE a
-    IntV lo' <- asint <$> evalE lo
-    IntV hi' <- asint <$> evalE hi
+    IntV lo' <- evalE lo
+    IntV hi' <- evalE hi
     case a' of
         BitsV av -> return (BitsV (extractB av lo' hi'))
         ArrayV xs -> return (ArrayV (drop lo' (take hi' xs)))
@@ -306,14 +306,6 @@ evalE (AppE f xs) = do
         _ -> error $ "Expected function, but got: " ++ show f'
     
     
--- promote to int as needed
--- It's an error if the value can't be implicitly converted to an Int.
-asint :: Value -> Value
-asint (BitV False) = IntV 0
-asint (BitV True) = IntV 1
-asint x@(IntV {})  = x
-asint x = error $ "cannot implicitly convert to int: " ++ show x
-
 dimension :: Type -> Int
 dimension BitT = 1
 dimension (ArrT t _) = 1 + dimension t

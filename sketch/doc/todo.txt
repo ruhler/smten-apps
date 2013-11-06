@@ -38,8 +38,6 @@ miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
 
 Cleanup::
-* Eval should no longer need 'asint' function.
-    Because we have an implicit cast where-ever needed.
 * Many bits array operations don't depend on the width, can we 
   share these implementations with the array operations?
 
