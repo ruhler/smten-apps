@@ -10,7 +10,6 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 import Smten.Symbolic
 
-import Bits
 import Sketch
 
 -- Construct a sample input for the given program.
@@ -41,7 +40,8 @@ mkFreeArg :: Int -> Type -> Symbolic Value
 mkFreeArg bnd t =
   case t of
     BitT -> BitV <$> free
-    ArrT BitT (ValE (IntV w)) -> BitsV <$> freeBits w bnd
+    ArrT t (ValE (IntV w)) -> do
+       arrayV <$> sequence (replicate w (mkFreeArg bnd t))
     IntT -> IntV <$> freeInt bnd
 
 -- Compute 2^n

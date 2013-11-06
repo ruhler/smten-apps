@@ -7,9 +7,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-ARRAY_HOLE
-  * int [8] fu = ??;  Should be allowed.
-
 MOD_OPERATOR
   * support: t % ?? for int type.
 
@@ -30,7 +27,6 @@ miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
-miniTest51.sk: ARRAY_HOLE
 miniTest52.sk: DIV_OPERATOR
 miniTest54.sk: PRAGMA
 miniTest60.sk: BULK_ARRAY_EVAL
@@ -53,10 +49,4 @@ Performance Ideas:: (consider only AFTER we run into performance problems)
     This would also help with implementing repeat properly, and static
     evaluation of types.
 * do incremental unrolling on the size of inputs and holes we try?
-
-Document Behaviors of sketch::
-* What happens to: ??[4] in terms of type inference?
-    blows up
-* what happens to: 7[2] in terms of type inference?
-    blows up
 
