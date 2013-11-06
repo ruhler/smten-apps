@@ -13,8 +13,8 @@ import Smten.Symbolic
 import Sketch
 
 -- Construct a sample input for the given program.
-mkFreeProgramInput :: Prog -> Symbolic ProgramInput
-mkFreeProgramInput p = do
+mkFreeProgramInput :: Options -> Prog -> Symbolic ProgramInput
+mkFreeProgramInput opts p = do
   let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) =
         case fd_kind d of
@@ -23,7 +23,7 @@ mkFreeProgramInput p = do
           WithSpecF _ -> do
             case (f_type . fd_val $ d) of
                 FunT _ ts -> do
-                  i <- mkFreeArgs ts
+                  i <- mkFreeArgs opts ts
                   return $ Just (d_name d, i)
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p
@@ -31,8 +31,8 @@ mkFreeProgramInput p = do
 
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
-mkFreeArgs :: [Type] -> Symbolic FunctionInput
-mkFreeArgs = mapM (mkFreeArg bnd_ctrlbits)
+mkFreeArgs :: Options -> [Type] -> Symbolic FunctionInput
+mkFreeArgs opts = mapM (mkFreeArg (bnd_ctrlbits opts))
 
 -- Given a type, construct a free expression of that type.
 -- Takes a bound on the number of bits used for the expression.

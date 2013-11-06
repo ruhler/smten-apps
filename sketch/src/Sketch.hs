@@ -5,8 +5,8 @@ module Sketch (
     Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
     Expr(..), Value(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
+    Options(..), defaultOptions,
     envof, declsof, d_type,
-    bnd_ctrlbits, bnd_unroll_amnt,
     blockS, typeofV, arrayV, pad,
     ) where
 
@@ -200,12 +200,16 @@ type FunctionInput = [Value]
 -- harnesses.
 type ProgramInput = Map.Map String FunctionInput
 
--- TODO: don't hardcode --bnd-ctrlbits like this.
-bnd_ctrlbits :: Int
-bnd_ctrlbits = 5
+data Options = Options {
+  bnd_ctrlbits :: Int,
+  bnd_unroll_amnt :: Int
+}
 
-bnd_unroll_amnt :: Int
-bnd_unroll_amnt = 8
+defaultOptions :: Options
+defaultOptions = Options {
+    bnd_ctrlbits = 5,
+    bnd_unroll_amnt = 8
+}
 
 pad :: Type -> Value
 pad BitT = BitV False

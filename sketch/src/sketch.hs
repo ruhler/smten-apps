@@ -34,7 +34,7 @@ main = do
   solver <- case dbg of
                Just fnm -> debug fnm yices2
                Nothing -> return yices2
-  syn <- runSMT solver (synthesize (envof st))
+  syn <- runSMT solver (synthesize defaultOptions (envof st))
   case syn of
     Nothing -> fail "sketch not satisfiable"
     Just v -> putStrLn (pretty v)

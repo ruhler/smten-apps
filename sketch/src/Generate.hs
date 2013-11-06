@@ -14,15 +14,17 @@ import Sketch
 
 -- Given a program with explicit holes, generate a corrisponding symbolic
 -- candidate program without holes.
-generate :: ProgEnv -> Symbolic Prog
-generate p = do
-  let readed = runReaderT (mapM genD (declsof p)) (GR p)
+generate :: Options -> ProgEnv -> Symbolic Prog
+generate opts p = do
+  let readed = runReaderT (mapM genD (declsof p)) (GR opts p)
   (ds, s) <- runStateT readed (TS [])
   return $ ts_decls s ++ ds
 
 type TypeEnv = Map.Map Name Type
 
 data GR = GR {
+    gr_opts :: Options,
+
     -- | The program environment.
     gr_env :: ProgEnv
 }
@@ -64,9 +66,10 @@ genS (RepeatS en s) = do
   --
   -- TODO: what if the statement changes the condition? How do we keep track
   -- of the original condition?
+  opts <- asks gr_opts
   let count = case en of
                 ValE (IntV v) -> v
-                _ -> bnd_unroll_amnt
+                _ -> bnd_unroll_amnt opts
   en' <- genE en
   let unroll n
         | n >= count = blockS []
@@ -106,7 +109,8 @@ genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)
 genE (NotE a) = NotE <$> genE a
 genE (HoleE ty mbnd) = do
-  let bnd = fromMaybe bnd_ctrlbits mbnd
+  opts <- asks gr_opts
+  let bnd = fromMaybe (bnd_ctrlbits opts) mbnd
   ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
 genE (BitChooseE ty a b) = do
   -- TODO: use the bit width of a and b, not 32.

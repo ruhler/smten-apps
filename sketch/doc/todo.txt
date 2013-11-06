@@ -9,7 +9,6 @@ RECURSIVE_GENERATOR
 
 PRAGMA
   * support: pragma options "--bnd-intbits 6";
-    2. Pass bnd_foo parameters as arguments instead of statically defining
     3. Read bnd_foo parameters from the command line
     4. Read bnd_foo parameters from the options pragma.
 
