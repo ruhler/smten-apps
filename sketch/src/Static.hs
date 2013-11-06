@@ -179,9 +179,9 @@ staticE (NotE a) = do
     _ -> error $ "unsupported type for not operator: " ++ show ty
   NotE <$> staticM a
 
-staticE (HoleE _ bnd) = do
+staticE (HoleE _ mbnd) = do
   oty <- asks sr_oty
-  return $ HoleE oty bnd
+  return $ HoleE oty mbnd
 staticE (ValE v) = ValE <$> staticM v
 staticE x@(VarE nm) = do
   oty <- asks sr_oty
@@ -395,7 +395,7 @@ typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (ShlE a b) = typeof a
 typeof (ShrE a b) = typeof a
 typeof (NotE a) = typeof a
-typeof (HoleE ty bnd) = return ty
+typeof (HoleE ty _) = return ty
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)
 typeof (VarE nm) = do
     env <- asks sr_env

@@ -174,9 +174,9 @@ expr :: { Expr }
  | 'false'          { ValE (BitV False) }
  | '!' expr         { NotE $2 }
  | '~' expr         { NotE $2 }
- | '??' { HoleE UnknownT bnd_ctrlbits }
- | '??' '(' integer ')' { HoleE UnknownT $3 }
- | '{' '*' '}' { HoleE UnknownT bnd_ctrlbits }
+ | '??' { HoleE UnknownT Nothing }
+ | '??' '(' integer ')' { HoleE UnknownT (Just $3) }
+ | '{' '*' '}' { HoleE UnknownT Nothing }
  | integer { ValE (IntV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }

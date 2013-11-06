@@ -6,6 +6,7 @@ import Smten.Control.Monad.Reader
 import Smten.Control.Monad.State
 import Smten.Data.Functor
 import qualified Smten.Data.Map as Map
+import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Input
@@ -104,7 +105,9 @@ genE (OrE a b) = liftM2 OrE (genE a) (genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)
 genE (NotE a) = NotE <$> genE a
-genE (HoleE ty bnd) = ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
+genE (HoleE ty mbnd) = do
+  let bnd = fromMaybe bnd_ctrlbits mbnd
+  ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
 genE (BitChooseE ty a b) = do
   -- TODO: use the bit width of a and b, not 32.
   x <- ValE <$> (liftSymbolic $ mkFreeArg 32 ty)
