@@ -59,6 +59,7 @@ instance Ppr Expr where
    pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
    pretty (MulE a b) = prettya a ++ " * " ++ prettya b
    pretty (NotE a) = "!" ++ prettya a
+   pretty (CondE p a b) = prettya p ++ " ? " ++ prettya a ++ " : " ++ prettya b
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
    pretty (HoleE _ (Just v)) = "??(" ++ show v ++ ")"

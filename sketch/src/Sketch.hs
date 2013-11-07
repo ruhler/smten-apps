@@ -89,6 +89,7 @@ data Expr =
  | GeE Expr Expr         -- ^ a >= b
  | EqE Expr Expr         -- ^ a == b
  | NeqE Expr Expr        -- ^ a != b
+ | CondE Expr Expr Expr  -- ^ p ? a : b
  | OrE Expr Expr         -- ^ a | b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b

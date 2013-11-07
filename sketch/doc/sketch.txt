@@ -95,6 +95,10 @@ Expressions
     <expr> == <expr>
         Equal to. Works on int, bit, and bit[].
 
+    <expr> ? <expr> : <expr>
+        Conditional operator. The first expression should be of type bit.
+        The other expressions should have the same types.
+
     <expr> >> <expr>
         Logical right shift. The left argument must be an array of bits. The
         right argument has type int.

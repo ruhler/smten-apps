@@ -11,6 +11,8 @@ PRAGMA
   * support: pragma options "--bnd-intbits 6";
     3. Read bnd_foo parameters from the command line
     4. Read bnd_foo parameters from the options pragma.
+    5. Parse string literals
+    6. Parse pragma
 
 BULK_ARRAY_EVAL
   * evaluate (statically) as necessary to determine bulk array bounds.
@@ -24,8 +26,8 @@ POOR_TYPE_BIT_LITERAL
 BULK_ASSIGN_BUG
   * there must be a bug in bulk assignment, because it doesn't work right.
 
-COND_OPERATOR
-  * (foo ? a : b)
+AMBIGUOUS_INT_LITERAL
+  * (0 == 0), the type of the integer literal is ambiguous.
 
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
@@ -45,7 +47,6 @@ miniTest68.sk: BULK_ARRAY_EVAL
 miniTest71.sk: POOR_TYPE_BULK_ASSIGN
 miniTest72.sk: BULK_ASSIGN_BUG
 miniTest73.sk: BULK_ASSIGN_BUG
-miniTest77.sk: COND_OPERATOR
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest82.sk: BULK_ARRAY_EVAL
 miniTest83.sk: BULK_ARRAY_EVAL
@@ -53,10 +54,14 @@ miniTest84.sk: BULK_ARRAY_EVAL
 miniTest86.sk: BULK_ARRAY_EVAL
 miniTest86.sk: BULK_ARRAY_EVAL
 miniTest89.sk: SLOW? (quadratic in int space?)
-miniTest90.sk: COND_OPERATOR
+miniTest91.sk: AMBIGUOUS_INT_LITERAL
+miniTest92.sk: PRAGMA
 
 Pretty Print::
 * for loop init and incr don't print properly
+
+Options::
+* Understand what they are, what they are called, and what they really do
 
 Cleanup::
 * Many bits array operations don't depend on the width, can we 

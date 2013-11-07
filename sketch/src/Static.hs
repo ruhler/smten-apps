@@ -154,6 +154,12 @@ staticE (LeE a b) = cmpop LeE "<=" a b
 staticE (GeE a b) = cmpop GeE ">=" a b
 staticE (EqE a b) = eqop EqE "==" a b
 staticE (NeqE a b) = eqop NeqE "!=" a b
+staticE (CondE p a b) = do
+  ty <- asks sr_oty  
+  p' <- withty BitT $ staticM p
+  a' <- withty ty $ staticM a
+  b' <- withty ty $ staticM b
+  return $ CondE p' a' b'
 staticE (ArrayE a) = do
   ty <- asks sr_oty
   case ty of
@@ -391,6 +397,7 @@ typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (MulE a b) = return IntT
 typeof (ModE a b) = return IntT
 typeof (DivE a b) = return IntT
+typeof (CondE _ a b) = liftM2 unify (typeof a) (typeof b)
 typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (ShlE a b) = typeof a
 typeof (ShrE a b) = typeof a

@@ -223,6 +223,11 @@ evalE (NotE a) = do
     case a' of
       BitsV av -> return $ BitsV (notB av)
       BitV av -> return $ BitV (not av)
+evalE (CondE p a b) = do
+    p' <- evalE p
+    case p' of
+        BitV True -> evalE a
+        BitV False -> evalE b
 evalE (XorE a b) = do
     a' <- evalE a
     b' <- evalE b

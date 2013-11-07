@@ -20,10 +20,10 @@ data Token =
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
   | TkStar | TkEquals | TkComma | TkSemicolon | TkPercent | TkSlash
-  | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq
+  | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq | TkQuestionMark
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
-  | TkDoubleColon
+  | TkDoubleColon | TkColon
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse
   | TkID String
@@ -68,7 +68,9 @@ singles = [
     ('>', TkGT),
     ('=', TkEquals),
     (',', TkComma),
-    (';', TkSemicolon)
+    (';', TkSemicolon),
+    ('?', TkQuestionMark),
+    (':', TkColon)
   ]
 
 doubles :: [(String, Token)]
