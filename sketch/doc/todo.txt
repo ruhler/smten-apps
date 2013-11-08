@@ -17,16 +17,14 @@ PRAGMA
 BULK_ARRAY_EVAL
   * Support dynamic BULK_ARRAY bounds
 
-BULK_ASSIGN_BUG
-  * Bulk assignment: foo[x::M]
-        x is the starting index
-        M is the width, not the ending index!
-
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
 
 AMBIGUOUS_INT_LITERAL
   * (0 == 0), the type of the integer literal is ambiguous.
+
+UNARY_MINUS
+  * support the unary minus operator
 
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
@@ -50,7 +48,6 @@ miniTest54.sk: PRAGMA
 miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
-miniTest71.sk: BULK_ASSIGN_BUG
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest82.sk: BULK_ARRAY_EVAL
 miniTest83.sk: BULK_ARRAY_EVAL
@@ -62,6 +59,7 @@ miniTest91.sk: AMBIGUOUS_INT_LITERAL
 miniTest92.sk: PRAGMA
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTest95.sk: EMPTY_BLOCK
+miniTest96.sk: UNARY_MINUS
 
 Pretty Print::
 * for loop init and incr don't print properly

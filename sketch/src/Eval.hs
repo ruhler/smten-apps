@@ -120,18 +120,20 @@ evalS (ArrUpdateS nm i e) = do
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
 
-evalS (ArrBulkUpdateS nm lo hi e) = do
+evalS (ArrBulkUpdateS nm lo _ e) = do
+  -- Note: we don't have to evaluate the width argument, because the type of
+  -- 'e' is already properly sized.
   env <- gets ss_vars
   lor <- evalE lo
-  hir <- evalE hi
   er <- evalE e
-  arr' <- case (Map.lookup nm env, lor, hir, er) of
-             (Just (BitsV xs), IntV lo', IntV hi', BitsV xs') -> do
+  -- TODO: assert the indices for update are all in bounds
+  arr' <- case (Map.lookup nm env, lor, er) of
+             (Just (BitsV xs), IntV lo', BitsV xs') -> do
                 return (BitsV $ arrbulkupd xs lo' xs')
-             (Just (ArrayV xs), IntV lo', IntV hi', ArrayV xs') -> do
+             (Just (ArrayV xs), IntV lo', ArrayV xs') -> do
                 return (ArrayV $ arrbulkupd xs lo' xs')
-             (Just v, _, _, _) -> error $ "array update into non-array: " ++ show v
-             (Nothing, _, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
+             (Just v, _, _) -> error $ "array update into non-array: " ++ show v
+             (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
 
 evalS (IfS p a b) = do

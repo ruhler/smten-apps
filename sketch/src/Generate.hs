@@ -85,7 +85,7 @@ genS (ForS init cond incr body) =
 genS s@(DeclS {}) = return s
 genS (UpdateS nm e) = UpdateS nm <$> genE e
 genS (ArrUpdateS nm idx e) = liftM2 (ArrUpdateS nm) (genE idx) (genE e)
-genS (ArrBulkUpdateS nm lo hi e) = liftM3 (ArrBulkUpdateS nm) (genE lo) (genE hi) (genE e)
+genS (ArrBulkUpdateS nm lo w e) = liftM3 (ArrBulkUpdateS nm) (genE lo) (genE w) (genE e)
 genS (IfS p a b) = liftM3 IfS (genE p) (genS a) (genS b)
 genS (BlockS xs) = blockS <$> mapM genS xs
 
