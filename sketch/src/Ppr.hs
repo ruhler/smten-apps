@@ -7,7 +7,6 @@ module Ppr (pretty) where
 
 
 import Smten.Prelude
-import Bits
 import Sketch
 
 class Ppr a where
@@ -37,7 +36,7 @@ commas (x:xs) = pretty x ++ ", " ++ commas xs
 instance Ppr Value where
    pretty (ArrayV xs) = "{" ++ commas xs ++ "}"
    pretty (BitV b) = if b then "true" else "false"
-   pretty (BitsV n) = pretty (ArrayV (map BitV $ bits n))
+   pretty (BitsV n) = pretty (ArrayV (map BitV n))
    pretty (IntV n) = pretty n
    pretty (FunV f) = error $ "No way to pretty print an anonymous function"
 

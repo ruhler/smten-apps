@@ -111,7 +111,7 @@ evalS (ArrUpdateS nm i e) = do
   er <- evalE e
   arr' <- case (Map.lookup nm env, ir, er) of
              (Just (BitsV arr), IntV i', BitV e') -> do
-                assert (i' < width arr)
+                assert (i' < length arr)
                 return (BitsV $ updB arr i' e')
              (Just (ArrayV xs), IntV i', e') -> do
                  let f _ [] = error "array update out of bounds"
@@ -282,7 +282,7 @@ evalE (AccessE a i) = do
                IntV iv -> iv
     case a' of
         BitsV av -> do
-          assert (idx < width av)
+          assert (idx < length av)
           return (BitV (av `accessB` idx))
         ArrayV xs -> do
           assert (idx < length xs)

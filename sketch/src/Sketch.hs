@@ -53,14 +53,14 @@ data Value =
 arrayV :: [Value] -> Value
 arrayV xs =
   case xs of
-    (BitV {} : _) -> BitsV (mkbits [v | BitV v <- xs])
+    (BitV {} : _) -> BitsV [v | BitV v <- xs]
     _ -> ArrayV xs
 
 typeofV :: Value -> Type
 typeofV (ArrayV []) = UnknownT
 typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
 typeofV (BitV {}) = BitT
-typeofV (BitsV b) = ArrT BitT (ValE (IntV $ width b))
+typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
 typeofV (IntV v) = UnknownT -- could be any integer literal
 typeofV (FunV f) = UnknownT
 

@@ -5,7 +5,6 @@ module Bits (
     andB, orB, notB, accessB, valB, updB, bulkupdB, intB, addB, subB,
     ltB, gtB, leB, geB, eqB, neqB,
     shlB, shrB, xor, xorB, castB, extractB,
-    mkbits, bits, width,
     freeBits,
     ) where
 
@@ -13,40 +12,24 @@ import Smten.Prelude
 import Smten.Symbolic
 
 type Bit = Bool
+type Bits = [Bit] -- head is the least significant bit
 
-data Bits = Bits {
-    bits :: [Bit]  -- head is the least significant bit
-}
-
-width :: Bits -> Int
-width (Bits bs) = length bs
-
-mkbits :: [Bit] -> Bits
-mkbits = Bits
-
-instance Eq Bits where
-    (==) a b = bits a == bits b
-
-instance Show Bits where
-    show (Bits b) = "Bits " ++ show b
-
--- TOOD: pad zeros to the lsbs or msbs?
 padto :: Bits -> Int -> [Bit]
-padto (Bits bs) w = take w (bs ++ repeat False)
+padto bs w = take w (bs ++ repeat False)
 
 andB :: Bits -> Bits -> Bits
 andB a b = 
-  let nw = max (width a) (width b)
+  let nw = max (length a) (length b)
       a' = padto a nw
       b' = padto b nw
-  in Bits (zipWith (&&) a' b')
+  in zipWith (&&) a' b'
 
 orB :: Bits -> Bits -> Bits
 orB a b = 
-  let nw = max (width a) (width b)
+  let nw = max (length a) (length b)
       a' = padto a nw
       b' = padto b nw
-  in Bits (zipWith (||) a' b')
+  in zipWith (||) a' b'
 
 ltB :: Bits -> Bits -> Bit
 ltB a b = isneg (a `subB` b)
@@ -61,24 +44,24 @@ geB :: Bits -> Bits -> Bit
 geB a b = not (ltB a b)
 
 eqB :: Bits -> Bits -> Bit
-eqB a b = and $ zipWith (==) (bits a) (bits b)
+eqB a b = and $ zipWith (==) a b
 
 neqB :: Bits -> Bits -> Bit
 neqB a b = not (eqB a b)
 
 notB :: Bits -> Bits 
-notB (Bits bs) = Bits (map not bs)
+notB = map not
 
 -- Right shift removes the least significant bits
 shrB :: Bits -> Int -> Bits
-shrB (Bits a) b = Bits (drop b a ++ replicate b False)
+shrB a b = drop b a ++ replicate b False
 
 -- Left shift removes the most significant bits
 shlB :: Bits -> Int -> Bits
-shlB (Bits a) b = Bits (take (length a) $ replicate b False ++ a)
+shlB a b = take (length a) $ replicate b False ++ a
 
 accessB :: Bits -> Int -> Bit
-accessB (Bits bs) i = bs !! i
+accessB bs i = bs !! i
 
 -- freeBits w n
 -- Construct a symbolic bit vector
@@ -88,39 +71,32 @@ freeBits :: Int -> Int -> Symbolic Bits
 freeBits w n = do
   let n' = min n w
   vals <- sequence $ replicate n' free
-  return $ Bits (vals ++ replicate (w - n') False)
+  return $ vals ++ replicate (w - n') False
 
 valB :: Bits -> Int
-valB (Bits vals) = 
-  let f :: [Bit] -> Int
-      f [] = 0
-      f (True:xs) = 1 + 2 * (f xs)
-      f (False:xs) = 0 + 2 * (f xs)
-  in f vals
+valB [] = 0
+valB (True:xs) = 1 + 2 * (valB xs)
+valB (False:xs) = 0 + 2 * (valB xs)
 
 updB :: Bits -> Int -> Bit -> Bits
-updB (Bits vals) i v =
-  let f _ [] = error "updB: update out of bounds"
-      f 0 (x:xs) = v:xs
-      f n (x:xs) = x : f (n-1) xs
-  in Bits (f i vals)
+updB [] _ _ = error "updB: update out of bounds"
+updB (x:xs) 0 v = v : xs
+updB (x:xs) n v = x : updB xs (n-1) v
 
 -- Do a bulk update of bits starting at the given index.
 bulkupdB :: Bits -> Int -> Bits -> Bits
-bulkupdB (Bits vals) i (Bits vals') =
+bulkupdB vals i vals' =
   let lo = take i vals
       mid = vals'
       hi = drop (i + length vals') vals
-  in Bits $ concat [lo, mid, hi]
+  in concat [lo, mid, hi]
 
 -- Create a bit array from an Int
 -- Least significant bit is first.
 intB :: Int -> Int -> Bits
-intB w x = 
-  let f 0 _ = []
-      f w v = case v `quotRem` 2 of
-               (v2, b) -> (b == 1) : f (w-1) v2
-  in Bits (f w x)
+intB 0 _ = []
+intB w v = case v `quotRem` 2 of
+               (v2, b) -> (b == 1) : intB (w-1) v2
 
 xor :: Bit -> Bit -> Bit
 xor True True = False
@@ -130,24 +106,24 @@ xor False False = False
 
 xorB :: Bits -> Bits -> Bits
 xorB a b = 
-  let nw = max (width a) (width b)
+  let nw = max (length a) (length b)
       a' = padto a nw
       b' = padto b nw
-  in Bits (zipWith xor a' b')
+  in zipWith xor a' b'
 
 addB :: Bits -> Bits -> Bits
 addB a b = 
-  let nw = max (width a) (width b)
+  let nw = max (length a) (length b)
       a' = padto a nw
       b' = padto b nw
-  in Bits (add False a' b')
+  in add False a' b'
 
 subB :: Bits -> Bits -> Bits
 subB a b = 
-  let nw = max (width a) (width b)
+  let nw = max (length a) (length b)
       a' = padto a nw
       b' = padto b nw
-  in Bits (add True a' (map not b'))
+  in add True a' (map not b')
 
 add :: Bit -> [Bit] -> [Bit] -> [Bit]
 add _ [] [] = []
@@ -157,15 +133,15 @@ add c (a:as) (b:bs) =
  in z : (add c' as bs)
 
 isneg :: Bits -> Bit
-isneg (Bits bs) = last bs
+isneg bs = last bs
 
 -- | Cast a bit vector to the given width.
 -- Truncates if the width is smaller than the bit vector width.
 -- Appends 0 bits if the width is greater than the bit vector width.
 castB :: Int -> Bits -> Bits
-castB nw (Bits bs) = Bits (take nw (bs ++ repeat False))
+castB nw bs = take nw (bs ++ repeat False)
 
 -- extractB bits lo hi
 extractB :: Bits -> Int -> Int -> Bits
-extractB (Bits bs) lo hi = Bits (drop lo (take hi bs))
+extractB bs lo hi = drop lo (take hi bs)
 
