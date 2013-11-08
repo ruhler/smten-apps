@@ -15,16 +15,15 @@ PRAGMA
     6. Parse pragma
 
 BULK_ARRAY_EVAL
-  * evaluate (statically) as necessary to determine bulk array bounds.
+  * Support dynamic BULK_ARRAY bounds
 
-POOR_TYPE_BULK_ASSIGN
-  * support something like: out[36::92] = (bit[92]) in;
+BULK_ASSIGN_BUG
+  * Bulk assignment: foo[x::M]
+        x is the starting index
+        M is the width, not the ending index!
 
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
-
-BULK_ASSIGN_BUG
-  * there must be a bug in bulk assignment, because it doesn't work right.
 
 AMBIGUOUS_INT_LITERAL
   * (0 == 0), the type of the integer literal is ambiguous.
@@ -44,7 +43,7 @@ miniTest54.sk: PRAGMA
 miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
-miniTest71.sk: POOR_TYPE_BULK_ASSIGN
+miniTest71.sk: BULK_ASSIGN_BUG
 miniTest72.sk: BULK_ASSIGN_BUG
 miniTest73.sk: BULK_ASSIGN_BUG
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
