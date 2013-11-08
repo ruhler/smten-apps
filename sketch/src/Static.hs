@@ -23,7 +23,7 @@ import Sketch
 static :: ProgEnv -> Prog
 static p = do
   let readed = runReaderT (mapM staticM (declsof p)) (SR p (error "no top level output type"))
-  evalState readed (SS (error "TODO: static with global tyenv"))
+  evalState readed (SS Map.empty)
 
 type TypeEnv = Map.Map Name Type
 
@@ -134,7 +134,7 @@ instance Static Expr where
      UnknownT -> staticE e
      _ | src == dst -> staticE e
        | src `subtype` dst -> ICastE src dst <$> (withty src $ staticE e)
-       | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src
+       | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
 staticE :: Expr -> SM Expr
 staticE (AndE a b) = bitwiseop AndE "and" a b
@@ -193,8 +193,19 @@ staticE x@(VarE nm) = do
   oty <- asks sr_oty
   ty <- typeof x
   if (ty == oty)
-    then return x
+    then return ()
     else error $ "expected type " ++ show oty ++ " but " ++ show nm ++ " has type " ++ show ty
+
+  -- See if we know the value statically.
+  -- TODO: This is a hack. We should have a better way of performing static
+  -- evaluation.
+  env <- asks sr_env
+  tyenv <- gets ss_tyenv
+  case Map.lookup nm tyenv of
+      Just {} -> return x
+      Nothing -> case Map.lookup nm env of    
+                    Just (VarD _ _ e) -> staticM e
+                    _ -> return x
 
 staticE (AccessE a b) = do
   oty <- asks sr_oty
@@ -212,7 +223,7 @@ staticE (BulkAccessE x lo w) = do
   -- We don't know the width of the array x, so we must try to infer it.
   tarr <- typeof x
   w' <- withty IntT $ staticM w
-  case (oty, tarr, w) of
+  case (oty, tarr, w') of
     (ArrT ta (ValE (IntV wdst)),
      ArrT tb (ValE (IntV wsrc)),
      ValE (IntV wv))
@@ -224,7 +235,7 @@ staticE (BulkAccessE x lo w) = do
       | otherwise -> error $ "[002]expected type " ++ show oty
                              ++ " but found type: " ++ show tarr
     (_, ArrT {}, ValE (IntV {})) -> error $ "could not determine array width statically: " ++ show tarr
-    (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w
+    (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w'
     _ -> error $ "expected array type, but found type: " ++ show tarr
 
 staticE (CastE t e) = do

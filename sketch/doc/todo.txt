@@ -7,8 +7,8 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-BULK_ARRAY_EVAL
-  * Support dynamic BULK_ARRAY bounds
+STATIC_MUL
+  * evaluate x * y statically if x and y are known statically.
 
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
@@ -33,6 +33,18 @@ ICAST_BITS_TO_INTS
     the width of the array.
    We may want to right a recursive procedure for this.
 
+BIT_INT_UNIFY_BUG
+  There appears to be some bug in unification of bit and int types.
+  I'm not sure what's going on.
+
+OUT_OF_BOUNDS_ACCESS
+  * looks like an out of bounds array access.
+    I suspect: we need a dynamic assertion for bulk array update bounds
+        (see TODO in code)
+
+STRUCT_TYPES
+  * support struct types.
+
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
@@ -46,23 +58,25 @@ miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest50.sk: FAIL_LAZY
 miniTest54.sk: INT_SHIFTL
-miniTest60.sk: BULK_ARRAY_EVAL
-miniTest62.sk: BULK_ARRAY_EVAL
-miniTest68.sk: BULK_ARRAY_EVAL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest82.sk: BULK_ARRAY_EVAL
-miniTest83.sk: BULK_ARRAY_EVAL
-miniTest84.sk: BULK_ARRAY_EVAL
-miniTest86.sk: BULK_ARRAY_EVAL
-miniTest86.sk: BULK_ARRAY_EVAL
+miniTest83.sk: STATIC_MUL
+miniTest84.sk: STATIC_MUL
+miniTest86.sk: OUT_OF_BOUNDS_ACCESS
 miniTest89.sk: SLOW? (quadratic in int space?)
-miniTest92.sk: BULK_ARRAY_EVAL
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
 miniTestb102.sk: ARRAY_ACCESS_BUG
 miniTestb103.sk: SLOW? Not sure why
+miniTestb104.sk: ICAST_BITS_TO_INTS
+miniTestb107.sk: ICAST_BITS_TO_INTS
+miniTestb108.sk: BIT_INT_UNIFY_BUG
+miniTestb109.sk: BIT_INT_UNIFY_BUG
+miniTestb110.sk: BIT_INT_UNIFY_BUG
+minitestb111.sk: STRUCT_TYPES
 
 Pretty Print::
+* in type errors: pretty print types, don't just "show" them
+* is it safe to print bit as 'true' and 'false'? What if they are used as int?
 * don't need parens around integer literals
 * for loop init and incr don't print properly
 
