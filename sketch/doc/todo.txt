@@ -28,11 +28,18 @@ POOR_TYPE_BIT_LITERAL
 AMBIGUOUS_INT_LITERAL
   * (0 == 0), the type of the integer literal is ambiguous.
 
+UNINTERPRETED_FUNCTION
+  * Support: int moo(int x);   at top level.
+
+EMPTY_BLOCK
+  * Support parsing of the statement { }.
+
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
     error. (except, this doesn't seem to have actually fixed it...)
     Or by: in the threaded runtime, it should just work hopefully.
+  
 
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
@@ -44,8 +51,6 @@ miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
 miniTest71.sk: BULK_ASSIGN_BUG
-miniTest72.sk: BULK_ASSIGN_BUG
-miniTest73.sk: BULK_ASSIGN_BUG
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest82.sk: BULK_ARRAY_EVAL
 miniTest83.sk: BULK_ARRAY_EVAL
@@ -55,6 +60,8 @@ miniTest86.sk: BULK_ARRAY_EVAL
 miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest91.sk: AMBIGUOUS_INT_LITERAL
 miniTest92.sk: PRAGMA
+miniTest93.sk: UNINTERPRETED_FUNCTION
+miniTest95.sk: EMPTY_BLOCK
 
 Pretty Print::
 * for loop init and incr don't print properly

@@ -281,13 +281,19 @@ evalE (AccessE a i) = do
         ArrayV xs -> do
           assert (idx < length xs)
           return (xs !! idx)
-evalE (BulkAccessE a lo hi) = do
+evalE (BulkAccessE a lo w) = do
     a' <- evalE a
     IntV lo' <- evalE lo
-    IntV hi' <- evalE hi
+    IntV w' <- evalE w
     case a' of
-        BitsV xs -> return (BitsV (drop lo' (take hi' xs)))
-        ArrayV xs -> return (ArrayV (drop lo' (take hi' xs)))
+        BitsV xs -> do
+          let xs' = drop lo' xs
+          assert (lo' >= 0 && w' <= length xs')
+          return (BitsV (take w' xs'))
+        ArrayV xs -> do
+          let xs' = drop lo' xs
+          assert (lo' >= 0 && w' <= length xs')
+          return (ArrayV (take w' xs'))
 evalE (CastE t e) = do
     e' <- evalE e
     case (t, e') of

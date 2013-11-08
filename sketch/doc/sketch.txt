@@ -118,6 +118,11 @@ Expressions
          if there is any input that will cause the assertion to fail."
         (I'm not sure what that means though)
 
+    <expr> [<expr>::<expr>]
+        ex: foo[lo::width]
+        Bulk array access. Return an array of width elements taken starting
+        from the index lo of the given array.
+
     {<expr>, <expr>, ..., <expr>}
         Array literal.
 
@@ -174,8 +179,8 @@ Statements
       where lval can be:    <name>          - update the variable
                      or:    <name>[<expr>]  - update a specific array element
                      or:    <name>[<expr>::<expr>]
-                                - update the range from lo to hi index of the
-                                  given array.
+                                - update width bits starting at lo index of
+                                  the given array, with [lo::width]
 
     if (<expr>) <stmt>  [else <stmt>]
       - evaluate the condition. If it is true, evaluate the statement,
