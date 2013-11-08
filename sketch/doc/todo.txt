@@ -62,10 +62,6 @@ Pretty Print::
 Options::
 * Understand what they are, what they are called, and what they really do
 
-Cleanup::
-* Many bits array operations don't depend on the width, can we 
-  share these implementations with the array operations?
-
 Refactor Ideas::
 * Do more stuff in Static pass
     * Loops can be unrolled properly if bounds known statically.

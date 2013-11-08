@@ -2,10 +2,12 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Bits (
     Bit, Bits,
-    andB, orB, notB, accessB, valB, updB, bulkupdB, intB, addB, subB,
-    ltB, gtB, leB, geB, eqB, neqB,
-    shlB, shrB, xor, xorB, castB, extractB,
+    xor,
     freeBits,
+    andB, orB, notB, xorB,
+    valB, intB, addB, subB,
+    ltB, gtB, leB, geB,
+    shlB, shrB,
     ) where
 
 import Smten.Prelude
@@ -35,12 +37,6 @@ gtB a b = isneg (b `subB` a)
 geB :: Bits -> Bits -> Bit
 geB a b = not (ltB a b)
 
-eqB :: Bits -> Bits -> Bit
-eqB a b = and $ zipWith (==) a b
-
-neqB :: Bits -> Bits -> Bit
-neqB a b = not (eqB a b)
-
 notB :: Bits -> Bits 
 notB = map not
 
@@ -51,9 +47,6 @@ shrB a b = drop b a ++ replicate b False
 -- Left shift removes the most significant bits
 shlB :: Bits -> Int -> Bits
 shlB a b = take (length a) $ replicate b False ++ a
-
-accessB :: Bits -> Int -> Bit
-accessB bs i = bs !! i
 
 -- freeBits w n
 -- Construct a symbolic bit vector
@@ -69,19 +62,6 @@ valB :: Bits -> Int
 valB [] = 0
 valB (True:xs) = 1 + 2 * (valB xs)
 valB (False:xs) = 0 + 2 * (valB xs)
-
-updB :: Bits -> Int -> Bit -> Bits
-updB [] _ _ = error "updB: update out of bounds"
-updB (x:xs) 0 v = v : xs
-updB (x:xs) n v = x : updB xs (n-1) v
-
--- Do a bulk update of bits starting at the given index.
-bulkupdB :: Bits -> Int -> Bits -> Bits
-bulkupdB vals i vals' =
-  let lo = take i vals
-      mid = vals'
-      hi = drop (i + length vals') vals
-  in concat [lo, mid, hi]
 
 -- Create a bit array from an Int
 -- Least significant bit is first.
@@ -114,14 +94,4 @@ add c (a:as) (b:bs) =
 
 isneg :: Bits -> Bit
 isneg bs = last bs
-
--- | Cast a bit vector to the given width.
--- Truncates if the width is smaller than the bit vector width.
--- Appends 0 bits if the width is greater than the bit vector width.
-castB :: Int -> Bits -> Bits
-castB nw bs = take nw (bs ++ repeat False)
-
--- extractB bits lo hi
-extractB :: Bits -> Int -> Int -> Bits
-extractB bs lo hi = drop lo (take hi bs)
 

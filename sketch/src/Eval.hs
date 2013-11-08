@@ -110,15 +110,12 @@ evalS (ArrUpdateS nm i e) = do
   ir <- evalE i
   er <- evalE e
   arr' <- case (Map.lookup nm env, ir, er) of
-             (Just (BitsV arr), IntV i', BitV e') -> do
-                assert (i' < length arr)
-                return (BitsV $ updB arr i' e')
+             (Just (BitsV xs), IntV i', BitV e') -> do
+                assert (i' < length xs)
+                return (BitsV $ arrupd xs i' e')
              (Just (ArrayV xs), IntV i', e') -> do
-                 let f _ [] = error "array update out of bounds"
-                     f 0 (v:vs) = e':vs
-                     f n (v:vs) = v : f (n-1) vs
                  assert (i' < length xs)
-                 return (ArrayV $ f i' xs)
+                 return (ArrayV $ arrupd xs i' e')
              (Just v, _, _) -> error $ "array update into non-array: " ++ show v
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
@@ -129,13 +126,10 @@ evalS (ArrBulkUpdateS nm lo hi e) = do
   hir <- evalE hi
   er <- evalE e
   arr' <- case (Map.lookup nm env, lor, hir, er) of
-             (Just (BitsV arr), IntV lo', IntV hi', BitsV xs) -> do
-                return (BitsV $ bulkupdB arr lo' xs)
+             (Just (BitsV xs), IntV lo', IntV hi', BitsV xs') -> do
+                return (BitsV $ arrbulkupd xs lo' xs')
              (Just (ArrayV xs), IntV lo', IntV hi', ArrayV xs') -> do
-                 let lo = take lo' xs
-                     mid = xs'
-                     hi = drop (lo' + length xs') xs
-                 return (ArrayV $ concat [lo, mid, hi])
+                return (ArrayV $ arrbulkupd xs lo' xs')
              (Just v, _, _, _) -> error $ "array update into non-array: " ++ show v
              (Nothing, _, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
@@ -200,7 +194,7 @@ evalE (EqE a b) = do
     b' <- evalE b
     case (a', b') of
       (BitV av, BitV bv) -> return $ BitV (av == bv)
-      (BitsV av, BitsV bv) -> return $ BitV (av `eqB` bv)
+      (BitsV av, BitsV bv) -> return $ BitV (av == bv)
       (IntV av, IntV bv) -> return $ BitV (av == bv)
       _ -> error $ "unexpected args to EqE: " ++ show (a', b')
 evalE (NeqE a b) = do
@@ -208,7 +202,7 @@ evalE (NeqE a b) = do
     b' <- evalE b
     case (a', b') of
       (BitV av, BitV bv) -> return $ BitV (av /= bv)
-      (BitsV av, BitsV bv) -> return $ BitV (av `neqB` bv)
+      (BitsV av, BitsV bv) -> return $ BitV (av /= bv)
       (IntV av, IntV bv) -> return $ BitV (av /= bv)
       _ -> error $ "unexpected args to NeqE: " ++ show (a', b')
 evalE (ArrayE xs) = arrayV <$> mapM evalE xs
@@ -283,7 +277,7 @@ evalE (AccessE a i) = do
     case a' of
         BitsV av -> do
           assert (idx < length av)
-          return (BitV (av `accessB` idx))
+          return (BitV (av !! idx))
         ArrayV xs -> do
           assert (idx < length xs)
           return (xs !! idx)
@@ -292,13 +286,13 @@ evalE (BulkAccessE a lo hi) = do
     IntV lo' <- evalE lo
     IntV hi' <- evalE hi
     case a' of
-        BitsV av -> return (BitsV (extractB av lo' hi'))
+        BitsV xs -> return (BitsV (drop lo' (take hi' xs)))
         ArrayV xs -> return (ArrayV (drop lo' (take hi' xs)))
 evalE (CastE t e) = do
     e' <- evalE e
     case (t, e') of
         (IntT, BitsV v) -> return (IntV (valB v))
-        (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
+        (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
         (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE (ICastE src dst e) = do
@@ -306,7 +300,7 @@ evalE (ICastE src dst e) = do
     case (dst, e') of
        (IntT, BitV False) -> return $ IntV 0
        (IntT, BitV True) -> return $ IntV 1
-       (ArrT BitT (ValE (IntV w)), BitsV v) -> return (BitsV (castB w v))
+       (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
        _ | dimension dst > dimension (typeofV e') -> do
            evalE (ICastE src dst (ArrayE [ValE e']))
        (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
@@ -323,4 +317,18 @@ dimension BitT = 1
 dimension (ArrT t _) = 1 + dimension t
 dimension IntT = 1
 dimension (FunT {}) = 1
+
+-- Update the ith element of an array
+arrupd :: [a] -> Int -> a -> [a]
+arrupd [] _ _ = error "arrupd: update out of bounds"
+arrupd (x:xs) 0 v = v : xs
+arrupd (x:xs) n v = x : arrupd xs (n-1) v
+
+-- Do a bulk update starting at the given index.
+arrbulkupd :: [a] -> Int -> [a] -> [a]
+arrbulkupd vals i vals' =
+  let lo = take i vals
+      mid = vals'
+      hi = drop (i + length vals') vals
+  in concat [lo, mid, hi]
 
