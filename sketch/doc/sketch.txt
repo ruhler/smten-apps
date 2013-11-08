@@ -80,6 +80,9 @@ Expressions
     <expr> * <expr>
         Multiplication. Works on int. Does not work on bit or bit[].
 
+    - <expr>
+        Unary minus. Works on int.
+
     <expr> % <expr>
         Modulo operator. Works on int.
 

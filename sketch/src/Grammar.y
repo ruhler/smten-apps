@@ -167,6 +167,7 @@ expr :: { Expr }
  | expr '!=' expr   { NeqE $1 $3 }
  | expr '+' expr    { AddE $1 $3 }
  | expr '-' expr    { SubE $1 $3 }
+ | '-' expr         { SubE (ValE (IntV 0)) $2 }
  | expr '*' expr    { MulE $1 $3 }
  | expr '%' expr    { ModE $1 $3 }
  | expr '/' expr    { DivE $1 $3 }

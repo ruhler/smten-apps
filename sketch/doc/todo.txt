@@ -23,11 +23,11 @@ POOR_TYPE_BIT_LITERAL
 AMBIGUOUS_INT_LITERAL
   * (0 == 0), the type of the integer literal is ambiguous.
 
-UNARY_MINUS
-  * support the unary minus operator
-
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
+
+UNIFY_INT_BIT
+  * int and bit should unify to int.
 
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
@@ -55,10 +55,11 @@ miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest91.sk: AMBIGUOUS_INT_LITERAL
 miniTest92.sk: PRAGMA
 miniTest93.sk: UNINTERPRETED_FUNCTION
-miniTest96.sk: UNARY_MINUS
-miniTest97.sk: UNARY_MINUS
+miniTestb100.sk: UNIFY_INT_BIT
+miniTestb101.sk: UNINTERPRETED_FUNCTION
 
 Pretty Print::
+* don't need parens around integer literals
 * for loop init and incr don't print properly
 
 Options::
