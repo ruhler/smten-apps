@@ -26,7 +26,9 @@ data Token =
   | TkDoubleColon | TkColon
   | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse
+  | TkPragma | TkOptions
   | TkID String
+  | TkString String
   | TkInteger Int
   | TkEOF
 
@@ -108,7 +110,9 @@ keywords = [
     ("false", TkFalse),
     ("repeat", TkRepeat),
     ("for", TkFor),
-    ("while", TkWhile)
+    ("while", TkWhile),
+    ("pragma", TkPragma),
+    ("options", TkOptions)
   ]
 
 isIDChar :: Char -> Bool
@@ -138,6 +142,8 @@ lex = do
       (c:cs) | isDigit c ->
          let (ns, rest) = span isDigit cs
          in put rest >> return (TkInteger . read $ c:ns)
+      ('"':cs) | (ns, '"':rest) <- break (== '"') cs ->
+         put rest >> return (TkString ns)
       cs -> failE $ "fail to lex: " ++ cs
 
 -- Get all the remaining tokens.

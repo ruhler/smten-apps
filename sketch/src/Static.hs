@@ -223,6 +223,8 @@ staticE (BulkAccessE x lo w) = do
       | ta == tb -> error $ "bulk array access out of bounds"
       | otherwise -> error $ "expected type " ++ show oty
                              ++ " but found type: " ++ show tarr
+    (_, ArrT {}, ValE (IntV {})) -> error $ "could not determine array width statically: " ++ show tarr
+    (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w
     _ -> error $ "expected array type, but found type: " ++ show tarr
 
 staticE (CastE t e) = do

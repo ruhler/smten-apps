@@ -70,8 +70,11 @@ import Sketch
     'generator'{ TkGenerator }
     'true'  { TkTrue }
     'false' { TkFalse }
+    'pragma' { TkPragma }
+    'options' { TkOptions }
     id      { TkID $$ }
     integer { TkInteger $$ }
+    string { TkString $$ }
 
 %left '||'
 %left '&&'
@@ -89,6 +92,7 @@ import Sketch
 
 sketch :: { Prog }
  : decl         { [$1] }
+ | 'pragma' 'options' string ';' { [] } -- TODO: don't ignore pragmas
  | sketch decl   { $2 : $1 }
 
 decl :: { Decl }

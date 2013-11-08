@@ -33,6 +33,10 @@ ARRAY_ACCESS_BUG
   * array access is encountering a non-array thing
     Why isn't this caught by static typing?
 
+INT_SHIFTL
+  * Support: int exp = 1 << (K*2)
+        for K int
+
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
@@ -43,9 +47,8 @@ FAIL_LAZY
 Features needed, by test case::
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
-miniTest49.sk: PRAGMA
 miniTest50.sk: FAIL_LAZY
-miniTest54.sk: PRAGMA
+miniTest54.sk: INT_SHIFTL
 miniTest60.sk: BULK_ARRAY_EVAL
 miniTest62.sk: BULK_ARRAY_EVAL
 miniTest68.sk: BULK_ARRAY_EVAL
@@ -57,10 +60,11 @@ miniTest86.sk: BULK_ARRAY_EVAL
 miniTest86.sk: BULK_ARRAY_EVAL
 miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest91.sk: AMBIGUOUS_INT_LITERAL
-miniTest92.sk: PRAGMA
+miniTest92.sk: BULK_ARRAY_EVAL
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
 miniTestb102.sk: ARRAY_ACCESS_BUG
+miniTestb103.sk: SLOW? Not sure why
 
 Pretty Print::
 * don't need parens around integer literals
