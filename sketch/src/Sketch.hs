@@ -7,7 +7,7 @@ module Sketch (
     FunctionInput, ProgramInput,
     Options(..), defaultOptions,
     envof, declsof, d_type,
-    blockS, typeofV, arrayV, pad,
+    blockS, typeofV, dimension, arrayV, pad,
     ) where
 
 import Smten.Prelude
@@ -61,9 +61,16 @@ typeofV (ArrayV []) = UnknownT
 typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
 typeofV (BitV {}) = BitT
 typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
-typeofV (IntV v) = UnknownT -- could be any integer literal
+typeofV (IntV 0) = BitT     -- it may be a bit literal, so indicate that:
+typeofV (IntV 1) = BitT     --  it will promote to int if needed
+typeofV (IntV w) = IntT
 typeofV (FunV f) = UnknownT
 
+dimension :: Type -> Int
+dimension BitT = 1
+dimension (ArrT t _) = 1 + dimension t
+dimension IntT = 1
+dimension (FunT {}) = 1
 
 
 showsPrecValue :: Int -> Value -> ShowS

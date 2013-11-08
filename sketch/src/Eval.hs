@@ -320,12 +320,6 @@ evalE (AppE f xs) = do
         _ -> error $ "Expected function, but got: " ++ show f'
     
     
-dimension :: Type -> Int
-dimension BitT = 1
-dimension (ArrT t _) = 1 + dimension t
-dimension IntT = 1
-dimension (FunT {}) = 1
-
 -- Update the ith element of an array
 arrupd :: [a] -> Int -> a -> [a]
 arrupd [] _ _ = error "arrupd: update out of bounds"

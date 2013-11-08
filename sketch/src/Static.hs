@@ -134,7 +134,7 @@ instance Static Expr where
      UnknownT -> staticE e
      _ | src == dst -> staticE e
        | src `subtype` dst -> ICastE src dst <$> (withty src $ staticE e)
-       | otherwise -> error $ "expected type " ++ show dst ++ " but found type " ++ show src
+       | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src
 
 staticE :: Expr -> SM Expr
 staticE (AndE a b) = bitwiseop AndE "and" a b
@@ -203,7 +203,7 @@ staticE (AccessE a b) = do
   case tarr of
     ArrT ty _
       | ty == oty -> liftM2 AccessE (withty tarr $ staticM a) (withty IntT $ staticM b)
-      | otherwise -> error $ "expected type " ++ show oty
+      | otherwise -> error $ "[001]expected type " ++ show oty
                              ++ " but found type: " ++ show ty
     _ -> error $ "expected array type, but found type: " ++ show tarr
 
@@ -221,7 +221,7 @@ staticE (BulkAccessE x lo w) = do
            lo' <- withty IntT $ staticM lo
            return $ BulkAccessE x' lo' w'
       | ta == tb -> error $ "bulk array access out of bounds"
-      | otherwise -> error $ "expected type " ++ show oty
+      | otherwise -> error $ "[002]expected type " ++ show oty
                              ++ " but found type: " ++ show tarr
     (_, ArrT {}, ValE (IntV {})) -> error $ "could not determine array width statically: " ++ show tarr
     (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w
@@ -232,7 +232,7 @@ staticE (CastE t e) = do
   t' <- staticM t
   if t' == oty
     then return ()
-    else error $ "expected type " ++ show oty ++ " but found type: " ++ show t
+    else error $ "[003]expected type " ++ show oty ++ " but found type: " ++ show t
   te <- typeof e
   case te of
     UnknownT -> error $ "unable to determine type of cast argument"
@@ -255,7 +255,7 @@ staticE (AppE fnm xs) = do
         FunT foty txs <- staticM $ f_type f
         if oty == foty
            then return ()
-           else error $ "expected type " ++ show oty ++ " but found type: " ++ show foty
+           else error $ "[004]expected type " ++ show oty ++ " but found type: " ++ show foty
 
         if length txs == length xs
            then return ()
@@ -307,13 +307,17 @@ instance Static Value where
 
 -- Try to unify the given types.
 unify :: Type -> Type -> Type
-unify a b | a == b = a
+unify a b
+  | a == b = a
 unify UnknownT b = b
 unify a UnknownT = a
 unify IntT BitT = IntT
 unify BitT IntT = IntT
 unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
   | a == b = ArrT a (ValE (IntV (max wa wb)))
+unify a b
+  | dimension a < dimension b = unify (ArrT a (ValE (IntV 1))) b
+  | dimension a > dimension b = unify a (ArrT b (ValE (IntV 1)))
 unify a b = error $ "unable to unify types: " ++ show (a, b)
 
 
@@ -444,11 +448,11 @@ typeof (AppE nm xs) = do
 -- subtype a b
 --   Test whether the type 'a' is a proper subtype of the type 'b'
 subtype :: Type -> Type -> Bool
-subtype a b | a == b = True
+subtype a b
+  | a == b = True
+  | dimension a < dimension b = subtype (ArrT a (ValE (IntV 1))) b
 subtype BitT IntT = True
 subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
-  | ta == tb && wa < wb = True
-subtype ta (ArrT tb _)
-  | ta == tb = True
+  | ta `subtype` tb && wa < wb = True
 subtype _ _ = False
 
