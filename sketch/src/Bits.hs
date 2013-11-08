@@ -18,18 +18,10 @@ padto :: Bits -> Int -> [Bit]
 padto bs w = take w (bs ++ repeat False)
 
 andB :: Bits -> Bits -> Bits
-andB a b = 
-  let nw = max (length a) (length b)
-      a' = padto a nw
-      b' = padto b nw
-  in zipWith (&&) a' b'
+andB = zipWith (&&)
 
 orB :: Bits -> Bits -> Bits
-orB a b = 
-  let nw = max (length a) (length b)
-      a' = padto a nw
-      b' = padto b nw
-  in zipWith (||) a' b'
+orB = zipWith (||)
 
 ltB :: Bits -> Bits -> Bit
 ltB a b = isneg (a `subB` b)
@@ -105,25 +97,13 @@ xor False True = True
 xor False False = False
 
 xorB :: Bits -> Bits -> Bits
-xorB a b = 
-  let nw = max (length a) (length b)
-      a' = padto a nw
-      b' = padto b nw
-  in zipWith xor a' b'
+xorB = zipWith xor
 
 addB :: Bits -> Bits -> Bits
-addB a b = 
-  let nw = max (length a) (length b)
-      a' = padto a nw
-      b' = padto b nw
-  in add False a' b'
+addB = add False
 
 subB :: Bits -> Bits -> Bits
-subB a b = 
-  let nw = max (length a) (length b)
-      a' = padto a nw
-      b' = padto b nw
-  in add True a' (map not b')
+subB a b = add True a (map not b)
 
 add :: Bit -> [Bit] -> [Bit] -> [Bit]
 add _ [] [] = []
