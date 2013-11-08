@@ -29,6 +29,10 @@ UNINTERPRETED_FUNCTION
 UNIFY_INT_BIT
   * int and bit should unify to int.
 
+ARRAY_ACCESS_BUG
+  * array access is encountering a non-array thing
+    Why isn't this caught by static typing?
+
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
@@ -55,8 +59,8 @@ miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest91.sk: AMBIGUOUS_INT_LITERAL
 miniTest92.sk: PRAGMA
 miniTest93.sk: UNINTERPRETED_FUNCTION
-miniTestb100.sk: UNIFY_INT_BIT
 miniTestb101.sk: UNINTERPRETED_FUNCTION
+miniTestb102.sk: ARRAY_ACCESS_BUG
 
 Pretty Print::
 * don't need parens around integer literals

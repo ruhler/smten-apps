@@ -308,6 +308,8 @@ unify :: Type -> Type -> Type
 unify a b | a == b = a
 unify UnknownT b = b
 unify a UnknownT = a
+unify IntT BitT = IntT
+unify BitT IntT = IntT
 unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
   | a == b = ArrT a (ValE (IntV (max wa wb)))
 unify a b = error $ "unable to unify types: " ++ show (a, b)
