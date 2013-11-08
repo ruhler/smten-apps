@@ -117,8 +117,12 @@ arg :: { (Type, Name) }
  : type id { ($1, $2) }
 
 stmts :: { [Stmt] }
+ : { [] }       -- Empty list is allowed
+ | somestmts { $1 }
+
+somestmts :: { [Stmt] }
  : stmt     { [$1] }
- | stmts stmt { $1  ++ [$2] }
+ | somestmts stmt { $1  ++ [$2] }
 
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }

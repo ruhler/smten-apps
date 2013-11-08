@@ -29,9 +29,6 @@ UNARY_MINUS
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
 
-EMPTY_BLOCK
-  * Support parsing of the statement { }.
-
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
     We could fix this by: explicitly saying rem with 0 as the divider is
@@ -58,8 +55,8 @@ miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest91.sk: AMBIGUOUS_INT_LITERAL
 miniTest92.sk: PRAGMA
 miniTest93.sk: UNINTERPRETED_FUNCTION
-miniTest95.sk: EMPTY_BLOCK
 miniTest96.sk: UNARY_MINUS
+miniTest97.sk: UNARY_MINUS
 
 Pretty Print::
 * for loop init and incr don't print properly
