@@ -57,7 +57,7 @@ arrayV xs =
     _ -> ArrayV xs
 
 typeofV :: Value -> Type
-typeofV (ArrayV []) = UnknownT
+typeofV (ArrayV []) = ArrT UnknownT (ValE (IntV 0))
 typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
 typeofV (BitV {}) = BitT
 typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
@@ -112,7 +112,7 @@ data Expr =
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | BulkAccessE Expr Expr Expr -- ^ foo[lo::N]
  | CastE Type Expr       -- ^ (T) e
- | ICastE Type Type Expr -- ^ implicit cast from src type to dst type
+ | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)
 
 showsPrecExpr :: Int -> Expr -> ShowS

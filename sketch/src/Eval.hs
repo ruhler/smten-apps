@@ -278,10 +278,10 @@ evalE (AccessE a i) = do
                IntV iv -> iv
     case a' of
         BitsV av -> do
-          assert (idx < length av)
+          assert (idx >= 0 && idx < length av)
           return (BitV (av !! idx))
         ArrayV xs -> do
-          assert (idx < length xs)
+          assert (idx >= 0 && idx < length xs)
           return (xs !! idx)
 evalE (BulkAccessE a lo w) = do
     a' <- evalE a
@@ -303,16 +303,7 @@ evalE (CastE t e) = do
         (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
         (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
-evalE (ICastE src dst e) = do
-    e' <- evalE e
-    case (dst, e') of
-       (IntT, BitV False) -> return $ IntV 0
-       (IntT, BitV True) -> return $ IntV 1
-       (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
-       _ | dimension dst > dimension (typeofV e') -> do
-           evalE (ICastE src dst (ArrayE [ValE e']))
-       (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
-       _ -> error $ "TODO: implement implicit cast of " ++ show e' ++ " to " ++ show dst
+evalE (ICastE dst e) = icast dst <$> evalE e
 evalE (AppE f xs) = do
     f' <- evalE (VarE f)
     case f' of
@@ -333,4 +324,16 @@ arrbulkupd vals i vals' =
       mid = vals'
       hi = drop (i + length vals') vals
   in concat [lo, mid, hi]
+
+-- Implicitly cast the given value to the given type.
+icast :: Type -> Value -> Value
+icast dst v
+  | dst == typeofV v = v
+  | dimension dst > dimension (typeofV v) = icast dst (arrayV [v])
+icast IntT (BitV False) = IntV 0
+icast IntT (BitV True) = IntV 1
+icast (ArrT BitT (ValE (IntV w))) (BitsV xs) = BitsV (take w (xs ++ replicate w False))
+icast t@(ArrT {}) (BitsV xs) = icast t (ArrayV (map BitV xs))
+icast (ArrT t (ValE (IntV w))) (ArrayV xs) = ArrayV $ take w (map (icast t) xs ++ replicate w (pad t))
+icast t v = error $ "TODO: implement implicit cast of " ++ show v ++ " to " ++ show t
 

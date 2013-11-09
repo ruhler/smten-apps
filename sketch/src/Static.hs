@@ -133,7 +133,7 @@ instance Static Expr where
     case src of
      UnknownT -> staticE e
      _ | src == dst -> staticE e
-       | src `subtype` dst -> ICastE src dst <$> (withty src $ staticE e)
+       | src `subtype` dst -> ICastE dst <$> (withty src $ staticE e)
        | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
 staticE :: Expr -> SM Expr
@@ -251,12 +251,7 @@ staticE (CastE t e) = do
 
 -- Note: I don't expect this case to happen, because implicit casts are not
 -- introduced before this phase.
-staticE (ICastE src dst e) = do
-  oty <- asks sr_oty
-  if oty == dst
-      then return ()
-      else error $ "destination type of implicit cast is wrong"
-  ICastE src dst <$> (withty src $ staticM e)
+staticE (ICastE {}) = error "implicit cast in static phase"
   
 staticE (AppE fnm xs) = do
   oty <- asks sr_oty

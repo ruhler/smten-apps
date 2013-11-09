@@ -69,7 +69,7 @@ instance Ppr Expr where
    pretty (BulkAccessE a b c)
     = prettya a ++ "[" ++ pretty b ++ "::" ++ pretty c ++ "]"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
-   pretty (ICastE _ _ e) = pretty e
+   pretty (ICastE _ e) = pretty e
    pretty (AppE f xs) =
      let pargs [] = ""
          pargs [x] = pretty x

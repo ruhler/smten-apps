@@ -24,23 +24,24 @@ INT_SHIFTL
   * Support: int exp = 1 << (K*2)
         for K int
 
-ICAST_BITS_TO_INTS
-  * implicit cast should support converting an array of bits to an array of
-    ints. And, more generally, casting each element of an array up, not just
-    the width of the array.
-   We may want to right a recursive procedure for this.
-
 BIT_INT_UNIFY_BUG
   There appears to be some bug in unification of bit and int types.
   I'm not sure what's going on.
 
 OUT_OF_BOUNDS_ACCESS
   * looks like an out of bounds array access.
-    I suspect: we need a dynamic assertion for bulk array update bounds
-        (see TODO in code)
+    Is this another example of FAIL_LAZY? The only place we do !! is in array
+    access, and we have an assertion to avoid issues...
 
 STRUCT_TYPES
   * support struct types.
+
+REORDER
+  * support reorder block
+
+2D_UPDATE
+  * support 2d array update: T[2][1] = 1;
+    And, ideally, any dimension array update.
 
 FAIL_LAZY
   * divide by zero failure is not lazy for rem.
@@ -50,26 +51,26 @@ FAIL_LAZY
   
 
 Features needed, by test case::
-tests/broken/miniTest21.sk: ICAST_BITS_TO_INTS
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest50.sk: FAIL_LAZY
 miniTest54.sk: INT_SHIFTL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest83.sk: ICAST_BITS_TO_INTS
-miniTest84.sk: ICAST_BITS_TO_INTS
+miniTest84.sk: OUT_OF_BOUNDS_ACCESS
 miniTest86.sk: OUT_OF_BOUNDS_ACCESS
 miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
 miniTestb102.sk: ARRAY_ACCESS_BUG
 miniTestb103.sk: SLOW? Not sure why
-miniTestb104.sk: ICAST_BITS_TO_INTS
-miniTestb107.sk: ICAST_BITS_TO_INTS
+miniTestb104.sk: SLOW?
+miniTestb107.sk: SLOW?
 miniTestb108.sk: BIT_INT_UNIFY_BUG
 miniTestb109.sk: BIT_INT_UNIFY_BUG
 miniTestb110.sk: BIT_INT_UNIFY_BUG
-minitestb111.sk: STRUCT_TYPES
+miniTestb111.sk: STRUCT_TYPES
+miniTestb112.sk: REORDER
+miniTestb113.sk: 2D_UPDATE
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
