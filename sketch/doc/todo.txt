@@ -7,9 +7,6 @@ RECURSIVE_GENERATOR
         --bnd-inline-amount. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
-STATIC_MUL
-  * evaluate x * y statically if x and y are known statically.
-
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
 
@@ -59,8 +56,8 @@ miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest50.sk: FAIL_LAZY
 miniTest54.sk: INT_SHIFTL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest83.sk: STATIC_MUL
-miniTest84.sk: STATIC_MUL
+miniTest83.sk: ICAST_BITS_TO_INTS
+miniTest84.sk: ICAST_BITS_TO_INTS
 miniTest86.sk: OUT_OF_BOUNDS_ACCESS
 miniTest89.sk: SLOW? (quadratic in int space?)
 miniTest93.sk: UNINTERPRETED_FUNCTION
@@ -78,7 +75,7 @@ Pretty Print::
 * in type errors: pretty print types, don't just "show" them
 * is it safe to print bit as 'true' and 'false'? What if they are used as int?
 * don't need parens around integer literals
-* for loop init and incr don't print properly
+* 'for loop' init and incr don't print properly
 
 Options:: (like --bnd-ictrl, --bnd-inbits, etc...)
 * Understand what they are, what they are called, and what they really do

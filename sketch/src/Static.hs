@@ -147,7 +147,7 @@ staticE (AddE a b) = do
     _ -> error $ "unsupported type for addition: " ++ show ty
   liftM2 AddE (staticM a) (staticM b)
 
-staticE (SubE a b) = intop SubE "-" a b
+staticE (SubE a b) = intop SubE (-) "-" a b
 staticE (LtE a b) = cmpop LtE "<" a b
 staticE (GtE a b) = cmpop GtE ">" a b
 staticE (LeE a b) = cmpop LeE "<=" a b
@@ -167,9 +167,9 @@ staticE (ArrayE a) = do
       _ -> error $ "expected array type for array expression, but got: " ++ show ty
 
 staticE (XorE a b) = bitwiseop XorE "xor" a b
-staticE (MulE a b) = intop MulE "*" a b
-staticE (ModE a b) = intop ModE "%" a b
-staticE (DivE a b) = intop DivE "/" a b
+staticE (MulE a b) = intop MulE (*) "*" a b
+staticE (ModE a b) = intop ModE rem "%" a b
+staticE (DivE a b) = intop DivE quot "/" a b
 staticE (OrE a b) = bitwiseop OrE "or" a b
 staticE (ShlE a b) = shiftop ShlE "<<" a b
 staticE (ShrE a b) = shiftop ShrE ">>" a b
@@ -383,13 +383,19 @@ bitwiseop f nm a b = do
 -- Typing Rules:
 --   * The return type is int
 --   * The argument types are int
-intop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
-intop f nm a b = do
+intop :: (Expr -> Expr -> Expr)
+         -> (Int -> Int -> Int)
+         -> String -> Expr -> Expr -> SM Expr
+intop mk f nm a b = do
     ty <- asks sr_oty
     case ty of
       IntT -> return ()
       _ -> error $ "unsupported type for operator " ++ nm ++ ": " ++ show ty
-    liftM2 f (staticM a) (staticM b)
+    a' <- staticM a
+    b' <- staticM b
+    case (a', b') of
+       (ValE (IntV av), ValE (IntV bv)) -> return $ ValE (IntV (f av bv))
+       _ -> return $ mk a' b'
 
 -- Shift operators
 -- Typing Rules:
