@@ -24,10 +24,6 @@ INT_SHIFTL
   * Support: int exp = 1 << (K*2)
         for K int
 
-BIT_INT_UNIFY_BUG
-  There appears to be some bug in unification of bit and int types.
-  I'm not sure what's going on.
-
 OUT_OF_BOUNDS_ACCESS
   * looks like an out of bounds array access.
     Is this another example of FAIL_LAZY? The only place we do !! is in array
@@ -65,12 +61,12 @@ miniTestb102.sk: ARRAY_ACCESS_BUG
 miniTestb103.sk: SLOW? Not sure why
 miniTestb104.sk: SLOW?
 miniTestb107.sk: SLOW?
-miniTestb108.sk: BIT_INT_UNIFY_BUG
-miniTestb109.sk: BIT_INT_UNIFY_BUG
-miniTestb110.sk: BIT_INT_UNIFY_BUG
+miniTestb110.sk: SLOW?
 miniTestb111.sk: STRUCT_TYPES
 miniTestb112.sk: REORDER
 miniTestb113.sk: 2D_UPDATE
+miniTestb114.sk: STRUCT_TYPES
+miniTestb116.sk: STRUCT_TYPES
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

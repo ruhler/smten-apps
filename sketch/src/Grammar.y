@@ -76,7 +76,7 @@ import Sketch
     integer { TkInteger $$ }
     string { TkString $$ }
 
-%left '||'
+%left '||' '?'
 %left '&&'
 %left '|'
 %left '^'
