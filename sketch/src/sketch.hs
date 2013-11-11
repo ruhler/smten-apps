@@ -18,20 +18,27 @@ import Synthesis
 usage :: String
 usage = unlines [
     "Usage:",
-    "  sketch FILE [-d debug.dbg]",
+    "  sketch FILE [OPTIONS]",
+    "",
+    " Options:",
+    "    -d FILE            Output debug info to the given file",
+    "    --bnd-cbits N      Set the bnd-cbits value to N",
+    "    --bnd-inbits N     Set the bnd-inbits value to N",
     ""]
 
 data CmdArgs = CmdArgs {
     cmd_err :: Maybe String,
     cmd_file :: Maybe String,
-    cmd_debug :: Maybe String
+    cmd_debug :: Maybe String,
+    cmd_opts :: Options
 }
 
 defargs :: CmdArgs
 defargs = CmdArgs {
     cmd_err = Nothing,
     cmd_file = Nothing,
-    cmd_debug = Nothing
+    cmd_debug = Nothing,
+    cmd_opts = defaultOptions
 }
 
 parseargs :: [String] -> CmdArgs
@@ -39,6 +46,14 @@ parseargs s =
   case s of
     [] -> defargs
     ("-d" : dbg : rest) -> (parseargs rest) { cmd_debug = Just dbg }
+    ("--bnd-cbits" : n : rest) ->
+        let args = parseargs rest
+            opts' = (cmd_opts args) { bnd_cbits = read n }
+        in args { cmd_opts = opts' }
+    ("--bnd-inbits" : n : rest) ->
+        let args = parseargs rest
+            opts' = (cmd_opts args) { bnd_inbits = read n }
+        in args { cmd_opts = opts' }
     (('-':f) : _) -> defargs { cmd_err = Just ("unrecognized flag: " ++ f) }
     (f : rest) -> (parseargs rest) { cmd_file = Just f }
 
@@ -66,7 +81,7 @@ main = do
                Just fnm -> debug fnm yices2
                Nothing -> return yices2
 
-  syn <- runSMT solver (synthesize defaultOptions (envof st))
+  syn <- runSMT solver (synthesize (cmd_opts args) (envof st))
   case syn of
     Nothing -> fail "sketch not satisfiable"
     Just v -> putStrLn (pretty v)

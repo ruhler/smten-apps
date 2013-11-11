@@ -4,7 +4,7 @@ RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
     To deal with this:
         bound number of appearances of a function on the stack to
-        --bnd-inline-amount. Assert no more are needed.
+        --bnd-inline-amnt. Assert no more are needed.
         So, if you exceed the limit, assert false and return error.
 
 POOR_TYPE_BIT_LITERAL
@@ -61,13 +61,13 @@ FAIL_LAZY
 
 PRAGMA::
   Read options from pragmas.
-
-CBITS::
-  Properly support --bnd-cbits option.
-  
+  * Have a Pragma declaration, which is read after parsing, but otherwise
+    ignored. 
+  * change args parser to accept existing args as a baseline, so that we can
+    update the args based on pragma options.
 
 Features needed, by test case::
-broken/cbitsA.smten.sk: CBITS, PRAGMA
+broken/cbitsA.smten.sk: PRAGMA
 miniTest12.sk: RECURSIVE_GENERATOR
 miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
 miniTest50.sk: FAIL_LAZY
