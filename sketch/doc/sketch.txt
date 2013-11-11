@@ -245,3 +245,45 @@ Declarations
     <type> <name> = <expr> ;
         Global variable declaration.
     
+Options
+-------
+  --bnd-arr-size        default: 32
+      The maximum value for an input variable used to determine the size of an
+      array. For example, if the array size is: n*n, and 'n' is an input, then
+      the maximum size considered for the array is the square of the value of
+      bnd-arr-size.
+
+
+  --bnd-cbits           default: 5
+      The default number of bits to use for integer holes
+    Reference:
+        cbitsA.smten.sk
+        expectfail/cbitsB.smten.sk
+        expectfail/cbitsC.smten.sk
+        cbitsD.smten.sk
+        expectfail/cbitsE.smten.sk
+
+  --bnd-inbits          default: 5
+      The number of bits to use for inputs
+
+  --bnd-inline-amnt     default: 5
+      The max number of times a function can appear on the stack during
+      inlining.
+
+  --bnd-unroll-amnt     default: 8
+      The max number of unrollings for loops and repeats if bounds aren't
+      statically known.
+
+
+Sketch Issues
+-------------
+* tests/miniTest49.sk: uses unrecognized option in pragma: "--bnd-intbits 6"
+* tests/miniTest92.sk: uses unrecognized option in pragma: "--bnd-intbits 9"
+* reference guide says --bnd-ctrlbits is the option, but really it's
+  --bnd-cbits
+* tests/miniTest78.sk: has bit N = 5, which is not reported as an error by
+  sketch (but the same thing is reported as an error if not in the global
+  scope)
+
+
+

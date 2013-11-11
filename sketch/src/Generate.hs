@@ -111,7 +111,7 @@ genE (NotE a) = NotE <$> genE a
 genE (CondE p a b) = liftM3 CondE (genE p) (genE a) (genE b)
 genE (HoleE ty mbnd) = do
   opts <- asks gr_opts
-  let bnd = fromMaybe (bnd_ctrlbits opts) mbnd
+  let bnd = fromMaybe (bnd_cbits opts) mbnd
   ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
 genE (BitChooseE ty a b) = do
   -- TODO: use the bit width of a and b, not 32.

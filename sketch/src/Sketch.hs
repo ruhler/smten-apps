@@ -209,13 +209,15 @@ type FunctionInput = [Value]
 type ProgramInput = Map.Map String FunctionInput
 
 data Options = Options {
-  bnd_ctrlbits :: Int,
+  bnd_cbits :: Int,
+  bnd_inbits :: Int,
   bnd_unroll_amnt :: Int
 }
 
 defaultOptions :: Options
 defaultOptions = Options {
-    bnd_ctrlbits = 5,
+    bnd_cbits = 5,
+    bnd_inbits = 5,
     bnd_unroll_amnt = 8
 }
 

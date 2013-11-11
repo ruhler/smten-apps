@@ -1,0 +1,13 @@
+
+// Verify --bnd-ctrlbits is not accepted (even though reference guide says so)
+pragma options "--bnd-ctrlbits 6";
+
+int sketch1(int in) implements spec {
+    int x = ??;
+    return in + x;
+}
+   
+int spec(int in) {
+    return in + 34;
+}
+

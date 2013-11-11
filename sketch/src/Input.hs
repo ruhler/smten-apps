@@ -32,7 +32,7 @@ mkFreeProgramInput opts p = do
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
 mkFreeArgs :: Options -> [Type] -> Symbolic FunctionInput
-mkFreeArgs opts = mapM (mkFreeArg (bnd_ctrlbits opts))
+mkFreeArgs opts = mapM (mkFreeArg (bnd_inbits opts))
 
 -- Given a type, construct a free expression of that type.
 -- Takes a bound on the number of bits used for the expression.

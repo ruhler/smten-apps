@@ -1,0 +1,13 @@
+
+// Verify if you set cbits high enough, it will make a difference.
+pragma options "--bnd-cbits 6";
+
+int sketch1(int in) implements spec {
+    int x = ??;
+    return in + x;
+}
+   
+int spec(int in) {
+    return in + 34;
+}
+
