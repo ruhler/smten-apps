@@ -1,12 +1,12 @@
 
-all: nqueens nqueens_prof
+all: nqueens
 
-nqueens: nqueens.hs
+nqueens: nqueens.hs IntNQueens.hs IntegerNQueens.hs BitNQueens.hs
 	smten --make -O -o nqueens nqueens.hs -rtsopts
 
-nqueens_prof: nqueens.hs
-	smten --make -prof -o nqueens_prof nqueens.hs -rtsopts
+nqueens_prof: nqueens.hs IntNQueens.hs IntegerNQueens.hs BitNQueens.hs
+	smten --make -prof -o nqueens_prof nqueens.hs -rtsopts -fprof-auto-top
 
 clean:
-	rm -rf nqueens *.hi *.smten_hi *.o nqueens_prof nqueens.smten_o Smten
+	rm -rf nqueens *.hi *.smten_hi *.o *.smten_o Smten
 
