@@ -10,6 +10,7 @@ import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2
 import Smten.Symbolic.Solver.STP
+import Smten.Symbolic.Solver.MiniSat
 import Smten.Symbolic.Solver.Z3
 
 import Board
@@ -50,7 +51,13 @@ instance Eq EType where
     (==) _ _ = False
 
 usage :: String
-usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Bit | Enum]"
+usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Bit | Enum] [n]"
+
+lookupn :: [String] -> Maybe Int
+lookupn [] = Nothing
+lookupn (('-':_):_:xs) = lookupn xs
+lookupn (n:_) = Just (read n)
+
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -70,12 +77,13 @@ main = do
                    Just "yices2" -> return yices2
                    Just "stp" -> return stp
                    Just "z3" -> return z3
+                   Just "minisat" -> return minisat
                    Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                    Nothing -> return yices2
 
-  let solver = case lookuparg "-d" args of
-                      Just fn -> debug fn basesolver
-                      Nothing -> basesolver
+  solver <- case lookuparg "-d" args of
+                Just fn -> debug fn basesolver
+                Nothing -> return basesolver
 
   elemtype <- case lookuparg "-e" args of
                Just "Integer" -> return E_Integer
@@ -84,10 +92,15 @@ main = do
                Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
                Nothing -> return E_Bit
 
-  boards <- getContents
+  boardlist <- getContents
+
+  let boards = case lookupn args of
+                 Nothing -> lines boardlist
+                 Just n -> take n (lines boardlist)
+
   let runsolve board = case elemtype of
           E_Integer -> solve_ic solver board
           E_Bit -> solve_bc solver board 
           E_Enum -> solve_ec solver board
-  mapM_ runsolve (lines boards)
+  mapM_ runsolve boards
 
