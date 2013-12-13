@@ -12,6 +12,7 @@ import Smten.Symbolic.Solver.MiniSat
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Z3
 
+import BoolNQueens
 import BitNQueens
 import IntNQueens
 import IntegerNQueens
@@ -19,7 +20,7 @@ import IntegerNQueens
 
 
 usage :: String
-usage = "nqueens [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Int | Bit] <n>"
+usage = "nqueens [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Int | Bit | Bool] <n>"
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -54,6 +55,7 @@ main = do
 
   f <- case lookuparg "-e" args of
          Just "Integer" -> return integer_nqueens
+         Just "Bool" -> return bool_nqueens
          Just "Bit" -> return bit_nqueens
          Just "Int" -> return int_nqueens
          Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
