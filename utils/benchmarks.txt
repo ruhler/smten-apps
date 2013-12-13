@@ -5,13 +5,13 @@ tests/cfg/014.cfg.hmp
 tests/cfg/013.cfg.hmp
 tests/cfg/021.cfg.hmp
 tests/cfg/010.cfg.hmp
+tests/cfg/063.cfg.hmp
 tests/cfg/049.cfg.hmp
 tests/cfg/027.cfg.hmp
 tests/cfg/030.cfg.hmp
 tests/cfg/022.cfg.hmp
 tests/cfg/rna6.cfg.hmp
 tests/cfg/001.cfg.hmp
-tests/cfg/063.cfg.hmp
 tests/cfg/012.cfg.hmp
 tests/cfg/038.cfg.hmp
 tests/size/test_047_AND_049_size5.hmp
@@ -221,6 +221,7 @@ tests/size/test_039_AND_030_size5.hmp
 tests/size/test_java_modifiers_AND_018_size5.hmp
 tests/size/test_025_AND_03_02_124_size5.hmp
 tests/size/test_008_AND_050_size5.hmp
+tests/wsu/testWSU23_0_1.hmp
 tests/wsu/testWSU3_7.hmp
 tests/wsu/testWSU3_5.hmp
 tests/wsu/testWSU3_10.hmp
@@ -314,6 +315,7 @@ tests/cfg2/test_cfg_026.hmp
 tests/cfg2/test_cfg_031.hmp
 tests/cfg2/test_cfg_arithmetic_20.hmp
 tests/cfg2/test_cfg_g4.hmp
+tests/cfg2/test_cfg_g7.hmp
 tests/cfg2/test_cfg_arithmetic2.hmp
 tests/cfg2/test_cfg_05_06_028_20.hmp
 tests/cfg2/test_cfg_082.hmp
@@ -347,8 +349,6 @@ tests/cfg2/test_cfg_001_20.hmp
 tests/cfg2/test_cfg_sml_patterns.hmp
 tests/cfg2/test_cfg_03_02_124.hmp
 tests/cfg2/test_cfg_sml_fvalbind.hmp
-tests/cfg2/test_cfg_g7.hmp
-tests/cfg2/test_cfg_063_20.hmp
 tests/cfg2/test_cfg_030.hmp
 tests/cfg2/test_cfg_03_01_011.hmp
 tests/cfg2/test_cfg_055.hmp
@@ -419,5 +419,6 @@ tests/cfg2/test_cfg_047.hmp
 tests/cfg2/test_cfg_038_10.hmp
 tests/cfg2/test_cfg_007.hmp
 tests/cfg2/test_cfg_012_20.hmp
+tests/cfg2/test_cfg_063_20.hmp
 tests/cfg2/test_cfg_001.hmp
-tests/wsu/testWSU23_0_1.hmp
+

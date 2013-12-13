@@ -65,9 +65,9 @@ main = do
                      Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                      Nothing -> return yices2
 
-    let solver = case lookuparg "-d" args of
-                        Just fn -> debug fn basesolver
-                        Nothing -> basesolver
+    solver <- case lookuparg "-d" args of
+                     Just fn -> debug fn basesolver
+                     Nothing -> return basesolver
 
     elemtype <- case lookuparg "-e" args of
                  Just "Integer" -> return SChar_Integer
@@ -80,7 +80,7 @@ main = do
             putStr (fin ++ ": ")
             input <- readFile fin
 
-            h <- case evalStateT parseHampi input of
+            h <- case {-# SCC "ParseHampi" #-} evalStateT parseHampi input of
                     Left msg -> fail msg
                     Right x -> return x
 
