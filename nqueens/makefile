@@ -17,6 +17,12 @@ boolnqtest: boolnqtest.hs BoolNQueens.hs
 	smten --make -o boolnqtest boolnqtest.hs
 	./boolnqtest
 
+z3nqueens: z3nqueens.c
+	gcc -std=c99 -o $@ $< -lz3
+
+z3txtnqueens: z3txtnqueens.c
+	gcc -std=c99 -o $@ $<
+
 
 
 perf: nqueens
