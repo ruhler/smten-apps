@@ -23,7 +23,11 @@ z3nqueens: z3nqueens.c
 z3txtnqueens: z3txtnqueens.c
 	gcc -std=c99 -o $@ $<
 
+y2.data: y2.tcl
+	tclsh y2.tcl | tee $@
 
+y2.pdf: y2.data y2.style
+	Rscript y2.R
 
 perf: nqueens
 	time -f %E ./nqueens -s yices2 -e Int 24 > /dev/null

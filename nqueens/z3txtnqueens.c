@@ -24,7 +24,7 @@ void genquery(FILE* fout, int n)
     // Assert columns are disjoint
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
-            fprintf(fout, "(assert (distinct q%i q%i))\n", i, j);
+            fprintf(fout, "(assert (not (= q%i q%i)))\n", i, j);
         }
     }
 
@@ -36,7 +36,7 @@ void genquery(FILE* fout, int n)
     // Assert positive diagonals are disjoint
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
-            fprintf(fout, "(assert (distinct p%i p%i))\n", i, j);
+            fprintf(fout, "(assert (not (= p%i p%i)))\n", i, j);
         }
     }
 
@@ -48,7 +48,7 @@ void genquery(FILE* fout, int n)
     // Assert negative diagonals are disjoint
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
-            fprintf(fout, "(assert (distinct n%i n%i))\n", i, j);
+            fprintf(fout, "(assert (not (= n%i n%i)))\n", i, j);
         }
     }
 
