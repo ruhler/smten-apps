@@ -9,6 +9,9 @@ nqueens: nqueens.hs  $(sources)
 nqueens_prof: nqueens.hs $(sources)
 	smten --make -prof -o nqueens_prof nqueens.hs -rtsopts -fprof-auto-top
 
+nqueens_debug: nqueens.hs $(sources)
+	smten --make -debug -o nqueens_debug nqueens.hs -rtsopts
+
 blocktest: blocktest.hs Block.hs
 	smten --make -o blocktest blocktest.hs
 	./blocktest
@@ -23,11 +26,14 @@ z3nqueens: z3nqueens.c
 z3txtnqueens: z3txtnqueens.c
 	gcc -std=c99 -o $@ $<
 
-y2.data: y2.tcl
-	tclsh y2.tcl | tee $@
+%.data: %.tcl
+	tclsh $< | tee $@
 
 y2.pdf: y2.data y2.style
 	Rscript y2.R
+
+y1.pdf: y1.data y1.style
+	Rscript y1.R
 
 perf: nqueens
 	time -f %E ./nqueens -s yices2 -e Int 24 > /dev/null

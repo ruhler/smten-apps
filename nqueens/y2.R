@@ -1,7 +1,7 @@
 
 pdf(file="y2.pdf")
 y2data <- read.table("y2.data", header=TRUE);
-y2style <- read.table("y2.style");
+y2style <- read.table("style.data");
 
 plot(c(),
      xlim=c(0,length(row.names(y2data))), ylim=c(0,max(y2data, na.rm=TRUE)),
