@@ -1,8 +1,10 @@
 
-sudoku: sudoku.hs BitCell.hs Board.hs Cell.hs EnumCell.hs IntegerCell.hs
-	smten --make -o sudoku sudoku.hs
+SOURCES := sudoku.hs BitCell.hs Board.hs Cell.hs EnumCell.hs IntegerCell.hs IntCell.hs
 
-sudoku_prof: sudoku.hs BitCell.hs Board.hs Cell.hs EnumCell.hs IntegerCell.hs
+sudoku: $(SOURCES)
+	smten --make -o sudoku -O sudoku.hs
+
+sudoku_prof: $(SOURCES)
 	smten --make -o sudoku_prof sudoku.hs -prof
 
 perf: sudoku

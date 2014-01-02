@@ -15,7 +15,9 @@ import Smten.Symbolic.Solver.Z3
 import Board
 import Cell
 import IntegerCell
+import IntCell
 import BitCell
+import BitOneHotCell
 import EnumCell
 
 -- solve_xx c slv board
@@ -32,25 +34,8 @@ solve_xx _ slv board = do
         Nothing -> putStrLn "no solution"
         Just b' -> putStrLn $ printBoard b'
 
-solve_ic :: Solver -> String -> IO ()
-solve_ic = solve_xx (undefined :: IntegerCell)
-
-solve_bc :: Solver -> String -> IO ()
-solve_bc = solve_xx (undefined :: BitCell)
-
-solve_ec :: Solver -> String -> IO ()
-solve_ec = solve_xx (undefined :: EnumCell)
-
-data EType = E_Integer | E_Bit | E_Enum
-
-instance Eq EType where
-    (==) E_Integer E_Integer = True
-    (==) E_Bit E_Bit = True
-    (==) E_Enum E_Enum = True
-    (==) _ _ = False
-
 usage :: String
-usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Bit | Enum] [n]"
+usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Int | Bit | BitOneHot | Enum] [n]"
 
 lookupn :: [String] -> Maybe Int
 lookupn [] = Nothing
@@ -84,12 +69,14 @@ main = do
                 Just fn -> debug fn basesolver
                 Nothing -> return basesolver
 
-  elemtype <- case lookuparg "-e" args of
-               Just "Integer" -> return E_Integer
-               Just "Bit" -> return E_Bit
-               Just "Enum" -> return E_Enum
+  solve <- case lookuparg "-e" args of
+               Just "Int" -> return $ solve_xx (undefined :: IntCell)
+               Just "Integer" -> return $ solve_xx (undefined :: IntegerCell)
+               Just "Bit" -> return $ solve_xx (undefined :: BitCell)
+               Just "BitOneHot" -> return $ solve_xx (undefined :: BitOneHotCell)
+               Just "Enum" -> return $ solve_xx (undefined :: EnumCell)
                Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
-               Nothing -> return E_Bit
+               Nothing -> return $ solve_xx (undefined :: BitCell)
 
   boardlist <- getContents
 
@@ -97,9 +84,5 @@ main = do
                  Nothing -> lines boardlist
                  Just n -> take n (lines boardlist)
 
-  let runsolve board = case elemtype of
-          E_Integer -> solve_ic solver board
-          E_Bit -> solve_bc solver board 
-          E_Enum -> solve_ec solver board
-  mapM_ runsolve boards
+  mapM_ (solve solver) boards
 
