@@ -1,6 +1,5 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module EnumCell where
+module EnumCell (EnumCell) where
 
 import Smten.Prelude
 import Smten.Control.Monad
@@ -22,7 +21,7 @@ instance Eq EnumCell where
     (==) _ _ = False
 
 instance Cell EnumCell where
-    mkCell i = [C1, C2, C3, C4, C5, C6, C7, C8, C9] !! (fromInteger $ i-1)
+    mkCell i = [C1, C2, C3, C4, C5, C6, C7, C8, C9] !! (i-1)
 
     deCell C1 = 1
     deCell C2 = 2

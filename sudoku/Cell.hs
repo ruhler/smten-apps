@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Cell where
 
 import Smten.Prelude
@@ -21,8 +20,8 @@ distinct [] = True
 distinct (x:xs) = notElem x xs && distinct xs
 
 class Cell c where
-    mkCell :: Integer -> c
-    deCell :: c -> Integer
+    mkCell :: Int -> c
+    deCell :: c -> Int
     freeCell :: Symbolic c
     distinctCell :: [c] -> Bool
     

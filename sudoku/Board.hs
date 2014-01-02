@@ -1,6 +1,5 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module Board where
+module Board (Board, printBoard, readBoard, isvalid) where
 
 import Smten.Prelude
 import Smten.Symbolic

@@ -1,6 +1,5 @@
 
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
