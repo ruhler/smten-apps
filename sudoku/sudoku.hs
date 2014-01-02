@@ -35,7 +35,7 @@ solve_xx _ slv board = do
         Just b' -> putStrLn $ printBoard b'
 
 usage :: String
-usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Int | Bit | BitOneHot | Enum] [n]"
+usage = "sudoku [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Int | Bit | BitOneHot | Enum] [n]"
 
 lookupn :: [String] -> Maybe Int
 lookupn [] = Nothing
