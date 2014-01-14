@@ -8,6 +8,7 @@ import Smten.Data.Functor((<$>))
 import Smten.Symbolic
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.STP
+import Smten.Symbolic.Solver.MiniSat
 import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2
 import Smten.Symbolic.Solver.Z3
@@ -46,7 +47,7 @@ getfiles (x:xs)
   | otherwise = x:xs
 
 usage :: String
-usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp | z3] [-e Integer | Bit] [FILE]"
+usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Bit] [FILE]"
 
 main :: IO ()
 main = do
@@ -61,6 +62,7 @@ main = do
                      Just "yices1" -> return yices1
                      Just "yices2" -> return yices2
                      Just "stp" -> return stp
+                     Just "minisat" -> return minisat
                      Just "z3" -> return z3
                      Just x -> fail $ "Unknown solver: " ++ x ++ ".\n" ++ usage
                      Nothing -> return yices2
