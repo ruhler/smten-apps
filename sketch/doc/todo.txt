@@ -1,20 +1,5 @@
 
 Features::
-FAIL_LAZY
-  * divide by zero failure is not lazy for rem.
-    We could fix this by: explicitly saying rem with 0 as the divider is
-    error. (except, this doesn't seem to have actually fixed it...)
-    Or by: in the threaded runtime, it should just work hopefully.
-
-  * out of bounds array access is also not lazy.
-
-  The problem is with how the evaluation monad is structured. It doesn't
-  "fail" if an assertion fails. Rather, it marks a flag as false, but
-  continues executing based on the result value. This continued execution
-  causes the result value to be forced, even if the assertion is False.
-
-  To fix it, change the evaluation monad to an error monad.
-
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
     To deal with this:
@@ -71,15 +56,14 @@ PRAGMA::
     update the args based on pragma options.
 
 Features needed, by test case::
-broken/*.sk: FAIL_LAZY
+broken/miniTest48.sk: SLOW?
+broken/miniTest49.sk: SLOW?
+broken/miniTest52.sk: SLOW?
 broken/cbitsA.smten.sk: PRAGMA
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest41.sk: SLOW? (It contains nested repeats of arbitrary depth)
-miniTest50.sk: FAIL_LAZY
 miniTest54.sk: INT_SHIFTL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest84.sk: FAIL_LAZY
-miniTest86.sk: FAIL_LAZY
+miniTest86.sk: SLOW?
 miniTest89.sk: SLOW: takes 20 seconds about
                It most certainly should *not*. Why is it so slow?
                To figure out: make inbits a cmd line arg, and see how it
