@@ -58,14 +58,12 @@ evalS (AssertS p) = {-# SCC "AssertS" #-} do
   p' <- evalE p
   case p' of
     BitV b -> assert b
-    _ -> error $ "expected bit type for assert, but got: " ++ show p'
 evalS (RepeatS n s) = {-# SCC "RepeatS" #-} do
   -- Note: The generator inlines repeats, so we don't expect this case to ever
   -- occur.
   n' <- evalE n
   case n' of
     IntV nv -> mapM_ evalS (replicate nv s)
-    _ -> error $ "expected int type for repeat count, but got: " ++ show n'
 evalS (ForS init cond incr body) = {-# SCC "ForS" #-} do
   evalS init
   evalS $ WhileS cond (blockS [body, incr])
@@ -76,7 +74,6 @@ evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
     BitV True -> do
       evalS s
       evalS w
-    _ -> error $ "expected bit type for while condition, but got: " ++ show c'
 evalS (DeclS ty nm) = {-# SCC "DeclS" #-} do
   v0 <- case ty of
           t@(ArrT {}) -> return $ pad t
@@ -94,10 +91,8 @@ evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
                 assert (i' < length xs)
                 return (BitsV $ arrupd xs i' e')
              (Just (ArrayV xs), IntV i', e') -> do
-                 assert (i' < length xs)
-                 return (ArrayV $ arrupd xs i' e')
-             (Just v, _, _) -> error $ "array update into non-array: " ++ show v
-             (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
+                assert (i' < length xs)
+                return (ArrayV $ arrupd xs i' e')
   insertVar nm arr'
 
 evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
@@ -112,8 +107,6 @@ evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
                 return (BitsV $ arrbulkupd xs lo' xs')
              (Just (ArrayV xs), IntV lo', ArrayV xs') -> do
                 return (ArrayV $ arrbulkupd xs lo' xs')
-             (Just v, _, _) -> error $ "array update into non-array: " ++ show v
-             (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
   insertVar nm arr'
 
 evalS (IfS p a b) = {-# SCC "IfS" #-} do
@@ -121,7 +114,6 @@ evalS (IfS p a b) = {-# SCC "IfS" #-} do
   case p' of
     BitV True -> evalS a
     BitV False -> evalS b
-    _ -> error $ "expected bit type for if condition, but got: " ++ show p'
 evalS (BlockS xs) = {-# SCC "BlockS" #-} mapM_ evalS xs
 
 evalE :: Expr -> EvalM Value
@@ -132,45 +124,38 @@ evalE (AndE a b) = {-# SCC "AndE" #-} do
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `andB` bv)
       (BitV av, BitV bv) -> return $ BitV (av && bv)
-      _ -> error $ "unexpected args to AndE: " ++ show (a', b')
 evalE (AddE a b) = {-# SCC "AddE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `addB` bv)
       (IntV av, IntV bv) -> return $ IntV (av + bv)
-      _ -> error $ "unexpected args to AddE: " ++ show (a', b')
 evalE (SubE a b) = {-# SCC "SubE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `subB` bv)
       (IntV av, IntV bv) -> return $ IntV (av - bv)
-      _ -> error $ "unexpected args to SubE: " ++ show (a', b')
 evalE (LtE a b) = {-# SCC "LtE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av < bv)
-      _ -> error $ "unexpected args to LtE: " ++ show (a', b')
 evalE (GtE a b) = {-# SCC "GtE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av > bv)
-      _ -> error $ "unexpected args to GtE: " ++ show (a', b')
 evalE (LeE a b) = {-# SCC "LeE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av <= bv)
-      _ -> error $ "unexpected args to LeE: " ++ show (a', b')
 evalE (GeE a b) = {-# SCC "GeE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> return $ BitV (av >= bv)
-      _ -> error $ "unexpected args to GeE: " ++ show (a', b')
 evalE (EqE a b) = {-# SCC "EqE" #-} do
     a' <- evalE a
     b' <- evalE b
@@ -178,7 +163,6 @@ evalE (EqE a b) = {-# SCC "EqE" #-} do
       (BitV av, BitV bv) -> return $ BitV (av == bv)
       (BitsV av, BitsV bv) -> return $ BitV (av == bv)
       (IntV av, IntV bv) -> return $ BitV (av == bv)
-      _ -> error $ "unexpected args to EqE: " ++ show (a', b')
 evalE (NeqE a b) = {-# SCC "NeqE" #-} do
     a' <- evalE a
     b' <- evalE b
@@ -186,7 +170,6 @@ evalE (NeqE a b) = {-# SCC "NeqE" #-} do
       (BitV av, BitV bv) -> return $ BitV (av /= bv)
       (BitsV av, BitsV bv) -> return $ BitV (av /= bv)
       (IntV av, IntV bv) -> return $ BitV (av /= bv)
-      _ -> error $ "unexpected args to NeqE: " ++ show (a', b')
 evalE (ArrayE xs) = {-# SCC "ArrayE" #-} arrayV <$> mapM evalE xs
 evalE (OrE a b) = {-# SCC "OrE" #-} do
     a' <- evalE a
@@ -210,7 +193,6 @@ evalE (XorE a b) = {-# SCC "XorE" #-} do
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `xorB` bv)
       (BitV av, BitV bv) -> return $ BitV (av `xor` bv)
-      _ -> error $ "unexpected args to XorE: " ++ show (a', b')
 evalE (MulE a b) = {-# SCC "MulE" #-} do
     a' <- evalE a
     b' <- evalE b
@@ -244,11 +226,9 @@ evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     mval <- lookupVar nm
     mdecl <- lookupDecl nm
-    case mval of
-        Just v -> return v
-        Nothing -> evalE $ case mdecl of
-                            Just d -> d_val d
-                            Nothing -> error $ "Var " ++ nm ++ " not in scope"
+    case (mval, mdecl) of
+        (Just v, _) -> return v
+        (_, Just d) -> evalE (d_val d)
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     a' <- evalE a
     i' <- evalE i
@@ -256,11 +236,10 @@ evalE (AccessE a i) = {-# SCC "AccessE" #-} do
                IntV iv -> iv
     case a' of
         BitsV av -> do
-          if (idx >= 0 && idx < length av)
-            then return (BitV (av !! idx))
-            else assert False >> return (error "outofbounds._|_")
+          assert (idx >= 0 && idx < length av)
+          return (BitV (av !! idx))
         ArrayV xs -> do
-          assert ({-# SCC "ArrayBoundsCheck" #-} idx >= 0 && idx < length xs)
+          assert (idx >= 0 && idx < length xs)
           return (xs !! idx)
 evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
     a' <- evalE a

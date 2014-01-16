@@ -1,13 +1,12 @@
 
 -- A monad used in evaluation.
 module EvalMonad (
-    EvalM, runEvalM, scope, assert,
+    EvalM, runEvalM, scope, assert, efail,
     lookupDecl, lookupVar, insertVar,
     getOutput, setOutput,
  ) where
 
 import Smten.Prelude
-import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 import Sketch
@@ -53,9 +52,13 @@ scope vars x = EvalM $ \e s -> do
   r <- runEvalM_ x e (SS vars (error "EvalM: no output value"))
   return (fst r, s)
 
+-- Evaluation which fails.
+efail :: EvalM a
+efail = EvalM $ \_ _ -> Nothing
+
 assert :: Bool -> EvalM ()
 assert True = return ()
-assert False = EvalM $ \_ _ -> Nothing
+assert False = efail
 
 -- Look for the given declaration in the program environment.
 lookupDecl :: Name -> EvalM (Maybe Decl)
