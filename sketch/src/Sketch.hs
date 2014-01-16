@@ -6,7 +6,7 @@ module Sketch (
     Expr(..), Value(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     Options(..), defaultOptions,
-    envof, declsof, d_type,
+    envof, declsof, d_type, d_val,
     blockS, typeofV, dimension, arrayV, pad,
     ) where
 
@@ -185,6 +185,12 @@ data Decl =
 d_type :: Decl -> Type
 d_type d@(FunD {}) = f_type $ fd_val d
 d_type d@(VarD {}) = vd_ty d
+
+d_val :: Decl -> Expr
+d_val x =
+    case x of
+        VarD {} -> vd_val x
+        FunD {} -> ValE (FunV (fd_val x))
 
 showsPrecDecl :: Int -> Decl -> ShowS
 showsPrecDecl = $(derive_showsPrec ''Decl)

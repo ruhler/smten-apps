@@ -42,7 +42,7 @@ notB = map not
 
 -- Right shift removes the least significant bits
 shrB :: Bits -> Int -> Bits
-shrB a b = drop b a ++ replicate b False
+shrB a b = take (length a) $ drop b a ++ replicate b False
 
 -- Left shift removes the most significant bits
 shlB :: Bits -> Int -> Bits

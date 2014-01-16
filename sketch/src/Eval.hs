@@ -263,14 +263,12 @@ evalE (ShrE a b) = {-# SCC "ShrE" #-} do
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     vars <- gets ss_vars
+    env <- gets ss_env
     case Map.lookup nm vars of
         Just v -> return v
-        Nothing -> do
-            env <- gets ss_env
-            case Map.lookup nm env of
-                Just (VarD _ _ v) -> evalE v
-                Just (FunD _ v _) -> return (FunV v)
-                Nothing -> error $ "Var " ++ nm ++ " not in scope"
+        Nothing -> evalE $ case Map.lookup nm env of
+                            Just d -> d_val d
+                            Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     a' <- evalE a
     i' <- evalE i
@@ -278,8 +276,9 @@ evalE (AccessE a i) = {-# SCC "AccessE" #-} do
                IntV iv -> iv
     case a' of
         BitsV av -> do
-          assert ({-# SCC "BitArrayBoundsCheck" #-} idx >= 0 && idx < length av)
-          return (BitV (av !! idx))
+          if (idx >= 0 && idx < length av)
+            then return (BitV (av !! idx))
+            else assert False >> return (error "outofbounds._|_")
         ArrayV xs -> do
           assert ({-# SCC "ArrayBoundsCheck" #-} idx >= 0 && idx < length xs)
           return (xs !! idx)

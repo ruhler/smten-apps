@@ -3,8 +3,12 @@
 module Cegis (cegis) where
 
 import Smten.Prelude
+import Smten.Control.Monad.Trans
 import Smten.Symbolic
 import Smten.Symbolic.SMT
+
+import Ppr
+import Sketch
 
 -- Answer the question:
 --   Does there exist a value 'c' such that for all 'x', p(x, c) is satisfied?
@@ -18,7 +22,7 @@ import Smten.Symbolic.SMT
 --
 --  x has type a
 --  c has type b
-cegis :: Symbolic a -> Symbolic b -> [a] -> (b -> a -> Bool) -> SMT (Maybe b)
+cegis :: Symbolic ProgramInput -> Symbolic Prog -> [ProgramInput] -> (Prog -> ProgramInput -> Bool) -> SMT (Maybe Prog)
 cegis freeX freeC xs p = do
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.
@@ -29,6 +33,7 @@ cegis freeX freeC xs p = do
   case rc of
     Nothing -> return Nothing
     Just cv -> do
+      liftIO $ putStrLn ("candidate program: " ++ pretty cv)
       -- Search for a counter example
       rx <- query $ do
           x <- freeX
@@ -36,5 +41,7 @@ cegis freeX freeC xs p = do
           return x
       case rx of
         Nothing -> return (Just cv)
-        Just xv -> cegis freeX freeC (xv:xs) p
+        Just xv -> do
+            liftIO $ putStrLn ("found counter example: " ++ show xv)
+            cegis freeX freeC (xv:xs) p
   
