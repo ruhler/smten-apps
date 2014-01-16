@@ -1,28 +1,14 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Eval (evalP, evalT) where
 
 import Smten.Prelude
-import Smten.Control.Monad.State
 import Smten.Data.Functor
+import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
 
 import Bits
+import EvalMonad
 import Sketch
-
-data SS = SS {
-    -- | The Global Environment
-    ss_env :: Map.Map Name Decl,
-
-    -- | Local variables.
-    ss_vars :: Map.Map Name Value,
-
-    -- | The output of the statement if any.
-    ss_out :: Value,
-
-    -- | Predicate which says if the result is valid.
-    ss_valid :: Bool
-}
 
 -- Evaluate a sketch program on the given program input.
 --   It runs each harness on the harness's input, and returns whether all the
@@ -31,9 +17,10 @@ evalP :: Prog -> ProgramInput -> Bool
 evalP p i = all (evalD (envof p) i) p
 
 -- Evaluate a type.
+-- It should not fail.
 evalT :: ProgEnv -> Type -> Type
 evalT env BitT = BitT
-evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (evalState (evalE e) (SS env Map.empty (error "evalT.ss_out") True))
+evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromJust $ runEvalM env (evalE e))
 evalT env IntT = IntT
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env UnknownT = UnknownT
@@ -51,29 +38,22 @@ evalD env i d@(FunD {}) =
                 want <- apply (fd_val sd) args
                 got <- apply (fd_val d) args
                 assert (want == got)
-          in ss_valid $ execState run (SS env Map.empty (error "evalD: no output produces") True)
+          in isJust (runEvalM env run)
 
 -- Apply a function to the given arguments.
-apply :: Function -> [Expr] -> State SS Value
+apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip (f_args f) xs')
-    olds <- get
-    put (SS (ss_env olds) args (error "apply: no output returned") (ss_valid olds))
-    evalS (f_body f)
-    r <- gets ss_out
-    p <- gets ss_valid
-    modify $ \s -> s { ss_out = ss_out olds, ss_vars = ss_vars olds }
-    return r
-
-assert :: Bool -> State SS ()
-assert p = modify $ \s -> s { ss_valid = ss_valid s && p }
+    scope args $ do
+       evalS (f_body f)
+       getOutput
 
 -- | Evaluate a statement
-evalS :: Stmt -> State SS ()
+evalS :: Stmt -> EvalM ()
 evalS (ReturnS x) = {-# SCC "ReturnS" #-} do
   x' <- evalE x
-  modify $ \s -> s { ss_out = x' }
+  setOutput x'
 evalS (AssertS p) = {-# SCC "AssertS" #-} do
   p' <- evalE p
   case p' of
@@ -101,15 +81,15 @@ evalS (DeclS ty nm) = {-# SCC "DeclS" #-} do
   v0 <- case ty of
           t@(ArrT {}) -> return $ pad t
           _ -> return (error $ nm ++ " not initialized")
-  modify $ \s -> s { ss_vars = Map.insert nm v0 (ss_vars s) }
+  insertVar nm v0
 evalS (UpdateS nm e) = {-# SCC "UpdateS" #-} do
   e' <- evalE e
-  modify $ \s -> s { ss_vars = {-# SCC "UpdateSInsert" #-} Map.insert nm e' (ss_vars s) }
+  insertVar nm e'
 evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
-  env <- gets ss_vars
+  mval <- lookupVar nm
   ir <- evalE i
   er <- evalE e
-  arr' <- case (Map.lookup nm env, ir, er) of
+  arr' <- case (mval, ir, er) of
              (Just (BitsV xs), IntV i', BitV e') -> do
                 assert (i' < length xs)
                 return (BitsV $ arrupd xs i' e')
@@ -118,23 +98,23 @@ evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
                  return (ArrayV $ arrupd xs i' e')
              (Just v, _, _) -> error $ "array update into non-array: " ++ show v
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
-  modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
+  insertVar nm arr'
 
 evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
   -- Note: we don't have to evaluate the width argument, because the type of
   -- 'e' is already properly sized.
-  env <- gets ss_vars
+  mval <- lookupVar nm
   lor <- evalE lo
   er <- evalE e
   -- TODO: assert the indices for update are all in bounds
-  arr' <- case (Map.lookup nm env, lor, er) of
+  arr' <- case (mval, lor, er) of
              (Just (BitsV xs), IntV lo', BitsV xs') -> do
                 return (BitsV $ arrbulkupd xs lo' xs')
              (Just (ArrayV xs), IntV lo', ArrayV xs') -> do
                 return (ArrayV $ arrbulkupd xs lo' xs')
              (Just v, _, _) -> error $ "array update into non-array: " ++ show v
              (Nothing, _, _) -> error $ "array update: variable " ++ show nm ++ " not found"
-  modify $ \s -> s { ss_vars = Map.insert nm arr' (ss_vars s) }
+  insertVar nm arr'
 
 evalS (IfS p a b) = {-# SCC "IfS" #-} do
   p' <- evalE p
@@ -144,7 +124,7 @@ evalS (IfS p a b) = {-# SCC "IfS" #-} do
     _ -> error $ "expected bit type for if condition, but got: " ++ show p'
 evalS (BlockS xs) = {-# SCC "BlockS" #-} mapM_ evalS xs
 
-evalE :: Expr -> State SS Value
+evalE :: Expr -> EvalM Value
 evalE (ValE v) = {-# SCC "ValE" #-} return v
 evalE (AndE a b) = {-# SCC "AndE" #-} do
     a' <- evalE a
@@ -262,11 +242,11 @@ evalE (ShrE a b) = {-# SCC "ShrE" #-} do
       (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
-    vars <- gets ss_vars
-    env <- gets ss_env
-    case Map.lookup nm vars of
+    mval <- lookupVar nm
+    mdecl <- lookupDecl nm
+    case mval of
         Just v -> return v
-        Nothing -> evalE $ case Map.lookup nm env of
+        Nothing -> evalE $ case mdecl of
                             Just d -> d_val d
                             Nothing -> error $ "Var " ++ nm ++ " not in scope"
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
