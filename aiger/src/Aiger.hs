@@ -11,7 +11,6 @@ module Aiger (
 import Smten.Prelude
 import Smten.Derive.Show
 import Smten.Data.Array
-import Smten.Debug.Trace
 
 -- Notes on the Aiger format:
 --  * literal 0 stands for False
@@ -60,9 +59,11 @@ data Aiger = Aiger {
    aig_num_inputs :: Int,
    aig_num_outputs :: Int,
    aig_num_latches :: Int,
+   aig_num_badstates :: Int,
    aig_outputs :: Array Int Literal,
    aig_latches :: Array Int Literal,
-   aig_andgates :: Array Int (Literal, Literal)
+   aig_andgates :: Array Int (Literal, Literal),
+   aig_badstates :: Array Int Literal
 }
 
 showsPrecAiger :: Int -> Aiger -> ShowS
@@ -80,7 +81,9 @@ instance Show Aiger where
 --   where output is a vector with length (aig_num_outputs aig),
 --     and newstate is a vector with length (aig_num_latches aig)
 --aig_step :: Aiger -> Vector -> Vector -> (Vector, Vector)
---aig_step aig inputs state 
+--aig_step aig inputs state = 
+  --let and
+ 
 
 -- | Parse an ascii aiger file, assuming it is restricted in the following
 -- way:
@@ -94,16 +97,22 @@ readAsciiAiger text =
      (header : nonheader) ->
        case words header ++ repeat "0" of
          (fmt : _) | fmt /= "aag" -> error "AsciiAiger file is not aag format"
-         (_ : m : i : l : o : a : _) ->
+         (_ : m : i : l : o : a : b : c : j : f : _) ->
             let numinputs = read i
                 numlatches = read l
                 numoutputs = read o
                 numands = read a
 
+                numbadstateps = read b
+                --numinvarps = read c
+                --numjusticeps = read j
+                --numfairps = read f
+
                 (inputlines, noninput) = splitAt numinputs nonheader
                 (latchlines, nonlatch) = splitAt numlatches noninput
                 (outputlines, nonoutput) = splitAt numoutputs nonlatch
-                (andlines, nonand) = splitAt numands nonoutput
+                (bslines, nonbs) = splitAt numbadstateps nonoutput
+                (andlines, nonand) = splitAt numands nonbs
 
                 -- Compute the literal from its given number
                 literal :: Int -> Literal
@@ -131,22 +140,15 @@ readAsciiAiger text =
                 outputs = listArray (1, numoutputs) (map mkout outputlines)
                 latches = listArray (1, numlatches) (map mklatch latchlines)
                 andgates = listArray (1, numands) (map mkand andlines)
-            in trace (
-                 "numinputs = " ++ show numinputs ++ ",\n"
-              ++ "numlatches = " ++ show numlatches ++ ",\n"
-              ++ "numoutputs = " ++ show numoutputs ++ ",\n"
-              ++ "numands = " ++ show numands ++ ",\n"
-              ++ "inputlines = " ++ show inputlines ++ ",\n"
-              ++ "latchlines = " ++ show latchlines ++ ",\n"
-              ++ "outputlines = " ++ show outputlines ++ ",\n"
-              ++ "andlines = " ++ show andlines ++ "\n"
-                ) $ 
-              Aiger { 
-                    aig_num_inputs = numinputs,
-                    aig_num_outputs = numoutputs,
-                    aig_num_latches = numlatches,
-                    aig_outputs = outputs,
-                    aig_latches = latches,
-                    aig_andgates = andgates
+                badstates = listArray (1, numbadstateps) (map mkout bslines)
+            in Aiger { 
+                 aig_num_inputs = numinputs,
+                 aig_num_outputs = numoutputs,
+                 aig_num_latches = numlatches,
+                 aig_num_badstates = numbadstateps,
+                 aig_outputs = outputs,
+                 aig_latches = latches,
+                 aig_andgates = andgates,
+                 aig_badstates = badstates
              }
 
