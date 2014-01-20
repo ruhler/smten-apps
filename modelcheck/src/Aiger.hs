@@ -4,9 +4,9 @@
 module Aiger (
     Aiger, Vector, Literal,
     aig_num_inputs, aig_num_outputs, aig_num_latches, aig_badstates,
-    aig_eval, aig_step,
+    aig_eval, aig_step, aig_reset,
 
-    readAsciiAiger,
+    readAsciiAiger, showVector,
   ) where
 
 import Smten.Prelude
@@ -72,6 +72,10 @@ showsPrecAiger = $(derive_showsPrec ''Aiger)
 
 instance Show Aiger where
     showsPrec = showsPrecAiger
+
+-- The reset state for this aiger.
+aig_reset :: Aiger -> Vector
+aig_reset aig = listArray (1, aig_num_latches aig) (replicate (aig_num_latches aig) False)
 
 -- | aig_eval
 --   Evaluate literals in an aig with given input and state.
@@ -179,4 +183,10 @@ readAsciiAiger text =
                  aig_andgates = andgates,
                  aig_badstates = badstates
              }
+
+-- Show a vector as a binary string.
+showVector :: Vector -> String
+showVector v =
+  let f b = if b then '1' else '0'
+  in map f (elems v)
 

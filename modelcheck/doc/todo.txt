@@ -1,6 +1,6 @@
 
 Execution::
-* Implement aig_step.
+* Look for any bad state properties, not just b0.
 
 Parsing::
 * Parse environment, fairness, and justice properties
