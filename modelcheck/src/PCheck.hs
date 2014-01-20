@@ -30,7 +30,7 @@ data Model s = Model {
 --
 -- Returns (Just xs) for a sequence of states xs from an initial state to a
 -- state not satisfying the property>
-pcheck :: (Free s, Eq s) => Model s -> (s -> Bool) -> SMT (Maybe [s])
+pcheck :: (Eq s) => Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
 pcheck = pcheck' 0
 
 -- | Property checking with an initial guess for the depth of induction needed
@@ -38,29 +38,29 @@ pcheck = pcheck' 0
 --
 -- TODO: Use one of the better algorithms from the paper instead of the
 -- simplest (if it helps performance).
-pcheck' :: (Free s, Eq s) => Int -> Model s -> (s -> Bool) -> SMT (Maybe [s])
-pcheck' k m p = do
+pcheck' :: (Eq s) => Int -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
+pcheck' k m mkS p = do
    -- Search for a loopfree path from an initial state of length k
    ra <- query $ do 
-      xs <- sequence $ replicate (k+1) free
+      xs <- sequence $ replicate (k+1) mkS
       assert (_I m (head xs) && loopfree m xs)
    case ra of
       Nothing -> return Nothing
       _ -> do
         -- Search backwards for a loopfree path from a failing state
         rb <- query $ do
-            xs <- sequence $ replicate (k+1) free
+            xs <- sequence $ replicate (k+1) mkS
             assert (loopfree m xs && not (p (last xs)))
         case rb of
           Nothing -> return Nothing
           _ -> do
             -- Search for a failing path of this length
             rc <- query $ do
-               xs <- sequence $ replicate (k+1) free
+               xs <- sequence $ replicate (k+1) mkS
                assert (_I m (head xs) && path m xs && not (p (last xs)))
                return xs
             case rc of
-              Nothing -> pcheck' (k+1) m p
+              Nothing -> pcheck' (k+1) m mkS p
               Just xs -> return (Just xs)
                 
 

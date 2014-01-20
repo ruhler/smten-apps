@@ -1,7 +1,5 @@
 
-test: aiger
-	./aiger < reference/aiger-1.9.4/examples/or.aag
-
+all: aiger
 
 sources := src/Aiger.hs
 

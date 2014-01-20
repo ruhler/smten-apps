@@ -2,8 +2,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Aiger (
-    Aiger, aig_num_inputs, aig_num_outputs, aig_num_latches,
-    --aig_step,
+    Aiger, Vector, Literal,
+    aig_num_inputs, aig_num_outputs, aig_num_latches, aig_badstates,
+    aig_eval, aig_step,
 
     readAsciiAiger,
   ) where
@@ -72,17 +73,44 @@ showsPrecAiger = $(derive_showsPrec ''Aiger)
 instance Show Aiger where
     showsPrec = showsPrecAiger
 
+-- | aig_eval
+--   Evaluate literals in an aig with given input and state.
+aig_eval :: Aiger -> Vector -> Vector -> (Literal -> Bool)
+aig_eval aig inputs state = 
+  let flit :: Literal -> Bool
+      flit TrueLiteral = True
+      flit FalseLiteral = False
+      flit (Literal invert idx src) =
+        let arr = case src of
+                    Input -> inputs
+                    Latch -> state
+                    AndGate -> ands
+            v = arr ! idx
+        in if invert then not v else v
+
+      fand :: (Literal, Literal) -> Bool
+      fand (l1, l2) = flit l1 && flit l2
+
+      ands = fmap fand (aig_andgates aig)
+  in flit
+
 -- | aig_step
 --   One run step of the aig network
 --  aig - the network to run
 --  inputs - the input vector. Should have length (aig_num_inputs aig)
 --  state - the state vector. Should have length (aig_num_latches aig)
--- Returns (output, newstate)
+-- Returns (output, badstates, newstate)
 --   where output is a vector with length (aig_num_outputs aig),
+--     and badstates is a vector with length (aig_num_badstates aig),
 --     and newstate is a vector with length (aig_num_latches aig)
---aig_step :: Aiger -> Vector -> Vector -> (Vector, Vector)
---aig_step aig inputs state = 
-  --let and
+--      
+aig_step :: Aiger -> Vector -> Vector -> (Vector, Vector, Vector)
+aig_step aig inputs state = 
+  let flit = aig_eval aig inputs state
+      outs = fmap flit (aig_outputs aig)
+      badstates = fmap flit (aig_badstates aig)
+      newstate = fmap flit (aig_latches aig)
+  in (outs, badstates, newstate)
  
 
 -- | Parse an ascii aiger file, assuming it is restricted in the following

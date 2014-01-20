@@ -1,0 +1,9 @@
+
+Execution::
+* Implement aig_step.
+
+Parsing::
+* Parse environment, fairness, and justice properties
+* Accept initial values for latches:
+    0, 1, or the latch value.
+
