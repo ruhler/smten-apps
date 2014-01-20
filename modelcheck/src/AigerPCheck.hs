@@ -37,7 +37,7 @@ aigerfreestate aig = do
      }
 
 aigerpred :: Aiger -> Literal -> (AigerState -> Bool)
-aigerpred aig l = \as -> aig_eval aig (as_input as) (as_state as) l
+aigerpred aig l = \as -> not (aig_eval aig (as_input as) (as_state as) l)
 
 aigercheck :: Aiger -> Literal -> SMT (Maybe [Vector])
 aigercheck aig l = do
