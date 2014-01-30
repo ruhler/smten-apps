@@ -394,16 +394,26 @@ intop mk f nm a b = do
 
 -- Shift operators
 -- Typing Rules:
---   * The return type is bit[]
+--   * The return type is bit[] or int.
 --   * The first argument type matches the return type
 --   * The second argument type is Int.
 shiftop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
 shiftop f nm a b = do
     ty <- asks sr_oty
-    case ty of
-      ArrT BitT _ -> return ()
-      _ -> error $ "unsupported type for operator " ++ nm ++ ": " ++ show ty
+    ty' <- case ty of
+              ArrT BitT _ -> return ty
+              IntT -> return ty
+              _ -> error $ "unsupported type for operator " ++ nm ++ ": " ++ show ty
     liftM2 f (withty ty $ staticM a) (withty IntT $ staticM b)
+
+-- return the type of a shift expression given its first argument.
+typeofshift :: Expr -> SM Type
+typeofshift a = do
+  ty <- typeof a
+  return $ case ty of
+             ArrT BitT _ -> ty
+             IntT -> ty
+             _ -> UnknownT
 
 -- Determine as best as possible the type of the given expression.
 -- Returns 'UnknownT' if the type is not certain.
@@ -425,8 +435,8 @@ typeof (ModE a b) = return IntT
 typeof (DivE a b) = return IntT
 typeof (CondE _ a b) = liftM2 unify (typeof a) (typeof b)
 typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (ShlE a b) = typeof a
-typeof (ShrE a b) = typeof a
+typeof (ShlE a b) = typeofshift a
+typeof (ShrE a b) = typeofshift a
 typeof (NotE a) = typeof a
 typeof (HoleE ty _) = return ty
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)

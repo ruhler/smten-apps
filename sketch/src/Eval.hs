@@ -217,11 +217,13 @@ evalE (ShlE a b) = {-# SCC "ShlE" #-} do
     b' <- evalE b
     case (a', b') of
       (BitsV av, IntV bv) -> return $ BitsV (av `shlB` bv)
+      (IntV av, IntV bv) -> return $ IntV (av `shlI` bv)
 evalE (ShrE a b) = {-# SCC "ShrE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
+      (IntV av, IntV bv) -> return $ IntV (av `shrI` bv)
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     mval <- lookupVar nm
@@ -229,6 +231,7 @@ evalE (VarE nm) = {-# SCC "VarE" #-} do
     case (mval, mdecl) of
         (Just v, _) -> return v
         (_, Just d) -> evalE (d_val d)
+        _ -> error $ "Variable " ++ show nm ++ " not found"
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     a' <- evalE a
     i' <- evalE i
@@ -294,4 +297,16 @@ icast (ArrT BitT (ValE (IntV w))) (BitsV xs) = BitsV (take w (xs ++ replicate w 
 icast t@(ArrT {}) (BitsV xs) = icast t (ArrayV (map BitV xs))
 icast (ArrT t (ValE (IntV w))) (ArrayV xs) = ArrayV $ take w (map (icast t) xs ++ replicate w (pad t))
 icast t v = error $ "TODO: implement implicit cast of " ++ show v ++ " to " ++ show t
+
+shlI :: Int -> Int -> Int
+shlI x n
+ | n < 0 = 0
+ | n == 0 = x
+ | otherwise = shlI (2*x) (n-1)
+
+shrI :: Int -> Int -> Int
+shrI x n
+ | n < 0 = 0
+ | n == 0 = x
+ | otherwise = shrI (x `quot` 2) (n-1)
 

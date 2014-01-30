@@ -1,0 +1,12 @@
+
+int sketch1(int in) implements spec {
+    int exp = ??;
+    return in + exp;
+}
+   
+int spec(int in) {
+    int exp = 16 << (-3);
+    return in + exp;
+}
+
+

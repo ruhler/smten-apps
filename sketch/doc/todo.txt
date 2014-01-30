@@ -1,4 +1,3 @@
-
 Features::
 RECURSIVE_GENERATOR
   - have a generator which calls itself depending on the input value.
@@ -16,12 +15,6 @@ POOR_TYPE_BIT_LITERAL
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
   Not sure how to implement this.
-
-INT_SHIFTL
-  * Support: int exp = 1 << (K*2)
-        for K int
-  Tedious, but straight forward to implement.
-  Just multiply by 2 repeatedly.
 
 STRUCT_TYPES
   * support struct types.
@@ -55,26 +48,46 @@ PRAGMA::
   * change args parser to accept existing args as a baseline, so that we can
     update the args based on pragma options.
 
+STATIC_EVAL::
+  Evaluate local variables statically if possible.
+  Because we might have:
+    int x = foo(K);
+    bit bar[x] = ...
+  So we have to inline x to know the type of bar.
+  Question: don't we already have some infrastructure for this?
+
+TYPEOFV_SLOW
+ 80% time is spent in typeofV, and the program doesn't finish.
+ Perhaps a bug or an infinite loop there?
+
+INSERTVAR_SLOW
+ 95% time is spent in insertVar, and the program doesn't finish.
+ Particularly, that 95% is a result of a seemingly exponential blowup of calls
+ to PRIM_INT_EQ, PRIM_INT_LEQ, and PRIM_INT_ADD.
+ Ex: 175 calls to PRIM_INT_ADD lead to about 17 million calls to select.
+
 Features needed, by test case::
 broken/miniTest48.sk: SLOW?
-broken/miniTest49.sk: SLOW?
-broken/miniTest52.sk: SLOW?
+  Stack overflow
+broken/miniTest49.sk: INSERTVAR_SLOW
+broken/miniTest52.sk: INSERTVAR_SLOW
 broken/cbitsA.smten.sk: PRAGMA
 miniTest12.sk: RECURSIVE_GENERATOR
-miniTest54.sk: INT_SHIFTL
+miniTest54.sk: STATIC_EVAL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest86.sk: SLOW?
+miniTest86.sk: INSERTVAR_SLOW
 miniTest89.sk: SLOW: takes 20 seconds about
                It most certainly should *not*. Why is it so slow?
                To figure out: make inbits a cmd line arg, and see how it
                scales from 1 bit up to whatever the default is.
+ 80% Assert traversal
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
-miniTestb102.sk: SLOW?
-miniTestb103.sk: SLOW?
-miniTestb104.sk: SLOW?
-miniTestb107.sk: SLOW?
-miniTestb110.sk: SLOW?
+miniTestb102.sk: TYPEOFV_SLOW
+miniTestb103.sk: TYPEOFV_SLOW
+miniTestb104.sk: TYPEOFV_SLOW
+miniTestb107.sk: TYPEOFV_SLOW
+miniTestb110.sk: INSERTVAR_SLOW
 miniTestb111.sk: STRUCT_TYPES
 miniTestb112.sk: REORDER
 miniTestb113.sk: 2D_UPDATE
