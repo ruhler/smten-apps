@@ -3,9 +3,14 @@
 
 import Smten.Prelude
 import Smten.Control.Monad.State
+import Smten.Symbolic
 import Smten.Symbolic.SMT
 import Smten.Symbolic.Solver.Debug
+import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2
+import Smten.Symbolic.Solver.STP
+import Smten.Symbolic.Solver.Z3
+import Smten.Symbolic.Solver.MiniSat
 import Smten.System.Environment
 import Smten.System.IO
 
@@ -30,6 +35,7 @@ data CmdArgs = CmdArgs {
     cmd_err :: Maybe String,
     cmd_file :: Maybe String,
     cmd_debug :: Maybe String,
+    cmd_solver :: Solver,
     cmd_opts :: Options
 }
 
@@ -38,6 +44,7 @@ defargs = CmdArgs {
     cmd_err = Nothing,
     cmd_file = Nothing,
     cmd_debug = Nothing,
+    cmd_solver = yices2,
     cmd_opts = defaultOptions
 }
 
@@ -46,6 +53,12 @@ parseargs s =
   case s of
     [] -> defargs
     ("-d" : dbg : rest) -> (parseargs rest) { cmd_debug = Just dbg }
+    ("-s" : "yices1" : rest) -> (parseargs rest) { cmd_solver = yices1 }
+    ("-s" : "yices2" : rest) -> (parseargs rest) { cmd_solver = yices2 }
+    ("-s" : "stp" : rest) -> (parseargs rest) { cmd_solver = stp }
+    ("-s" : "z3" : rest) -> (parseargs rest) { cmd_solver = z3 }
+    ("-s" : "minisat" : rest) -> (parseargs rest) { cmd_solver = minisat }
+    ("-s" : slv : _) -> defargs { cmd_err = Just ("unrecognized solver: " ++ slv) }
     ("--bnd-cbits" : n : rest) ->
         let args = parseargs rest
             opts' = (cmd_opts args) { bnd_cbits = read n }
@@ -78,8 +91,8 @@ main = do
   --putStrLn $ "POST STATIC: " ++ show st
 
   solver <- case cmd_debug args of
-               Just fnm -> debug fnm yices2
-               Nothing -> return yices2
+               Just fnm -> debug fnm (cmd_solver args)
+               Nothing -> return (cmd_solver args)
 
   syn <- runSMT solver (synthesize (cmd_opts args) (envof st))
   case syn of
