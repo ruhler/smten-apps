@@ -29,17 +29,14 @@ z3txtnqueens: z3txtnqueens.c
 %.data: %.tcl
 	tclsh $< | tee $@
 
-y2.pdf: y2.data y2.style
-	Rscript y2.R
-
-y1.pdf: y1.data y1.style
-	Rscript y1.R
+%.pdf: %.R %.data
+	Rscript $<
 
 perf: nqueens
-	time -f %E ./nqueens -s yices2 -e Int 24 > /dev/null
+	time -f %E ./nqueens -s yices2 -e Int 32 > /dev/null
 	time -f %E ./nqueens -s yices2 -e Integer 36 > /dev/null
 	time -f %E ./nqueens -s yices2 -e Bit 128 > /dev/null
 
 clean:
-	rm -rf nqueens *.hi *.smten_hi *.o *.smten_o Smten
+	rm -rf nqueens nqueens_debug nqueens_prof *.hi *.smten_hi *.o *.smten_o Smten
 
