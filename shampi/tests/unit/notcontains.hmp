@@ -1,0 +1,6 @@
+
+var str : 2 ;
+reg a := concat(['a'-'b'],['a'-'b']) ;
+assert str in a ;
+assert str not contains "a" ;
+

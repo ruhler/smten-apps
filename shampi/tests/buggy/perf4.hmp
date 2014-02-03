@@ -1,0 +1,8 @@
+var hampiStringVar : 38;
+cfg P :=  "(" P ")" | "(" Q ")" ;
+cfg Q :=  L P | P R | S P S | H ;
+cfg L :=  "." L | "." ;
+cfg R :=  "." R | "." ;
+cfg S :=  "." S | "." ;
+cfg H :=  "." H | "." ;
+assert hampiStringVar in P;

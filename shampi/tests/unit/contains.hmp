@@ -1,0 +1,6 @@
+
+var str : 4 ;
+reg r := star(or("ab", "cd")) ;
+assert str in r ;
+assert str contains "da" ;
+

@@ -1,0 +1,8 @@
+
+var str : 2 ;
+cfg E := ['a'-'z'] "b" ;
+reg e := fix(E, 2) ;
+reg f := concat("a", ['a'-'z']) ;
+assert str in e ;
+assert str in f ;
+

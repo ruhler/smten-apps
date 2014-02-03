@@ -1,0 +1,7 @@
+
+var x : 1;
+cfg S :=  "a" | A A ;
+cfg A :=  "b" | S S ;
+reg a := fix(S, 1);
+assert x in a;
+

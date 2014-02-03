@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd hampi/trunk
+bash hampi.sh ../../$1
+

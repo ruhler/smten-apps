@@ -1,0 +1,4 @@
+
+var str : 3 ;
+reg orthing := or("ab", "cde") ;
+assert str in orthing ;

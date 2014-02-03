@@ -1,0 +1,5 @@
+
+var str : 2 .. 4 ;
+reg r := "abc" ;
+assert str in r ;
+

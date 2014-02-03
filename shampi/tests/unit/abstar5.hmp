@@ -1,0 +1,3 @@
+var str : 5 ;
+reg abstar := star("ab") ;
+assert str in abstar ;

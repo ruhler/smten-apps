@@ -1,0 +1,4 @@
+
+var str : 3 ;
+reg concatthing := concat(or("ab", "cde"), or("fg", "hijk")) ;
+assert str in concatthing ;

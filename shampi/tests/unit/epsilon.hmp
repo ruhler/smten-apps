@@ -1,0 +1,5 @@
+var v : 4 ;
+cfg E := | E "x" ;
+reg e := fix(E, 4) ;
+assert v in e ;
+

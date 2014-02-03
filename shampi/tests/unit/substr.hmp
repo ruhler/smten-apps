@@ -1,0 +1,14 @@
+
+var v : 7 ;
+
+val v1 := v[1:3];
+val v2 := v[4:2];
+
+val bcd := "bcd";
+val ef := "ef" ;
+
+assert v1 equals bcd ;
+assert v2 equals ef ;
+assert v contains "ab" ;
+assert v contains "fg" ;
+

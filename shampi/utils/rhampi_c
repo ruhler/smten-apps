@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd hampi/trunk
+#bash hampi_client.sh 4444 ../../$1 2> /dev/null
+bash hampi_client.sh 4444 ../../$1
+
