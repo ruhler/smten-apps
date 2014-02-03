@@ -1,3 +1,5 @@
+Test::
+* Set up a test framework somehow
 
 Execution::
 * Look for any bad state properties, not just b0.
