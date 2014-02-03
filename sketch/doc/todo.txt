@@ -80,7 +80,7 @@ miniTestb112.sk: REORDER
 miniTestb113.sk: 2D_UPDATE
 miniTestb114.sk: STRUCT_TYPES
 miniTestb116.sk: STRUCT_TYPES
-miniTestb117.sk: Buggy: reports unsat when it shouldn't.
+miniTestb118.sk: INSERTVAR_SLOW
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

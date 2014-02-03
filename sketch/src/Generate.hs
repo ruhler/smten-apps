@@ -91,6 +91,7 @@ genS (BlockS xs) = blockS <$> mapM genS xs
 
 genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)
+genE (LAndE a b) = liftM2 LAndE (genE a) (genE b)
 genE (AddE a b) = liftM2 AddE (genE a) (genE b)
 genE (SubE a b) = liftM2 SubE (genE a) (genE b)
 genE (LtE a b) = liftM2 LtE (genE a) (genE b)

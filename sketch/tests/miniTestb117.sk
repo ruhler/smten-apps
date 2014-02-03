@@ -2,7 +2,8 @@ int N = 3;
 
 int test(bit[N] in){
 	int x = 0;
-	for(int i=0; i<N && in[i]; ++i){
+    bit[N] foo = {1,1,1};
+	for(int i=0; i<N && foo[i]; ++i){
 		++x;
 	}	
 	return x;	
@@ -12,8 +13,9 @@ int test(bit[N] in){
 int sketch(bit[N] in) implements test{
 	int x = 0;
 	bit done = false;
+    bit[N] foo = {1,1,1};
 	for(int i=0; i<N ; ++i){
-		if(in[i] && !done){
+		if(foo[i] && !done){
 			++x;
 		}else{
 			done = true;	

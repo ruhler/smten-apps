@@ -137,7 +137,8 @@ instance Static Expr where
        | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
 staticE :: Expr -> SM Expr
-staticE (AndE a b) = bitwiseop AndE "and" a b
+staticE (AndE a b) = bitwiseop AndE "&" a b
+staticE (LAndE a b) = bitwiseop LAndE "&&" a b
 
 staticE (AddE a b) = do
   ty <- asks sr_oty
@@ -420,6 +421,7 @@ typeofshift a = do
 typeof :: Expr -> SM Type
 typeof (ValE v) = return $ typeofV v
 typeof (AndE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (LAndE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (AddE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (SubE a b) = return IntT
 typeof (LtE a b) = return BitT

@@ -45,13 +45,17 @@ Expressions
         Reference: andbitbit.smten.sk
                    andbitsbits.smten.sk
                    expectfail/andintint.smten.sk
+                   expectfail/noshortband.smten.sk
+        Strict in both arguments.
 
     <expr> && <expr>
         Logical AND. Works on bit, bit[].
         Reference: landbitbit.smten.sk
                    landbitsbits.smten.sk
                    expectfail/landintint.smten.sk
-        Same as bitwise and?
+                   shortland.smten.sk
+        Short circuit semantics.
+        Question: what does short circuit mean for an array of bits?
 
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[]
@@ -103,12 +107,19 @@ Expressions
         The other expressions should have the same types.
 
     <expr> >> <expr>
-        Logical right shift. The left argument must be an array of bits. The
-        right argument has type int.
+        Logical right shift. The left argument must be an array of bits or
+        int. The right argument has type int. Is 0 if the shift amount is
+        negative.
+
+        Reference: intshr.smten.sk
+                   intshrneg.smten.sk
 
     <expr> << <expr>
-        Logical left shift. The left argument must be an array of bits. The
-        right argument has type int.
+        Logical left shift. The left argument must be an array of bits or int.
+        The right argument has type int. Is 0 if the shift amount is negative.
+
+        Reference: intshl.smten.sk
+                   intshlneg.smten.sk
 
     <expr> [<expr>]
         Array access. The array must have an array type (bit arrays are

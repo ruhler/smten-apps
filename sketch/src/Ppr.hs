@@ -43,6 +43,7 @@ instance Ppr Value where
 instance Ppr Expr where
    pretty (ValE v) = pretty v
    pretty (AndE a b) = prettya a ++ " & " ++ prettya b
+   pretty (LAndE a b) = prettya a ++ " && " ++ prettya b
    pretty (AddE a b) = prettya a ++ " + " ++ prettya b
    pretty (SubE a b) = prettya a ++ " - " ++ prettya b
    pretty (ModE a b) = prettya a ++ " % " ++ prettya b

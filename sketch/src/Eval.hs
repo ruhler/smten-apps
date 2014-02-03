@@ -124,6 +124,15 @@ evalE (AndE a b) = {-# SCC "AndE" #-} do
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `andB` bv)
       (BitV av, BitV bv) -> return $ BitV (av && bv)
+evalE (LAndE a b) = {-# SCC "LAndE" #-} do
+    a' <- evalE a
+    case a' of
+        BitV True -> evalE b
+        BitV False -> return a'
+        BitsV av -> do  -- TODO: should we short circuit if av is 0?
+            b' <- evalE b
+            case b' of
+                BitsV bv -> return $ BitsV (av `andB` bv)
 evalE (AddE a b) = {-# SCC "AddE" #-} do
     a' <- evalE a
     b' <- evalE b

@@ -1,0 +1,18 @@
+
+bit boom(bit x) {
+   assert (x != x);
+   return x;
+}
+
+int sketch(bit[3] in) implements spec {
+    if (in[0] != in[0] && boom(in[0])) {
+      return 0;
+    } else {
+      return 1;
+    }    
+}
+
+int spec(bit[3] in) {
+    return 1;
+}
+

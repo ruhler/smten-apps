@@ -182,8 +182,8 @@ expr :: { Expr }
  | expr '%' expr    { ModE $1 $3 }
  | expr '/' expr    { DivE $1 $3 }
  | expr '|' expr    { OrE $1 $3 }
- | expr '||' expr    { OrE $1 $3 }
- | expr '&&' expr    { AndE $1 $3 }
+ | expr '||' expr    { OrE $1 $3 }      -- TODO: should generate LOrE?
+ | expr '&&' expr    { LAndE $1 $3 }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }

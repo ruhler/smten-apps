@@ -88,6 +88,7 @@ instance Eq Value where
 data Expr = 
    ValE Value
  | AndE Expr Expr        -- ^ a & b
+ | LAndE Expr Expr       -- ^ a && b
  | AddE Expr Expr        -- ^ a + b
  | SubE Expr Expr        -- ^ a - b
  | LtE Expr Expr         -- ^ a < b
