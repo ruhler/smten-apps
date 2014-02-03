@@ -99,6 +99,7 @@ data Expr =
  | NeqE Expr Expr        -- ^ a != b
  | CondE Expr Expr Expr  -- ^ p ? a : b
  | OrE Expr Expr         -- ^ a | b
+ | LOrE Expr Expr        -- ^ a || b
  | XorE Expr Expr        -- ^ a ^ b
  | MulE Expr Expr        -- ^ a * b
  | ModE Expr Expr        -- ^ a % b

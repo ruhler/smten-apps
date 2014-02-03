@@ -133,6 +133,21 @@ evalE (LAndE a b) = {-# SCC "LAndE" #-} do
             b' <- evalE b
             case b' of
                 BitsV bv -> return $ BitsV (av `andB` bv)
+evalE (OrE a b) = {-# SCC "OrE" #-} do
+    a' <- evalE a
+    b' <- evalE b
+    case (a', b') of
+      (BitsV av, BitsV bv) -> return $ BitsV (av `orB` bv)
+      (BitV av, BitV bv) -> return $ BitV (av || bv)
+evalE (LOrE a b) = {-# SCC "LOrE" #-} do
+    a' <- evalE a
+    case a' of
+        BitV True -> return a'
+        BitV False -> evalE b
+        BitsV av -> do  -- TODO: should we short circuit if av is all ones?
+            b' <- evalE b
+            case b' of
+                BitsV bv -> return $ BitsV (av `orB` bv)
 evalE (AddE a b) = {-# SCC "AddE" #-} do
     a' <- evalE a
     b' <- evalE b
@@ -180,12 +195,6 @@ evalE (NeqE a b) = {-# SCC "NeqE" #-} do
       (BitsV av, BitsV bv) -> return $ BitV (av /= bv)
       (IntV av, IntV bv) -> return $ BitV (av /= bv)
 evalE (ArrayE xs) = {-# SCC "ArrayE" #-} arrayV <$> mapM evalE xs
-evalE (OrE a b) = {-# SCC "OrE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    case (a', b') of
-      (BitsV av, BitsV bv) -> return $ BitsV (av `orB` bv)
-      (BitV av, BitV bv) -> return $ BitV (av || bv)
 evalE (NotE a) = {-# SCC "NotE" #-} do
     a' <- evalE a
     case a' of

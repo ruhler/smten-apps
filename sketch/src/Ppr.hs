@@ -56,6 +56,7 @@ instance Ppr Expr where
    pretty (NeqE a b) = prettya a ++ " != " ++ prettya b
    pretty (ArrayE xs) = "{" ++ commas xs ++ "}"
    pretty (OrE a b) = prettya a ++ " | " ++ prettya b
+   pretty (LOrE a b) = prettya a ++ " || " ++ prettya b
    pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
    pretty (MulE a b) = prettya a ++ " * " ++ prettya b
    pretty (NotE a) = "!" ++ prettya a

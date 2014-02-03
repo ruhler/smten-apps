@@ -42,27 +42,31 @@ Expressions
 
     <expr> & <expr> 
         Bitwise AND. Works on bit, bit[].
+        Strict in both arguments.
         Reference: andbitbit.smten.sk
                    andbitsbits.smten.sk
                    expectfail/andintint.smten.sk
                    expectfail/noshortband.smten.sk
-        Strict in both arguments.
 
     <expr> && <expr>
         Logical AND. Works on bit, bit[].
+        Short circuit semantics.
         Reference: landbitbit.smten.sk
                    landbitsbits.smten.sk
                    expectfail/landintint.smten.sk
                    shortland.smten.sk
-        Short circuit semantics.
         Question: what does short circuit mean for an array of bits?
 
     <expr> | <expr> 
         Bitwise OR. Works on bit, bit[]
+        Strict in both arguments.
+        Reference: expectfail/noshortbor.smten.sk
+      
 
     <expr> || <expr>
         Logical OR. Works on bit, bit[]
-        Same as bitwise or?
+        Short circuit semantics.
+        Reference: shortlor.smten.sk
 
 
     ~ <expr>
