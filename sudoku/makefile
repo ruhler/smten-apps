@@ -7,8 +7,12 @@ sudoku: $(SOURCES)
 sudoku_prof: $(SOURCES)
 	smten --make -o sudoku_prof sudoku.hs -prof
 
+bench.data: sudoku bench.tcl
+	tclsh bench.tcl | tee bench.data
+
+
 perf: sudoku
-	time -f %E ./sudoku -s yices2 -e Bit 10 < boards/sudoku17.unsolved > /dev/null
+	time -f %E ./sudoku -s yices2 -e Bit 100 < boards/sudoku17.unsolved > /dev/null
 	time -f %E ./sudoku -s yices2 -e Enum 100 < boards/sudoku17.unsolved > /dev/null
 	time -f %E ./sudoku -s yices2 -e Integer 2 < boards/sudoku17.unsolved > /dev/null
 
