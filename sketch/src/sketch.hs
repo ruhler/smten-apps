@@ -1,6 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-
 import Smten.Prelude
 import Smten.Control.Monad.State
 import Smten.Symbolic
@@ -50,34 +48,35 @@ defargs = CmdArgs {
     cmd_opts = defaultOptions
 }
 
-parseargs :: [String] -> CmdArgs
-parseargs s =
+-- Parse the command line arguments, using the given defaults
+parseargs :: [String] -> CmdArgs -> CmdArgs
+parseargs s defs =
   case s of
-    [] -> defargs
-    ("-d" : dbg : rest) -> (parseargs rest) { cmd_debug = Just dbg }
-    ("-s" : "yices1" : rest) -> (parseargs rest) { cmd_solver = yices1 }
-    ("-s" : "yices2" : rest) -> (parseargs rest) { cmd_solver = yices2 }
-    ("-s" : "stp" : rest) -> (parseargs rest) { cmd_solver = stp }
-    ("-s" : "z3" : rest) -> (parseargs rest) { cmd_solver = z3 }
-    ("-s" : "minisat" : rest) -> (parseargs rest) { cmd_solver = minisat }
-    ("-s" : slv : _) -> defargs { cmd_err = Just ("unrecognized solver: " ++ slv) }
+    [] -> defs
+    ("-d" : dbg : rest) -> (parseargs rest defs) { cmd_debug = Just dbg }
+    ("-s" : "yices1" : rest) -> (parseargs rest defs) { cmd_solver = yices1 }
+    ("-s" : "yices2" : rest) -> (parseargs rest defs) { cmd_solver = yices2 }
+    ("-s" : "stp" : rest) -> (parseargs rest defs) { cmd_solver = stp }
+    ("-s" : "z3" : rest) -> (parseargs rest defs) { cmd_solver = z3 }
+    ("-s" : "minisat" : rest) -> (parseargs rest defs) { cmd_solver = minisat }
+    ("-s" : slv : _) -> defs { cmd_err = Just ("unrecognized solver: " ++ slv) }
     ("--bnd-cbits" : n : rest) ->
-        let args = parseargs rest
+        let args = parseargs rest defs
             opts' = (cmd_opts args) { bnd_cbits = read n }
         in args { cmd_opts = opts' }
     ("--bnd-inbits" : n : rest) ->
-        let args = parseargs rest
+        let args = parseargs rest defs
             opts' = (cmd_opts args) { bnd_inbits = read n }
         in args { cmd_opts = opts' }
-    (('-':f) : _) -> defargs { cmd_err = Just ("unrecognized flag: " ++ f) }
+    (('-':f) : _) -> defs { cmd_err = Just ("unrecognized flag: " ++ f) }
     (f : rest) ->
-       let x = parseargs rest
+       let x = parseargs rest defs
        in x { cmd_files = f : (cmd_files x) }
 
 main :: IO ()
 main = do
   argv <- getArgs
-  let args = parseargs argv
+  let args = parseargs argv defargs
   case cmd_err args of
      Just err -> error $ unlines [err, usage]
      Nothing -> return ()
