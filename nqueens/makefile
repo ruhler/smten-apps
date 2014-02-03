@@ -28,6 +28,12 @@ perf: build/release/nqueens
 	time -f %E ./build/release/nqueens -s yices2 -e Integer 36 > /dev/null
 	time -f %E ./build/release/nqueens -s yices2 -e Bit 128 > /dev/null
 
+graphs: build/bench.data
+	Rscript utils/bench.R
+
+build/bench.data: build/release/nqueens
+	tclsh utils/bench.tcl | tee $@
+
 clean:
 	rm -rf build
 

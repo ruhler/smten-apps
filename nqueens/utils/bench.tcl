@@ -6,21 +6,21 @@ proc mytime {script} {
     return [expr [lindex [time $script $::runspertest] 0] / 1.0e6]
 }
 
-# A configuration has a name, solver, and representation
-proc cfg {name solver rep} {
-    return [list $name $solver $rep]
+# A configuration has a solver, and representation
+proc cfg {solver rep} {
+    return [list $solver $rep]
 }
 
 proc cfgname {cfg} {
-    return [lindex $cfg 0]
+    return "[lindex $cfg 0].[lindex $cfg 1]"
 }
 
 proc cfgsolver {cfg} {
-    return [lindex $cfg 1]
+    return [lindex $cfg 0]
 }
 
 proc cfgrep {cfg} {
-    return [lindex $cfg 2]
+    return [lindex $cfg 1]
 }
 
 proc elem {x l} {
@@ -37,8 +37,7 @@ proc gendata {maxtimepertest configs} {
 
     # Increase n until all configurations are done.
     # Done means either:
-    #    - it has taken longer than maxtimepertest to get an answer for some n
-    #    - or there have been back to back errors
+    #    - there have been back to back errors or timeouts
     set done [list]
     set errprev [list]
     set errthis [list]
@@ -48,11 +47,9 @@ proc gendata {maxtimepertest configs} {
                puts -nonewline "NA "
            } else {
                if { [catch {
-                       set t [mytime "exec ./nqueens -s [cfgsolver $cfg] -e [cfgrep $cfg] $n"]
+                       set t [mytime "exec timeout $maxtimepertest ./build/release/nqueens -s [cfgsolver $cfg] -e [cfgrep $cfg] $n"]
                        puts -nonewline "$t "
-                       if {$maxtimepertest < $t} {
-                           lappend done [cfgname $cfg]
-                       }}]} {
+                       }]} {
                    # An error occurred
                    puts -nonewline "NA "
                    if {[elem [cfgname $cfg] $errprev]} {
@@ -71,4 +68,24 @@ proc gendata {maxtimepertest configs} {
     # Output a blank line as indication that we finished.
     puts ""
 }
+
+set cfgs [list [cfg "minisat" "Int"] \
+               [cfg "minisat" "Bit"] \
+               [cfg "minisat" "Bool"] \
+               [cfg "stp" "Int"] \
+               [cfg "stp" "Bit"] \
+               [cfg "stp" "Bool"] \
+               [cfg "yices1" "Int"] \
+               [cfg "yices1" "Integer"] \
+               [cfg "yices1" "Bit"] \
+               [cfg "yices1" "Bool"] \
+               [cfg "yices2" "Int"] \
+               [cfg "yices2" "Integer"] \
+               [cfg "yices2" "Bit"] \
+               [cfg "yices2" "Bool"] \
+               [cfg "z3" "Int"] \
+               [cfg "z3" "Integer"] \
+               [cfg "z3" "Bit"] \
+               [cfg "z3" "Bool"]]
+gendata 1m $cfgs
 
