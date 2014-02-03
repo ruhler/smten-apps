@@ -47,6 +47,9 @@ PRAGMA::
     ignored. 
   * change args parser to accept existing args as a baseline, so that we can
     update the args based on pragma options.
+  Command line arguments overrule pragma declarations, so pragmas
+    should be parsed first? Except, we don't know the pragmas until we
+    have parsed the file names, so there is some working out to do.
 
 STATIC_EVAL::
   Evaluate local variables statically if possible.
@@ -76,11 +79,6 @@ miniTest12.sk: RECURSIVE_GENERATOR
 miniTest54.sk: STATIC_EVAL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest86.sk: INSERTVAR_SLOW
-miniTest89.sk: SLOW: takes 20 seconds about
-               It most certainly should *not*. Why is it so slow?
-               To figure out: make inbits a cmd line arg, and see how it
-               scales from 1 bit up to whatever the default is.
- 80% Assert traversal
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
 miniTestb102.sk: TYPEOFV_SLOW
