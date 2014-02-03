@@ -1,21 +1,16 @@
 
-{-# LANGUAGE DataKinds #-}
 
--- | Implementation of nqueens based on the Bit-vector type.
-module BitNQueens( bit_nqueens ) where
+-- | Implementation of nqueens based on the Integer type.
+module IntegerNQueens( integer_nqueens ) where
 
 import Smten.Prelude
-import Smten.Control.Monad
 import Smten.Control.Monad.Trans
-import Smten.Data.Bit
 import Smten.Symbolic
 import Smten.Symbolic.SMT
 
-type Bits = Bit 12
-
 -- Placement: A list of locations (row, col) for each queen.
 -- Indices go from 0 to n-1
-type Placement = [(Bits, Bits)]
+type Placement = [(Integer, Integer)]
 
 distinct :: (Eq a) => [a] -> Bool
 distinct [] = True
@@ -29,24 +24,20 @@ islegal places = and [
   distinct (map (uncurry (-)) places)]
 
 pretty :: Placement -> String
-pretty places = unlines [[if (r, c) `elem` places then '♛' else '.'
-                | c <- enumFromTo 0 (toEnum $ length places - 1)]
-                | r <- enumFromTo 0 (toEnum $ length places - 1)]
+pretty places = unlines [[if (r, c) `elem` places then 'X' else '.'
+                | c <- [0..(toInteger $ length places - 1)]]
+                | r <- [0..(toInteger $ length places - 1)]]
 
-mkcol :: Int -> Symbolic Bits
+mkcol :: Int -> Symbolic Integer
 mkcol n = do
-    x <- free_Bit
-    assert (x < toEnum n)
-    return x
+   x <- free_Integer
+   assert (x >= 0 && x < toInteger n)
+   return x
 
-supported :: Int -> Bool
-supported n = 2*n < fromEnum (bv_not 0 :: Bits)
-
-bit_nqueens :: Int -> SMT ()
-bit_nqueens n
- | supported n = do
+integer_nqueens :: Int -> SMT ()
+integer_nqueens n = do
   result <- query $ do
-         let rows = enumFromTo 0 (toEnum n-1)
+         let rows = [0..(toInteger n-1)]
          cols <- sequence $ replicate n (mkcol n)
          let places = zip rows cols
          assert (islegal places)
@@ -54,5 +45,4 @@ bit_nqueens n
   liftIO $ case result of
               Nothing -> putStrLn "no solution"
               Just v -> putStrLn (pretty v)
- | otherwise = error ("n = " ++ show n ++ " not supported. Increase bit width")
 

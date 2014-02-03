@@ -2,9 +2,7 @@
 import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
-import Smten.Symbolic
 import Smten.Symbolic.SMT
-import Smten.Symbolic.Solver.Smten
 import Smten.Symbolic.Solver.STP
 import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2

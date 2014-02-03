@@ -28,6 +28,24 @@ REORDER
         is:   a ; reorder { b; c}
            |  b ; reorder { a; c}
            |  c ; reorder { a; b}
+  or: int x0 = ??;
+      int x1 = ??;
+      int x2 = ??;
+      assert (x0 != x1)
+      assert (x0 != x2)
+      assert (x1 != x2)
+      case x0 of
+        0 -> a
+        1 -> b
+        2 -> c
+      case x1 of
+        0 -> a
+        1 -> b
+        2 -> c
+      case x2 of
+        0 -> a
+        1 -> b
+        2 -> c
     
 
 2D_UPDATE
@@ -89,9 +107,6 @@ Refactor Ideas::
 * Do more stuff in Static pass
     * Loops can be unrolled properly if bounds known statically.
     * We can inline generator functions here.
-
-Other Ideas::
-* Add a command line option for which solver to use
 
 Performance Ideas:: (consider only AFTER we run into performance problems)
 * split a program into independent pieces if there are any?

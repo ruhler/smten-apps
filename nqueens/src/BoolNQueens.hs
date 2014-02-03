@@ -2,10 +2,7 @@
 module BoolNQueens (bool_nqueens, bool_nqueens_test) where
 
 import Smten.Prelude
-import Smten.Control.Monad
 import Smten.Control.Monad.State
-import Smten.Control.Monad.Trans
-import Smten.Data.Array
 import Smten.Data.Char
 import Smten.Symbolic
 import Smten.Symbolic.SMT
