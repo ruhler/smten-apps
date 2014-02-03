@@ -220,6 +220,12 @@ data Options = Options {
   bnd_unroll_amnt :: Int
 }
 
+showsPrecOptions :: Int -> Options -> ShowS
+showsPrecOptions = $(derive_showsPrec ''Options)
+
+instance Show Options where
+    showsPrec = showsPrecOptions
+
 defaultOptions :: Options
 defaultOptions = Options {
     bnd_cbits = 5,

@@ -90,10 +90,16 @@ import Sketch
 
 %%
 
-sketch :: { Prog }
- : decl         { [$1] }
- | 'pragma' 'options' string ';' { [] } -- TODO: don't ignore pragmas
- | sketch decl   { $2 : $1 }
+sketch :: { (Prog, String) }
+ : declorpragma { $1 }
+ | sketch declorpragma {
+     case ($1, $2) of
+      ((d1, o1), (d2, o2)) -> (d1 ++ d2, o1 ++ " " ++ o2)
+ }
+
+declorpragma :: { ([Decl], String) }
+ : decl  { ([$1], "") }
+ | 'pragma' 'options' string ';' { ([], $3) }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'

@@ -48,55 +48,68 @@ defargs = CmdArgs {
     cmd_opts = defaultOptions
 }
 
--- Parse the command line arguments, using the given defaults
-parseargs :: [String] -> CmdArgs -> CmdArgs
-parseargs s defs =
+parseargs :: [String] -> CmdArgs
+parseargs s =
   case s of
-    [] -> defs
-    ("-d" : dbg : rest) -> (parseargs rest defs) { cmd_debug = Just dbg }
-    ("-s" : "yices1" : rest) -> (parseargs rest defs) { cmd_solver = yices1 }
-    ("-s" : "yices2" : rest) -> (parseargs rest defs) { cmd_solver = yices2 }
-    ("-s" : "stp" : rest) -> (parseargs rest defs) { cmd_solver = stp }
-    ("-s" : "z3" : rest) -> (parseargs rest defs) { cmd_solver = z3 }
-    ("-s" : "minisat" : rest) -> (parseargs rest defs) { cmd_solver = minisat }
-    ("-s" : slv : _) -> defs { cmd_err = Just ("unrecognized solver: " ++ slv) }
+    [] -> defargs
+    ("-d" : dbg : rest) -> (parseargs rest) { cmd_debug = Just dbg }
+    ("-s" : "yices1" : rest) -> (parseargs rest) { cmd_solver = yices1 }
+    ("-s" : "yices2" : rest) -> (parseargs rest) { cmd_solver = yices2 }
+    ("-s" : "stp" : rest) -> (parseargs rest) { cmd_solver = stp }
+    ("-s" : "z3" : rest) -> (parseargs rest) { cmd_solver = z3 }
+    ("-s" : "minisat" : rest) -> (parseargs rest) { cmd_solver = minisat }
+    ("-s" : slv : _) -> defargs { cmd_err = Just ("unrecognized solver: " ++ slv) }
     ("--bnd-cbits" : n : rest) ->
-        let args = parseargs rest defs
+        let args = parseargs rest
             opts' = (cmd_opts args) { bnd_cbits = read n }
         in args { cmd_opts = opts' }
     ("--bnd-inbits" : n : rest) ->
-        let args = parseargs rest defs
+        let args = parseargs rest
             opts' = (cmd_opts args) { bnd_inbits = read n }
         in args { cmd_opts = opts' }
-    (('-':f) : _) -> defs { cmd_err = Just ("unrecognized flag: " ++ f) }
+    (('-':f) : _) -> defargs { cmd_err = Just ("unrecognized flag: " ++ f) }
     (f : rest) ->
-       let x = parseargs rest defs
+       let x = parseargs rest
        in x { cmd_files = f : (cmd_files x) }
 
 main :: IO ()
 main = do
+  -- Parse command line arguments
   argv <- getArgs
-  let args = parseargs argv defargs
+  let args = parseargs argv 
   case cmd_err args of
      Just err -> error $ unlines [err, usage]
      Nothing -> return ()
 
+  -- Setup the back-end solver
   solver <- case cmd_debug args of
                Just fnm -> debug fnm (cmd_solver args)
                Nothing -> return (cmd_solver args)
 
+  -- Run sketch on each input file
   flip mapM_ (cmd_files args) $ \fin -> do
     putStrLn $ "Running sketch on " ++ show fin ++ "..."
+
+    -- Parse the input file
     input <- readFile fin
-    sk <- case evalStateT parseSketch input of
+    (sk, skopts) <- case evalStateT parseSketch input of
              Left msg -> fail msg
              Right x -> return x
-    --putStrLn $ "POST PARSE: " ++ show sk
 
+    -- Update the options based on any pragmas in the file
+    let args' = parseargs (argv ++ words skopts)
+        opts = cmd_opts args'
+    case cmd_err args' of
+       Just err -> putStrLn $ unlines ["warning: " ++ err, "(from use of a pragma)"]
+       Nothing -> return ()
+    putStrLn $ "Using Options: " ++ show opts
+      
+
+    -- Perform static analysis and execution
     let st = static (envof sk)
-    --putStrLn $ "POST STATIC: " ++ show st
 
-    syn <- runSMT solver (synthesize (cmd_opts args) (envof st))
+    -- Run the synthesizer
+    syn <- runSMT solver (synthesize opts (envof st))
     case syn of
       Nothing -> fail "sketch not satisfiable"
       Just v -> putStrLn (pretty v)
