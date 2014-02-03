@@ -1,11 +1,4 @@
 Features::
-RECURSIVE_GENERATOR
-  - have a generator which calls itself depending on the input value.
-    To deal with this:
-        bound number of appearances of a function on the stack to
-        --bnd-inline-amnt. Assert no more are needed.
-        So, if you exceed the limit, assert false and return error.
-
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
   Works at global scope after inlining, but not locally.
@@ -59,12 +52,15 @@ INSERTVAR_SLOW
  to PRIM_INT_EQ, PRIM_INT_LEQ, and PRIM_INT_ADD.
  Ex: 175 calls to PRIM_INT_ADD lead to about 17 million calls to select.
 
+INTEQ_SLOW
+ All the time is spent in Int equality. Perhaps some algebraic 
+ simplifications are needed?
+
 Features needed, by test case::
 broken/miniTest48.sk: SLOW?
   Stack overflow
 broken/miniTest49.sk: INSERTVAR_SLOW
 broken/miniTest52.sk: INSERTVAR_SLOW
-miniTest12.sk: RECURSIVE_GENERATOR
 miniTest54.sk: STATIC_EVAL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
 miniTest86.sk: INSERTVAR_SLOW
@@ -81,6 +77,7 @@ miniTestb113.sk: 2D_UPDATE
 miniTestb114.sk: STRUCT_TYPES
 miniTestb116.sk: STRUCT_TYPES
 miniTestb118.sk: INSERTVAR_SLOW
+miniTestb121.sk: INTEQ_SLOW
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

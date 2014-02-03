@@ -24,11 +24,13 @@ usage = unlines [
     "  sketch [OPTIONS] [FILE...]",
     "",
     " Options:",
-    "    -d FILE            Output debug info to the given file",
-    "    -s solver          Select the back-end solver to use:",
-    "                         yices1, yices2, z3, stp, or minisat",
-    "    --bnd-cbits N      Set the bnd-cbits value to N",
-    "    --bnd-inbits N     Set the bnd-inbits value to N",
+    "    -d FILE                Output debug info to the given file",
+    "    -s solver              Select the back-end solver to use:",
+    "                            yices1, yices2, z3, stp, or minisat",
+    "    --bnd-cbits N          Set the bnd-cbits value to N",
+    "    --bnd-inbits N         Set the bnd-inbits value to N",
+    "    --bnd-unroll-amnt N    Set the bnd-unroll-amnt value to N",
+    "    --bnd-inline-amnt N    Set the bnd-inline-amnt value to N",
     ""]
 
 data CmdArgs = CmdArgs {
@@ -66,6 +68,14 @@ parseargs s =
     ("--bnd-inbits" : n : rest) ->
         let args = parseargs rest
             opts' = (cmd_opts args) { bnd_inbits = read n }
+        in args { cmd_opts = opts' }
+    ("--bnd-unroll-amnt" : n : rest) ->
+        let args = parseargs rest
+            opts' = (cmd_opts args) { bnd_unroll_amnt = read n }
+        in args { cmd_opts = opts' }
+    ("--bnd-inline-amnt" : n : rest) ->
+        let args = parseargs rest
+            opts' = (cmd_opts args) { bnd_inline_amnt = read n }
         in args { cmd_opts = opts' }
     (('-':f) : _) -> defargs { cmd_err = Just ("unrecognized flag: " ++ f) }
     (f : rest) ->

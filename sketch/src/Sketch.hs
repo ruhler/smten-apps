@@ -219,7 +219,8 @@ type ProgramInput = Map.Map String FunctionInput
 data Options = Options {
   bnd_cbits :: Int,
   bnd_inbits :: Int,
-  bnd_unroll_amnt :: Int
+  bnd_unroll_amnt :: Int,
+  bnd_inline_amnt :: Int
 }
 
 showsPrecOptions :: Int -> Options -> ShowS
@@ -232,7 +233,8 @@ defaultOptions :: Options
 defaultOptions = Options {
     bnd_cbits = 5,
     bnd_inbits = 5,
-    bnd_unroll_amnt = 8
+    bnd_unroll_amnt = 8,
+    bnd_inline_amnt = 5
 }
 
 pad :: Type -> Value

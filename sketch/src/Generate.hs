@@ -16,7 +16,7 @@ import Sketch
 -- candidate program without holes.
 generate :: Options -> ProgEnv -> Symbolic Prog
 generate opts p = do
-  let readed = runReaderT (mapM genD (declsof p)) (GR opts p)
+  let readed = runReaderT (mapM genD (declsof p)) (GR opts p Map.empty)
   (ds, s) <- runStateT readed (TS [])
   return $ ts_decls s ++ ds
 
@@ -26,7 +26,10 @@ data GR = GR {
     gr_opts :: Options,
 
     -- | The program environment.
-    gr_env :: ProgEnv
+    gr_env :: ProgEnv,
+
+    -- | The call stack: used to bound recursion properly.
+    gr_stack :: Map.Map Name Int
 }
 
 data TS = TS {
@@ -50,6 +53,7 @@ liftSymbolic = lift . lift
 
 genD :: Decl -> GM Decl
 genD d@(VarD {}) = return d
+genD d@(FunD _ _ GeneratorF) = return d
 genD d@(FunD {}) = do
     let FunT _ argtys = f_type . fd_val $ d
         tyenv = Map.fromList (zip (f_args . fd_val $ d) argtys)
@@ -128,14 +132,17 @@ genE (BulkAccessE a b c) = liftM3 BulkAccessE (genE a) (genE b) (genE c)
 genE (CastE t e) = CastE t <$> genE e
 genE (ICastE d e) = ICastE d <$> genE e
 genE (AppE fnm xs) = do
-    env <- asks gr_env
-    case Map.lookup fnm env of
-       Just (FunD _ f kind) -> do
-          xs' <- mapM genE xs
-          fnm' <- case kind of
-                 GeneratorF -> do
-                    generated <- genD (FunD fnm f NormalF)
-                    emit generated
-                 _ -> return fnm
-          return $ AppE fnm' xs'
-
+    xs' <- mapM genE xs
+    gr <- ask
+    let fcnt = fromMaybe 0 $ Map.lookup fnm (gr_stack gr)
+    case Map.lookup fnm (gr_env gr) of
+      Just (FunD _ f kind) -> do
+         fnm' <- case (kind, fcnt < bnd_inline_amnt (gr_opts gr)) of
+                    (GeneratorF, True) ->
+                       local (\g -> g { gr_stack = Map.insert fnm (fcnt + 1) (gr_stack g) }) $ do
+                          genD (FunD fnm f NormalF) >>= emit
+                    (_, True) -> return fnm
+                    (_, False) -> do
+                        let f' = f { f_body = AssertS (ValE (BitV False)) }
+                        genD (FunD fnm f' NormalF) >>= emit
+         return $ AppE fnm' xs'
