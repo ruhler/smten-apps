@@ -90,6 +90,7 @@ infirst x (l:ls) = (x ++ l) : ls
 -- A statement is printed as a list of lines
 pprS :: Stmt -> [String]
 pprS (ReturnS x) = ["return " ++ prettya x ++ ";"]
+pprS (ReorderS xs) = concat [["reorder {"], map ("    " ++) (concatMap pprS xs), ["}"]]
 pprS (AssertS x) = ["assert " ++ prettya x ++ ";"]
 pprS (RepeatS n s) = infirst ("repeat (" ++ pretty n ++ ") ") (pprS s)
 pprS (ForS init cond incr b)

@@ -127,6 +127,7 @@ data Stmt =
      ReturnS Expr                   -- ^ return e;
    | AssertS Expr                   -- ^ assert e;
    | RepeatS Expr Stmt              -- ^ repeat (n) s
+   | ReorderS [Stmt]                 -- ^ reorder { stmts }
    | WhileS Expr Stmt               -- ^ while (c) s
    | ForS Stmt Expr Stmt Stmt       -- ^ for (init ; cond ; incr ) body
    | DeclS Type Name                -- ^ ty foo;

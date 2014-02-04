@@ -12,42 +12,6 @@ UNINTERPRETED_FUNCTION
 STRUCT_TYPES
   * support struct types.
 
-REORDER
-  * support reorder block
-  Not clear what reorder block is, though intuitively, it's any permutation of
-  the given statements.
-    reorder { a; b }
-   is: 
-    bit x = ??; 
-    if x { a ; b} else { b ; a }
-  or: bit x = ??;
-      if x { a }
-      b
-      if !x { a } 
-    reorder { a; b; c}
-        is:   a ; reorder { b; c}
-           |  b ; reorder { a; c}
-           |  c ; reorder { a; b}
-  or: int x0 = ??;
-      int x1 = ??;
-      int x2 = ??;
-      assert (x0 != x1)
-      assert (x0 != x2)
-      assert (x1 != x2)
-      case x0 of
-        0 -> a
-        1 -> b
-        2 -> c
-      case x1 of
-        0 -> a
-        1 -> b
-        2 -> c
-      case x2 of
-        0 -> a
-        1 -> b
-        2 -> c
-    
-
 2D_UPDATE
   * support 2d array update: T[2][1] = 1;
     And, ideally, any dimension array update.
@@ -74,9 +38,11 @@ INTEQ_SLOW
  All the time is spent in Int equality. Perhaps some algebraic 
  simplifications are needed?
 
+STACK_OVERFLOW
+ A mysterious stack overflow
+
 Features needed, by test case::
-broken/miniTest48.sk: SLOW?
-  Stack overflow
+broken/miniTest48.sk: STACK_OVERFLOW
 broken/miniTest49.sk: INSERTVAR_SLOW
 broken/miniTest52.sk: INSERTVAR_SLOW
 miniTest54.sk: STATIC_EVAL
@@ -90,7 +56,7 @@ miniTestb104.sk: TYPEOFV_SLOW
 miniTestb107.sk: TYPEOFV_SLOW
 miniTestb110.sk: INSERTVAR_SLOW
 miniTestb111.sk: STRUCT_TYPES
-miniTestb112.sk: REORDER
+miniTestb112.sk: STACK_OVERFLOW
 miniTestb113.sk: 2D_UPDATE
 miniTestb114.sk: STRUCT_TYPES
 miniTestb116.sk: STRUCT_TYPES

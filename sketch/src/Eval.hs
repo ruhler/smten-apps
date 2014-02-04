@@ -58,12 +58,14 @@ evalS (AssertS p) = {-# SCC "AssertS" #-} do
   p' <- evalE p
   case p' of
     BitV b -> assert b
-evalS (RepeatS n s) = {-# SCC "RepeatS" #-} do
+evalS (ReorderS {}) = {-# SCC "ReorderS" #-}
+  -- Note: The generator inlines reorders, so we don't expect this case to ever
+  -- occur.
+  error "unexpected ReorderS during evaluation"
+evalS (RepeatS {}) = {-# SCC "RepeatS" #-}
   -- Note: The generator inlines repeats, so we don't expect this case to ever
   -- occur.
-  n' <- evalE n
-  case n' of
-    IntV nv -> mapM_ evalS (replicate nv s)
+  error "unexpected RepeatS during evaluation"
 evalS (ForS init cond incr body) = {-# SCC "ForS" #-} do
   evalS init
   evalS $ WhileS cond (blockS [body, incr])

@@ -64,6 +64,29 @@ genD d@(FunD {}) = do
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
 genS (AssertS x) = AssertS <$> genE x
+genS (ReorderS xs) = do
+  -- We create a matrix of boolean variables x[i,j]
+  -- x[i,j] is true if the ith statement executed is the jth statement in
+  -- the given list.
+  xs' <- mapM genS xs
+  let mkelem s = do
+        x <- free_Bool
+        return (x, s)
+      mkrow = mapM mkelem xs'
+  matrix <- liftSymbolic $ mapM (const mkrow) xs'
+
+  -- Each row and col should have exactly one statement executed
+  let rowselects = map (map fst) matrix
+      cols [] = []
+      cols ([]:_) = []
+      cols xs = map head xs : cols (map tail xs)
+      colselects = map (map fst) (cols matrix)
+  liftSymbolic $ assert (all oneset rowselects && all oneset colselects)
+
+  -- Get and return the list of statements to execute
+  let stmts = map (\(x, s) -> if x then s else BlockS []) (concat matrix)
+  return $ blockS stmts
+
 genS (RepeatS en s) = do
   -- TODO: evaluate n statically as much as possible here
   -- Perhaps a 'simplify' operation on expressions would be useful
@@ -146,3 +169,12 @@ genE (AppE fnm xs) = do
                         let f' = f { f_body = AssertS (ValE (BitV False)) }
                         genD (FunD fnm f' NormalF) >>= emit
          return $ AppE fnm' xs'
+
+-- Return True if exactly one of the inputs is set.
+oneset :: [Bool] -> Bool
+oneset =
+  -- s - at least some bit has been seen set.
+  -- m - multiple bits have been seen set.
+  let oneset' s m [] = s && not m
+      oneset' s m (x:xs) = oneset' (s || x) ((s && x) || m) xs
+  in oneset' False False

@@ -77,6 +77,7 @@ instance Static Function where
 instance Static Stmt where
   staticM (ReturnS x) = ReturnS <$> staticM x
   staticM (AssertS x) = AssertS <$> withty BitT (staticM x)
+  staticM (ReorderS xs) = ReorderS <$> mapM staticM xs
   staticM (RepeatS n s) = liftM2 RepeatS (withty IntT $ staticM n) (staticM s)
   staticM (WhileS c s) = liftM2 WhileS (withty BitT $ staticM c) (staticM s)
   staticM (ForS init cond incr body) =

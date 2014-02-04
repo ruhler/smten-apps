@@ -66,6 +66,7 @@ import Sketch
     'int'   { TkInt }
     'implements'   { TkImplements }
     'return'   { TkReturn }
+    'reorder'   { TkReorder }
     'assert'   { TkAssert }
     'generator'{ TkGenerator }
     'true'  { TkTrue }
@@ -142,6 +143,7 @@ stmt :: { Stmt }
  | id '=' expr ';' { UpdateS $1 $3 }
  | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
  | id '[' expr '::' expr ']' '=' expr ';' { ArrBulkUpdateS $1 $3 $5 $8 }
+ | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
