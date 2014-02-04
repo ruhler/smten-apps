@@ -3,7 +3,6 @@
 module IntegerCell (IntegerCell) where
 
 import Smten.Prelude
-import Smten.Data.Function
 import Smten.Symbolic
 import Cell
 

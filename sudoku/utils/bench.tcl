@@ -15,12 +15,12 @@ proc runconfig {rep solver} {
 
     # Run the solver and representation on consecutive boards from the list
     # for about 60 seconds, then average the runtime.
-    set fin [open "boards/sudoku17.unsolved" r]
+    set fin [open "tests/sudoku17.unsolved" r]
     set t 0
     set n 0
     while {$t < 10} {
         incr n
-        set me [mytime "exec ./sudoku -s $solver -e $rep 1 << [gets $fin]"]
+        set me [mytime "exec ./build/release/sudoku -s $solver -e $rep 1 << [gets $fin]"]
         set t [expr $t + $me]
     }
     close $fin

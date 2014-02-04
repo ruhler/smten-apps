@@ -6,7 +6,6 @@ module BitCell (BitCell) where
 import Smten.Prelude
 import Smten.Symbolic
 import Smten.Data.Bit
-import Smten.Data.Function
 
 import Cell
 

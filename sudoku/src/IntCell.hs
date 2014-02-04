@@ -4,8 +4,6 @@ module IntCell (IntCell) where
 
 import Smten.Prelude
 import Smten.Control.Monad
-import Smten.Data.Function
-import Smten.Symbolic
 import Cell
 
 type IntCell = Int
