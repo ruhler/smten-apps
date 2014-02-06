@@ -39,10 +39,8 @@ instance SChar Integer where
 integerSChar :: Integer
 integerSChar = 0
 
-data BitSChar = BitSChar { bschar :: Bit 8 }
-
-instance Eq BitSChar where
-    (==) = (==) `on` bschar
+newtype BitSChar = BitSChar { bschar :: Bit 8 }
+    deriving (Eq)
 
 instance Ord BitSChar where
     (<) (BitSChar a) (BitSChar b) = a < b

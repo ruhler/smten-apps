@@ -17,12 +17,7 @@ data SubMatch = SubMatch {
     m_id :: RID,    -- ID.
     m_len :: Int,   -- Length to match.
     m_off :: Int    -- Offset in entire string to match at.
-}
-
-instance Eq SubMatch where
-    (==) a b = (m_id a == m_id b)
-            && (m_len a == m_len b)
-            && (m_off a == m_off b)
+} deriving (Eq)
 
 instance Show SubMatch where
     show (SubMatch x n o) = show x ++ "." ++ show n ++ "." ++ show o

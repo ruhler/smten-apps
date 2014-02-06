@@ -24,11 +24,7 @@ import Query
 import SChar
 
 data SCharType = SChar_Integer | SChar_Bit
-
-instance Eq SCharType where
-    (==) SChar_Integer SChar_Integer = True
-    (==) SChar_Bit SChar_Bit = True
-    (==) _ _ = False
+    deriving (Eq)
 
 instance Show SCharType where
     show SChar_Integer = "integer"

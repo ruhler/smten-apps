@@ -15,18 +15,7 @@ data RegEx =
          | Concat Int RegEx RegEx
          | Or Int RegEx RegEx
          | Variable Int RID
-
-instance Eq RegEx where
-    (==) Epsilon Epsilon = True
-    (==) Empty Empty = True
-    (==) (Atom a) (Atom b) = a == b
-    (==) (Range al ah) (Range bl bh) = al == bl && ah == bh
-    (==) (Concat a1 a2 a3) (Concat b1 b2 b3) =
-            (a1 == b1) && (a2 == b2) && (a3 == b3)
-    (==) (Or a1 a2 a3) (Or b1 b2 b3) =
-            (a1 == b1) && (a2 == b2) && (a3 == b3)
-    (==) (Variable a1 a2) (Variable b1 b2) = a1 == b1 && a2 == b2
-    (==) _ _ = False
+    deriving (Eq)
 
 -- The length a string much be to match against the given regular expression.
 rlength :: RegEx -> Int
