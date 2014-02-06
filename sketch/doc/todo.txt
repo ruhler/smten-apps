@@ -8,6 +8,13 @@ POOR_TYPE_BIT_LITERAL
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
   Not sure how to implement this.
+  Maybe: replace each call moo(x) with a new free variable y.
+         collect all the pairs (x, y) used during execution,
+         and at the end assert they have the function property:
+  if x0 = x1 then y0 = y1
+  if x0 = x2 then y0 = y2
+  if x1 = x2 then y1 = y2
+  etc...
 
 STRUCT_TYPES
   * support struct types.
@@ -25,14 +32,16 @@ STATIC_EVAL::
   Question: don't we already have some infrastructure for this?
 
 TYPEOFV_SLOW
- 80% time is spent in typeofV, and the program doesn't finish.
- Perhaps a bug or an infinite loop there?
+ Looks like we are getting stuck in a false infinite finite formula.
+ See broken/perf0.smten.sk for minimized test case.
+ 
 
 INSERTVAR_SLOW
  95% time is spent in insertVar, and the program doesn't finish.
  Particularly, that 95% is a result of a seemingly exponential blowup of calls
  to PRIM_INT_EQ, PRIM_INT_LEQ, and PRIM_INT_ADD.
  Ex: 175 calls to PRIM_INT_ADD lead to about 17 million calls to select.
+ See broken/perf1.smten.sk for a minimized test case.
 
 INTEQ_SLOW
  All the time is spent in Int equality. Perhaps some algebraic 
@@ -42,6 +51,8 @@ STACK_OVERFLOW
  A mysterious stack overflow
 
 Features needed, by test case::
+broken/perf0.smten.sk: TYPEOFV_SLOW
+broken/perf1.smten.sk: INSERVAR_SLOW
 broken/miniTest48.sk: STACK_OVERFLOW
 broken/miniTest49.sk: INSERTVAR_SLOW
 broken/miniTest52.sk: INSERTVAR_SLOW

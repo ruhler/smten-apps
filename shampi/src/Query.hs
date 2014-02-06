@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Query (hquery) where
 
 import Smten.Prelude

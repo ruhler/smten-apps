@@ -1,6 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-
 import Smten.Prelude
 import Smten.Control.Monad.State
 import Smten.Data.Maybe(fromMaybe)

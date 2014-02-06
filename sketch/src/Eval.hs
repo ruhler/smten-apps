@@ -1,5 +1,8 @@
 
-module Eval (evalP, evalT) where
+module Eval (
+    evalP, evalT,
+    evalS, evalE, -- Exposed only for performance debugging
+  ) where
 
 import Smten.Prelude
 import Smten.Data.Functor

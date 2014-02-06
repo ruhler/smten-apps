@@ -4,6 +4,10 @@ all:
 	tclsh utils/make.tcl
 	tclsh utils/test.tcl
 
+perf:
+	tclsh utils/makeperf.tcl
+	./build/profile/perf +RTS -p
+
 check:
 	tclsh utils/test.tcl
 

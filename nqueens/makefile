@@ -13,7 +13,7 @@ build/release/nqueens: src/nqueens.hs $(sources)
 
 build/profile/nqueens: src/nqueens.hs $(sources)
 	mkdir -p build/profile
-	smten --make -prof -o build/profile/nqueens -ibuild/release -isrc -hidir build/release -odir build/release src/nqueens.hs -rtsopts -fwarn-unused-imports
+	smten --make -prof -o build/profile/nqueens -ibuild/profile -isrc -hidir build/profile -odir build/profile src/nqueens.hs -rtsopts -fwarn-unused-imports
 
 build/z3nqueens: src/z3nqueens.c
 	mkdir -p build

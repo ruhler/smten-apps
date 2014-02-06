@@ -117,6 +117,7 @@ main = do
 
     -- Perform static analysis and execution
     let st = static (envof sk)
+    putStrLn (show st)
 
     -- Run the synthesizer
     syn <- runSMT solver (synthesize opts (envof st))

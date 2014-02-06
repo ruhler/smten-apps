@@ -1,6 +1,5 @@
 
 -- | Pretty printer for Sketch programs
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 module Ppr (pretty) where
