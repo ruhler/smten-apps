@@ -43,6 +43,10 @@ INSERTVAR_SLOW
  Ex: 175 calls to PRIM_INT_ADD lead to about 17 million calls to select.
  See broken/perf1.smten.sk for a minimized test case.
 
+ARRUPD_SLOW
+ 100% time is spent in arrupd
+ 
+
 INTEQ_SLOW
  All the time is spent in Int equality. Perhaps some algebraic 
  simplifications are needed?
@@ -53,6 +57,7 @@ STACK_OVERFLOW
 Features needed, by test case::
 broken/perf0.smten.sk: TYPEOFV_SLOW
 broken/perf1.smten.sk: INSERVAR_SLOW
+broken/repeat.smten.sk: ARRUPD_SLOW
 broken/miniTest48.sk: STACK_OVERFLOW
 broken/miniTest49.sk: INSERTVAR_SLOW
 broken/miniTest52.sk: INSERTVAR_SLOW

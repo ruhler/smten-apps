@@ -11,7 +11,6 @@ module Sketch (
     ) where
 
 import Smten.Prelude
-import Smten.Derive.Show
 import qualified Smten.Data.Map as Map
 
 import Bits
@@ -24,12 +23,7 @@ data Type =
   | IntT              -- int
   | FunT Type [Type]  -- function type: output and argument types
   | UnknownT          -- type is not known
-
-showsPrecType :: Int -> Type -> ShowS
-showsPrecType = $(derive_showsPrec ''Type)
-
-instance Show Type where
-    showsPrec = showsPrecType
+    deriving (Show)
 
 instance Eq Type where
     (==) BitT BitT = True
@@ -47,6 +41,7 @@ data Value =
   | BitsV Bits
   | IntV Int
   | FunV Function
+    deriving (Show)
 
 -- Make an array value.
 -- Automatically constructs a BitsV if the argument type is Bit.
@@ -72,12 +67,6 @@ dimension (ArrT t _) = 1 + dimension t
 dimension IntT = 1
 dimension (FunT {}) = 1
 
-
-showsPrecValue :: Int -> Value -> ShowS
-showsPrecValue = $(derive_showsPrec ''Value) 
-
-instance Show Value where
-    showsPrec = showsPrecValue
 
 instance Eq Value where
     (==) (BitV a) (BitV b) = a == b
@@ -116,12 +105,7 @@ data Expr =
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)
-
-showsPrecExpr :: Int -> Expr -> ShowS
-showsPrecExpr = $(derive_showsPrec ''Expr)
-
-instance Show Expr where
-    showsPrec = showsPrecExpr
+    deriving (Show)
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
@@ -136,6 +120,7 @@ data Stmt =
    | ArrBulkUpdateS Name Expr Expr Expr -- ^ foo[e1::e2] = e3;
    | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
+    deriving (Show)
 
 -- Construct a block of statements.
 -- This flattens any blocks into the higher level.
@@ -146,33 +131,16 @@ blockS xs =
       f s = [s]
   in BlockS (concatMap f xs)
 
-showsPrecStmt :: Int -> Stmt -> ShowS
-showsPrecStmt = $(derive_showsPrec ''Stmt)
-   
-instance Show Stmt where
-    showsPrec = showsPrecStmt
-
 data Function = Function {
     f_type :: Type,
     f_args :: [Name],
     f_body :: Stmt
-}
-
-showsPrecFunction :: Int -> Function -> ShowS
-showsPrecFunction = $(derive_showsPrec ''Function)
-
-instance Show Function where
-  showsPrec = showsPrecFunction
+} deriving (Show)
 
 data FunctionKind = NormalF          -- ^ a normal function
                   | WithSpecF Name   -- ^ the function has a spec
                   | GeneratorF       -- ^ the function is a generator
-
-showsPrecFunctionKind :: Int -> FunctionKind -> ShowS
-showsPrecFunctionKind = $(derive_showsPrec ''FunctionKind)
-
-instance Show FunctionKind where
-    showsPrec = showsPrecFunctionKind
+    deriving (Show)
 
 data Decl =
    FunD {
@@ -184,6 +152,7 @@ data Decl =
       d_name :: Name,
       vd_val :: Expr
    }
+ deriving (Show)
 
 d_type :: Decl -> Type
 d_type d@(FunD {}) = f_type $ fd_val d
@@ -194,12 +163,6 @@ d_val x =
     case x of
         VarD {} -> vd_val x
         FunD {} -> ValE (FunV (fd_val x))
-
-showsPrecDecl :: Int -> Decl -> ShowS
-showsPrecDecl = $(derive_showsPrec ''Decl)
-
-instance Show Decl where
-    showsPrec = showsPrecDecl
 
 type Prog = [Decl]
 type ProgEnv = Map.Map String Decl
@@ -222,13 +185,7 @@ data Options = Options {
   bnd_inbits :: Int,
   bnd_unroll_amnt :: Int,
   bnd_inline_amnt :: Int
-}
-
-showsPrecOptions :: Int -> Options -> ShowS
-showsPrecOptions = $(derive_showsPrec ''Options)
-
-instance Show Options where
-    showsPrec = showsPrecOptions
+} deriving (Show)
 
 defaultOptions :: Options
 defaultOptions = Options {

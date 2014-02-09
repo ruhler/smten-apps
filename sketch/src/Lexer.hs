@@ -13,8 +13,6 @@ import Smten.Control.Monad.State
 import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit)
 import Smten.Data.Functor ((<$>))
 
-import Smten.Derive.Show
-
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
@@ -32,12 +30,7 @@ data Token =
   | TkString String
   | TkInteger Int
   | TkEOF
-
-showsPrecToken :: Int -> Token -> ShowS
-showsPrecToken = $(derive_showsPrec ''Token)
-
-instance Show Token where
-    showsPrec = showsPrecToken
+    deriving (Show)
 
 -- | State is the text remaining to be parsed.
 --   Left is parse failed with error message

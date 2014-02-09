@@ -23,40 +23,7 @@ data Token =
   | TkString String
   | TkChar Char
   | TkEOF
-
-instance Show Token where
-    show TkOpenParen = "TkOpenParen"
-    show TkCloseParen = "TkCloseParen"
-    show TkOpenBracket = "TkOpenBracket"
-    show TkCloseBracket = "TkCloseBracket"
-    show TkBar = "TkBar"
-    show TkComma = "TkComma"
-    show TkSemicolon = "TkSemicolon"
-    show TkColon            = "TkColon"
-    show TkColonEquals      = "TkColonEquals"
-    show TkDoubleDot        = "TkDoubleDot"
-    show TkDash             = "TkDash"
-    show TkAsterisk         = "TkAsterisk"
-    show TkPlus             = "TkPlus"
-    show TkQuestionMark     = "TkQuestionMark"
-    show TkVal              = "TkVal"
-    show TkVar              = "TkVar"
-    show TkCfg              = "TkCfg"
-    show TkReg              = "TkReg"
-    show TkFix              = "TkFix"
-    show TkConcat           = "TkConcat"
-    show TkStar             = "TkStar"
-    show TkOr               = "TkOr"
-    show TkNot              = "TkNot"
-    show TkAssert           = "TkAssert"
-    show TkIn               = "TkIn"
-    show TkContains         = "TkContains"
-    show TkEquals           = "TkEquals"
-    show (TkID x)           = "TkID " ++  show x
-    show (TkInt x)          = "TkInt " ++ show x
-    show (TkString x)    = "TkString " ++ show x
-    show (TkChar x)        = "TkChar " ++ show x
-    show TkEOF              = "TkEOF"
+    deriving (Show)
 
 -- | State is the text remaining to be parsed.
 --   Left is parse failed with error message

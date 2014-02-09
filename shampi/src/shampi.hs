@@ -22,11 +22,7 @@ import Query
 import SChar
 
 data SCharType = SChar_Integer | SChar_Bit
-    deriving (Eq)
-
-instance Show SCharType where
-    show SChar_Integer = "integer"
-    show SChar_Bit = "bit"
+    deriving (Eq, Show)
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
