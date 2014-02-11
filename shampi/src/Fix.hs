@@ -9,6 +9,8 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
 
+import Smten.Debug.Trace
+
 import RegEx
 import CFG
 
@@ -45,29 +47,45 @@ fixidM x n = do
             return (v, rid)
 
 fixM :: CFG -> Int -> FixM RegEx
-fixM r n = 
+fixM r n = do
+    reg <- fixM' r n
+    --traceShow ((r, n), reg == Empty) $ return reg
+    return reg
+
+-- Given cfg x, compute fix of x* for all i less than n
+-- Returns (xc, fc, res)
+--   xc - a cache of Fix sizes of x for 0 < i <= n
+--   fc - a cache of fix sizes of (x*) for 0 < i <= n
+--   res - the fix size of (x*) for i == n
+fixStar :: CFG -> Int -> FixM (Map.Map Int RegEx, Map.Map Int RegEx, RegEx)
+fixStar _ 0 = return (Map.empty, Map.empty, epsilonR)
+fixStar x n = do
+    (xc, fc, _) <- fixStar x (n-1)
+    xn <- fixM x n
+    let p = \i -> do
+          case (Map.lookup i xc) of
+            Nothing -> Empty
+            Just Empty -> Empty
+            Just a' -> concatR a' (fromMaybe Empty (Map.lookup (n-i) fc))
+    let res = orsR (xn : map p [1..(n-1)])
+    return (Map.insert n xn xc, Map.insert n res fc, res)
+
+fixM' :: CFG -> Int -> FixM RegEx
+fixM' r n = 
   case r of
      EpsilonC -> return $ if n == 0 then epsilonR else emptyR
      EmptyC -> return emptyR
      AtomC c -> return $ if n == 1 then Atom c else emptyR
      RangeC a b -> return $ if n == 1 then Range a b else emptyR
-     StarC x
-      | n == 0 -> return epsilonR
-      | otherwise ->
-       let p = \i -> do
-             a' <- fixM x i
-             if a' == Empty
-                 then return Empty
-                 else do
-                     b' <- fixM r (n-i)
-                     return $ concatR a' b'
-       in orsR <$> mapM p [1..n]
+     StarC x -> do
+        (_, _, r) <- fixStar x n
+        return r
      ConcatC a b ->
        let p = \i -> do
              a' <- fixM a i
-             if a' == Empty
-                 then return a'
-                 else do
+             case a' of
+                Empty -> return a'
+                _ -> do
                      b' <- fixM b (n-i)
                      return $ concatR a' b'
        in orsR <$> mapM p [0..n]

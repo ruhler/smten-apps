@@ -17,6 +17,7 @@ data CFG =
    | OrC CFG CFG
    | VariableC ID
    | FixC ID Int
+    deriving (Show)
 
 charC :: Char -> CFG
 charC = AtomC
