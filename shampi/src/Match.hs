@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Match (match) where
 
 import Smten.Prelude

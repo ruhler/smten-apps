@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module CFG where
 
 import Smten.Prelude

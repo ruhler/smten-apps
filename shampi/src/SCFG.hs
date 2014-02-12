@@ -1,6 +1,4 @@
 
-{-# OPTIONS_GHC -fprof-auto-top #-}
-
 -- | Sized CFGs
 module SCFG (
     SID, Sizes, SCFG(..), andS,
