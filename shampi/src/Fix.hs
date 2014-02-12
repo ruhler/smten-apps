@@ -5,6 +5,7 @@ import Smten.Prelude
 
 import Smten.Control.Monad.State.Strict
 
+import Smten.Data.Ix
 import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
@@ -49,7 +50,7 @@ fixidM x n = do
 fixM :: CFG -> Int -> FixM RegEx
 fixM r n = do
     reg <- fixM' r n
-    --traceShow ((r, n), reg == Empty) $ return reg
+    --traceShow ((r, n), reg == Empty) (return ())
     return reg
 
 -- Given cfg x, compute fix of x* for all i less than n
@@ -88,7 +89,11 @@ fixM' r n =
                 _ -> do
                      b' <- fixM b (n-i)
                      return $ concatR a' b'
-       in orsR <$> mapM p [0..n]
+       in case a of
+            AtomC {} -> if n > 0 then p 1 else return emptyR
+            RangeC {} -> if n > 0 then p 1 else return emptyR
+            FixC _ i -> if n > i then p i else return emptyR
+            _ -> orsR <$> mapM p [0..n]
      OrC a b -> do
          a' <- fixM a n
          b' <- fixM b n
@@ -109,9 +114,11 @@ data FixResult = FixResult {
 fixN :: Map.Map ID CFG -> ID -> Int -> FixResult
 fixN regs x n = {-# SCC "FixN" #-}
   let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
+      bounds = ((0, 0), ((fs_nrid s)-1, n))
+      elems = Map.toList (fs_cache s)
   in FixResult {    
-        fr_regbound = ((0, 0), ((fs_nrid s)-1, n)),
-        fr_regs = Map.toList (fs_cache s),
+        fr_regbound = bounds,
+        fr_regs = elems,
         fr_top = r
       }
 
