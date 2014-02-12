@@ -83,8 +83,6 @@ hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
             (m, cfgs') = cfgsS cfgs
-        trace ("ID to SID: " ++ show m) (return ())
-        trace ("Sized: " ++ show cfgs') (return ())
         mapM_ (hassert m cfgs' svals) asserts
         return svar
     case r of

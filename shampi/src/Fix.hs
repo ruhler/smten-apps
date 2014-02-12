@@ -3,7 +3,7 @@ module Fix (FixResult(..), fixN) where
 
 import Smten.Prelude
 
-import Smten.Control.Monad.State
+import Smten.Control.Monad.State.Strict
 
 import Smten.Data.Array
 import Smten.Data.Ix
@@ -36,9 +36,10 @@ fixidM x n = do
             return v
 
 fixM :: SCFG -> Int -> FixM RegEx
-fixM r n =
+fixM r n = --traceShow (r, n) $
   case andS [n] (sizeS r) of
-     [] -> return Empty
+     [] -> --trace ("empty intersection: " ++ show n ++ " and " ++ showSizes (sizeS r)) $
+            return Empty
      _ -> fixM' r n
 
 -- Given cfg x, compute fix of x* for all i less than n
@@ -78,7 +79,7 @@ fixM' r n =
                 _ -> do
                      b' <- fixM b (n-i)
                      return $ concatR a' b'
-       in orsR <$> mapM p (andS [0..n] (sizeS r))
+       in orsR <$> mapM p (andS [0..n] (sizeS a))
      OrS a b _ -> do
          a' <- fixM a n
          b' <- fixM b n
