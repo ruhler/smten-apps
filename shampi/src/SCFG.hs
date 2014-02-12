@@ -13,7 +13,6 @@ import Smten.Control.Monad.State.Strict
 import Smten.Data.Array
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
-import Smten.Debug.Trace
 import CFG
 
 type SID = Int
@@ -131,7 +130,7 @@ cfgidM x = do
             return (v, sid)
 
 cfgM :: CFG -> SizeM SCFG
-cfgM r = --traceShow r $
+cfgM r =
   case r of
      EpsilonC -> return EpsilonS
      EmptyC -> return EmptyS

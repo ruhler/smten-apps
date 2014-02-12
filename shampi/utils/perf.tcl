@@ -32,8 +32,7 @@ puts ""
 exec ./utils/rhampi_s &
 exec sleep 1
 
-#foreach x [glob tests/cfg/* tests/cfg2/* tests/named/* tests/size/* tests/wsu/*] {
-foreach x [glob tests/cfg/* tests/cfg2/* tests/named/* tests/size/*] {
+foreach x [glob tests/cfg/* tests/cfg2/* tests/named/* tests/size/* tests/wsu/*] {
     puts -nonewline "$x"
     foreach {cfg} $cfgs {
         set t [mytime "[lindex $cfg 1] $x"]

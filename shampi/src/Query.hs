@@ -8,8 +8,6 @@ import Smten.Data.Maybe (fromMaybe)
 import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
-import Smten.Debug.Trace
-
 import SChar
 import Hampi
 import RegEx

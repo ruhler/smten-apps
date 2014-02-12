@@ -11,8 +11,6 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
 
-import Smten.Debug.Trace
-
 import RegEx
 import SCFG
 
@@ -36,10 +34,9 @@ fixidM x n = do
             return v
 
 fixM :: SCFG -> Int -> FixM RegEx
-fixM r n = --traceShow (r, n) $
+fixM r n =
   case andS [n] (sizeS r) of
-     [] -> --trace ("empty intersection: " ++ show n ++ " and " ++ showSizes (sizeS r)) $
-            return Empty
+     [] -> return Empty
      _ -> fixM' r n
 
 -- Given cfg x, compute fix of x* for all i less than n
@@ -59,8 +56,6 @@ fixStar x n = do
     let res = orsR (xn : map p (andS [1..(n-1)] (sizeS x)))
     return (Map.insert n xn xc, Map.insert n res fc, res)
 
--- TODO: fixM already verifies we can have something, so can we optimize
--- given that knowledge?
 fixM' :: SCFG -> Int -> FixM RegEx
 fixM' r n = 
   case r of

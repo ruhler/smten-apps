@@ -1,7 +1,6 @@
 -- vim: ft=haskell
 {
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Grammar (parseHampi) where
 
 import Smten.Prelude

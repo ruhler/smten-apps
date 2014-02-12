@@ -1,7 +1,6 @@
 
 -- | Implementations of Symbolic Characters.
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module SChar where
 
 import Smten.Prelude

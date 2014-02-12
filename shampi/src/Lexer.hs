@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Lexer (
     Token(..), ParserMonad, lexer, failE, read_int,
     ) where
