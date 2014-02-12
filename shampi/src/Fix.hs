@@ -3,8 +3,9 @@ module Fix (FixResult(..), fixN) where
 
 import Smten.Prelude
 
-import Smten.Control.Monad.State.Strict
+import Smten.Control.Monad.State
 
+import Smten.Data.Array
 import Smten.Data.Ix
 import Smten.Data.Functor
 import Smten.Data.Maybe
@@ -13,52 +14,39 @@ import qualified Smten.Data.Map as Map
 import Smten.Debug.Trace
 
 import RegEx
-import CFG
+import SCFG
 
 data FS = FS {
-    fs_cfgs :: Map.Map ID CFG,
-    fs_cache :: Map.Map (RID, Int) RegEx,
-    fs_rids :: Map.Map ID RID,
-    fs_nrid :: RID
+    fs_cfgs :: Array SID SCFG,
+    fs_cache :: Map.Map (SID, Int) RegEx
 }
 
 type FixM = State FS
 
-getridM :: ID -> FixM RID
-getridM x = do
+fixidM :: SID -> Int -> FixM RegEx
+fixidM x n = do
     fs <- get
-    case Map.lookup x (fs_rids fs) of
+    case Map.lookup (x, n) (fs_cache fs) of
         Just v -> return v
         Nothing -> do
-            let v = fs_nrid fs
-            put $ fs { fs_nrid = v+1, fs_rids = Map.insert x v (fs_rids fs) }
+            put $ fs { fs_cache = Map.insert (x, n) Empty (fs_cache fs) }
+            let r = fs_cfgs fs ! x
+            v <- fixM r n
+            modify $ \fs -> fs { fs_cache = Map.insert (x, n) v (fs_cache fs) }
             return v
 
-fixidM :: ID -> Int -> FixM (RegEx, RID)
-fixidM x n = do
-    rid <- getridM x
-    fs <- get
-    case Map.lookup (rid, n) (fs_cache fs) of
-        Just v -> return (v, rid)
-        Nothing -> do
-            put $ fs { fs_cache = Map.insert (rid, n) Empty (fs_cache fs) }
-            let r = fromMaybe (error $ "fixid.r: " ++ x) $ Map.lookup x (fs_cfgs fs)
-            v <- fixM r n
-            modify $ \fs -> fs { fs_cache = Map.insert (rid, n) v (fs_cache fs) }
-            return (v, rid)
-
-fixM :: CFG -> Int -> FixM RegEx
-fixM r n = do
-    reg <- fixM' r n
-    --traceShow ((r, n), reg == Empty) (return ())
-    return reg
+fixM :: SCFG -> Int -> FixM RegEx
+fixM r n =
+  case andS [n] (sizeS r) of
+     [] -> return Empty
+     _ -> fixM' r n
 
 -- Given cfg x, compute fix of x* for all i less than n
 -- Returns (xc, fc, res)
 --   xc - a cache of Fix sizes of x for 0 < i <= n
 --   fc - a cache of fix sizes of (x*) for 0 < i <= n
 --   res - the fix size of (x*) for i == n
-fixStar :: CFG -> Int -> FixM (Map.Map Int RegEx, Map.Map Int RegEx, RegEx)
+fixStar :: SCFG -> Int -> FixM (Map.Map Int RegEx, Map.Map Int RegEx, RegEx)
 fixStar _ 0 = return (Map.empty, Map.empty, epsilonR)
 fixStar x n = do
     (xc, fc, _) <- fixStar x (n-1)
@@ -66,22 +54,23 @@ fixStar x n = do
     let p = \i -> do
           case (Map.lookup i xc) of
             Nothing -> Empty
-            Just Empty -> Empty
             Just a' -> concatR a' (fromMaybe Empty (Map.lookup (n-i) fc))
-    let res = orsR (xn : map p [1..(n-1)])
+    let res = orsR (xn : map p (andS [1..(n-1)] (sizeS x)))
     return (Map.insert n xn xc, Map.insert n res fc, res)
 
-fixM' :: CFG -> Int -> FixM RegEx
+-- TODO: fixM already verifies we can have something, so can we optimize
+-- given that knowledge?
+fixM' :: SCFG -> Int -> FixM RegEx
 fixM' r n = 
   case r of
-     EpsilonC -> return $ if n == 0 then epsilonR else emptyR
-     EmptyC -> return emptyR
-     AtomC c -> return $ if n == 1 then Atom c else emptyR
-     RangeC a b -> return $ if n == 1 then Range a b else emptyR
-     StarC x -> do
+     EpsilonS -> return $ if n == 0 then epsilonR else emptyR
+     EmptyS -> return emptyR
+     AtomS c -> return $ if n == 1 then Atom c else emptyR
+     RangeS a b -> return $ if n == 1 then Range a b else emptyR
+     StarS x _ -> do
         (_, _, r) <- fixStar x n
         return r
-     ConcatC a b ->
+     ConcatS a b _ ->
        let p = \i -> do
              a' <- fixM a i
              case a' of
@@ -89,21 +78,17 @@ fixM' r n =
                 _ -> do
                      b' <- fixM b (n-i)
                      return $ concatR a' b'
-       in case a of
-            AtomC {} -> if n > 0 then p 1 else return emptyR
-            RangeC {} -> if n > 0 then p 1 else return emptyR
-            FixC _ i -> if n > i then p i else return emptyR
-            _ -> orsR <$> mapM p [0..n]
-     OrC a b -> do
+       in orsR <$> mapM p (andS [0..n] (sizeS r))
+     OrS a b _ -> do
          a' <- fixM a n
          b' <- fixM b n
          return $ orsR [a', b']
-     VariableC id -> do
-        (x, rid) <- fixidM id n
+     VariableS id _ -> do
+        x <- fixidM id n
         case x of
           Empty -> return x
-          _ -> return $ Variable n rid
-     FixC x n' -> if n == n' then fst <$> fixidM x n else return emptyR
+          _ -> return $ Variable n id
+     FixS x n' -> if n == n' then fixidM x n else return emptyR
 
 data FixResult = FixResult {
     fr_regbound :: ((RID, Int), (RID, Int)),
@@ -111,13 +96,14 @@ data FixResult = FixResult {
     fr_top :: RegEx
 }
 
-fixN :: Map.Map ID CFG -> ID -> Int -> FixResult
+fixN :: Array SID SCFG -> SID -> Int -> FixResult
 fixN regs x n = {-# SCC "FixN" #-}
-  let (r, s) = runState (fst <$> fixidM x n) $ FS regs Map.empty Map.empty 0
-      bounds = ((0, 0), ((fs_nrid s)-1, n))
+  let (r, s) = runState (fixidM x n) $ FS regs Map.empty
+      maxsid = snd (bounds regs)
+      bnds = ((0, 0), (maxsid, n))
       elems = Map.toList (fs_cache s)
   in FixResult {    
-        fr_regbound = bounds,
+        fr_regbound = bnds,
         fr_regs = elems,
         fr_top = r
       }

@@ -8,10 +8,13 @@ import Smten.Data.Maybe (fromMaybe)
 import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
+import Smten.Debug.Trace
+
 import SChar
 import Hampi
 import RegEx
 import CFG
+import SCFG
 import Fix
 import Match
 
@@ -54,18 +57,19 @@ assertIn (FixResult regsbnd regs reg) vstr
   = match (array regsbnd regs) reg vstr
 
 -- Make a hampi assertion.
-hassert :: (SChar c) => Map.Map ID CFG -> Map.Map ID [c] -> Assertion -> Symbolic ()
-hassert cfgs vals (AssertIn v b y) =
+hassert :: (SChar c) => Map.Map ID SID -> Array SID SCFG -> Map.Map ID [c] -> Assertion -> Symbolic ()
+hassert cfgm cfgs vals (AssertIn v b y) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-        fr = fixN cfgs y (length vstr)
+        yid = fromMaybe (error $ "cfg " ++ y ++ " not found") $ Map.lookup y cfgm
+        fr = fixN cfgs yid (length vstr)
     in assert $ xor b (assertIn fr vstr)
 
-hassert _ vals (AssertEquals v b x) =
+hassert _ _ vals (AssertEquals v b x) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
     in assert $ xor b (vstr == xstr)
 
-hassert _ vals (AssertContains v b s) =
+hassert _ _ vals (AssertContains v b s) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
     in assert $ xor b (contains vstr s)
 
@@ -78,7 +82,10 @@ hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
     r <- run_symbolic s $ do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
-        mapM_ (hassert cfgs svals) asserts
+            (m, cfgs') = cfgsS cfgs
+        trace ("ID to SID: " ++ show m) (return ())
+        trace ("Sized: " ++ show cfgs') (return ())
+        mapM_ (hassert m cfgs' svals) asserts
         return svar
     case r of
         Just v ->
