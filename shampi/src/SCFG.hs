@@ -84,7 +84,8 @@ starS xs = 0 : plusS xs
 
 plusS :: Sizes -> Sizes
 plusS [] = []
-plusS (x:xs) = orS (seqS x) (plusS xs)
+plusS [x] = seqS x
+plusS (x:xs) = [x..]    -- Just approximate rather than blow up.
 
 seqS :: Int -> Sizes
 seqS x = enumFromThen x (x+x)
@@ -92,8 +93,10 @@ seqS x = enumFromThen x (x+x)
 concatS :: Sizes -> Sizes -> Sizes
 concatS [] _ = []
 concatS _ [] = []
-concatS (x:xs) y_@(y:ys)
-  = (x+y) : orS (map (+ x) ys) (concatS xs y_)
+concatS [x] [y] = [x+y]
+concatS [x] ys = map (+ x) ys
+concatS xs [y] = map (+ y) xs
+concatS (x:xs) (y:ys) = [x+y ..] -- Just approximate rather than blow up.
 
 data SS = SS {
     ss_cfgs :: Map.Map ID CFG,
