@@ -8,6 +8,8 @@ import Smten.Data.Maybe (fromMaybe)
 import qualified Smten.Data.Map as Map
 import Smten.Symbolic
 
+import Smten.Debug.Trace
+
 import SChar
 import Hampi
 import RegEx
@@ -81,6 +83,8 @@ hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
             (m, cfgs') = cfgsS cfgs
+        --traceShow m (return ())
+        --traceShow cfgs' (return ())
         mapM_ (hassert m cfgs' svals) asserts
         return svar
     case r of

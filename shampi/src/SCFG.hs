@@ -155,6 +155,11 @@ cfgM r =
 cfgsM :: Map.Map ID CFG -> SizeM ()
 cfgsM regs = mapM_ cfgidM (Map.keys regs)
 
+-- TODO:
+--  Split this into 2 phases:
+--     1. Just translate ID to SID, use _|_ approximation for all sizes
+--     2. Update size approximation given best known approximation
+--   And iterate (2) until a fixpoint is reached or we get tired.
 cfgsS :: Map.Map ID CFG -> (Map.Map ID SID, Array SID SCFG)
 cfgsS regs = {-# SCC "cfgsS" #-}
   let s = execState (cfgsM regs) (SS regs Map.empty Map.empty 0)

@@ -11,6 +11,8 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
 
+import Smten.Debug.Trace
+
 import RegEx
 import SCFG
 
@@ -37,7 +39,10 @@ fixM :: SCFG -> Int -> FixM RegEx
 fixM r n =
   case andS [n] (sizeS r) of
      [] -> return Empty
-     _ -> fixM' r n
+     _ -> do
+        res <- fixM' r n
+        --traceShow ((r, n), res == Empty) (return ())
+        return res
 
 -- Given cfg x, compute fix of x* for all i less than n
 -- Returns (xc, fc, res)
