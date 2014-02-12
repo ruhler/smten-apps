@@ -87,8 +87,7 @@ fixM' r n =
      FixS x n' -> if n == n' then fixidM x n else return emptyR
 
 data FixResult = FixResult {
-    fr_regbound :: ((RID, Int), (RID, Int)),
-    fr_regs :: [((RID, Int), RegEx)],
+    fr_regs :: Array (RID, Int) RegEx,
     fr_top :: RegEx
 }
 
@@ -99,8 +98,7 @@ fixN regs x n = {-# SCC "FixN" #-}
       bnds = ((0, 0), (maxsid, n))
       elems = Map.toList (fs_cache s)
   in FixResult {    
-        fr_regbound = bnds,
-        fr_regs = elems,
+        fr_regs = array bnds elems,
         fr_top = r
       }
 

@@ -6,7 +6,6 @@ import Smten.Data.List
 
 type RID = Int
 
--- TODO: do we need to keep track of lengths anymore?
 data RegEx =
            Epsilon        -- matches ""
          | Empty          -- never matches

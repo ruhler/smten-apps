@@ -156,7 +156,7 @@ cfgsM :: Map.Map ID CFG -> SizeM ()
 cfgsM regs = mapM_ cfgidM (Map.keys regs)
 
 cfgsS :: Map.Map ID CFG -> (Map.Map ID SID, Array SID SCFG)
-cfgsS regs =
+cfgsS regs = {-# SCC "cfgsS" #-}
   let s = execState (cfgsM regs) (SS regs Map.empty Map.empty 0)
       bounds = (0, ss_nsid s - 1)
       elems = Map.assocs (ss_cache s)

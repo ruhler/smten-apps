@@ -51,8 +51,8 @@ xor :: Bool -> Bool -> Bool
 xor b p = if b then p else not p
 
 assertIn :: (SChar c) => FixResult -> [c] -> Bool
-assertIn (FixResult regsbnd regs reg) vstr
-  = match (array regsbnd regs) reg vstr
+assertIn (FixResult regs reg) vstr
+  = match regs reg vstr
 
 -- Make a hampi assertion.
 hassert :: (SChar c) => Map.Map ID SID -> Array SID SCFG -> Map.Map ID [c] -> Assertion -> Symbolic ()
