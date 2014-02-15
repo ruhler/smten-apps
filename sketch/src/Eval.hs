@@ -263,10 +263,10 @@ evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     case a' of
         BitsV av -> do
           assert (idx >= 0 && idx < length av)
-          return (BitV (av !! idx))
+          return (BitV (arrsub av idx))
         ArrayV xs -> do
           assert (idx >= 0 && idx < length xs)
-          return (xs !! idx)
+          return (arrsub xs idx)
 evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
     a' <- evalE a
     IntV lo' <- evalE lo
@@ -303,6 +303,17 @@ evalE (AppE f xs) = {-# SCC "AppE" #-} do
 arrupd :: [a] -> Int -> a -> [a]
 arrupd [] _ _ = []
 arrupd (x:xs) n v = (if (n == 0) then v else x) : arrupd xs (n-1) v
+
+-- List subscript.
+-- Assumes the index is in range.
+-- Tries to be lazy in the index to work better with symbolic index and
+-- concrete list structure.
+arrsub :: [a] -> Int -> a
+arrsub [x] _ = x
+arrsub (x:xs) n = if (n == 0)
+                    then x
+                    else arrsub xs (n-1)
+                    
 
 -- Do a bulk update starting at the given index.
 arrbulkupd :: [a] -> Int -> [a] -> [a]

@@ -33,15 +33,9 @@ STATIC_EVAL::
 
 TYPEOFV_SLOW
  Looks like we are getting stuck in a false infinite finite formula.
- See broken/perf0.smten.sk for minimized test case.
- 
 
 INSERTVAR_SLOW
- 95% time is spent in insertVar, and the program doesn't finish.
- Particularly, that 95% is a result of a seemingly exponential blowup of calls
- to PRIM_INT_EQ, PRIM_INT_LEQ, and PRIM_INT_ADD.
- Ex: 175 calls to PRIM_INT_ADD lead to about 17 million calls to select.
- See broken/perf1.smten.sk for a minimized test case.
+ Stuck in false symbolic execution?
 
 INTEQ_SLOW
  All the time is spent in Int equality. Perhaps some algebraic 
@@ -51,28 +45,26 @@ STACK_OVERFLOW
  A mysterious stack overflow
 
 Features needed, by test case::
-broken/perf0.smten.sk: TYPEOFV_SLOW
-broken/perf1.smten.sk: INSERTVAR_SLOW
 broken/miniTest48.sk: STACK_OVERFLOW
-broken/miniTest49.sk: INSERTVAR_SLOW
-broken/miniTest52.sk: INSERTVAR_SLOW
 miniTest54.sk: STATIC_EVAL
 miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest86.sk: INSERTVAR_SLOW
+miniTest86.sk: WRONG ANSWER: says unsat
 miniTest93.sk: UNINTERPRETED_FUNCTION
 miniTestb101.sk: UNINTERPRETED_FUNCTION
 miniTestb102.sk: TYPEOFV_SLOW
 miniTestb103.sk: TYPEOFV_SLOW
 miniTestb104.sk: TYPEOFV_SLOW
-miniTestb107.sk: TYPEOFV_SLOW
 miniTestb110.sk: INSERTVAR_SLOW
 miniTestb111.sk: STRUCT_TYPES
 miniTestb112.sk: STACK_OVERFLOW
 miniTestb113.sk: 2D_UPDATE
 miniTestb114.sk: STRUCT_TYPES
 miniTestb116.sk: STRUCT_TYPES
-miniTestb118.sk: INSERTVAR_SLOW
 miniTestb121.sk: INTEQ_SLOW
+miniTestb122.sk: STRUCT_TYPES
+miniTestb123.sk: STRUCT_TYPES
+miniTestb125.sk: STRUCT_TYPES
+miniTestb126.sk: STRUCT_TYPES
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
