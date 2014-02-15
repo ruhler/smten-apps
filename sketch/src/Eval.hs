@@ -296,10 +296,13 @@ evalE (AppE f xs) = {-# SCC "AppE" #-} do
     
     
 -- Update the ith element of an array
+-- Does nothing if the index is out of bounds.
+--
+-- Note: This is structured to be lazy in the Int argument, because we
+-- expect the index to be symbolic, but the list structure to be concrete.
 arrupd :: [a] -> Int -> a -> [a]
-arrupd [] _ _ = error "arrupd: update out of bounds"
-arrupd (x:xs) 0 v = v : xs
-arrupd (x:xs) n v = x : arrupd xs (n-1) v
+arrupd [] _ _ = []
+arrupd (x:xs) n v = (if (n == 0) then v else x) : arrupd xs (n-1) v
 
 -- Do a bulk update starting at the given index.
 arrbulkupd :: [a] -> Int -> [a] -> [a]

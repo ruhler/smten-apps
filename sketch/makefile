@@ -2,7 +2,7 @@
 .PHONY: all
 all: 
 	tclsh utils/make.tcl
-	tclsh utils/test.tcl
+	time -f %E tclsh utils/test.tcl
 
 perf:
 	tclsh utils/makeperf.tcl
