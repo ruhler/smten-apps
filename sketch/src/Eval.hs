@@ -283,6 +283,7 @@ evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
+        (IntT, BitV v) -> return (IntV (if v then 1 else 0))
         (IntT, BitsV v) -> return (IntV (valB v))
         (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
         (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))

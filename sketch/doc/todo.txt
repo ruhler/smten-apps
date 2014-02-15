@@ -17,11 +17,21 @@ UNINTERPRETED_FUNCTION
   etc...
 
 STRUCT_TYPES
-  * support struct types.
+  Support struct types.
+  Needs:
+  * Declaration for struct.
+  * StructT type
+  * new operator: new Foo();
+  * 'null' pointer.
+  * member access via '.'  May be multi-level
+  * member update via '.'  May be multi-level
+  * passing structs as arguments
+  
 
 2D_UPDATE
-  * support 2d array update: T[2][1] = 1;
-    And, ideally, any dimension array update.
+  Support 2d array update: T[2][1] = 1;
+  And, ideally, any dimension array update.
+  Maybe: Have a generic Assign operator, and LVal?
 
 STATIC_EVAL::
   Evaluate local variables statically if possible.
@@ -33,6 +43,10 @@ STATIC_EVAL::
 
 VOID_TYPE::
   Support the type 'void' for functions.
+  Should just need a new 'void' type?
+  Can you do something like:
+    void foo = fooFunction();
+    return foo;
 
 INSERT_INTO
   insert and into statements? What do those mean?
@@ -59,7 +73,6 @@ tests/broken/miniTestb112.sk: STACK_OVERFLOW
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb157.sk: 2D_UPDATE
 
-tests/broken/miniTestb149.sk: explicit cast bit to int.
 tests/broken/miniTestb150.sk: support do-while statement.
 
 tests/broken/static/*.sk: STATIC_EVAL
