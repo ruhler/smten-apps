@@ -61,6 +61,7 @@ import Sketch
     'repeat'    { TkRepeat }
     'while'    { TkWhile }
     'for'    { TkFor }
+    'do'    { TkDo }
     'else'  { TkElse }
     'bit'   { TkBit }
     'int'   { TkInt }
@@ -149,6 +150,9 @@ stmt :: { Stmt }
  | 'if' '(' expr ')' stmt 'else' stmt { IfS $3 $5 $7 }
  | 'repeat' '(' expr ')' stmt { RepeatS $3 $5 }
  | 'while' '(' expr ')' stmt { WhileS $3 $5 }
+    -- TODO: Are we allowed to duplicate the stmt for do-while?
+    -- What if it has a whole or generator in it?
+ | 'do' stmt 'while' '(' expr ')' ';' { BlockS [$2, WhileS $5 $2] }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
  | '++' id ';' { UpdateS $2 (AddE (VarE $2) (ValE $ IntV 1)) }

@@ -73,8 +73,6 @@ tests/broken/miniTestb112.sk: STACK_OVERFLOW
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb157.sk: 2D_UPDATE
 
-tests/broken/miniTestb150.sk: support do-while statement.
-
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
