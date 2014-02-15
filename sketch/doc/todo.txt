@@ -31,6 +31,12 @@ STATIC_EVAL::
   So we have to inline x to know the type of bar.
   Question: don't we already have some infrastructure for this?
 
+VOID_TYPE::
+  Support the type 'void' for functions.
+
+INSERT_INTO
+  insert and into statements? What do those mean?
+
 TYPEOFV_SLOW
  Looks like we are getting stuck in a false infinite finite formula.
 
@@ -45,26 +51,31 @@ STACK_OVERFLOW
  A mysterious stack overflow
 
 Features needed, by test case::
-broken/miniTest48.sk: STACK_OVERFLOW
-miniTest54.sk: STATIC_EVAL
-miniTest78.sk: POOR_TYPE_BIT_LITERAL
-miniTest86.sk: WRONG ANSWER: says unsat
-miniTest93.sk: UNINTERPRETED_FUNCTION
-miniTestb101.sk: UNINTERPRETED_FUNCTION
-miniTestb102.sk: TYPEOFV_SLOW
-miniTestb103.sk: TYPEOFV_SLOW
-miniTestb104.sk: TYPEOFV_SLOW
-miniTestb110.sk: INSERTVAR_SLOW
-miniTestb111.sk: STRUCT_TYPES
-miniTestb112.sk: STACK_OVERFLOW
-miniTestb113.sk: 2D_UPDATE
-miniTestb114.sk: STRUCT_TYPES
-miniTestb116.sk: STRUCT_TYPES
-miniTestb121.sk: INTEQ_SLOW
-miniTestb122.sk: STRUCT_TYPES
-miniTestb123.sk: STRUCT_TYPES
-miniTestb125.sk: STRUCT_TYPES
-miniTestb126.sk: STRUCT_TYPES
+
+tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
+tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
+tests/broken/miniTestb141.sk: WRONG ANSWER: says unsat
+tests/broken/miniTestb112.sk: STACK_OVERFLOW
+tests/broken/miniTestb113.sk: 2D_UPDATE
+tests/broken/miniTestb157.sk: 2D_UPDATE
+
+tests/broken/miniTestb149.sk: explicit cast bit to int.
+tests/broken/miniTestb150.sk: support do-while statement.
+
+tests/broken/static/*.sk: STATIC_EVAL
+tests/broken/structs/*.sk: STRUCT_TYPES
+tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
+tests/broken/void/*.sk: VOID_TYPE
+tests/broken/insertinto/*.sk: INSERT_INTO
+tests/broken/regex/*.sk: Support REGEX hole expressions.
+
+tests/broken/slow/miniTest48.sk: STACK_OVERFLOW
+tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
+tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
+tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW
+tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
+tests/broken/slow/miniTestb121.sk: INTEQ_SLOW
+tests/broken/slow/miniTestb147.sk: (==) takes all time?
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
