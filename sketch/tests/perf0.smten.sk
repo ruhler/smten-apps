@@ -1,0 +1,16 @@
+
+bit one(bit in){
+  return 1;
+}
+
+bit parallel1(bit in) implements one{
+  int[2] pc = {0,0};    
+  
+  int idx = in ? 1 : 0;
+  if(pc[idx] == 0){
+    bit[2] ne;
+    ne[in] = 0;
+  }
+
+  return 1;
+} 
