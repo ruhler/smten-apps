@@ -1,0 +1,16 @@
+int N = 1;
+
+bit[N] sort(bit[N] input){
+	bit[N] output={0};
+	if(input[0] && 1){
+        output[0] = input[0];
+	}
+	return output;
+}
+
+
+bit[N] MergeSort(bit[N] input)implements sort{
+    int y = ??;
+	return sort(input>>y);
+}
+

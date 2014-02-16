@@ -69,7 +69,7 @@ Features needed, by test case::
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb141.sk: WRONG ANSWER: says unsat
-tests/broken/miniTestb112.sk: STACK_OVERFLOW
+tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb157.sk: 2D_UPDATE
 
@@ -80,7 +80,6 @@ tests/broken/void/*.sk: VOID_TYPE
 tests/broken/insertinto/*.sk: INSERT_INTO
 tests/broken/regex/*.sk: Support REGEX hole expressions.
 
-tests/broken/slow/miniTest48.sk: STACK_OVERFLOW
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW
