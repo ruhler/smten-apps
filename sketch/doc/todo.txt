@@ -40,6 +40,12 @@ STATIC_EVAL::
     bit bar[x] = ...
   So we have to inline x to know the type of bar.
   Question: don't we already have some infrastructure for this?
+  Operations to support at least:
+    * multiplication, addition
+    * left shift
+    * constant variable
+  Other things to do:
+    * Keep track of values in the type environment if we have them statically
 
 VOID_TYPE::
   Support the type 'void' for functions.
@@ -47,6 +53,8 @@ VOID_TYPE::
   Can you do something like:
     void foo = fooFunction();
     return foo;
+  * Add Void type
+  * Add expression statement (which must have type void?)
 
 INSERT_INTO
   insert and into statements? What do those mean?
@@ -64,6 +72,18 @@ INTEQ_SLOW
 STACK_OVERFLOW
  A mysterious stack overflow
 
+PERF3
+ In pc[1] < 4, 
+ pc[1] can have so many possible values, we have an exponential blowup?
+ Looks like it's from the short circuiting of &&, which actually requires
+ a lot more work, because we don't know if we are allowed to short circuit 
+ or not.
+
+ Can we have the same control-flow path, independent of the value of the first
+ argument to &&? Something like: predicated evaluation of the second argument.
+ It only can cause failure if the predicate is true? That may or may not help.
+
+
 Features needed, by test case::
 
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
@@ -80,6 +100,7 @@ tests/broken/void/*.sk: VOID_TYPE
 tests/broken/insertinto/*.sk: INSERT_INTO
 tests/broken/regex/*.sk: Support REGEX hole expressions.
 
+tests/broken/slow/perf3.smten.sk: PERF3
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW

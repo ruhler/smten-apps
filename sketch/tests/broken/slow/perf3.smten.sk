@@ -1,0 +1,16 @@
+
+bit one(bit in){
+	return 1;
+}
+
+bit parallel1(bit in) implements one{
+  int[2] pc = 0;    
+  
+  for(int t=0; t < 10; ++t){
+  	bit runThr0 = (in && pc[1] < 4 );
+    pc[runThr0] = pc[runThr0] + 1;
+  }
+
+  return 1;
+} 
+
