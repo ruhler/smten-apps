@@ -5,11 +5,23 @@ sources := \
 	src/BitNQueens.hs \
 	src/BoolNQueens.hs
 
-all: build/release/nqueens build/profile/nqueens build/z3nqueens build/z3txtnqueens
+sourcesl := \
+	src/IntNQueensL.hs
+
+all: build/release/nqueens \
+	build/profile/nqueens \
+	build/z3nqueens \
+	build/z3txtnqueens \
+	build/release/nqueensl \
+	build/msnqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
 	mkdir -p build/release
 	smten --make -O -o build/release/nqueens -ibuild/release -isrc -hidir build/release -odir build/release src/nqueens.hs -rtsopts -fwarn-unused-imports
+
+build/release/nqueensl: src/nqueensl.hs $(sourcesl)
+	mkdir -p build/release
+	ghc --make -O -o build/release/nqueensl -ibuild/release -isrc -hidir build/release -odir build/release src/nqueensl.hs -rtsopts -fwarn-unused-imports
 
 build/profile/nqueens: src/nqueens.hs $(sources)
 	mkdir -p build/profile
@@ -19,14 +31,18 @@ build/z3nqueens: src/z3nqueens.c
 	mkdir -p build
 	gcc -std=c99 -o $@ $< -lz3
 
+build/msnqueens: src/msnqueens.cc
+	mkdir -p build
+	g++ -o $@ -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS $< -lminisat
+
 build/z3txtnqueens: src/z3txtnqueens.c
 	mkdir -p build
 	gcc -std=c99 -o $@ $<
 
 perf: build/release/nqueens
-	time -f %E ./build/release/nqueens -s yices2 -e Int 32 > /dev/null
+	time -f %E ./build/release/nqueens -s yices2 -e Int 38 > /dev/null
 	time -f %E ./build/release/nqueens -s yices2 -e Integer 36 > /dev/null
-	time -f %E ./build/release/nqueens -s yices2 -e Bit 128 > /dev/null
+	time -f %E ./build/release/nqueens -s yices2 -e Bit 156 > /dev/null
 
 graphs: build/bench.data
 	Rscript utils/bench.R
