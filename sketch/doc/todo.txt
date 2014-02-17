@@ -47,6 +47,9 @@ STATIC_EVAL::
   Other things to do:
     * Keep track of values in the type environment if we have them statically
 
+HARNESS::
+  Support the 'harness' declaration.
+
 VOID_TYPE::
   Support the type 'void' for functions.
   Should just need a new 'void' type?
@@ -92,7 +95,14 @@ tests/broken/miniTestb141.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb157.sk: 2D_UPDATE
+tests/broken/miniTestb202.sk: WRONG ANSWER: says unsat (looks easy to solve?)
+tests/broken/miniTestb205.sk: TYPE ERROR
+tests/broken/miniTestb206.sk: TYPE ERROR
+tests/broken/miniTestb208.sk: C Preprocessor?
+tests/broken/miniTestb215.sk: TYPE ERROR - parser precedence bug?
+tests/broken/miniTestb225.sk: C Preprocessor?
 
+tests/broken/harness/*.sk: HARNESS
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
@@ -107,6 +117,11 @@ tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
 tests/broken/slow/miniTestb121.sk: INTEQ_SLOW
 tests/broken/slow/miniTestb147.sk: (==) takes all time?
+tests/broken/slow/miniTestb180.sk: takes many iterations
+tests/broken/slow/miniTestb180.sk: takes many iterations
+tests/broken/slow/miniTestb181.sk: arrsub takes all time?
+tests/broken/slow/miniTestb182.sk: takes many iterations
+tests/broken/slow/miniTestb189.sk: (==) takes all time?
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
