@@ -18,7 +18,8 @@ import Bits
 type Name = String
 
 data Type = 
-    BitT              -- bit
+    VoidT             -- void
+  | BitT              -- bit
   | ArrT Type Expr    -- T[n]
   | IntT              -- int
   | FunT Type [Type]  -- function type: output and argument types
@@ -26,6 +27,7 @@ data Type =
     deriving (Show)
 
 instance Eq Type where
+    (==) VoidT VoidT = True
     (==) BitT BitT = True
     (==) (ArrT a (ValE (IntV aw))) (ArrT b (ValE (IntV bw))) =
         a == b && aw == bw
@@ -62,6 +64,7 @@ typeofV (IntV w) = IntT
 typeofV (FunV f) = UnknownT
 
 dimension :: Type -> Int
+dimension VoidT = 1
 dimension BitT = 1
 dimension (ArrT t _) = 1 + dimension t
 dimension IntT = 1

@@ -22,7 +22,7 @@ data Token =
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
   | TkDoubleColon | TkColon
-  | TkIf | TkElse | TkBit | TkInt | TkImplements | TkReturn | TkReorder
+  | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse | TkDo
   | TkPragma | TkOptions
@@ -96,6 +96,7 @@ keywords = [
     ("else", TkElse),
     ("bit", TkBit),
     ("int", TkInt),
+    ("void", TkVoid),
     ("implements", TkImplements),
     ("return", TkReturn),
     ("reorder", TkReorder),

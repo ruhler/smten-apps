@@ -52,12 +52,11 @@ HARNESS::
 
 VOID_TYPE::
   Support the type 'void' for functions.
-  Should just need a new 'void' type?
-  Can you do something like:
-    void foo = fooFunction();
-    return foo;
-  * Add Void type
+  * What value should be returned for void?
+     In order to ensure two void type functions are the same?
   * Add expression statement (which must have type void?)
+  * Support reference parameters
+  * Support empty return statement: return;
 
 INSERT_INTO
   insert and into statements? What do those mean?
@@ -86,16 +85,21 @@ PERF3
  argument to &&? Something like: predicated evaluation of the second argument.
  It only can cause failure if the predicate is true? That may or may not help.
 
+RETURN_BUG
+ A return statement not only causes an output to be set, but should also halt
+ execution of the current block. In the implementation as it is now, it fails
+ to stop execution.
+
 
 Features needed, by test case::
 
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
-tests/broken/miniTestb141.sk: WRONG ANSWER: says unsat
+tests/broken/miniTestb141.sk: RETURN_BUG
+tests/broken/miniTestb202.sk: RETURN_BUG
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb157.sk: 2D_UPDATE
-tests/broken/miniTestb202.sk: WRONG ANSWER: says unsat (looks easy to solve?)
 tests/broken/miniTestb205.sk: TYPE ERROR
 tests/broken/miniTestb206.sk: TYPE ERROR
 tests/broken/miniTestb208.sk: C Preprocessor?

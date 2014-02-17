@@ -22,6 +22,7 @@ evalP p i = all (evalD (envof p) i) p
 -- Evaluate a type.
 -- It should not fail.
 evalT :: ProgEnv -> Type -> Type
+evalT env VoidT = VoidT
 evalT env BitT = BitT
 evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromJust $ runEvalM env (evalE e))
 evalT env IntT = IntT

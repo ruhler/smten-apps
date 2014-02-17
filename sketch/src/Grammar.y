@@ -65,6 +65,7 @@ import Sketch
     'else'  { TkElse }
     'bit'   { TkBit }
     'int'   { TkInt }
+    'void'   { TkVoid }
     'implements'   { TkImplements }
     'return'   { TkReturn }
     'reorder'   { TkReorder }
@@ -114,6 +115,7 @@ decl :: { Decl }
 
 type :: { Type }
  : 'bit' { BitT }
+ | 'void' { VoidT }
  | type '[' expr ']' { ArrT $1 $3 }
  | 'int' { IntT }
 

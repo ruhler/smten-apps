@@ -18,6 +18,7 @@ instance Ppr Name where
    prettya = pretty
 
 instance Ppr Type where
+   pretty VoidT = "void"
    pretty BitT = "bit"
    pretty (ArrT t n) = pretty t ++ "[" ++ pretty n ++ "]"
    pretty IntT = "int"
