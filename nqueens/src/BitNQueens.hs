@@ -29,8 +29,8 @@ islegal places = and [
 
 pretty :: Placement -> String
 pretty places = unlines [[if (r, c) `elem` places then '♛' else '.'
-                | c <- enumFromTo 0 (toEnum $ length places - 1)]
-                | r <- enumFromTo 0 (toEnum $ length places - 1)]
+                | c <- [0..(toEnum $ length places - 1)]]
+                | r <- [0..(toEnum $ length places - 1)]]
 
 mkcol :: Int -> Symbolic Bits
 mkcol n = do
@@ -45,7 +45,7 @@ bit_nqueens :: Int -> SMT ()
 bit_nqueens n
  | supported n = do
   result <- query $ do
-         let rows = enumFromTo 0 (toEnum n-1)
+         let rows = [0..(toEnum n-1)]
          cols <- sequence $ replicate n (mkcol n)
          let places = zip rows cols
          assert (islegal places)

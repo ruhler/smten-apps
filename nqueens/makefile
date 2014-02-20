@@ -13,6 +13,7 @@ all: build/release/nqueens \
 	build/z3nqueens \
 	build/z3txtnqueens \
 	build/release/nqueensl \
+	build/release/nqueensl2 \
 	build/msnqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
@@ -22,6 +23,10 @@ build/release/nqueens: src/nqueens.hs $(sources)
 build/release/nqueensl: src/nqueensl.hs $(sourcesl)
 	mkdir -p build/release
 	ghc --make -O -o build/release/nqueensl -ibuild/release -isrc -hidir build/release -odir build/release src/nqueensl.hs -rtsopts -fwarn-unused-imports
+
+build/release/nqueensl2: src/nqueens.hs $(sources)
+	mkdir -p build/release
+	ghc --make -O -o build/release/nqueensl2 -ibuild/release -isrc -hidir build/release -odir build/release src/nqueens.hs -rtsopts -fwarn-unused-imports -XNoImplicitPrelude
 
 build/profile/nqueens: src/nqueens.hs $(sources)
 	mkdir -p build/profile
