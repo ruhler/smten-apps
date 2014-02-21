@@ -54,6 +54,9 @@ VOID_TYPE::
   Support the type 'void' for functions.
   * What value should be returned for void?
      In order to ensure two void type functions are the same?
+     What does a function return if it doesn't include a return statement?
+      - for a void function, it should return void
+      - for an int or bit function??
   * Add expression statement (which must have type void?)
   * Support reference parameters
   * Support empty return statement: return;
