@@ -108,14 +108,21 @@ tests/broken/miniTestb206.sk: TYPE ERROR
 tests/broken/miniTestb208.sk: C Preprocessor?
 tests/broken/miniTestb215.sk: TYPE ERROR - parser precedence bug?
 tests/broken/miniTestb225.sk: C Preprocessor?
+tests/broken/miniTestb338.sk: Can't find variable in scope
+tests/broken/miniTestb533.sk: Empty file?
 
 tests/broken/harness/*.sk: HARNESS
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/void/*.sk: VOID_TYPE
+tests/broken/char/*.sk: CHAR_TYPE
+tests/broken/include/*.sk: include keyword
+tests/broken/package/*.sk: package keyword
 tests/broken/insertinto/*.sk: INSERT_INTO
 tests/broken/regex/*.sk: Support REGEX hole expressions.
+tests/broken/stencil/*.sk: stencil keyword
+tests/broken/unknownN/*.sk: Global N not defined?
 
 tests/broken/slow/perf3.smten.sk: PERF3
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
