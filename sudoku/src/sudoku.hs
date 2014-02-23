@@ -3,6 +3,7 @@
 import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
+import Smten.System.IO0(linebuffer)
 
 import Smten.Symbolic
 import Smten.Symbolic.Solver.Debug
@@ -84,5 +85,6 @@ main = do
                  Nothing -> lines boardlist
                  Just n -> take n (lines boardlist)
 
+  linebuffer
   mapM_ (solve solver) boards
 
