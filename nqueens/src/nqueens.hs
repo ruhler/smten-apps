@@ -2,6 +2,7 @@
 import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
+import Smten.System.IO0 (linebuffer)
 import Smten.Symbolic
 import Smten.Symbolic.Solver.STP
 import Smten.Symbolic.Solver.Yices1
@@ -72,8 +73,16 @@ main = do
           Nothing -> fail $ "no board size input\n" ++ usage 
           Just v -> return v
 
-  mxs <- run_symbolic solver (f n)
-  case mxs of
-    Nothing -> putStrLn "no solution"
-    Just xs -> putStrLn $ pretty n xs
+  -- If n is less than zero, we try all n starting from 0 to (-n) and print a
+  -- single line for each solution.
+  if (n < 0)
+    then do
+        linebuffer
+        flip mapM_ [0..(negate n)] $ \n -> do
+            run_symbolic solver (f n) >>= print
+    else do
+      mxs <- run_symbolic solver (f n)
+      case mxs of
+        Nothing -> putStrLn "no solution"
+        Just xs -> putStrLn $ pretty n xs
 
