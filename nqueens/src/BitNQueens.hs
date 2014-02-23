@@ -5,10 +5,8 @@
 module BitNQueens( bit_nqueens ) where
 
 import Smten.Prelude
-import Smten.Control.Monad.Trans
 import Smten.Data.Bit
 import Smten.Symbolic
-import Smten.Symbolic.SMT
 
 type Bits = Bit 12
 
@@ -27,11 +25,6 @@ islegal places = and [
   distinct (map (uncurry (+)) places),
   distinct (map (uncurry (-)) places)]
 
-pretty :: Placement -> String
-pretty places = unlines [[if (r, c) `elem` places then '♛' else '.'
-                | c <- [0..(toEnum $ length places - 1)]]
-                | r <- [0..(toEnum $ length places - 1)]]
-
 mkcol :: Int -> Symbolic Bits
 mkcol n = do
     x <- free_Bit
@@ -41,17 +34,13 @@ mkcol n = do
 supported :: Int -> Bool
 supported n = 2*n < fromEnum (bv_not 0 :: Bits)
 
-bit_nqueens :: Int -> SMT ()
+bit_nqueens :: Int -> Symbolic [Int]
 bit_nqueens n
  | supported n = do
-  result <- query $ do
-         let rows = [0..(toEnum n-1)]
-         cols <- sequence $ replicate n (mkcol n)
-         let places = zip rows cols
-         assert (islegal places)
-         return places
-  liftIO $ case result of
-              Nothing -> putStrLn "no solution"
-              Just v -> putStrLn (pretty v)
+      let rows = [0..(toEnum n-1)]
+      cols <- sequence $ replicate n (mkcol n)
+      let places = zip rows cols
+      assert (islegal places)
+      return $ map fromEnum cols
  | otherwise = error ("n = " ++ show n ++ " not supported. Increase bit width")
 

@@ -2,7 +2,7 @@
 import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
-import Smten.Symbolic.SMT
+import Smten.Symbolic
 import Smten.Symbolic.Solver.STP
 import Smten.Symbolic.Solver.Yices1
 import Smten.Symbolic.Solver.Yices2
@@ -30,6 +30,15 @@ lookupn :: [String] -> Maybe Int
 lookupn [] = Nothing
 lookupn (('-':_):_:xs) = lookupn xs
 lookupn (n:_) = Just (read n)
+
+-- Given the placement as a list of column positions for each queen
+-- in row order, print a pretty result.
+-- The columns are 0-indexed
+pretty :: Int -> [Int] -> String
+pretty n xs =
+  let mkrow :: Int -> String
+      mkrow i = replicate i '.' ++ ['♛'] ++ replicate (n - i - 1) '.'
+  in unlines (map mkrow xs)
 
 main :: IO ()
 main = do
@@ -63,5 +72,8 @@ main = do
           Nothing -> fail $ "no board size input\n" ++ usage 
           Just v -> return v
 
-  runSMT solver (f n)
+  mxs <- run_symbolic solver (f n)
+  case mxs of
+    Nothing -> putStrLn "no solution"
+    Just xs -> putStrLn $ pretty n xs
 
