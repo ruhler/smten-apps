@@ -12,12 +12,12 @@ import Cell
 type BitCell = Bit 4
 
 instance Cell BitCell where
-    mkCell = toEnum
-    deCell = fromEnum
+    mkCell c = toEnum (c-1)
+    deCell c = fromEnum c + 1
 
     freeCell = do
         x <- free_Bit
-        assert ((x > 0) && (x <= 9))
+        assert (x <= 8)
         return x
 
     distinctCell = distinct

@@ -21,26 +21,26 @@ build/profile/sudoku: $(SOURCES)
 perf: build/release/sudoku
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e Bit | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e Enum | wc -l
-	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e BitOneHot | wc -l
+	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e BitOneHot | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e Int | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices2 -e Integer | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e Bit | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e Enum | wc -l
-	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e BitOneHot | wc -l
+	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e BitOneHot | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e Int | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s yices1 -e Integer | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e Bit | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e Enum | wc -l
-	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e BitOneHot | wc -l
+	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e BitOneHot | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e Int | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s z3 -e Integer | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s stp -e Bit | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s stp -e Enum | wc -l
-	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s stp -e BitOneHot | wc -l
+	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s stp -e BitOneHot | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s stp -e Int | wc -l
-	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e Bit | wc -l
+	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e Bit | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e Enum | wc -l
-	cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e BitOneHot | wc -l
+	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e BitOneHot | wc -l
 	#cat tests/sudoku17.shuffled | timeout 30s ./build/release/sudoku -s minisat -e Int | wc -l
 
 graphs: build/bench.data
