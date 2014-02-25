@@ -26,22 +26,44 @@ void nqueens(int n)
         s.addClause(ps);
     }
 
-    // Assert there cannot be conflicts
-    for (int r1 = 0; r1 < n; r1++) {
+    // Assert there are no conflicts in each row.
+    for (int r = 0; r < n; r++) {
         for (int c1 = 0; c1 < n; c1++) {
             for (int c2 = c1+1; c2 < n; c2++) {
-                s.addClause(mkLit(vars[r1][c1], false), mkLit(vars[r1][c2], false));
+                s.addClause(mkLit(vars[r][c1], false), mkLit(vars[r][c2], false));
             }
-                
-            for (int r2 = r1 + 1; r2 < n; r2++) {
-                for (int c2 = 0; c2 < n; c2++) {
-                    bool eqcol = c1 == c2;
-                    bool eqpdiag = (r1 + c1) == (r2 + c2);
-                    bool eqndiag = (r1 - c1) == (r2 - c2);
-                    if (eqcol || eqpdiag || eqndiag) {
-                        s.addClause(mkLit(vars[r1][c1], false), mkLit(vars[r2][c2], false));
-                    }
-                }
+        }
+    }
+
+    // Assert there are no conflicts in each col.
+    for (int c = 0; c < n; c++) {
+        for (int r1 = 0; r1 < n; r1++) {
+            for (int r2 = r1+1; r2 < n; r2++) {
+                s.addClause(mkLit(vars[r1][c], false), mkLit(vars[r2][c], false));
+            }
+        }
+    }
+
+    // Assert there are no conflicts in each positive diagonal
+    //  r = c + d
+    for (int d = 2-n; d < n-1; d++) {
+        for (int c1 = std::max(0, -d); c1 < std::min(n, n-d); c1++) {
+            int r1 = c1 + d;
+            for (int c2 = c1+1; c2 < std::min(n, n-d); c2++) {
+                int r2 = c2 + d;
+                s.addClause(mkLit(vars[r1][c1], false), mkLit(vars[r2][c2], false));
+            }
+        }
+    }
+
+    // Assert there are no conflicts in each negative diagonal
+    //  r = -c + d
+    for (int d = 1; d < 2*(n-1); d++) {
+        for (int c1 = std::max(0, 1+d-n); c1 < std::min(n, 1+d); c1++) {
+            int r1 = -c1 + d;
+            for (int c2 = c1+1; c2 < std::min(n, 1+d); c2++) {
+                int r2 = -c2 + d;
+                s.addClause(mkLit(vars[r1][c1], false), mkLit(vars[r2][c2], false));
             }
         }
     }

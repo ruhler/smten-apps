@@ -8,18 +8,19 @@ import Smten.Symbolic
 
 -- Placement: A list of locations (row, col) for each queen.
 -- Indices go from 0 to n-1
-type Placement = [(Int, Int)]
+type Queen = (Int, Int)
+type Queens = [Queen]
 
-distinct :: (Eq a) => [a] -> Bool
+distinct :: [Int] -> Bool
 distinct [] = True
 distinct (x:xs) = x `notElem` xs && distinct xs
 
-islegal :: Placement -> Bool
-islegal places = and [
-  distinct (map fst places),
-  distinct (map snd places),
-  distinct (map (uncurry (+)) places),
-  distinct (map (uncurry (-)) places)]
+islegal :: Queens -> Bool
+islegal queens = and [
+  distinct (map fst queens),
+  distinct (map snd queens),
+  distinct (map (uncurry (+)) queens),
+  distinct (map (uncurry (-)) queens)]
 
 mkcol :: Int -> Symbolic Int
 mkcol n = msum (map return [0..(n-1)])
@@ -27,8 +28,8 @@ mkcol n = msum (map return [0..(n-1)])
 int_nqueens :: Int -> Symbolic [Int]
 int_nqueens n = do
     let rows = [0..(n-1)]
-    cols <- sequence $ replicate n (mkcol n)
-    let places = zip rows cols
-    assert (islegal places)
+    cols <- replicateM n (mkcol n)
+    let queens = zip rows cols
+    guard (islegal queens)
     return cols
 
