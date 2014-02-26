@@ -22,19 +22,19 @@ proc runcfg {outfile maxn cmd} {
 
 # 1. haskell list monad based on Int type.
 #    Ranges from n = 1 to n = 10 before blowing up too much.
-runcfg build/nqueensl.data 10 ./build/release/nqueensl
+#runcfg build/nqueensl.data 10 ./build/release/nqueensl
 
 # 2. minisat coded in c.
 #    Ranges from n = 1 to n = 200 easily enough.
-runcfg build/cminisat.data 200 ./build/msnqueens
+#runcfg build/cminisat.data 200 ./build/msnqueens
 
 # 3. Smten using the Int type.
 #   Ranges from n = 1 to n = 57
-runcfg build/smtenmsint.data 57 "./build/release/nqueens -e Int -s minisat"
+#runcfg build/smtenmsint.data 57 "./build/release/nqueens -e Int -s minisat"
 
 # 4. Smten using the Bit type.
-#   Ranges from n = 1 to n = 200 easily enough
-runcfg build/smtenmsbit.data 200 "./build/release/nqueens -e Bit -s minisat"
+#   Ranges from n = 1 to n = 100 easily enough
+#runcfg build/smtenmsbit.data 100 "./build/release/nqueens -e Bit -s minisat"
 
 # 5. Smten using the Bool type.
 #   Ranges from n = 1 to n = 200 easily enough

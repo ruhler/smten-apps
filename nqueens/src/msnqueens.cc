@@ -4,7 +4,7 @@
 
 using namespace Minisat;
 
-void nqueens(int n)
+void nqueens(int n, bool pretty)
 {
     Solver s;
 
@@ -76,13 +76,21 @@ void nqueens(int n)
     for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
             if (toInt(s.model[vars[r][c]])) {
-                printf("X");
-            } else {
+                if (pretty) {
+                    printf("X");
+                } else {
+                    printf("%i ", c);
+                }
+            } else if (pretty) {
                 printf(".");
             }
         }
-        printf("\n");
+        if (pretty) {
+            printf("\n");
+        }
     }
+    printf("\n");
+    fflush(stdout);
 }
 
 
@@ -94,7 +102,13 @@ int main(int argc, char* argv[])
     }
 
     int n = atoi(argv[1]);
-    nqueens(n);
+    if (n < 0) {
+        for (int i = 0; i <= -n; i++) {
+            nqueens(i, false);
+        }
+    } else {
+        nqueens(n, true);
+    }
     return 0;
 }
 
