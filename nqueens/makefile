@@ -15,6 +15,7 @@ all: build/release/nqueens \
 	build/release/nqueensl \
 	build/release/nqueensl2 \
 	build/msnqueens \
+	build/ms2nqueens \
 	build/y2nqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
@@ -40,6 +41,10 @@ build/z3nqueens: src/z3nqueens.c
 build/msnqueens: src/msnqueens.cc
 	mkdir -p build
 	g++ -o $@ -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS $< -lminisat
+
+build/ms2nqueens: src/ms2nqueens.cc src/minisat.cc
+	mkdir -p build
+	g++ -o $@ -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS $^ -lminisat
 	
 build/y2nqueens: src/y2nqueens.cc
 	mkdir -p build
@@ -51,11 +56,12 @@ build/z3txtnqueens: src/z3txtnqueens.c
 
 perf: build/release/nqueens
 	timeout 30s ./build/msnqueens -500 | wc -l
+	timeout 30s ./build/ms2nqueens -500 | wc -l
 	timeout 30s ./build/y2nqueens -500 | wc -l
-	#timeout 30s ./build/release/nqueens -s yices2 -e Int -500 | wc -l
-	#timeout 30s ./build/release/nqueens -s yices2 -e Integer -500 | wc -l
-	#timeout 30s ./build/release/nqueens -s yices2 -e Bit -500 | wc -l
-	#timeout 30s ./build/release/nqueens -s yices2 -e Bool -500 | wc -l
+	timeout 30s ./build/release/nqueens -s yices2 -e Int -500 | wc -l
+	timeout 30s ./build/release/nqueens -s yices2 -e Integer -500 | wc -l
+	timeout 30s ./build/release/nqueens -s yices2 -e Bit -500 | wc -l
+	timeout 30s ./build/release/nqueens -s yices2 -e Bool -500 | wc -l
 	timeout 30s ./build/release/nqueens -s yices2 -e Bool2 -500 | wc -l
 	timeout 30s ./build/release/nqueens -s yices1 -e Int -500 | wc -l
 	timeout 30s ./build/release/nqueens -s yices1 -e Integer -500 | wc -l

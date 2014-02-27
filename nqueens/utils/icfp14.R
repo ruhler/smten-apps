@@ -1,12 +1,18 @@
 
 lm <- read.table("build/nqueensl.data")
 cms <- read.table("build/cminisat.data")
+cms2 <- read.table("build/cms2.data")
+cy2 <- read.table("build/cy2.data")
 msint <- read.table("build/smtenmsint.data")
 msbit <- read.table("build/smtenmsbit.data")
 msbool <- read.table("build/smtenmsbool.data")
+msbool2 <- read.table("build/smtenmsbool2.data")
+y2bool2 <- read.table("build/smteny2bool2.data")
 
-cfgnms = c("List Monad", "Hand SAT", "Smten Int", "Smten Bit", "Smten Bool")
-cfgs=list(lm, cms, msint, msbit, msbool)
+#cfgnms = c("List Monad", "Hand SAT MS", "Hand SAT Y2", "Smten Int", "Smten Bit", "Smten Bool", "Smten Bool2 Y2")
+#cfgs=list(lm, cms, cy2, msint, msbit, msbool, y2bool2)
+cfgnms = c("List Monad", "SAT Based I", "SAT Based II", "Smten Int", "Smten Bool")
+cfgs=list(lm, cms, cms2, msint, msbool2)
 
 pdf(file="build/nqueens_icfp14.pdf", height=5 )
 plot(c(),
