@@ -3,7 +3,8 @@ sources := \
 	src/IntNQueens.hs \
    	src/IntegerNQueens.hs \
 	src/BitNQueens.hs \
-	src/BoolNQueens.hs
+	src/BoolNQueens.hs \
+	src/Bool2NQueens.hs
 
 sourcesl := \
 	src/IntNQueensL.hs
@@ -32,7 +33,7 @@ build/release/nqueensl2: src/nqueens.hs $(sources)
 
 build/profile/nqueens: src/nqueens.hs $(sources)
 	mkdir -p build/profile
-	smten --make -prof -o build/profile/nqueens -ibuild/profile -isrc -hidir build/profile -odir build/profile src/nqueens.hs -rtsopts -fwarn-unused-imports
+	smten --make -prof -o build/profile/nqueens -ibuild/profile -isrc -hidir build/profile -odir build/profile src/nqueens.hs -rtsopts -fwarn-unused-imports -fprof-auto-top
 
 build/z3nqueens: src/z3nqueens.c
 	mkdir -p build
@@ -55,32 +56,7 @@ build/z3txtnqueens: src/z3txtnqueens.c
 	gcc -std=c99 -o $@ $<
 
 perf: build/release/nqueens
-	timeout 30s ./build/msnqueens -500 | wc -l
-	timeout 30s ./build/ms2nqueens -500 | wc -l
-	timeout 30s ./build/y2nqueens -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices2 -e Int -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices2 -e Integer -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices2 -e Bit -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices2 -e Bool -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices2 -e Bool2 -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices1 -e Int -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices1 -e Integer -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices1 -e Bit -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices1 -e Bool -500 | wc -l
-	timeout 30s ./build/release/nqueens -s yices1 -e Bool2 -500 | wc -l
-	timeout 30s ./build/release/nqueens -s z3 -e Int -500 | wc -l
-	timeout 30s ./build/release/nqueens -s z3 -e Integer -500 | wc -l
-	timeout 30s ./build/release/nqueens -s z3 -e Bit -500 | wc -l
-	timeout 30s ./build/release/nqueens -s z3 -e Bool -500 | wc -l
-	timeout 30s ./build/release/nqueens -s z3 -e Bool2 -500 | wc -l
-	timeout 30s ./build/release/nqueens -s stp -e Int -500 | wc -l
-	timeout 30s ./build/release/nqueens -s stp -e Bit -500 | wc -l
-	timeout 30s ./build/release/nqueens -s stp -e Bool -500 | wc -l
-	timeout 30s ./build/release/nqueens -s stp -e Bool2 -500 | wc -l
-	timeout 30s ./build/release/nqueens -s minisat -e Int -500 | wc -l
-	timeout 30s ./build/release/nqueens -s minisat -e Bit -500 | wc -l
-	timeout 30s ./build/release/nqueens -s minisat -e Bool -500 | wc -l
-	timeout 30s ./build/release/nqueens -s minisat -e Bool2 -500 | wc -l
+	tclsh utils/perf.tcl | tee build/perf.txt
 
 graphs: build/bench.data
 	Rscript utils/bench.R

@@ -18,11 +18,11 @@ noconf (x:xs) =
 
 islegal :: Placement -> Bool
 islegal places = and [
-  all or (rows places),     -- each row must have at least one queen
-  all noconf (rows places), -- rows shouldn't conflict
-  all noconf (cols places), -- columns shouldn't conflict
-  all noconf (pdiags places),   -- diagonals shouldn't conflict
-  all noconf (ndiags places)]
+  {-# SCC "RowsOccupied" #-}    all or (rows places),       -- each row must have at least one queen
+  {-# SCC "RowsNonConflict" #-} all noconf (rows places),   -- rows shouldn't conflict
+  {-# SCC "ColsNonConflict" #-} all noconf (cols places),   -- columns shouldn't conflict
+  {-# SCC "PDNonConflict" #-}   all noconf (pdiags places), -- diagonals shouldn't conflict
+  {-# SCC "NDNonConflict" #-}   all noconf (ndiags places)]
 
 bool2_nqueens :: Int -> Symbolic [Int]
 bool2_nqueens n = do
