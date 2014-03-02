@@ -3,7 +3,7 @@
 module Block (
    Block, rows, cols, pdiags, ndiags,
    blockM, fromRows,
-   blockMapM,
+   blockMap, blockMapM,
   ) where
 
 import Smten.Prelude
@@ -57,6 +57,10 @@ blockM f nr nc =
 fromRows :: [[a]] -> Block a
 fromRows = id
 
+blockMap :: (a -> b) -> Block a -> Block b
+blockMap f xs = map (map f) xs
+
 blockMapM :: (Monad m) => (a -> m b) -> Block a -> m (Block b)
 blockMapM f xs = mapM (mapM f) xs
+
 

@@ -1,31 +1,27 @@
 
-lm <- read.table("build/nqueensl.data")
-cms <- read.table("build/cminisat.data")
-cms2 <- read.table("build/cms2.data")
-cy2 <- read.table("build/cy2.data")
-msint <- read.table("build/smtenmsint.data")
-msbit <- read.table("build/smtenmsbit.data")
-msbool <- read.table("build/smtenmsbool.data")
-msbool2 <- read.table("build/smtenmsbool2.data")
-y2bool2 <- read.table("build/smteny2bool2.data")
+ms <- read.table("build/ms.data")
+ms2 <- read.table("build/ms2.data")
+ms3 <- read.table("build/ms3.data")
+ms4 <- read.table("build/ms4.data")
+ms5 <- read.table("build/ms5.data")
+ms6 <- read.table("build/ms6.data")
+ms7 <- read.table("build/ms7.data")
+sms <- read.table("build/sms.data")
 
-#cfgnms = c("List Monad", "Hand SAT MS", "Hand SAT Y2", "Smten Int", "Smten Bit", "Smten Bool", "Smten Bool2 Y2")
-#cfgs=list(lm, cms, cy2, msint, msbit, msbool, y2bool2)
-cfgnms = c("List Monad", "SAT Based I", "SAT Based II", "Smten Int", "Smten Bool")
-cfgs=list(lm, cms, cms2, msint, msbool2)
+cfgnms = c("MS", "MS2", "MS3", "MS4", "MS5", "MS6", "MS7", "SMS")
+cfgs=list(ms, ms2, ms3, ms4, ms5, ms6, ms7, sms)
 
 pdf(file="build/nqueens_icfp14.pdf", height=5 )
 plot(c(),
-     xlim=c(0, max(length(row.names(cms)))),
+     xlim=c(0, max(length(row.names(ms)))),
      ylim=c(min(unlist(lapply(cfgs, FUN=min)))
           , max(unlist(lapply(cfgs, FUN=max)))),
      xlab="n",
-     ylab="runtime(s)",
-     log="y"
+     ylab="runtime(s)"
      )
 for (i in 1:length(cfgs)) {
     points(cfgs[[i]], pch=i, col=i, type="b", lty=2)
 }
-legend("bottomright", cfgnms, pch=1:length(cfgnms), col=1:length(cfgnms))
+legend("topleft", cfgnms, pch=1:length(cfgnms), col=1:length(cfgnms))
 
 

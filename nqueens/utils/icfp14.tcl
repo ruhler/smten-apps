@@ -26,8 +26,6 @@ proc runcfg {outfile maxn cmd} {
 
 # 2. minisat coded in c.
 #    Ranges from n = 1 to n = 200 easily enough.
-#runcfg build/cminisat.data 200 ./build/msnqueens
-runcfg build/cms2.data 150 ./build/ms2nqueens
 
 
 # 3. Smten using the Int type.
@@ -44,5 +42,15 @@ runcfg build/cms2.data 150 ./build/ms2nqueens
 
 #runcfg build/cy2.data 150 ./build/y2nqueens
 #runcfg build/smteny2bool2.data 160 "./build/release/nqueens -e Bool2 -s yices2"
-#runcfg build/smtenmsbool2.data 160 "./build/release/nqueens -e Bool2 -s minisat"
+
+
+
+#runcfg build/ms.data 150 ./build/msnqueens
+#runcfg build/ms2.data 150 ./build/ms2nqueens
+#runcfg build/ms3.data 150 ./build/ms3nqueens
+#runcfg build/ms4.data 150 ./build/ms4nqueens
+#runcfg build/ms5.data 150 ./build/ms5nqueens
+#runcfg build/ms6.data 150 ./build/ms6nqueens
+runcfg build/ms7.data 150 ./build/ms7nqueens
+#runcfg build/sms.data 150 "./build/release/nqueens -e Bool2 -s minisat"
 
