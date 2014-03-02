@@ -17,6 +17,7 @@ all: build/release/nqueens \
 	build/release/nqueensl2 \
 	build/msnqueens \
 	build/ms2nqueens \
+	build/ms3nqueens \
 	build/y2nqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
@@ -46,6 +47,9 @@ build/msnqueens: src/msnqueens.cc
 build/ms2nqueens: src/ms2nqueens.cc src/minisat.cc
 	mkdir -p build
 	g++ -o $@ -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS $^ -lminisat
+
+build/ms3nqueens: src/ms3nqueens.hs
+	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
 	
 build/y2nqueens: src/y2nqueens.cc
 	mkdir -p build
