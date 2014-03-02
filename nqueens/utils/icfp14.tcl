@@ -47,10 +47,10 @@ proc runcfg {outfile maxn cmd} {
 
 #runcfg build/ms.data 150 ./build/msnqueens
 #runcfg build/ms2.data 150 ./build/ms2nqueens
-#runcfg build/ms3.data 150 ./build/ms3nqueens
-#runcfg build/ms4.data 150 ./build/ms4nqueens
-#runcfg build/ms5.data 150 ./build/ms5nqueens
-#runcfg build/ms6.data 150 ./build/ms6nqueens
-runcfg build/ms7.data 150 ./build/ms7nqueens
+#runcfg build/ms3.data 150 ./build/release/ms3nqueens
+#runcfg build/ms4.data 150 ./build/release/ms4nqueens
+#runcfg build/ms5.data 150 ./build/release/ms5nqueens
+#runcfg build/ms6.data 150 ./build/release/ms6nqueens
+#runcfg build/ms7.data 150 ./build/release/ms7nqueens
 #runcfg build/sms.data 150 "./build/release/nqueens -e Bool2 -s minisat"
 

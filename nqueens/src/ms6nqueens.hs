@@ -1,8 +1,7 @@
 
 -- Implementation of n-queens using MiniSat
 -- Implemented in Haskell, using custom formula type and build function.
--- The formula construction does not perform optimizations, so it should
--- be constructed lazily.
+-- Uses optimizations.
 
 import qualified Data.HashTable.IO as H
 import Data.Functor

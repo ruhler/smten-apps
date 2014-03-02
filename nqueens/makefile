@@ -17,11 +17,16 @@ all: build/release/nqueens \
 	build/release/nqueensl2 \
 	build/msnqueens \
 	build/ms2nqueens \
-	build/ms3nqueens \
-	build/ms4nqueens \
-	build/ms5nqueens \
-	build/ms6nqueens \
-	build/ms7nqueens \
+	build/release/ms3nqueens \
+	build/release/ms4nqueens \
+	build/release/ms5nqueens \
+	build/release/ms6nqueens \
+	build/release/ms7nqueens \
+	build/profile/ms3nqueens \
+	build/profile/ms4nqueens \
+	build/profile/ms5nqueens \
+	build/profile/ms6nqueens \
+	build/profile/ms7nqueens \
 	build/y2nqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
@@ -52,20 +57,13 @@ build/ms2nqueens: src/ms2nqueens.cc src/minisat.cc
 	mkdir -p build
 	g++ -o $@ -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS $^ -lminisat
 
-build/ms3nqueens: src/ms3nqueens.hs
-	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
+build/release/ms%nqueens: src/ms%nqueens.hs
+	mkdir -p build/release/ms$*nqueens_
+	ghc -o $@ --make -O $< -isrc -ibuild/release/ms$*nqueens_ -hidir build/release/ms$*nqueens_ -odir build/release/ms$*nqueens_
 
-build/ms4nqueens: src/ms4nqueens.hs
-	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
-	
-build/ms5nqueens: src/ms5nqueens.hs
-	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
-
-build/ms6nqueens: src/ms6nqueens.hs
-	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
-
-build/ms7nqueens: src/ms7nqueens.hs
-	ghc -o $@ --make -O $< -isrc -ibuild -hidir build -odir build
+build/profile/ms%nqueens: src/ms%nqueens.hs
+	mkdir -p build/profile/ms$*nqueens_
+	ghc -o $@ --make -prof -auto-all $< -isrc -ibuild/profile/ms$*nqueens_ -hidir build/profile/ms$*nqueens_ -odir build/profile/ms$*nqueens_
 	
 build/y2nqueens: src/y2nqueens.cc
 	mkdir -p build
