@@ -1,60 +1,89 @@
 
+// Interface to MiniSat which doesn't
+// require the formula to already be in
+// conjunctive normal form.
+//
+// This is a copy of the interface used in smten-minisat.
+
+
 #include "minisat/core/Solver.h"
 
 using namespace Minisat;
 
-Solver* ms_create()
+Lit lit(int x)
+{
+    Lit l;
+    l.x = x;
+    return l;
+}
+
+int unlit(Lit x)
+{
+    return x.x;
+}
+
+extern "C" Solver* minisat_new()
 {
     return new Solver();
 }
 
-void ms_free(Solver* s)
+extern "C" void minisat_delete(Solver* s)
 {
     delete s;
 }
 
-Var ms_var(Solver* s)
+extern "C" int minisat_true(Solver* s)
 {
-    return s->newVar();
+    Var x = s->newVar();
+    s->addClause(mkLit(x, true));
+    return unlit(mkLit(x, true));
 }
 
-Lit ms_lit(Var x)
+extern "C" int minisat_false(Solver* s)
 {
-    return mkLit(x, true);
+    Var x = s->newVar();
+    s->addClause(mkLit(x, true));
+    return unlit(mkLit(x, false));
 }
 
-Lit ms_not(Solver* s, Lit x)
+
+extern "C" int minisat_var(Solver* s)
 {
-    return ~x;
+    return unlit(mkLit(s->newVar(), true));
 }
 
-Lit ms_and(Solver* s, Lit a, Lit b)
+extern "C" int minisat_not(Solver* s, int x)
+{
+    return unlit(~lit(x));
+}
+
+extern "C" int minisat_and(Solver* s, int a, int b)
 {
     Lit x = mkLit(s->newVar(), true);
-    s->addClause(~x, a);   // x -> a
-    s->addClause(~x, b);   // x -> b
-    s->addClause(~a, ~b, x);    // a & b ==> x
-    return x;
+    s->addClause(~x, lit(a));               // x -> a
+    s->addClause(~x, lit(b));               // x -> b
+    s->addClause(~lit(a), ~lit(b), x);      // a & b ==> x
+    return unlit(x);
 }
 
-Lit ms_or(Solver* s, Lit a, Lit b)
+extern "C" int minisat_or(Solver* s, int a, int b)
 {
     Lit x = mkLit(s->newVar(), true);
-    s->addClause(~a, x);   // a -> x
-    s->addClause(~b, x);   // b -> x
-    s->addClause(~x, a, b);    // x ==> a | b
-    return x;
+    s->addClause(~lit(a), x);           // a -> x
+    s->addClause(~lit(b), x);           // b -> x
+    s->addClause(~x, lit(a), lit(b));   // x ==> a | b
+    return unlit(x);
 }
 
-void ms_assert(Solver* s, Lit x)
+extern "C" void minisat_assert(Solver* s, int x)
 {
-    s->addClause(x);
+    s->addClause(lit(x));
 }
 
 
 // 0 if UNSAT
 // 1 if SAT
-int ms_check(Solver* s)
+extern "C" int minisat_check(Solver* s)
 {
     if (!s->simplify()) {
         return 0;
@@ -65,22 +94,8 @@ int ms_check(Solver* s)
 
 // 0 if False
 // 1 if True
-int ms_getvar(Solver* s, Var v)
+extern "C" int minisat_getvar(Solver* s, int v)
 {
-    return (toInt(s->model[v]));
-}
-
-Lit ms_true(Solver* s)
-{
-    Var x = s->newVar();
-    s->addClause(mkLit(x, true));
-    return mkLit(x, true);
-}
-
-Lit ms_false(Solver* s)
-{
-    Var x = s->newVar();
-    s->addClause(mkLit(x, true));
-    return mkLit(x, false);
+    return toInt(s->model[var(lit(v))]);
 }
 

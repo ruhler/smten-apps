@@ -1,4 +1,7 @@
 
+// Implementation of hand-coded nqueens using MiniSat
+// Produces a formula already in conjunction normal form.
+
 #include <vector>
 #include "minisat/core/Solver.h"
 
