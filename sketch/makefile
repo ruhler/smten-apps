@@ -2,14 +2,21 @@
 .PHONY: all
 all: 
 	tclsh utils/make.tcl
-	time -f %E tclsh utils/test.tcl
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices2"
 
-perf:
+perfer:
 	tclsh utils/makeperf.tcl
 	./build/profile/perf +RTS -p
 
+perf:
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices2" > /dev/null
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices1" > /dev/null
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s z3" > /dev/null
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s stp" > /dev/null
+	time -f %E tclsh utils/test.tcl "./build/release/sketch -s minisat" > /dev/null
+
 check:
-	tclsh utils/test.tcl
+	tclsh utils/test.tcl "./build/release/sketch -s yices2"
 
 build/sskVsk.pdf: build/sskVsk.data
 	Rscript utils/sskVsk.R

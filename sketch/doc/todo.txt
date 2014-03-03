@@ -102,6 +102,10 @@ tests/broken/miniTestb141.sk: RETURN_BUG
 tests/broken/miniTestb202.sk: RETURN_BUG
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
 tests/broken/miniTestb113.sk: 2D_UPDATE
+tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
+tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
+tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
+tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb157.sk: 2D_UPDATE
 tests/broken/miniTestb205.sk: TYPE ERROR
 tests/broken/miniTestb206.sk: TYPE ERROR
