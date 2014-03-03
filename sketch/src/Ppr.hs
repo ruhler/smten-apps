@@ -39,6 +39,7 @@ instance Ppr Value where
    pretty (BitsV n) = pretty (ArrayV (map BitV n))
    pretty (IntV n) = pretty n
    pretty (FunV f) = error $ "No way to pretty print an anonymous function"
+   pretty VoidV = error $ "No way to pretty print a void value"
 
 instance Ppr Expr where
    pretty (ValE v) = pretty v

@@ -88,18 +88,10 @@ PERF3
  argument to &&? Something like: predicated evaluation of the second argument.
  It only can cause failure if the predicate is true? That may or may not help.
 
-RETURN_BUG
- A return statement not only causes an output to be set, but should also halt
- execution of the current block. In the implementation as it is now, it fails
- to stop execution.
-
-
 Features needed, by test case::
 
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
-tests/broken/miniTestb141.sk: RETURN_BUG
-tests/broken/miniTestb202.sk: RETURN_BUG
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
 tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers

@@ -49,19 +49,23 @@ apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip (f_args f) xs')
-    scope args $ do
-       evalS (f_body f)
-       getOutput
+    scope args $ returned <$> evalS (f_body f)
+
+data StmtResult = OK | RET Value
+
+returned :: StmtResult -> Value
+returned OK = VoidV
+returned (RET v) = v
 
 -- | Evaluate a statement
-evalS :: Stmt -> EvalM ()
-evalS (ReturnS x) = {-# SCC "ReturnS" #-} do
-  x' <- evalE x
-  setOutput x'
+evalS :: Stmt -> EvalM StmtResult
+evalS (ReturnS x) = {-# SCC "ReturnS" #-} RET <$> evalE x
 evalS (AssertS p) = {-# SCC "AssertS" #-} do
   p' <- evalE p
   case p' of
-    BitV b -> assert b
+    BitV b -> do
+        assert b
+        return OK
 evalS (ReorderS {}) = {-# SCC "ReorderS" #-}
   -- Note: The generator inlines reorders, so we don't expect this case to ever
   -- occur.
@@ -76,18 +80,20 @@ evalS (ForS init cond incr body) = {-# SCC "ForS" #-} do
 evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
   c' <- {-# SCC "WhileSCondition" #-} evalE c
   case c' of
-    BitV False -> return ()
+    BitV False -> return OK
     BitV True -> do
-      evalS s
+      evalS s   -- TODO: if this statement returns, do we break out of the loop?
       evalS w
 evalS (DeclS ty nm) = {-# SCC "DeclS" #-} do
   v0 <- case ty of
           t@(ArrT {}) -> return $ pad t
           _ -> return (error $ nm ++ " not initialized")
   insertVar nm v0
+  return OK
 evalS (UpdateS nm e) = {-# SCC "UpdateS" #-} do
   e' <- evalE e
   insertVar nm e'
+  return OK
 evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
   mval <- lookupVar nm
   ir <- evalE i
@@ -100,6 +106,7 @@ evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
                 assert (i' < length xs)
                 return (ArrayV $ arrupd xs i' e')
   insertVar nm arr'
+  return OK
 
 evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
   -- Note: we don't have to evaluate the width argument, because the type of
@@ -114,13 +121,20 @@ evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
              (Just (ArrayV xs), IntV lo', ArrayV xs') -> do
                 return (ArrayV $ arrbulkupd xs lo' xs')
   insertVar nm arr'
+  return OK
 
 evalS (IfS p a b) = {-# SCC "IfS" #-} do
   p' <- evalE p
   case p' of
     BitV True -> evalS a
     BitV False -> evalS b
-evalS (BlockS xs) = {-# SCC "BlockS" #-} mapM_ evalS xs
+
+evalS (BlockS []) = {-# SCC "BlockS" #-} return OK
+evalS (BlockS (x:xs)) = {-# SCC "BlockS" #-} do
+    r <- evalS x
+    case r of
+       OK -> evalS (BlockS xs)
+       RET v -> return (RET v)
 
 evalE :: Expr -> EvalM Value
 evalE (ValE v) = {-# SCC "ValE" #-} return v

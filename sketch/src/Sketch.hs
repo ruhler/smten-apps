@@ -43,6 +43,7 @@ data Value =
   | BitsV Bits
   | IntV Int
   | FunV Function
+  | VoidV
     deriving (Show)
 
 -- Make an array value.
@@ -62,6 +63,7 @@ typeofV (IntV 0) = BitT     -- it may be a bit literal, so indicate that:
 typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
 typeofV (FunV f) = UnknownT
+typeofV VoidV = VoidT
 
 dimension :: Type -> Int
 dimension VoidT = 1
