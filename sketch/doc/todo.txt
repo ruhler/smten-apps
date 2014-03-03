@@ -47,19 +47,20 @@ STATIC_EVAL::
   Other things to do:
     * Keep track of values in the type environment if we have them statically
 
-HARNESS::
-  Support the 'harness' declaration.
-
 VOID_TYPE::
   Support the type 'void' for functions.
   * What value should be returned for void?
      In order to ensure two void type functions are the same?
      What does a function return if it doesn't include a return statement?
       - for a void function, it should return void
-      - for an int or bit function??
+      - for an int or bit function?? undefined? Can we just return void?
   * Add expression statement (which must have type void?)
+      - to start, it can just be a function call to a void function.
   * Support reference parameters
+      - after a function call, check which arguments were reference 
+        arguments, and copy the results back to the environment
   * Support empty return statement: return;
+      - have it be syntactic sugar for return VoidV.
 
 INSERT_INTO
   insert and into statements? What do those mean?
@@ -103,11 +104,11 @@ tests/broken/miniTestb205.sk: TYPE ERROR
 tests/broken/miniTestb206.sk: TYPE ERROR
 tests/broken/miniTestb208.sk: C Preprocessor?
 tests/broken/miniTestb215.sk: TYPE ERROR - parser precedence bug?
+tests/broken/miniTestb220.sk: inline global vars in explicit cast types.
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb338.sk: Can't find variable in scope
 tests/broken/miniTestb533.sk: Empty file?
 
-tests/broken/harness/*.sk: HARNESS
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
@@ -132,6 +133,7 @@ tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb181.sk: arrsub takes all time?
 tests/broken/slow/miniTestb182.sk: takes many iterations
 tests/broken/slow/miniTestb189.sk: (==) takes all time?
+tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

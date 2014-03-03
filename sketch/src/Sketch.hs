@@ -144,6 +144,7 @@ data Function = Function {
 
 data FunctionKind = NormalF          -- ^ a normal function
                   | WithSpecF Name   -- ^ the function has a spec
+                  | HarnessF         -- ^ the function is a harness
                   | GeneratorF       -- ^ the function is a generator
     deriving (Show)
 

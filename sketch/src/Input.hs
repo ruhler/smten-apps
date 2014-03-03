@@ -16,15 +16,19 @@ import Sketch
 mkFreeProgramInput :: Options -> Prog -> Symbolic ProgramInput
 mkFreeProgramInput opts p = do
   let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
-      mkDeclInput d@(FunD {}) =
-        case fd_kind d of
-          NormalF -> return Nothing
-          GeneratorF -> return Nothing
-          WithSpecF _ -> do
-            case (f_type . fd_val $ d) of
-                FunT _ ts -> do
-                  i <- mkFreeArgs opts ts
-                  return $ Just (d_name d, i)
+      mkDeclInput d@(FunD {}) = do
+        let needsinputs = 
+             case fd_kind d of
+               NormalF -> False
+               GeneratorF -> False
+               HarnessF -> True
+               WithSpecF _ -> True
+        if needsinputs 
+            then case (f_type . fd_val $ d) of
+                    FunT _ ts -> do
+                      i <- mkFreeArgs opts ts
+                      return $ Just (d_name d, i)
+            else return Nothing
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput p
   return $ Map.fromList (catMaybes inputs)

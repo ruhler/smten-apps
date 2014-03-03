@@ -24,7 +24,7 @@ data Token =
   | TkDoubleColon | TkColon
   | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
-  | TkRepeat | TkWhile | TkFor | TkGenerator | TkTrue | TkFalse | TkDo
+  | TkRepeat | TkWhile | TkFor | TkGenerator | TkHarness | TkTrue | TkFalse | TkDo
   | TkPragma | TkOptions
   | TkID String
   | TkString String
@@ -102,6 +102,7 @@ keywords = [
     ("reorder", TkReorder),
     ("assert", TkAssert),
     ("generator", TkGenerator),
+    ("harness", TkHarness),
     ("true", TkTrue),
     ("false", TkFalse),
     ("repeat", TkRepeat),

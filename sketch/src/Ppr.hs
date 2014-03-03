@@ -130,10 +130,12 @@ instance Ppr Prog where
 pprkindl :: FunctionKind -> String
 pprkindl NormalF = ""
 pprkindl GeneratorF = "generator "
+pprkindl HarnessF = "harness "
 pprkindl (WithSpecF {}) = ""
 
 pprkindr :: FunctionKind -> String
 pprkindr NormalF = " "
 pprkindr GeneratorF = " "
+pprkindr HarnessF = " "
 pprkindr (WithSpecF v) = " implements " ++ pretty v ++ " "
 

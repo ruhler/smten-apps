@@ -71,6 +71,7 @@ import Sketch
     'reorder'   { TkReorder }
     'assert'   { TkAssert }
     'generator'{ TkGenerator }
+    'harness'{ TkHarness }
     'true'  { TkTrue }
     'false' { TkFalse }
     'pragma' { TkPragma }
@@ -111,6 +112,8 @@ decl :: { Decl }
     { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (blockS $9)) (WithSpecF $7) }
  | 'generator' type id '(' args ')' '{' stmts '}'
     { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (blockS $8)) GeneratorF }
+ | 'harness' type id '(' args ')' '{' stmts '}'
+    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (blockS $8)) HarnessF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }

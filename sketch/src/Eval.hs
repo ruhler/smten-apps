@@ -35,6 +35,9 @@ evalD env i d@(FunD {}) =
   case fd_kind d of
     NormalF -> True
     GeneratorF -> True
+    HarnessF
+      | Just args <- map ValE <$> Map.lookup (d_name d) i ->
+          isJust (runEvalM env (apply (fd_val d) args))
     WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just args <- map ValE <$> Map.lookup (d_name d) i ->
