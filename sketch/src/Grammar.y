@@ -107,13 +107,13 @@ declorpragma :: { ([Decl], String) }
 
 decl :: { Decl }
  : type id '(' args ')' '{' stmts '}'
-    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (blockS $7)) NormalF }
+    { FunD $2 (Function $1 $4 (blockS $7)) NormalF }
  | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 (Function (FunT $1 (map fst $4)) (map snd $4) (blockS $9)) (WithSpecF $7) }
+    { FunD $2 (Function $1 $4 (blockS $9)) (WithSpecF $7) }
  | 'generator' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (blockS $8)) GeneratorF }
+    { FunD $3 (Function $2 $5 (blockS $8)) GeneratorF }
  | 'harness' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function (FunT $2 (map fst $5)) (map snd $5) (blockS $8)) HarnessF }
+    { FunD $3 (Function $2 $5 (blockS $8)) HarnessF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
 
 type :: { Type }
@@ -122,16 +122,16 @@ type :: { Type }
  | type '[' expr ']' { ArrT $1 $3 }
  | 'int' { IntT }
 
-args :: { [(Type, Name)] }
+args :: { [Arg] }
  : { [] }       -- Empty list is allowed
  | someargs { $1 }
 
-someargs :: { [(Type, Name)] }
+someargs :: { [Arg] }
  : arg { [$1] }
  | someargs ',' arg { $1 ++ [$3] }
 
-arg :: { (Type, Name) }
- : type id { ($1, $2) }
+arg :: { Arg }
+ : type id { Arg $1 $2 }
 
 stmts :: { [Stmt] }
  : { [] }       -- Empty list is allowed

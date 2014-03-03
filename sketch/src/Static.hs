@@ -63,16 +63,21 @@ instance Static Decl where
       val' <- staticM val
       return $ FunD nm val' k
 
+instance Static Arg where
+  staticM (Arg ty nm) = do
+    ty' <- staticM ty
+    return $ Arg ty' nm
+
 instance Static Function where
   staticM (Function ty args body) = do
      ty' <- staticM ty
-     let FunT oty argtys = ty'
-         tyenv = Map.fromList (zip args argtys)
+     args' <- mapM staticM args
+     let tyenv = Map.fromList [(nm, ty) | Arg ty nm <- args']
      tyenvold <- gets ss_tyenv
      modify $ \s -> s { ss_tyenv = tyenv }
-     body' <- withty oty $ staticM body
+     body' <- withty ty' $ staticM body
      modify $ \s -> s { ss_tyenv = tyenvold }
-     return $ Function ty' args body'
+     return $ Function ty' args' body'
 
 instance Static Stmt where
   staticM (ReturnS x) = ReturnS <$> staticM x
@@ -469,7 +474,7 @@ typeof (CastE t e) = return t
 typeof (AppE nm xs) = do
     env <- asks sr_env
     case Map.lookup nm env of
-       Just (FunD _ (Function (FunT v _) _ _) _) -> staticM v
+       Just (FunD _ (Function v _ _) _) -> staticM v
        Nothing -> return UnknownT
 
 -- subtype a b

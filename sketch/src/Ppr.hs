@@ -113,16 +113,19 @@ pprS (IfS p a b)
 instance Ppr Stmt where
    pretty s = unlines (pprS s)
 
+instance Ppr Arg where
+   pretty (Arg ty nm) = pretty ty ++ " " ++ pretty nm
+
 instance Ppr Decl where
-   pretty (FunD nm (Function (FunT oty xtys) xs body) kind) = 
-     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty (zip xtys xs) ++ ")"
+   pretty (FunD nm (Function oty xs body) kind) = 
+     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
         ++ pprkindr kind ++ pretty body
    pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
 
-instance Ppr [(Type, Name)] where
+instance Ppr [Arg] where
    pretty [] = ""
-   pretty [(t, x)] = pretty t ++ " " ++ pretty x
-   pretty ((t, x):tl) = pretty t ++ " " ++ pretty x ++ ", " ++ pretty tl
+   pretty [x] = pretty x
+   pretty (x:xs) = pretty x ++ ", " ++ pretty xs
 
 instance Ppr Prog where
    pretty xs = unlines (map pretty xs)

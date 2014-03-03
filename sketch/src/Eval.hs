@@ -51,7 +51,7 @@ evalD env i d@(FunD {}) =
 apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
-    let args = Map.fromList (zip (f_args f) xs')
+    let args = Map.fromList (zip [nm | Arg _ nm <- f_args f] xs')
     scope args $ returned <$> evalS (f_body f)
 
 data StmtResult = OK | RET Value

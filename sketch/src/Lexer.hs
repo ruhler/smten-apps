@@ -25,7 +25,7 @@ data Token =
   | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkHarness | TkTrue | TkFalse | TkDo
-  | TkPragma | TkOptions
+  | TkPragma | TkOptions | TkRef
   | TkID String
   | TkString String
   | TkInteger Int
@@ -103,6 +103,7 @@ keywords = [
     ("assert", TkAssert),
     ("generator", TkGenerator),
     ("harness", TkHarness),
+    ("ref", TkRef),
     ("true", TkTrue),
     ("false", TkFalse),
     ("repeat", TkRepeat),

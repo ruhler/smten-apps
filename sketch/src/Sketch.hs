@@ -3,10 +3,10 @@
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
     Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
-    Expr(..), Value(..), Function(..), FunctionKind(..),
+    Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     Options(..), defaultOptions,
-    envof, declsof, d_type, d_val,
+    envof, declsof, d_type, d_val, f_type,
     blockS, typeofV, dimension, arrayV, pad,
     ) where
 
@@ -136,11 +136,17 @@ blockS xs =
       f s = [s]
   in BlockS (concatMap f xs)
 
+data Arg = Arg Type Name
+    deriving (Show)
+
 data Function = Function {
-    f_type :: Type,
-    f_args :: [Name],
+    f_outtype :: Type,
+    f_args :: [Arg],
     f_body :: Stmt
 } deriving (Show)
+
+f_type :: Function -> Type
+f_type f = FunT (f_outtype f) [t | Arg t _ <- f_args f]
 
 data FunctionKind = NormalF          -- ^ a normal function
                   | WithSpecF Name   -- ^ the function has a spec
