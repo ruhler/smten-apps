@@ -52,7 +52,8 @@ apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip [nm | Arg _ nm <- f_args f] xs')
-    scope args $ returned <$> evalS (f_body f)
+    (v, args') <- scope args $ returned <$> evalS (f_body f)
+    return v
 
 data StmtResult = OK | RET Value
 

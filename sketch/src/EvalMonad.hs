@@ -13,10 +13,7 @@ import Sketch
 type Env = Map.Map Name Decl
 type Vars = Map.Map Name Value
 
-data SS = SS {
-    -- | Local variables.
-    ss_vars :: Map.Map Name Value
-}
+type LocalVars = Map.Map Name Value
 
 -- The evaluation monad.
 --  It has access to a read-only global environment,
@@ -24,7 +21,7 @@ data SS = SS {
 --  it has access to a read/write output value,
 --  and it can fail.
 newtype EvalM a = EvalM {
-   runEvalM_ :: Env -> SS -> Maybe (a, SS)
+   runEvalM_ :: Env -> LocalVars -> Maybe (a, LocalVars)
 }
 
 instance Functor EvalM where
@@ -37,16 +34,16 @@ instance Monad EvalM where
       runEvalM_ (f v) e s'
 
 runEvalM :: ProgEnv -> EvalM a -> Maybe a
-runEvalM env q =
-  let s0 = SS Map.empty
-  in fst <$> runEvalM_ q env s0
+runEvalM env q = fst <$> runEvalM_ q env Map.empty
 
 -- Evaluate the monad in the given scope.
 -- Outer scopes are not visible.
-scope :: Map.Map Name Value -> EvalM a -> EvalM a
+-- Returns the result of computation, and the local scope after computation
+-- completes
+scope :: LocalVars -> EvalM a -> EvalM (a, LocalVars)
 scope vars x = EvalM $ \e s -> do
-  r <- runEvalM_ x e (SS vars)
-  return (fst r, s)
+  r <- runEvalM_ x e vars
+  return (r, s)
 
 -- Evaluation which fails.
 efail :: EvalM a
@@ -62,9 +59,9 @@ lookupDecl nm = EvalM $ \e s -> return (Map.lookup nm e, s)
 
 -- Look for the given variable in the local scope
 lookupVar :: Name -> EvalM (Maybe Value)
-lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (ss_vars s), s)
+lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm s, s)
 
 insertVar :: Name -> Value -> EvalM ()
 insertVar nm val = EvalM $ \_ s ->
-    return ((), s { ss_vars = Map.insert nm val (ss_vars s)})
+    return ((), Map.insert nm val s)
 
