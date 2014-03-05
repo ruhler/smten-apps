@@ -4,3 +4,9 @@
   Currently:
     - input format is pre 1.9
     - output format is 1.9
+
+* classify more test cases, especially UNSAT test cases.
+
+* Figure out how to compare the performance of the smten model checker
+  against other model checkers
+

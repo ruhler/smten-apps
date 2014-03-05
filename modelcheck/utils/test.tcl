@@ -6,7 +6,7 @@ foreach x [glob tests/sat/*.aig] {
 }
 
 # All tests from tests/unsat/*.aig should be unsat
-foreach x [glob tests/sat/*.aig] {
+foreach x [glob tests/unsat/*.aig] {
     puts "$x ..."
     exec ./utils/rununsat $x
 }
