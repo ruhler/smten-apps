@@ -23,7 +23,7 @@ aigermodel :: Aiger -> Model AigerState
 aigermodel aig = Model {
   _I = \as -> all (== False) (elems (as_state as)),
   _T = \a1 a2 ->
-          let (_, _, ns) = aig_step aig (as_input a1) (as_state a1)
+          let (_, ns) = aig_step aig (as_input a1) (as_state a1)
           in ns == (as_state a2)
 }
 

@@ -12,9 +12,9 @@ main = do
   txt <- getContents
   let aig = readAsciiAiger txt
 
-  -- Note: we only look for the first bad state property.
+  -- Note: we only look for the first output.
   -- Presumably we need to check for them all?
-  result <- runSMT yices2 $ aigercheck aig (aig_badstates aig ! 1)
+  result <- runSMT yices2 $ aigercheck aig (aig_outputs aig ! 1)
   case result of
     Nothing -> putStrLn "0\n.\n"
     Just v -> do

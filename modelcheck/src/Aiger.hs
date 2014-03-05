@@ -3,14 +3,13 @@
 
 module Aiger (
     Aiger, Vector, Literal,
-    aig_num_inputs, aig_num_outputs, aig_num_latches, aig_badstates,
+    aig_num_inputs, aig_num_outputs, aig_num_latches, aig_outputs,
     aig_eval, aig_step, aig_reset,
 
     readAsciiAiger, showVector,
   ) where
 
 import Smten.Prelude
-import Smten.Derive.Show
 import Smten.Data.Array
 
 -- Notes on the Aiger format:
@@ -34,12 +33,7 @@ import Smten.Data.Array
 type Vector = Array Int Bool
 
 data Source = Input | Latch | AndGate 
-
-showsPrecSource :: Int -> Source -> ShowS
-showsPrecSource = $(derive_showsPrec ''Source)
-
-instance Show Source where
-    showsPrec = showsPrecSource
+    deriving (Show)
 
 -- | Literal p idx src
 --    p - True if the literal is inverted
@@ -49,29 +43,16 @@ instance Show Source where
 --    src - The source of the literal
 data Literal = Literal Bool Int Source
              | TrueLiteral | FalseLiteral
-
-showsPrecLiteral :: Int -> Literal -> ShowS
-showsPrecLiteral = $(derive_showsPrec ''Literal)
-
-instance Show Literal where
-    showsPrec = showsPrecLiteral
+    deriving (Show)
 
 data Aiger = Aiger {
    aig_num_inputs :: Int,
    aig_num_outputs :: Int,
    aig_num_latches :: Int,
-   aig_num_badstates :: Int,
    aig_outputs :: Array Int Literal,
    aig_latches :: Array Int Literal,
-   aig_andgates :: Array Int (Literal, Literal),
-   aig_badstates :: Array Int Literal
-}
-
-showsPrecAiger :: Int -> Aiger -> ShowS
-showsPrecAiger = $(derive_showsPrec ''Aiger)
-
-instance Show Aiger where
-    showsPrec = showsPrecAiger
+   aig_andgates :: Array Int (Literal, Literal)
+} deriving (Show)
 
 -- The reset state for this aiger.
 aig_reset :: Aiger -> Vector
@@ -103,18 +84,16 @@ aig_eval aig inputs state =
 --  aig - the network to run
 --  inputs - the input vector. Should have length (aig_num_inputs aig)
 --  state - the state vector. Should have length (aig_num_latches aig)
--- Returns (output, badstates, newstate)
+-- Returns (output, newstate)
 --   where output is a vector with length (aig_num_outputs aig),
---     and badstates is a vector with length (aig_num_badstates aig),
 --     and newstate is a vector with length (aig_num_latches aig)
 --      
-aig_step :: Aiger -> Vector -> Vector -> (Vector, Vector, Vector)
+aig_step :: Aiger -> Vector -> Vector -> (Vector, Vector)
 aig_step aig inputs state = 
   let flit = aig_eval aig inputs state
       outs = fmap flit (aig_outputs aig)
-      badstates = fmap flit (aig_badstates aig)
       newstate = fmap flit (aig_latches aig)
-  in (outs, badstates, newstate)
+  in (outs, newstate)
  
 
 -- | Parse an ascii aiger file, assuming it is restricted in the following
@@ -129,22 +108,16 @@ readAsciiAiger text =
      (header : nonheader) ->
        case words header ++ repeat "0" of
          (fmt : _) | fmt /= "aag" -> error "AsciiAiger file is not aag format"
-         (_ : m : i : l : o : a : b : c : j : f : _) ->
+         (_ : m : i : l : o : a : _) ->
             let numinputs = read i
                 numlatches = read l
                 numoutputs = read o
                 numands = read a
 
-                numbadstateps = read b
-                --numinvarps = read c
-                --numjusticeps = read j
-                --numfairps = read f
-
                 (inputlines, noninput) = splitAt numinputs nonheader
                 (latchlines, nonlatch) = splitAt numlatches noninput
                 (outputlines, nonoutput) = splitAt numoutputs nonlatch
-                (bslines, nonbs) = splitAt numbadstateps nonoutput
-                (andlines, nonand) = splitAt numands nonbs
+                (andlines, nonand) = splitAt numands nonoutput
 
                 -- Compute the literal from its given number
                 literal :: Int -> Literal
@@ -172,16 +145,13 @@ readAsciiAiger text =
                 outputs = listArray (1, numoutputs) (map mkout outputlines)
                 latches = listArray (1, numlatches) (map mklatch latchlines)
                 andgates = listArray (1, numands) (map mkand andlines)
-                badstates = listArray (1, numbadstateps) (map mkout bslines)
             in Aiger { 
                  aig_num_inputs = numinputs,
                  aig_num_outputs = numoutputs,
                  aig_num_latches = numlatches,
-                 aig_num_badstates = numbadstateps,
                  aig_outputs = outputs,
                  aig_latches = latches,
-                 aig_andgates = andgates,
-                 aig_badstates = badstates
+                 aig_andgates = andgates
              }
 
 -- Show a vector as a binary string.
