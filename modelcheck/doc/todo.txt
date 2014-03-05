@@ -1,17 +1,6 @@
-Priority::
-1. Write some unit tests for model checking in the old FORMAT
-   that I understand. Simple is good.
-2. Clean up reference directory to have just:
-    -  abc
-    - old aiger
-    - and maybe picosat
-3. Write a wrapper around abc to run model checking
-    read_aiger, bmc?, write_aiger
-4. Write a util which checks if a given witness for a model checking problem
-    is valid: probably by calling aigsim
-5. Update my model checker to use old FORMAT
-6. Set up a test framework:
-   Organize tests by UNSAT and SAT, using abc to check UNSAT.
-   Verify my model checker reports UNSAT for all in UNSAT.
-   Verify counter-examples for all in SAT.
+* Clean up reference directory?
 
+* Clarify whether I support format 1.9 or not
+  Currently:
+    - input format is pre 1.9
+    - output format is 1.9

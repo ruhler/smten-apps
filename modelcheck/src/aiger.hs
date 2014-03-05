@@ -15,10 +15,11 @@ main = do
   -- Presumably we need to check for them all?
   result <- runSMT yices2 $ aigercheck aig (aig_outputs aig ! 1)
   case result of
-    Nothing -> putStrLn "0\n.\n"
+    Nothing -> putStrLn "0\n."
     Just v -> do
        putStrLn "1"
        putStrLn "b0"
        putStrLn $ showVector (aig_reset aig)
-       putStrLn . unlines $ map showVector v  ++ ["."]
+       putStr . unlines $ map showVector v
+       putStrLn "."
 

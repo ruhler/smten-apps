@@ -10,3 +10,14 @@ pdtrav: using -engine bdd appears to give reasonable results
     PASS is unsat
     FAIL is sat
 
+aigsim:
+  For checking witnesses, use aigsim from 1.9.
+  Output format should be:
+    1
+    b0
+    <vectors>
+    .
+  For a witness found for bad state property 0.
+  For a 2007 FORMAT input:
+    aigsim -m -c foo.aig foo.out
+  
