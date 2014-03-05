@@ -1,0 +1,12 @@
+
+abc:
+  read_aiger foo.aig
+  bmc2 
+  write_aiger foo.cex
+
+  Only finds sat, doesn't find unsat.
+
+pdtrav: using -engine bdd appears to give reasonable results
+    PASS is unsat
+    FAIL is sat
+

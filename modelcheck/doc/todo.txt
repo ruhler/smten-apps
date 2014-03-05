@@ -15,6 +15,3 @@ Priority::
    Verify my model checker reports UNSAT for all in UNSAT.
    Verify counter-examples for all in SAT.
 
-
-Other::
-* Have a 'build' directory

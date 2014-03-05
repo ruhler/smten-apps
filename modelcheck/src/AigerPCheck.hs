@@ -5,7 +5,6 @@ module AigerPCheck (
 
 import Smten.Prelude
 import Smten.Data.Array
-import Smten.Data.Functor
 import Smten.Symbolic
 import Smten.Symbolic.SMT
 import Aiger

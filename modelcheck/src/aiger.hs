@@ -4,7 +4,6 @@ import Smten.Data.Array
 import Smten.Symbolic.SMT
 import Smten.Symbolic.Solver.Yices2
 import Aiger
-import PCheck
 import AigerPCheck
 
 main :: IO ()

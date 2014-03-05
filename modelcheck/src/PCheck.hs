@@ -11,6 +11,7 @@
 module PCheck (Model(..), pcheck) where
 
 import Smten.Prelude
+import Smten.Control.Monad.Trans
 import Smten.Symbolic
 import Smten.Symbolic.SMT
 
@@ -40,6 +41,7 @@ pcheck = pcheck' 0
 -- simplest (if it helps performance).
 pcheck' :: (Eq s) => Int -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
 pcheck' k m mkS p = do
+   liftIO $ putStrLn ("checking k = " ++ show k)
    -- Search for a loopfree path from an initial state of length k
    ra <- query $ do 
       xs <- sequence $ replicate (k+1) mkS

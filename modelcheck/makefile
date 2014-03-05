@@ -1,10 +1,15 @@
 
-all: aiger
+all: build/release/aiger build/profile/aiger
 
-sources := src/Aiger.hs src/AigerPCheck.hs src/PCheck.hs
+SOURCES := src/Aiger.hs src/AigerPCheck.hs src/PCheck.hs
 
-aiger: src/aiger.hs  $(sources)
-	smten --make -isrc -O -o $@ $< -rtsopts
+build/release/aiger: src/aiger.hs  $(sources)
+	mkdir -p build/release
+	smten --make -O -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports
+	
+build/profile/aiger: src/aiger.hs  $(sources)
+	mkdir -p build/profile
+	smten --make -prof -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports
 
 clean:
-	rm aiger src/*.hi src/*.smten_o
+	rm -rf build
