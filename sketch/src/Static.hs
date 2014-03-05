@@ -438,6 +438,8 @@ typeof (GeE a b) = return BitT
 typeof (EqE a b) = return BitT
 typeof (NeqE a b) = return BitT
 typeof (ArrayE a) = return UnknownT
+    --ty <- foldr unify UnknownT <$> mapM typeof a
+    --return $ ArrT ty (ValE (IntV (length a)))
 typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (MulE a b) = return IntT
 typeof (ModE a b) = return IntT
@@ -466,11 +468,10 @@ typeof (AccessE a b) = do
 
 typeof (BulkAccessE a b c) = do
     ta <- typeof a
-    case (ta, b, c) of
-        (ArrT t _, _, ValE (IntV w)) -> do
-            return $ ArrT t (ValE (IntV w))
+    case (ta, c) of
+        (ArrT t _, ValE (IntV w)) -> return $ ArrT t (ValE (IntV w))
         _ -> return UnknownT
-typeof (CastE t e) = return t
+typeof (CastE t e) = staticM t
 typeof (AppE nm xs) = do
     env <- asks sr_env
     case Map.lookup nm env of
@@ -485,6 +486,6 @@ subtype a b
   | dimension a < dimension b = subtype (ArrT a (ValE (IntV 1))) b
 subtype BitT IntT = True
 subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
-  | ta `subtype` tb && wa < wb = True
+  | ta `subtype` tb && wa <= wb = True
 subtype _ _ = False
 

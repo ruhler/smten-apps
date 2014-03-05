@@ -1,3 +1,7 @@
+Priority:: 
+ * fix 2D_UPDATE
+ * brainstorm pass-by-reference in light of the 2D_UPDATE fix.
+
 Features::
 POOR_TYPE_BIT_LITERAL
   * bit N = 5;
@@ -59,6 +63,7 @@ VOID_TYPE::
   * Support reference parameters
       - after a function call, check which arguments were reference 
         arguments, and copy the results back to the environment
+      - but what if the argument isn't a variable? What is a reference to it?
   * Support empty return statement: return;
       - have it be syntactic sugar for return VoidV.
 
@@ -101,13 +106,14 @@ tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb157.sk: 2D_UPDATE
 tests/broken/miniTestb205.sk: TYPE ERROR
-tests/broken/miniTestb206.sk: TYPE ERROR
+    We don't do inference on ArrayE when we should.
+    I just have to get the details right.
+tests/broken/miniTestb206.sk: TYPE ERROR (see 205)
 tests/broken/miniTestb208.sk: C Preprocessor?
-tests/broken/miniTestb215.sk: TYPE ERROR - parser precedence bug?
-tests/broken/miniTestb220.sk: inline global vars in explicit cast types.
+tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
-tests/broken/miniTestb338.sk: Can't find variable in scope
-tests/broken/miniTestb533.sk: Empty file?
+tests/broken/miniTestb338.sk:
+  Support use of global variables in normal code, not just type declarations.
 
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES

@@ -304,6 +304,7 @@ evalE (CastE t e) = {-# SCC "CastE" #-} do
     case (t, e') of
         (IntT, BitV v) -> return (IntV (if v then 1 else 0))
         (IntT, BitsV v) -> return (IntV (valB v))
+        (ArrT BitT (ValE (IntV w)), BitV x) -> return (BitsV (x : replicate (w-1) False))
         (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
         (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t

@@ -71,6 +71,7 @@ dimension BitT = 1
 dimension (ArrT t _) = 1 + dimension t
 dimension IntT = 1
 dimension (FunT {}) = 1
+dimension UnknownT = error "dimension: UnknownT"
 
 
 instance Eq Value where
