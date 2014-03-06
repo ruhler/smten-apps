@@ -1,7 +1,7 @@
 
 # Gather performance data for Hampi and Shampi.
 #  Prints out individual test times (average)
-set ::runspertest 4
+set ::runspertest 8
 
 # Return the average time in seconds to run the given script.
 proc mytime {script} {
@@ -17,12 +17,12 @@ set cfgs [list  \
   [mkcfg yices2 Integer] \
   [mkcfg yices2 Bit]    \
   [mkcfg yices1 Integer] \
+  [mkcfg yices1 Bit] \
   [mkcfg z3 Integer] \
   [mkcfg z3 Bit]    \
   [mkcfg stp Bit]   \
   [mkcfg minisat Bit]   \
   ]
-  #[mkcfg yices1 Bit]       -- fails 
 
 foreach {cfg} $cfgs {
     puts -nonewline " [lindex $cfg 0]"

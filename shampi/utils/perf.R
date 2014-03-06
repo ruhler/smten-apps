@@ -10,6 +10,10 @@ pdf(file="build/hVstpb.pdf")
 plot(data[,c("hampi","Shampi.stp.Bit")], log="xy", xlim=lim, ylim=lim)
 abline(0, 1)
 
+pdf(file="build/hVms.pdf")
+plot(data[,c("hampi","Shampi.minisat.Bit")], log="xy", xlim=lim, ylim=lim)
+abline(0, 1)
+
 pdf(file="build/y2bVstpb.pdf")
 plot(data[,c("Shampi.yices2.Bit","Shampi.stp.Bit")], log="xy", xlim=lim, ylim=lim)
 abline(0, 1)
