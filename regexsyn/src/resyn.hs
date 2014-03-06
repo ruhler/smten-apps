@@ -1,9 +1,11 @@
 
 import Smten.Prelude
 import Smten.Control.Monad
+import Smten.Control.Monad.State
 import Smten.Data.List
 import Smten.Symbolic
 import Smten.Symbolic.Solver.Yices2
+import Grammar
 import RegEx
 
 abstar :: RegEx
@@ -37,8 +39,19 @@ resyn alphabet good bad =
             Nothing -> f (n+1)
   in f 0
 
+testparse :: String -> IO ()
+testparse s = case evalStateT parseRegEx s of
+                    Left msg -> fail msg
+                    Right x -> putStrLn (pretty x)
+
 main :: IO ()
 main = do
+    testparse "a"
+    testparse "abc"
+    testparse "a | b"
+    testparse "(a | b)c"
+
+
     txt <- getContents
     let f ('-':w) = ([], [w])
         f ('+':w) = ([w], [])

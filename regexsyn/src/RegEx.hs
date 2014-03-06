@@ -1,7 +1,7 @@
 
 module RegEx (
     RegEx,
-    epsilonR, emptyR, atomR, rangeR, concatR, orR, starR,
+    epsilonR, emptyR, atomR, rangeR, concatR, orR, starR, plusR, optionR,
     match,
     pretty,
     ) where
@@ -51,6 +51,12 @@ starR Empty = Empty
 starR Epsilon = Epsilon
 starR (Star a) = Star a
 starR a = Star a
+
+plusR :: RegEx -> RegEx
+plusR x = concatR x (starR x)
+
+optionR :: RegEx -> RegEx
+optionR x = orR x epsilonR 
 
 pretty :: RegEx -> String
 pretty r =
