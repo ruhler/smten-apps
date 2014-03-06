@@ -64,7 +64,7 @@ pretty f r =
         Star x -> "(" ++ pretty f x ++ ")*"
 
 prettyc :: RegEx Char -> String
-prettyc = pretty (\c -> [c])
+prettyc = pretty show
 
 match :: (Ord a) => RegEx a -> [a] -> Bool
 match r str = 
