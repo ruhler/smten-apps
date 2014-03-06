@@ -4,6 +4,7 @@
 module SChar where
 
 import Smten.Prelude
+import Smten.Control.Monad
 import Smten.Data.Char
 import Smten.Data.Function
 import Smten.Data.Functor
@@ -55,4 +56,13 @@ instance SChar BitSChar where
 
 bitSChar :: BitSChar
 bitSChar = BitSChar 0
+
+
+instance SChar Char where
+    toSChar = id
+    fromSChar = id
+    freeSChar = msum (map (return . chr) [0..256])
+
+charSChar :: Char
+charSChar = '\0'
 

@@ -21,7 +21,7 @@ import Hampi
 import Query
 import SChar
 
-data SCharType = SChar_Integer | SChar_Bit
+data SCharType = SChar_Integer | SChar_Bit | SChar_Char
     deriving (Eq, Show)
 
 lookuparg :: String -> [String] -> Maybe String
@@ -64,6 +64,7 @@ main = do
     elemtype <- case lookuparg "-e" args of
                  Just "Integer" -> return SChar_Integer
                  Just "Bit" -> return SChar_Bit
+                 Just "Char" -> return SChar_Char
                  Just x -> fail $ "Unknown elem type: " ++ x ++ ".\n" ++ usage
                  Nothing -> return SChar_Bit
 
@@ -79,6 +80,7 @@ main = do
             let hq = case elemtype of
                         SChar_Bit -> hquery bitSChar solver h
                         SChar_Integer -> hquery integerSChar solver h
+                        SChar_Char -> hquery charSChar solver h
             r <- timeout (1000000*to) hq
             putStrLn (fromMaybe "TIMEOUT" r)
     mapM_ runf fins
