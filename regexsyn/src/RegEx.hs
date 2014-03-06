@@ -1,9 +1,8 @@
 
 module RegEx (
-    RegEx,
+    RegEx(..),
     epsilonR, emptyR, atomR, rangeR, concatR, orR, starR, plusR, optionR,
     match,
-    pretty,
     ) where
 
 import Smten.Prelude
@@ -57,17 +56,6 @@ plusR x = concatR x (starR x)
 
 optionR :: RegEx -> RegEx
 optionR x = orR x epsilonR 
-
-pretty :: RegEx -> String
-pretty r =
-    case r of
-        Epsilon -> "ε"
-        Empty -> "∅"
-        Atom a -> show a
-        Range a b -> "[" ++ show a ++ "-" ++ show b ++ "]"
-        Concat a b -> pretty a ++ pretty b
-        Or a b -> "(" ++ pretty a ++ " | " ++ pretty b ++ ")"
-        Star x -> "(" ++ pretty x ++ ")*"
 
 match :: RegEx -> String -> Bool
 match r str = 

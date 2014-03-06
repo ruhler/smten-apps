@@ -5,7 +5,9 @@ import Smten.Control.Monad.State
 import Smten.Data.List
 import Smten.Symbolic
 import Smten.Symbolic.Solver.Yices2
+
 import Grammar
+import Ppr
 import RegEx
 
 abstar :: RegEx
@@ -50,6 +52,7 @@ main = do
     testparse "abc"
     testparse "a | b"
     testparse "(a | b)c"
+    testparse "a | b | cd*e* | f"
 
 
     txt <- getContents
