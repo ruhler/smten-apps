@@ -3,70 +3,67 @@ module RegEx (
     RegEx,
     epsilonR, emptyR, atomR, rangeR, concatR, orR, starR,
     match,
-    pretty, prettyc
+    pretty,
     ) where
 
 import Smten.Prelude
 
-data RegEx a =
+data RegEx =
     Epsilon
   | Empty
-  | Atom a
-  | Range a a
-  | Concat (RegEx a) (RegEx a)
-  | Or (RegEx a) (RegEx a)
-  | Star (RegEx a)
+  | Atom Char
+  | Range Char Char
+  | Concat RegEx RegEx
+  | Or RegEx RegEx
+  | Star RegEx
     deriving (Eq)
 
-epsilonR :: RegEx a
+epsilonR :: RegEx
 epsilonR = Epsilon
 
-emptyR :: RegEx a
+emptyR :: RegEx
 emptyR = Empty
 
-atomR :: a -> RegEx a
+atomR :: Char -> RegEx
 atomR = Atom
 
-rangeR :: (Ord a) => a -> a -> RegEx a
+rangeR :: Char -> Char -> RegEx
 rangeR a b =
   case compare a b of
      LT -> Range a b
      EQ -> Atom a
      GT -> Empty
 
-concatR :: RegEx a -> RegEx a -> RegEx a
+concatR :: RegEx -> RegEx -> RegEx
 concatR Empty _ = Empty
 concatR _ Empty = Empty
 concatR Epsilon a = a
 concatR a Epsilon = a
 concatR a b = Concat a b
 
-orR :: RegEx a -> RegEx a -> RegEx a
+orR :: RegEx -> RegEx -> RegEx
 orR Empty a = a
 orR a Empty = a
 orR a b = Or a b
 
-starR :: RegEx a -> RegEx a
+starR :: RegEx -> RegEx
 starR Empty = Empty
 starR Epsilon = Epsilon
 starR (Star a) = Star a
 starR a = Star a
 
-pretty :: (a -> String) -> RegEx a -> String
-pretty f r =
+pretty :: RegEx -> String
+pretty r =
     case r of
         Epsilon -> "ε"
         Empty -> "∅"
-        Atom a -> f a
-        Range a b -> "[" ++ f a ++ "-" ++ f b ++ "]"
-        Concat a b -> pretty f a ++ pretty f b
-        Or a b -> "(" ++ pretty f a ++ " | " ++ pretty f b ++ ")"
-        Star x -> "(" ++ pretty f x ++ ")*"
+        Atom a -> show a
+        Range a b -> "[" ++ show a ++ "-" ++ show b ++ "]"
+        Concat a b -> pretty a ++ pretty b
+        Or a b -> "(" ++ pretty a ++ " | " ++ pretty b ++ ")"
+        Star x -> "(" ++ pretty x ++ ")*"
 
-prettyc :: RegEx Char -> String
-prettyc = pretty show
-
-match :: (Ord a) => RegEx a -> [a] -> Bool
+match :: RegEx -> String -> Bool
 match r str = 
   case r of
     Epsilon -> null str

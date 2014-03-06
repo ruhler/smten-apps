@@ -6,10 +6,10 @@ import Smten.Symbolic
 import Smten.Symbolic.Solver.Yices2
 import RegEx
 
-abstar :: RegEx Char 
+abstar :: RegEx
 abstar = starR (concatR (atomR 'a') (atomR 'b'))
 
-mkRegEx :: [Char] -> Int -> Symbolic (RegEx Char)
+mkRegEx :: [Char] -> Int -> Symbolic RegEx
 mkRegEx _ 0 = return emptyR
 mkRegEx alphabet n = do
     x1 <- msum (map return alphabet)
@@ -20,7 +20,7 @@ mkRegEx alphabet n = do
 
 -- Synthesize a regular expression which matches the given strings,
 -- but not the other given strings.
-resynN :: [Char] -> Int -> [String] -> [String] -> IO (Maybe (RegEx Char))
+resynN :: [Char] -> Int -> [String] -> [String] -> IO (Maybe RegEx)
 resynN alphabet n good bad =
    run_symbolic yices2 $ do
       re <- mkRegEx alphabet n
@@ -28,7 +28,7 @@ resynN alphabet n good bad =
       guard $ all (not . match re) bad
       return re
 
-resyn :: [Char] -> [String] -> [String] -> IO (RegEx Char)
+resyn :: [Char] -> [String] -> [String] -> IO RegEx
 resyn alphabet good bad =
   let f n = do
         r <- resynN alphabet n good bad
@@ -50,4 +50,4 @@ main = do
         badwords = concat bads
         alphabet = nub (concat (goodwords ++ badwords))
     re <- resyn alphabet goodwords badwords
-    putStrLn (prettyc re)
+    putStrLn (pretty re)
