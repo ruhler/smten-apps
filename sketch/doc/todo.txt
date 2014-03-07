@@ -105,10 +105,6 @@ tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb157.sk: 2D_UPDATE
-tests/broken/miniTestb205.sk: TYPE ERROR
-    We don't do inference on ArrayE when we should.
-    I just have to get the details right.
-tests/broken/miniTestb206.sk: TYPE ERROR (see 205)
 tests/broken/miniTestb208.sk: C Preprocessor?
 tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?

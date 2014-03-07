@@ -136,9 +136,8 @@ instance Static Expr where
   staticM e = do
     dst <- asks sr_oty
     src <- typeof e
-    case src of
-     UnknownT -> staticE e
-     _ | src == dst -> staticE e
+    case () of
+     _ | src `matches` dst -> staticE e
        | src `subtype` dst -> ICastE dst <$> (withty src $ staticE e)
        | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
@@ -319,7 +318,10 @@ instance Static Value where
   -- I don't expect to find any other value in the program at this point.
   staticM v = error $ "TODO: Static.staticM for value: " ++ show v
 
--- Try to unify the given types.
+-- Try to unify the given types A and B.
+-- Returns a type C which is consistent with both argument types where
+-- possible:  A is a subtype of C
+--            B is a subtype of C
 unify :: Type -> Type -> Type
 unify a b
   | a == b = a
@@ -334,6 +336,14 @@ unify a b
   | dimension a > dimension b = unify a (ArrT b (ValE (IntV 1)))
 unify a b = error $ "unable to unify types: " ++ show (a, b)
 
+-- Given types A and B,
+--  return True if B = A after substition of UnknownT types in A.
+matches :: Type -> Type -> Bool
+matches a b | a == b = True
+matches UnknownT _ = True
+matches (FunT a as) (FunT b bs) = and (zipWith matches (a:as) (b:bs))
+matches (ArrT a (ValE wa)) (ArrT b (ValE wb)) = wa == wb && a `matches` b
+matches _ _ = False
 
 -- Comparison operators: <, >, <=, >=
 -- Typing Rules:
@@ -437,9 +447,9 @@ typeof (LeE a b) = return BitT
 typeof (GeE a b) = return BitT
 typeof (EqE a b) = return BitT
 typeof (NeqE a b) = return BitT
-typeof (ArrayE a) = return UnknownT
-    --ty <- foldr unify UnknownT <$> mapM typeof a
-    --return $ ArrT ty (ValE (IntV (length a)))
+typeof (ArrayE a) = do
+   ty <- foldr unify UnknownT <$> mapM typeof a
+   return $ ArrT ty (ValE (IntV (length a)))
 typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (MulE a b) = return IntT
 typeof (ModE a b) = return IntT

@@ -62,9 +62,14 @@ typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
 typeofV (IntV 0) = BitT     -- it may be a bit literal, so indicate that:
 typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
-typeofV (FunV f) = UnknownT
+typeofV (FunV f) = f_type f
 typeofV VoidV = VoidT
 
+-- Return the dimension of a type.
+-- - void, bit, int, and function types have dimension 1.
+-- - array types have dimension greater than 1
+-- - The user should ensure the type passed to dimension is fully known. 
+--   That is, it should contain no UnknownT
 dimension :: Type -> Int
 dimension VoidT = 1
 dimension BitT = 1
