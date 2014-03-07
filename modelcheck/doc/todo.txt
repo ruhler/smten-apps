@@ -12,8 +12,6 @@
 
 * set up a 'perf' target, which ideally runs around 15 seconds.
 
-* take solver as a command line argument.
-
 
 Performance::
 * Use 0-indexed vectors instead of 1-indexed?
