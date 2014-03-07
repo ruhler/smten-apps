@@ -14,5 +14,11 @@ build/profile/aiger: src/aiger.hs  $(SOURCES)
 	mkdir -p build/profile
 	smten --make -prof -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports
 
+build/bench.data: utils/bench.tcl
+	tclsh utils/bench.tcl | tee $@
+
+build/bench.pdf: build/bench.data
+	Rscript utils/bench.R
+
 clean:
 	rm -rf build
