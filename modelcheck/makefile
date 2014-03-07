@@ -6,6 +6,9 @@ SOURCES := src/Aiger.hs src/AigerPCheck.hs src/PCheck.hs
 check: build/release/aiger
 	tclsh utils/test.tcl
 
+perf: build/release/aiger
+	tclsh utils/perf.tcl | tee build/perf.txt
+
 build/release/aiger: src/aiger.hs  $(SOURCES)
 	mkdir -p build/release
 	smten --make -O -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports
