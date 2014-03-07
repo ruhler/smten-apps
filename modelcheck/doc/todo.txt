@@ -6,10 +6,6 @@
     - output format is 1.9
 
 * classify more test cases
-
-* only use a few test cases for checking correctness.
-  Ideally it takes less than about 10 seconds.
-
 * set up a 'perf' target, which ideally runs around 15 seconds.
 
 
