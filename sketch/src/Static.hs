@@ -94,24 +94,9 @@ instance Static Stmt where
     modify $ \s -> s { ss_tyenv = env' }
     return $ DeclS ty' nm
 
-  staticM (UpdateS nm e) = do
-    env <- asks sr_env
-    tyenv <- gets ss_tyenv
-    case Map.lookup nm tyenv of
-      Nothing -> error $ "variable " ++ nm ++ " not in scope"
-      Just ty -> do
-        ty' <- staticM ty
-        UpdateS nm <$> (withty ty' (staticM e))
-
-  staticM (ArrUpdateS nm idx e) = do
-    tyenv <- gets ss_tyenv
-    t <- case Map.lookup nm tyenv of
-                Just (ArrT t _) -> staticM t
-                Just _ -> error $ "variable " ++ nm ++ " is not an array"
-                Nothing -> error $ "variable " ++ nm ++ " not in scope"
-    idx' <- withty IntT $ staticM idx
-    e' <- withty t $ staticM e
-    return (ArrUpdateS nm idx' e')
+  staticM (UpdateS lv e) = do
+    (lv', ty) <- staticLV lv
+    UpdateS lv' <$> (withty ty (staticM e))
 
   staticM (ArrBulkUpdateS nm lo w e) = do
     tyenv <- gets ss_tyenv
@@ -131,6 +116,26 @@ instance Static Stmt where
 
   staticM (IfS p a b) = liftM3 IfS (withty BitT $ staticM p) (staticM a) (staticM b)
   staticM (BlockS xs) = blockS <$> mapM staticM xs
+
+
+-- Return the LVal with static check done, and return the type of 
+-- expression expected.
+staticLV :: LVal -> SM (LVal, Type)
+staticLV lv@(VarLV nm) = do
+    tyenv <- gets ss_tyenv
+    case Map.lookup nm tyenv of
+      Nothing -> error $ "variable " ++ nm ++ " not in scope"
+      Just ty -> do
+        ty' <- staticM ty
+        return (lv, ty')
+staticLV (ArrLV lv idx) = do
+    (lv', arrt) <- staticLV lv
+    t <- case arrt of
+                ArrT t _ -> staticM t
+                _ -> error $ "expected array type, found " ++ show arrt
+    idx' <- withty IntT $ staticM idx
+    return (ArrLV lv' idx', t)
+
 
 instance Static Expr where
   staticM e = do

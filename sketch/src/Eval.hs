@@ -94,22 +94,9 @@ evalS (DeclS ty nm) = {-# SCC "DeclS" #-} do
           _ -> return (error $ nm ++ " not initialized")
   insertVar nm v0
   return OK
-evalS (UpdateS nm e) = {-# SCC "UpdateS" #-} do
+evalS (UpdateS lv e) = {-# SCC "UpdateS" #-} do
   e' <- evalE e
-  insertVar nm e'
-  return OK
-evalS (ArrUpdateS nm i e) = {-# SCC "ArrUpdateS" #-} do
-  mval <- lookupVar nm
-  ir <- evalE i
-  er <- evalE e
-  arr' <- case (mval, ir, er) of
-             (Just (BitsV xs), IntV i', BitV e') -> do
-                assert (i' < length xs)
-                return (BitsV $ arrupd xs i' e')
-             (Just (ArrayV xs), IntV i', e') -> do
-                assert (i' < length xs)
-                return (ArrayV $ arrupd xs i' e')
-  insertVar nm arr'
+  updateLV lv e'
   return OK
 
 evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
@@ -276,16 +263,7 @@ evalE (VarE nm) = {-# SCC "VarE" #-} do
         _ -> error $ "Variable " ++ show nm ++ " not found"
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     a' <- evalE a
-    i' <- evalE i
-    let idx = case i' of
-               IntV iv -> iv
-    case a' of
-        BitsV av -> do
-          assert (idx >= 0 && idx < length av)
-          return (BitV (arrsub av idx))
-        ArrayV xs -> do
-          assert (idx >= 0 && idx < length xs)
-          return (arrsub xs idx)
+    arrayAccess a' i
 evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
     a' <- evalE a
     IntV lo' <- evalE lo
@@ -314,7 +292,41 @@ evalE (AppE f xs) = {-# SCC "AppE" #-} do
     case f' of
         FunV fv -> apply fv xs
         _ -> error $ "Expected function, but got: " ++ show f'
+
+-- Given an array value and index, return the value at that index.
+arrayAccess :: Value -> Expr -> EvalM Value
+arrayAccess arr i = do
+    i' <- evalE i
+    let idx = case i' of
+               IntV iv -> iv
+    case arr of
+        BitsV av -> do
+          assert (idx >= 0 && idx < length av)
+          return (BitV (arrsub av idx))
+        ArrayV xs -> do
+          assert (idx >= 0 && idx < length xs)
+          return (arrsub xs idx)
     
+lookupLV :: LVal -> EvalM Value
+lookupLV (VarLV nm) = fromJust <$> lookupVar nm
+lookupLV (ArrLV lv i) = do
+    arr <- lookupLV lv
+    arrayAccess arr i
+
+updateLV :: LVal -> Value -> EvalM ()
+updateLV (VarLV nm) x = insertVar nm x
+updateLV (ArrLV lv i) x = do
+  arr <- lookupLV lv
+  ir <- evalE i
+  arr' <- case (arr, ir, x) of
+             (BitsV xs, IntV i', BitV e') -> do
+                assert (i' < length xs)
+                return (BitsV $ arrupd xs i' e')
+             (ArrayV xs, IntV i', e') -> do
+                assert (i' < length xs)
+                return (ArrayV $ arrupd xs i' e')
+  updateLV lv arr'
+            
     
 -- Update the ith element of an array
 -- Does nothing if the index is out of bounds.

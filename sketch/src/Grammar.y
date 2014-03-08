@@ -144,10 +144,10 @@ somestmts :: { [Stmt] }
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
  | 'assert' expr ';' { AssertS $2 }
- | type id '=' expr ';' { blockS [DeclS $1 $2, UpdateS $2 $4] }
+ | type id '=' expr ';' { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
  | type id ';' { DeclS $1 $2 }
- | id '=' expr ';' { UpdateS $1 $3 }
- | id '[' expr ']' '=' expr ';' { ArrUpdateS $1 $3 $6 }
+ | id '=' expr ';' { UpdateS (VarLV $1) $3 }
+ | id '[' expr ']' '=' expr ';' { UpdateS (ArrLV (VarLV $1) $3) $6 }
  | id '[' expr '::' expr ']' '=' expr ';' { ArrBulkUpdateS $1 $3 $5 $8 }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
@@ -160,20 +160,20 @@ stmt :: { Stmt }
  | 'do' stmt 'while' '(' expr ')' ';' { BlockS [$2, WhileS $5 $2] }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
- | '++' id ';' { UpdateS $2 (AddE (VarE $2) (ValE $ IntV 1)) }
- | id '++' ';' { UpdateS $1 (AddE (VarE $1) (ValE $ IntV 1)) }
- | id '--' ';' { UpdateS $1 (SubE (VarE $1) (ValE $ IntV 1)) }
+ | '++' id ';' { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
+ | id '++' ';' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
+ | id '--' ';' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
 
 for_init :: { Stmt }
- : type id '=' expr { blockS [DeclS $1 $2, UpdateS $2 $4] }
- | id '=' expr { UpdateS $1 $3 }
- | id '[' expr ']' '=' expr { ArrUpdateS $1 $3 $6 }
+ : type id '=' expr { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
+ | id '=' expr { UpdateS (VarLV $1) $3 }
+ | id '[' expr ']' '=' expr { UpdateS (ArrLV (VarLV $1) $3) $6 }
 
 for_incr :: { Stmt }
- : id '=' expr { UpdateS $1 $3 }
- | '++' id { UpdateS $2 (AddE (VarE $2) (ValE $ IntV 1)) }
- | id '++' { UpdateS $1 (AddE (VarE $1) (ValE $ IntV 1)) }
- | id '--' { UpdateS $1 (SubE (VarE $1) (ValE $ IntV 1)) }
+ : id '=' expr { UpdateS (VarLV $1) $3 }
+ | '++' id { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
+ | id '++' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
+ | id '--' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

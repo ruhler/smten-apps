@@ -2,7 +2,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Sketch (
-    Prog, ProgEnv, Decl(..), Type(..), Name, Stmt(..),
+    Prog, ProgEnv, Decl(..), Type(..), Name,
+    LVal(..), Stmt(..),
     Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
     Options(..), defaultOptions,
@@ -118,6 +119,10 @@ data Expr =
  | AppE Name [Expr]      -- ^ f(x, y, ...)
     deriving (Show)
 
+data LVal = VarLV Name              -- foo
+          | ArrLV LVal Expr         -- foo[i]
+    deriving (Show)
+
 data Stmt =
      ReturnS Expr                   -- ^ return e;
    | AssertS Expr                   -- ^ assert e;
@@ -126,8 +131,7 @@ data Stmt =
    | WhileS Expr Stmt               -- ^ while (c) s
    | ForS Stmt Expr Stmt Stmt       -- ^ for (init ; cond ; incr ) body
    | DeclS Type Name                -- ^ ty foo;
-   | UpdateS Name Expr              -- ^ foo = e;
-   | ArrUpdateS Name Expr Expr      -- ^ foo[e1] = e2;
+   | UpdateS LVal Expr              -- ^ foo = e;
    | ArrBulkUpdateS Name Expr Expr Expr -- ^ foo[e1::e2] = e3;
    | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
