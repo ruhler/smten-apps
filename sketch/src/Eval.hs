@@ -99,21 +99,6 @@ evalS (UpdateS lv e) = {-# SCC "UpdateS" #-} do
   updateLV lv e'
   return OK
 
-evalS (ArrBulkUpdateS nm lo _ e) = {-# SCC "ArrBulkUpdateS" #-} do
-  -- Note: we don't have to evaluate the width argument, because the type of
-  -- 'e' is already properly sized.
-  mval <- lookupVar nm
-  lor <- evalE lo
-  er <- evalE e
-  -- TODO: assert the indices for update are all in bounds
-  arr' <- case (mval, lor, er) of
-             (Just (BitsV xs), IntV lo', BitsV xs') -> do
-                return (BitsV $ arrbulkupd xs lo' xs')
-             (Just (ArrayV xs), IntV lo', ArrayV xs') -> do
-                return (ArrayV $ arrbulkupd xs lo' xs')
-  insertVar nm arr'
-  return OK
-
 evalS (IfS p a b) = {-# SCC "IfS" #-} do
   p' <- evalE p
   case p' of
@@ -266,17 +251,7 @@ evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     arrayAccess a' i
 evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
     a' <- evalE a
-    IntV lo' <- evalE lo
-    IntV w' <- evalE w
-    case a' of
-        BitsV xs -> do
-          let xs' = drop lo' xs
-          assert (lo' >= 0 && w' <= length xs')
-          return (BitsV (take w' xs'))
-        ArrayV xs -> do
-          let xs' = drop lo' xs
-          assert (lo' >= 0 && w' <= length xs')
-          return (ArrayV (take w' xs'))
+    bulkAccess a' lo w
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
@@ -294,6 +269,7 @@ evalE (AppE f xs) = {-# SCC "AppE" #-} do
         _ -> error $ "Expected function, but got: " ++ show f'
 
 -- Given an array value and index, return the value at that index.
+-- TODO: make an LValE, have it use lookupLV, then inline this into lookupLV.
 arrayAccess :: Value -> Expr -> EvalM Value
 arrayAccess arr i = do
     i' <- evalE i
@@ -306,12 +282,29 @@ arrayAccess arr i = do
         ArrayV xs -> do
           assert (idx >= 0 && idx < length xs)
           return (arrsub xs idx)
+
+bulkAccess :: Value -> Expr -> Expr -> EvalM Value
+bulkAccess arr lo w = do
+    IntV lo' <- evalE lo
+    IntV w' <- evalE w
+    case arr of
+        BitsV xs -> do
+          let xs' = drop lo' xs
+          assert (lo' >= 0 && w' <= length xs')
+          return (BitsV (take w' xs'))
+        ArrayV xs -> do
+          let xs' = drop lo' xs
+          assert (lo' >= 0 && w' <= length xs')
+          return (ArrayV (take w' xs'))
     
 lookupLV :: LVal -> EvalM Value
 lookupLV (VarLV nm) = fromJust <$> lookupVar nm
 lookupLV (ArrLV lv i) = do
     arr <- lookupLV lv
     arrayAccess arr i
+lookupLV (BulkLV lv lo w) = do
+    arr <- lookupLV lv
+    bulkAccess arr lo w
 
 updateLV :: LVal -> Value -> EvalM ()
 updateLV (VarLV nm) x = insertVar nm x
@@ -326,6 +319,19 @@ updateLV (ArrLV lv i) x = do
                 assert (i' < length xs)
                 return (ArrayV $ arrupd xs i' e')
   updateLV lv arr'
+updateLV (BulkLV lv lo _) x = do
+  -- Note: we don't have to evaluate the width argument, because the type of
+  -- 'x' is already properly sized.
+  arr <- lookupLV lv
+  lor <- evalE lo
+  -- TODO: assert the indices for update are all in bounds
+  arr' <- case (arr, lor, x) of
+             (BitsV xs, IntV lo', BitsV xs') -> do
+                return (BitsV $ arrbulkupd xs lo' xs')
+             (ArrayV xs, IntV lo', ArrayV xs') -> do
+                return (ArrayV $ arrbulkupd xs lo' xs')
+  updateLV lv arr'
+
             
     
 -- Update the ith element of an array

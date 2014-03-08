@@ -99,8 +99,6 @@ pprS (ForS init cond incr b)
 pprS (WhileS c s) = infirst ("while (" ++ pretty c ++ ") ") (pprS s)
 pprS (DeclS ty nm) = [pretty ty ++ " " ++ pretty nm ++ ";"]
 pprS (UpdateS lv ex) = [pretty lv ++ " = " ++ pretty ex ++ ";"]
-pprS (ArrBulkUpdateS nm lo w ex) =
-    [pretty nm ++ "[" ++ pretty lo ++ "::" ++ pretty w ++ "] = " ++ pretty ex ++ ";"]
 pprS (BlockS xs) = concat [["{"], map ("   " ++) (concatMap pprS xs), ["}"]]
 pprS (IfS p a (BlockS []))
  = infirst ("if (" ++ pretty p ++ ") ") (pprS a)
@@ -115,6 +113,7 @@ instance Ppr Stmt where
 instance Ppr LVal where
    pretty (VarLV nm) = pretty nm
    pretty (ArrLV lv idx) = pretty lv ++ "[" ++ pretty idx ++ "]"
+   pretty (BulkLV lv lo w) = pretty lv ++ "[" ++ pretty lv ++ "::" ++ pretty w ++ "]"
 
 instance Ppr Arg where
    pretty (Arg ty nm) = pretty ty ++ " " ++ pretty nm

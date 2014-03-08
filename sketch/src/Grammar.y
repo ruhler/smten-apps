@@ -148,7 +148,7 @@ stmt :: { Stmt }
  | type id ';' { DeclS $1 $2 }
  | id '=' expr ';' { UpdateS (VarLV $1) $3 }
  | id '[' expr ']' '=' expr ';' { UpdateS (ArrLV (VarLV $1) $3) $6 }
- | id '[' expr '::' expr ']' '=' expr ';' { ArrBulkUpdateS $1 $3 $5 $8 }
+ | id '[' expr '::' expr ']' '=' expr ';' { UpdateS (BulkLV (VarLV $1) $3 $5) $8 }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}

@@ -110,13 +110,13 @@ genS (ForS init cond incr body) =
     liftM4 ForS (genS init) (genE cond) (genS incr) (genS body)
 genS s@(DeclS {}) = return s
 genS (UpdateS lv e) = liftM2 UpdateS (genLV lv) (genE e)
-genS (ArrBulkUpdateS nm lo w e) = liftM3 (ArrBulkUpdateS nm) (genE lo) (genE w) (genE e)
 genS (IfS p a b) = liftM3 IfS (genE p) (genS a) (genS b)
 genS (BlockS xs) = blockS <$> mapM genS xs
 
 genLV :: LVal -> GM LVal
 genLV v@(VarLV nm) = return v
-genLV v@(ArrLV lv x) = liftM2 ArrLV (genLV lv) (genE x)
+genLV (ArrLV lv x) = liftM2 ArrLV (genLV lv) (genE x)
+genLV (BulkLV lv lo w) = liftM3 BulkLV (genLV lv) (genE lo) (genE w)
 
 genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)

@@ -98,22 +98,6 @@ instance Static Stmt where
     (lv', ty) <- staticLV lv
     UpdateS lv' <$> (withty ty (staticM e))
 
-  staticM (ArrBulkUpdateS nm lo w e) = do
-    tyenv <- gets ss_tyenv
-    t <- case Map.lookup nm tyenv of
-                Just t -> staticM t
-                Nothing -> error $ "variable " ++ nm ++ " not in scope"
-    lo' <- withty IntT $ staticM lo
-    w' <- withty IntT $ staticM w
-    case (w', t) of
-        (ValE (IntV wv), ArrT et (ValE (IntV w)))
-           | wv <= w -> do
-                e' <- withty (ArrT et (ValE (IntV wv))) $ staticM e
-                return (ArrBulkUpdateS nm lo' w' e')
-           | otherwise -> error $ "invalid bounds for bulk update of width: " ++ show wv
-        (_, ArrT {}) -> error $ "bulk update width could not be determined statically: " ++ show (w')
-        (_, _) -> error $ "variable " ++ show nm ++ " is not an array"
-
   staticM (IfS p a b) = liftM3 IfS (withty BitT $ staticM p) (staticM a) (staticM b)
   staticM (BlockS xs) = blockS <$> mapM staticM xs
 
@@ -135,6 +119,16 @@ staticLV (ArrLV lv idx) = do
                 _ -> error $ "expected array type, found " ++ show arrt
     idx' <- withty IntT $ staticM idx
     return (ArrLV lv' idx', t)
+staticLV (BulkLV lv lo w) = do
+    (lv', t) <- staticLV lv
+    lo' <- withty IntT $ staticM lo
+    w' <- withty IntT $ staticM w
+    case (w', t) of
+        (ValE (IntV wv), ArrT et (ValE (IntV w)))
+           | wv <= w -> return (BulkLV lv' lo' w', ArrT et (ValE (IntV wv)))
+           | otherwise -> error $ "invalid bounds for bulk update of width: " ++ show wv
+        (_, ArrT {}) -> error $ "bulk update width could not be determined statically: " ++ show (w')
+        (_, _) -> error $ "expected array type, but found " ++ show t
 
 
 instance Static Expr where

@@ -119,8 +119,9 @@ data Expr =
  | AppE Name [Expr]      -- ^ f(x, y, ...)
     deriving (Show)
 
-data LVal = VarLV Name              -- foo
-          | ArrLV LVal Expr         -- foo[i]
+data LVal = VarLV Name                  -- foo
+          | ArrLV LVal Expr             -- foo[i]
+          | BulkLV LVal Expr Expr    -- foo[lo::N]
     deriving (Show)
 
 data Stmt =
@@ -132,7 +133,6 @@ data Stmt =
    | ForS Stmt Expr Stmt Stmt       -- ^ for (init ; cond ; incr ) body
    | DeclS Type Name                -- ^ ty foo;
    | UpdateS LVal Expr              -- ^ foo = e;
-   | ArrBulkUpdateS Name Expr Expr Expr -- ^ foo[e1::e2] = e3;
    | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
    | BlockS [Stmt]                  -- ^ { stmts }
     deriving (Show)
