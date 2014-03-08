@@ -1,5 +1,4 @@
 Priority:: 
- * fix 2D_UPDATE
  * brainstorm pass-by-reference in light of the 2D_UPDATE fix.
 
 Features::
@@ -31,26 +30,6 @@ STRUCT_TYPES
   * member update via '.'  May be multi-level
   * passing structs as arguments
   
-
-2D_UPDATE
-  Support 2d array update: T[2][1] = 1;
-  And, ideally, any dimension array update.
-  Maybe: Have a generic Assign operator, and LVal?
-    Have something called an LVal:
-        var and LVal[i] to start.
-    Assignment statemtent is now: UpdateS LVal Expr
-    To update a Var, we read it just update it.
-    To update a assignment, we read the array, given the new array...
-    Isn't it easy then?
-
-    update :: LVal -> Expr -> ()
-    update (Var nm) x = insertVar nm x
-    update (Arr v i) x = arr0 <- lookup v ...
-        I need a way to read the value of 'v'.
-
-    So two functions: lookup and update for LVal.
-    Good. Let me try it.
-      
 
 STATIC_EVAL::
   Evaluate local variables statically if possible.
@@ -114,12 +93,10 @@ Features needed, by test case::
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
-tests/broken/miniTestb113.sk: 2D_UPDATE
 tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
-tests/broken/miniTestb157.sk: 2D_UPDATE
 tests/broken/miniTestb208.sk: C Preprocessor?
 tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?

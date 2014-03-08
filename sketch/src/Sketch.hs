@@ -81,9 +81,11 @@ dimension UnknownT = error "dimension: UnknownT"
 
 
 instance Eq Value where
+    (==) (ArrayV as) (ArrayV bs) = as == bs
     (==) (BitV a) (BitV b) = a == b
     (==) (BitsV a) (BitsV b) = a == b
     (==) (IntV a) (IntV b) = a == b
+    (==) VoidV VoidV = True
     (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
 
 data Expr = 

@@ -146,9 +146,7 @@ stmt :: { Stmt }
  | 'assert' expr ';' { AssertS $2 }
  | type id '=' expr ';' { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
  | type id ';' { DeclS $1 $2 }
- | id '=' expr ';' { UpdateS (VarLV $1) $3 }
- | id '[' expr ']' '=' expr ';' { UpdateS (ArrLV (VarLV $1) $3) $6 }
- | id '[' expr '::' expr ']' '=' expr ';' { UpdateS (BulkLV (VarLV $1) $3 $5) $8 }
+ | lval '=' expr ';' { UpdateS $1 $3 }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
@@ -168,6 +166,11 @@ for_init :: { Stmt }
  : type id '=' expr { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
  | id '=' expr { UpdateS (VarLV $1) $3 }
  | id '[' expr ']' '=' expr { UpdateS (ArrLV (VarLV $1) $3) $6 }
+
+lval :: { LVal }
+ : id { VarLV $1 }
+ | lval '[' expr ']' { ArrLV $1 $3 }
+ | lval '[' expr '::' expr ']' { BulkLV $1 $3 $5 }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
