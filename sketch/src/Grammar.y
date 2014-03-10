@@ -145,6 +145,7 @@ somestmts :: { [Stmt] }
 
 stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
+ | 'return' ';' { ReturnS (ValE VoidV) }
  | 'assert' expr ';' { AssertS $2 }
  | type id '=' expr ';' { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
  | type id ';' { DeclS $1 $2 }

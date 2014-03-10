@@ -323,6 +323,12 @@ instance Static Value where
     case ty of
       ArrT {} -> return x
       _ -> error $ "expected type " ++ show ty ++ " but got array type"
+
+  staticM VoidV = do
+    ty <- asks sr_oty
+    case ty of
+        VoidT {} -> return VoidV
+        _ -> error $ "expected type " ++ show ty ++ " but got void"
       
 
   -- I don't expect to find any other value in the program at this point.

@@ -90,6 +90,7 @@ infirst x (l:ls) = (x ++ l) : ls
 
 -- A statement is printed as a list of lines
 pprS :: Stmt -> [String]
+pprS (ReturnS (ValE VoidV)) = ["return;"]
 pprS (ReturnS x) = ["return " ++ prettya x ++ ";"]
 pprS (ExprS x) = [prettya x ++ ";"]
 pprS (ReorderS xs) = concat [["reorder {"], map ("    " ++) (concatMap pprS xs), ["}"]]

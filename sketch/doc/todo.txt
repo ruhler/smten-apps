@@ -63,6 +63,10 @@ INTEQ_SLOW
 STACK_OVERFLOW
  A mysterious stack overflow
 
+MULTI_VARS
+support multiple var decls on one line.
+  ex: int x=0, y=0;
+
 PERF3
  In pc[1] < 4, 
  pc[1] can have so many possible values, we have an exponential blowup?
@@ -79,20 +83,45 @@ Features needed, by test case::
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
+tests/broken/miniTestb129.sk: MULTI_VARS
+tests/broken/miniTestb130.sk: MULTI_VARS
 tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
-tests/broken/miniTestb208.sk: C Preprocessor?
+tests/broken/miniTestb196.sk: support h_assert statement.
+
+tests/broken/miniTestb208.sk,
+tests/broken/miniTest213ArrExpScaling.sk,
+tests/broken/miniTest215Choice.sk: C Preprocessor?
+
+tests/broken/miniTestb209.sk: MULTI_VARS
 tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
-tests/broken/miniTestb338.sk:
+tests/broken/miniTestb232.sk: Uninitialized variable?
+tests/broken/miniTestb279.sk: MULTI_VARS
+tests/broken/miniTestb280.sk, tests/broken/miniTest209Globals.sk: += operator
+tests/broken/miniTestb317.sk,
+tests/broken/miniTestb318.sk: post increment operator in expression
+tests/broken/miniTestb334.sk:
+  ExprS calls non-void function - should be okay
+
+tests/broken/miniTestb338.sk,
+tests/broken/miniTest208Globals.sk,
+tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
+tests/broken/miniTestb345.sk: support == on general arrays.
+tests/broken/miniTestb347.sk: MULTI_VARS
+tests/broken/miniTestb366.sk:
+  sketch takes reference parameter - but it's given no arguments to update?
+
+tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
-tests/broken/void/*.sk: VOID_TYPE
+tests/broken/hfun/*.sk: higher order and local functions.
+tests/broken/void/*.sk: unclassified test cases
 tests/broken/char/*.sk: CHAR_TYPE
 tests/broken/include/*.sk: include keyword
 tests/broken/package/*.sk: package keyword
@@ -113,7 +142,11 @@ tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb181.sk: arrsub takes all time?
 tests/broken/slow/miniTestb182.sk: takes many iterations
 tests/broken/slow/miniTestb189.sk: (==) takes all time?
+tests/broken/slow/miniTestb218.sk: slow: TODO: look into why
 tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
+tests/broken/slow/miniTestb276.sk: slow: why?
+tests/broken/slow/miniTestb277.sk: slow: why?
+tests/broken/slow/miniTestb278.sk: slow: why?
 
 Clean::
 * TODO's inlined
