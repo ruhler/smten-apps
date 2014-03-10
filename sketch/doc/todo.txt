@@ -1,5 +1,9 @@
 Priority:: 
  * brainstorm pass-by-reference in light of the 2D_UPDATE fix.
+   The object being passed needs to be an LVal, in order to support update.
+   So what should we do if they pass an array literal or other non-lval?
+   I think, just do a static check, report an error of a non-lval passed
+   as a reference argument.
 
 Features::
 POOR_TYPE_BIT_LITERAL
@@ -47,17 +51,12 @@ STATIC_EVAL::
 
 VOID_TYPE::
   Support the type 'void' for functions.
-  * What value should be returned for void?
-     In order to ensure two void type functions are the same?
-     What does a function return if it doesn't include a return statement?
-      - for a void function, it should return void
-      - for an int or bit function?? undefined? Can we just return void?
   * Add expression statement (which must have type void?)
       - to start, it can just be a function call to a void function.
   * Support reference parameters
       - after a function call, check which arguments were reference 
-        arguments, and copy the results back to the environment
-      - but what if the argument isn't a variable? What is a reference to it?
+        arguments (they should be lvals too), and copy the results back to the
+        environment using updateLV.
   * Support empty return statement: return;
       - have it be syntactic sugar for return VoidV.
 
@@ -128,6 +127,9 @@ tests/broken/slow/miniTestb181.sk: arrsub takes all time?
 tests/broken/slow/miniTestb182.sk: takes many iterations
 tests/broken/slow/miniTestb189.sk: (==) takes all time?
 tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
+
+Clean::
+* TODO's inlined
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

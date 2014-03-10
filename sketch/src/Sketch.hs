@@ -9,6 +9,7 @@ module Sketch (
     Options(..), defaultOptions,
     envof, declsof, d_type, d_val, f_type,
     blockS, typeofV, dimension, arrayV, pad,
+    asLVal,
     ) where
 
 import Smten.Prelude
@@ -125,6 +126,17 @@ data LVal = VarLV Name                  -- foo
           | ArrLV LVal Expr             -- foo[i]
           | BulkLV LVal Expr Expr    -- foo[lo::N]
     deriving (Show)
+
+-- Convert an expression to its corresponding LVal.
+asLVal :: Expr -> Maybe LVal
+asLVal (VarE nm) = return $ VarLV nm
+asLVal (AccessE arr idx) = do
+    lv <- asLVal arr
+    return (ArrLV lv idx)
+asLVal (BulkAccessE arr lo w) = do
+    lv <- asLVal arr 
+    return (BulkLV lv lo w)
+asLVal _ = Nothing
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
