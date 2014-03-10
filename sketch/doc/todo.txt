@@ -96,7 +96,6 @@ tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
 tests/broken/miniTestb279.sk: MULTI_VARS
-tests/broken/miniTestb280.sk, tests/broken/miniTest209Globals.sk: += operator
 tests/broken/miniTestb317.sk,
 tests/broken/miniTestb318.sk: post increment operator in expression
 tests/broken/miniTestb334.sk:
@@ -104,6 +103,7 @@ tests/broken/miniTestb334.sk:
 
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
+tests/broken/miniTest209Globals.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
@@ -143,6 +143,7 @@ tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
 tests/broken/slow/miniTestb276.sk: slow: why?
 tests/broken/slow/miniTestb277.sk: slow: why?
 tests/broken/slow/miniTestb278.sk: slow: why?
+tests/broken/slow/miniTestb280.sk: slow: why?
 
 Clean::
 * TODO's inlined

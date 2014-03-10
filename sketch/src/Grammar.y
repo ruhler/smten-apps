@@ -54,6 +54,7 @@ import Sketch
     '<<'    { TkDoubleLt }
     '++'    { TkDoublePlus }
     '--'    { TkDoubleDash }
+    '+='    { TkPlusEquals }
     '?'     { TkQuestionMark }
     '??'    { TkDoubleQuestionMark }
     '{|}'    { TkBitChoose }
@@ -164,6 +165,7 @@ stmt :: { Stmt }
  | '++' id ';' { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
  | id '++' ';' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
  | id '--' ';' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
+ | id '+=' expr ';' { UpdateS (VarLV $1) (AddE (VarE $1) $3) }
  | id '(' ')' { ExprS (AppE $1 []) }
  | id '(' exprs ')' { ExprS (AppE $1 $3) }
 

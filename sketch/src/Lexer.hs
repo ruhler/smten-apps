@@ -21,7 +21,7 @@ data Token =
   | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq | TkQuestionMark
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
-  | TkDoubleColon | TkColon
+  | TkDoubleColon | TkColon | TkPlusEquals
   | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkHarness | TkTrue | TkFalse | TkDo
@@ -80,6 +80,7 @@ doubles = [
     ("!=", TkBangEq),
     ("++", TkDoublePlus),
     ("--", TkDoubleDash),
+    ("+=", TkPlusEquals),
     ("||", TkDoubleBar),
     ("&&", TkDoubleAmp),
     ("::", TkDoubleColon)
