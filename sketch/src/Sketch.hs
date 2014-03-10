@@ -140,6 +140,7 @@ asLVal _ = Nothing
 
 data Stmt =
      ReturnS Expr                   -- ^ return e;
+   | ExprS Expr                     -- ^ foo
    | AssertS Expr                   -- ^ assert e;
    | RepeatS Expr Stmt              -- ^ repeat (n) s
    | ReorderS [Stmt]                 -- ^ reorder { stmts }

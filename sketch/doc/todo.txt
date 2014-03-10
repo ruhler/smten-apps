@@ -44,9 +44,6 @@ STATIC_EVAL::
     * Keep track of values in the type environment if we have them statically
 
 VOID_TYPE::
-  Support the type 'void' for functions.
-  * Add expression statement (which must have type void?)
-      - to start, it can just be a function call to a void function.
   * Support empty return statement: return;
       - have it be syntactic sugar for return VoidV.
 

@@ -73,6 +73,7 @@ returned (RET v) = v
 -- | Evaluate a statement
 evalS :: Stmt -> EvalM StmtResult
 evalS (ReturnS x) = {-# SCC "ReturnS" #-} RET <$> evalE x
+evalS (ExprS x) = {-# SCC "ExprS" #-} const OK <$> evalE x
 evalS (AssertS p) = {-# SCC "AssertS" #-} do
   p' <- evalE p
   case p' of

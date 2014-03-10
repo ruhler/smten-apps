@@ -62,6 +62,7 @@ genD d@(FunD {}) = do
 
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
+genS (ExprS x) = ExprS <$> genE x
 genS (AssertS x) = AssertS <$> genE x
 genS (ReorderS xs) = do
   -- We create a matrix of boolean variables x[i,j]

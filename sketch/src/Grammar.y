@@ -163,6 +163,8 @@ stmt :: { Stmt }
  | '++' id ';' { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
  | id '++' ';' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
  | id '--' ';' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
+ | id '(' ')' { ExprS (AppE $1 []) }
+ | id '(' exprs ')' { ExprS (AppE $1 $3) }
 
 for_init :: { Stmt }
  : type id '=' expr { blockS [DeclS $1 $2, UpdateS (VarLV $2) $4] }
