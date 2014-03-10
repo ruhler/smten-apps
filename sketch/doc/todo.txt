@@ -98,8 +98,6 @@ tests/broken/miniTestb232.sk: Uninitialized variable?
 tests/broken/miniTestb279.sk: MULTI_VARS
 tests/broken/miniTestb317.sk,
 tests/broken/miniTestb318.sk: post increment operator in expression
-tests/broken/miniTestb334.sk:
-  ExprS calls non-void function - should be okay
 
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
@@ -144,6 +142,7 @@ tests/broken/slow/miniTestb276.sk: slow: why?
 tests/broken/slow/miniTestb277.sk: slow: why?
 tests/broken/slow/miniTestb278.sk: slow: why?
 tests/broken/slow/miniTestb280.sk: slow: why?
+tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
 
 Clean::
 * TODO's inlined
