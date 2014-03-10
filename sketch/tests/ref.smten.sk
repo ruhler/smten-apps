@@ -1,0 +1,16 @@
+
+int sketch1(int in) implements spec {
+    return 2 * in + ??;
+}
+
+int incr(ref int x) {
+  int y = x;
+  x = x + 1;
+  return y;
+}
+   
+int spec(int in) {
+    int w = incr(in);
+    return in + w;
+}
+

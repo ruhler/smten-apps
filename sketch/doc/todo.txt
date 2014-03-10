@@ -1,9 +1,3 @@
-Priority:: 
- * brainstorm pass-by-reference in light of the 2D_UPDATE fix.
-   The object being passed needs to be an LVal, in order to support update.
-   So what should we do if they pass an array literal or other non-lval?
-   I think, just do a static check, report an error of a non-lval passed
-   as a reference argument.
 
 Features::
 POOR_TYPE_BIT_LITERAL
@@ -53,10 +47,6 @@ VOID_TYPE::
   Support the type 'void' for functions.
   * Add expression statement (which must have type void?)
       - to start, it can just be a function call to a void function.
-  * Support reference parameters
-      - after a function call, check which arguments were reference 
-        arguments (they should be lvals too), and copy the results back to the
-        environment using updateLV.
   * Support empty return statement: return;
       - have it be syntactic sugar for return VoidV.
 

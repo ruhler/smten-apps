@@ -71,6 +71,7 @@ import Sketch
     'reorder'   { TkReorder }
     'assert'   { TkAssert }
     'generator'{ TkGenerator }
+    'ref'   { TkRef }
     'harness'{ TkHarness }
     'true'  { TkTrue }
     'false' { TkFalse }
@@ -132,6 +133,7 @@ someargs :: { [Arg] }
 
 arg :: { Arg }
  : type id { Arg $2 $1 False }
+ | 'ref' type id { Arg $3 $2 True }
 
 stmts :: { [Stmt] }
  : { [] }       -- Empty list is allowed

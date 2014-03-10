@@ -5,6 +5,7 @@ module Eval (
   ) where
 
 import Smten.Prelude
+import Smten.Control.Monad
 import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
@@ -53,6 +54,14 @@ apply f xs = do
     xs' <- mapM evalE xs
     let args = Map.fromList (zip [nm | Arg nm _ _ <- f_args f] xs')
     (v, args') <- scope args $ returned <$> evalS (f_body f)
+
+    let updref :: Arg -> Expr -> EvalM ()
+        updref (Arg _ _ False) _ = return ()
+        updref (Arg nm _ True) x = do
+           let lv = fromJust $ asLVal x
+               v = fromJust $ Map.lookup nm args'
+           updateLV lv v
+    zipWithM_ updref (f_args f) xs
     return v
 
 data StmtResult = OK | RET Value

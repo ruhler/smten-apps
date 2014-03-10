@@ -274,6 +274,16 @@ staticE (AppE fnm xs) = do
            else error $ "wrong number of arguments passed to function " ++ fnm
 
         xs' <- sequence [withty t (staticM x) | (t, x) <- zip txs xs]
+
+        -- Verify all reference arguments can be converted to LVals.
+        let lfcheck :: Arg -> Expr -> SM ()
+            lfcheck (Arg _ _ False) _ = return ()
+            lfcheck (Arg nm _ True) x =
+               case asLVal x of
+                  Just _ -> return ()
+                  Nothing -> error $ "can't pass " ++ show x ++ " by reference"
+        zipWithM_ lfcheck (f_args f) xs'
+
         return $ AppE fnm xs'
      Nothing -> error $ "function " ++ show fnm ++ " not found"
 
