@@ -43,10 +43,6 @@ STATIC_EVAL::
   Other things to do:
     * Keep track of values in the type environment if we have them statically
 
-VOID_TYPE::
-  * Support empty return statement: return;
-      - have it be syntactic sugar for return VoidV.
-
 INSERT_INTO
   insert and into statements? What do those mean?
 
