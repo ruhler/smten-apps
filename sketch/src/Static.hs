@@ -64,15 +64,15 @@ instance Static Decl where
       return $ FunD nm val' k
 
 instance Static Arg where
-  staticM (Arg ty nm) = do
+  staticM (Arg nm ty isref) = do
     ty' <- staticM ty
-    return $ Arg ty' nm
+    return $ Arg nm ty' isref
 
 instance Static Function where
   staticM (Function ty args body) = do
      ty' <- staticM ty
      args' <- mapM staticM args
-     let tyenv = Map.fromList [(nm, ty) | Arg ty nm <- args']
+     let tyenv = Map.fromList [(nm, ty) | Arg nm ty _ <- args']
      tyenvold <- gets ss_tyenv
      modify $ \s -> s { ss_tyenv = tyenv }
      body' <- withty ty' $ staticM body

@@ -131,7 +131,7 @@ someargs :: { [Arg] }
  | someargs ',' arg { $1 ++ [$3] }
 
 arg :: { Arg }
- : type id { Arg $1 $2 }
+ : type id { Arg $2 $1 False }
 
 stmts :: { [Stmt] }
  : { [] }       -- Empty list is allowed

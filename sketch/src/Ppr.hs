@@ -116,7 +116,8 @@ instance Ppr LVal where
    pretty (BulkLV lv lo w) = pretty lv ++ "[" ++ pretty lv ++ "::" ++ pretty w ++ "]"
 
 instance Ppr Arg where
-   pretty (Arg ty nm) = pretty ty ++ " " ++ pretty nm
+   pretty (Arg nm ty False) = pretty ty ++ " " ++ pretty nm
+   pretty (Arg nm ty True) = pretty "ref " ++ pretty ty ++ " " ++ pretty nm
 
 instance Ppr Decl where
    pretty (FunD nm (Function oty xs body) kind) = 

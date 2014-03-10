@@ -55,7 +55,7 @@ genD :: Decl -> GM Decl
 genD d@(VarD {}) = return d
 genD d@(FunD _ _ GeneratorF) = return d
 genD d@(FunD {}) = do
-    let tyenv = Map.fromList [(nm, ty) | Arg ty nm <- f_args . fd_val $ d]
+    let tyenv = Map.fromList [(nm, ty) | Arg nm ty _ <- f_args . fd_val $ d]
     body' <- genS (f_body . fd_val $ d)
     let val' = (fd_val d) { f_body = body' }
     return $ d { fd_val = val' }

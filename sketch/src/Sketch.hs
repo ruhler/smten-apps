@@ -160,7 +160,9 @@ blockS xs =
       f s = [s]
   in BlockS (concatMap f xs)
 
-data Arg = Arg Type Name
+-- Arg name type isref
+--   isref - True if the argument is pass by reference.
+data Arg = Arg Name Type Bool
     deriving (Show)
 
 data Function = Function {
@@ -170,7 +172,7 @@ data Function = Function {
 } deriving (Show)
 
 f_type :: Function -> Type
-f_type f = FunT (f_outtype f) [t | Arg t _ <- f_args f]
+f_type f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
 
 data FunctionKind = NormalF          -- ^ a normal function
                   | WithSpecF Name   -- ^ the function has a spec
