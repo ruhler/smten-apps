@@ -8,7 +8,7 @@ SOURCES := src/sudoku.hs \
 	src/IntegerCell.hs \
 	src/IntCell.hs
 
-all: build/release/sudoku build/profile/sudoku build/y2bit
+all: build/release/sudoku build/profile/sudoku build/y2bit build/y2enum
 
 build/release/sudoku: $(SOURCES)
 	mkdir -p build/release
@@ -19,6 +19,10 @@ build/profile/sudoku: $(SOURCES)
 	smten --make -prof -o build/profile/sudoku -ibuild/profile -isrc -hidir build/profile -odir build/profile src/sudoku.hs -rtsopts -fwarn-unused-imports
 
 build/y2bit: src/y2bit.c
+	mkdir -p build
+	gcc -o $@ $< -std=c99 -I/home/ruhler/sri/scratch/yices2/yices-2.1.0/include -L/home/ruhler/sri/scratch/yices2/yices-2.1.0/lib -lyices
+
+build/y2enum: src/y2enum.c
 	mkdir -p build
 	gcc -o $@ $< -std=c99 -I/home/ruhler/sri/scratch/yices2/yices-2.1.0/include -L/home/ruhler/sri/scratch/yices2/yices-2.1.0/lib -lyices
 
