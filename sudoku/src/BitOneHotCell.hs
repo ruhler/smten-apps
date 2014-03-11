@@ -11,6 +11,9 @@ import Cell
 
 type BitOneHotCell = Bit 9
 
+-- This enforces that no more than one bit is set.
+-- The 'distinct' function and generated constraints will
+-- enfoce that at least one bit is set.
 isValidCell :: BitOneHotCell -> Bool
 isValidCell c = c `bv_and` (c - 1) == 0
 
