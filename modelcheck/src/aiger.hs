@@ -14,7 +14,12 @@ import Aiger
 import AigerPCheck
 
 usage :: String
-usage = "aiger [-d debug] [-a 1 | 2 | 3.k] [-s yices1 | yices2 | stp | z3 | minisat] < FILE"
+usage = unlines $ [
+    "aiger [-d debug] [-a 1 | 2 | 3] [-k0 n] [-ki n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE",
+    "  -a n     Use algorithm number n",
+    "  -k0 n    Start with initial bound n instead of 0 when using -a 3",
+    "  -ki n    Increment by n instead of 1 for each iteration when using -a 3"
+    ]
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -42,10 +47,18 @@ main = do
                 Just fn -> debug fn basesolver
                 Nothing -> return basesolver
 
+  k0 <- case lookuparg "-k0" args of
+          Just n -> return (read n)
+          Nothing -> return 0
+
+  ki <- case lookuparg "-ki" args of
+          Just n -> return (read n)
+          Nothing -> return 1
+
   alg <- case lookuparg "-a" args of
                 Just "1" -> return A1
                 Just "2" -> return A2
-                Just ('3':'.':k0) -> return $ A3 (read k0)
+                Just "3" -> return $ A3 k0 ki
                 Just x -> fail $ "Unknown algorithm: " ++ show x ++ ".\n" ++ usage
                 Nothing -> return A1
   

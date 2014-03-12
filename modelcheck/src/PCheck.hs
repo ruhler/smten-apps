@@ -22,7 +22,8 @@ data Model s = Model {
    _T :: s -> s -> Bool
 }
 
-data Alg = A1 | A2 | A3 Int
+data Alg = A1 | A2
+    | A3 Int Int      -- A3 k0 kincr
     deriving (Eq, Show)
 
 -- | Verify the given property holds for all states reachable from the initial
@@ -36,7 +37,7 @@ data Alg = A1 | A2 | A3 Int
 pcheck :: (Eq s) => Alg -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
 pcheck A1 = pcheck1' 0
 pcheck A2 = pcheck2' 0
-pcheck (A3 k0) = pcheck3' k0
+pcheck (A3 k0 kincr) = pcheck3' k0 kincr
 
 -- | Property checking with an initial guess for the depth of induction needed
 -- to solve the property checking problem.
@@ -95,10 +96,10 @@ pcheck2' k m mkS p = do
               Just xs -> return (Just xs)
 
 -- | Property checking with an initial guess for the depth of induction needed
--- to solve the property checking problem.
+-- to solve the property checking problem, and an increment.
 -- Algorithm 3
-pcheck3' :: (Eq s) => Int -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
-pcheck3' k m mkS p = do
+pcheck3' :: (Eq s) => Int -> Int -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
+pcheck3' k kincr m mkS p = do
    -- Search for a failing path of this length
    ra <- query $ do
       xs <- sequence $ replicate (k+1) mkS
@@ -120,7 +121,7 @@ pcheck3' k m mkS p = do
                 assert (loopfree m xs && all p (init xs) && not (p (last xs)))
             case rc of
               Nothing -> return Nothing
-              _ -> pcheck3' (k+1) m mkS p
+              _ -> pcheck3' (k+kincr) kincr m mkS p
                 
 
 path :: Model s -> [s] -> Bool

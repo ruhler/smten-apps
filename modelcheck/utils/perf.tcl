@@ -13,7 +13,7 @@ close $fin
 
 proc runall {slv n} {
     foreach x [lrange $::tests 0 $n] {
-        exec ./utils/aigtoaig -a $x | ./build/release/aiger -s $slv -a 3.8
+        exec ./utils/aigtoaig -a $x | ./build/release/aiger -s $slv -a 3 -k0 8 -ki 3
     }
 }
 
