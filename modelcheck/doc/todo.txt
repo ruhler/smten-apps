@@ -8,6 +8,14 @@
 * classify more test cases
 
 Performance::
+* Change interface for a model:
+    next :: State -> [State]
+   instead of 
+    next :: State -> State -> Bool
+   Except: AigerModel treats the inputs as the output of the previous state,
+    and we want those to be free.
+   Would it be terrible to have:
+    next :: State -> Symbolic State?
 * Use 0-indexed vectors instead of 1-indexed?
     Maybe just have a dummy value 0 which is never used?
 * Switch to alternate formation of k-induction

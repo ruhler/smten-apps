@@ -1,6 +1,6 @@
 
 set ::runspertest 1
-set ::timeout 30
+set ::timeout 900
 
 # Return the average time in seconds to run the given script.
 proc mytime {script} {
@@ -12,7 +12,7 @@ proc withtimeout {args} {
 }
 
 puts "  saiger pdtrav"
-foreach x [glob tests/sat/*.aig tests/unsat/*.aig] {
+foreach x [glob tests/sat/*.aig tests/unsat/*.aig tests/slow/sat/*.aig tests/slow/unsat/*.aig] {
     set saiger [mytime "withtimeout ./utils/run $x"]
     set pdtrav [mytime "withtimeout ./utils/pdtrav $x"]
     puts "$x $saiger $pdtrav"

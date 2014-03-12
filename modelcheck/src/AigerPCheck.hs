@@ -1,6 +1,6 @@
 
 module AigerPCheck (
-    aigercheck,
+    Alg(..), aigercheck,
   ) where
 
 import Smten.Prelude
@@ -37,8 +37,8 @@ aigerfreestate aig = do
 aigerpred :: Aiger -> Literal -> (AigerState -> Bool)
 aigerpred aig l = \as -> not (aig_eval aig (as_input as) (as_state as) l)
 
-aigercheck :: Aiger -> Literal -> SMT (Maybe [Vector])
-aigercheck aig l = do
-  mstates <- pcheck (aigermodel aig) (aigerfreestate aig) (aigerpred aig l)
+aigercheck :: Alg -> Aiger -> Literal -> SMT (Maybe [Vector])
+aigercheck alg aig l = do
+  mstates <- pcheck alg (aigermodel aig) (aigerfreestate aig) (aigerpred aig l)
   return $ (map as_input <$> mstates)
 

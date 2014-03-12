@@ -14,7 +14,7 @@ import Aiger
 import AigerPCheck
 
 usage :: String
-usage = "aiger [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] < FILE"
+usage = "aiger [-d debug] [-a n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE"
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -42,12 +42,19 @@ main = do
                 Just fn -> debug fn basesolver
                 Nothing -> return basesolver
 
+  alg <- case lookuparg "-a" args of
+                Just "1" -> return A1
+                Just "2" -> return A2
+                Just x -> fail $ "Unknown algorithm: " ++ show x ++ ".\n" ++ usage
+                Nothing -> return A1
+  
+
   txt <- getContents
   let aig = readAsciiAiger txt
 
   -- Note: we only look for the first output.
   -- Presumably we need to check for them all?
-  result <- runSMT solver $ aigercheck aig (aig_outputs aig ! 1)
+  result <- runSMT solver $ aigercheck alg aig (aig_outputs aig ! 1)
   case result of
     Nothing -> putStrLn "0\n."
     Just v -> do

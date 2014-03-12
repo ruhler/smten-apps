@@ -24,4 +24,4 @@ build/bench.pdf: build/bench.data
 	Rscript utils/bench.R
 
 clean:
-	rm -rf build
+	echo "clean it your self"
