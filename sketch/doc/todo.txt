@@ -17,6 +17,9 @@ UNINTERPRETED_FUNCTION
   if x1 = x2 then y1 = y2
   etc...
 
+FLOATS
+  Support double and float.
+
 STRUCT_TYPES
   Support struct types.
   Needs:
@@ -49,6 +52,7 @@ INCR_OP::
     They should take an LVal argument.
   * switch to ExprS rather than desugar for statements which do these
     operations.
+  * support arbitrary lvals, not just VarLV.
     
 
 INSERT_INTO
@@ -56,6 +60,9 @@ INSERT_INTO
 
 TYPEOFV_SLOW
  Looks like we are getting stuck in a false infinite finite formula.
+
+ARR_EQ
+ Support == and != on general arrays.
 
 INSERTVAR_SLOW
  Stuck in false symbolic execution?
@@ -101,6 +108,7 @@ tests/broken/miniTest215Choice.sk: C Preprocessor?
 
 tests/broken/miniTestb209.sk: MULTI_VARS
 tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
+tests/broken/miniTestb540.sk: Missed incorrect TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
 tests/broken/miniTestb279.sk: MULTI_VARS
@@ -109,6 +117,9 @@ tests/broken/miniTestb317.sk: INCR_OP
 tests/broken/miniTestb318.sk: INCR_OP
 tests/broken/miniTestb399.sk: INCR_OP
 tests/broken/miniTestb419.sk: INCR_OP
+tests/broken/miniTestb524.sk: INCR_OP
+
+tests/broken/miniTestb519.sk: support += in for incr.
 
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
@@ -116,10 +127,21 @@ tests/broken/miniTest209Globals.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb345.sk: support == on general arrays.
+tests/broken/miniTestb345.sk: ARR_EQ
+tests/broken/miniTestb464.sk: ARR_EQ
+tests/broken/miniTestb479.sk: ARR_EQ
+tests/broken/miniTestb513.sk: ARR_EQ
+
+tests/broken/miniTestb517.sk: parse name starting with _
+
 tests/broken/miniTestb347.sk: MULTI_VARS
 tests/broken/miniTestb366.sk:
+tests/broken/miniTestb532.sk:
   sketch takes reference parameter - but it's given no arguments to update?
+
+tests/broken/miniTestb442.sk: Global hole?
+tests/broken/miniTestb456.sk: Hole in type?
+tests/broken/miniTestb492.sk: Global variable without final value given.
 
 tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/static/*.sk: STATIC_EVAL
@@ -128,7 +150,9 @@ tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/void/*.sk: unclassified test cases
 tests/broken/char/*.sk: CHAR_TYPE
+tests/broken/double/*.sk: FLOATS
 tests/broken/include/*.sk: include keyword
+tests/broken/implicit/*.sk: implicit arguments
 tests/broken/package/*.sk: package keyword
 tests/broken/insertinto/*.sk: INSERT_INTO
 tests/broken/regex/*.sk: Support REGEX hole expressions.

@@ -348,7 +348,7 @@ unify a UnknownT = a
 unify IntT BitT = IntT
 unify BitT IntT = IntT
 unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
-  | a == b = ArrT a (ValE (IntV (max wa wb)))
+  = ArrT (unify a b) (ValE (IntV (max wa wb)))
 unify a b
   | dimension a < dimension b = unify (ArrT a (ValE (IntV 1))) b
   | dimension a > dimension b = unify a (ArrT b (ValE (IntV 1)))
