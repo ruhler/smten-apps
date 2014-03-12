@@ -3,6 +3,6 @@
 # Run the aiger program on a .aig file.
 # Assert the result is UNSAT
 # This assumes the result should be UNSAT
-./utils/aigtoaig -a $1 | ./build/release/aiger -a 2 > build/`basename $1`.wit
+./utils/aigtoaig -a $1 | ./build/release/aiger -a 3.4 > build/`basename $1`.wit
 cmp build/`basename $1`.wit utils/unsat.wit
 

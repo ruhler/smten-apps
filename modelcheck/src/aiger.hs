@@ -14,7 +14,7 @@ import Aiger
 import AigerPCheck
 
 usage :: String
-usage = "aiger [-d debug] [-a n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE"
+usage = "aiger [-d debug] [-a 1 | 2 | 3.k] [-s yices1 | yices2 | stp | z3 | minisat] < FILE"
 
 lookuparg :: String -> [String] -> Maybe String
 lookuparg k m = 
@@ -45,6 +45,7 @@ main = do
   alg <- case lookuparg "-a" args of
                 Just "1" -> return A1
                 Just "2" -> return A2
+                Just ('3':'.':k0) -> return $ A3 (read k0)
                 Just x -> fail $ "Unknown algorithm: " ++ show x ++ ".\n" ++ usage
                 Nothing -> return A1
   

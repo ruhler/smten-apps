@@ -2,6 +2,6 @@
 
 # Run the aiger program on a .aig file.
 # Assert the result is a correct witness.
-./utils/aigtoaig -a $1 | ./build/release/aiger -a 2 > build/`basename $1`.wit
+./utils/aigtoaig -a $1 | ./build/release/aiger -a 3.4 > build/`basename $1`.wit
 ./utils/aigsim -m -c $1 build/`basename $1`.wit
 
