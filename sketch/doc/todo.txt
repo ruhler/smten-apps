@@ -43,6 +43,14 @@ STATIC_EVAL::
   Other things to do:
     * Keep track of values in the type environment if we have them statically
 
+INCR_OP::
+  Support pre and post increment and decrement in expressions.
+  * add PostIncr, PostDecr, PreIncr, and PreDecr expressions.
+    They should take an LVal argument.
+  * switch to ExprS rather than desugar for statements which do these
+    operations.
+    
+
 INSERT_INTO
   insert and into statements? What do those mean?
 
@@ -96,8 +104,11 @@ tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
 tests/broken/miniTestb279.sk: MULTI_VARS
-tests/broken/miniTestb317.sk,
-tests/broken/miniTestb318.sk: post increment operator in expression
+
+tests/broken/miniTestb317.sk: INCR_OP
+tests/broken/miniTestb318.sk: INCR_OP
+tests/broken/miniTestb399.sk: INCR_OP
+tests/broken/miniTestb419.sk: INCR_OP
 
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
@@ -143,6 +154,7 @@ tests/broken/slow/miniTestb277.sk: slow: why?
 tests/broken/slow/miniTestb278.sk: slow: why?
 tests/broken/slow/miniTestb280.sk: slow: why?
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
+tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 
 Clean::
 * TODO's inlined
