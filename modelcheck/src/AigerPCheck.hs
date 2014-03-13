@@ -20,19 +20,25 @@ data AigerState = AigerState {
 aigermodel :: Aiger -> Model AigerState
 aigermodel aig = Model {
   _I = \as -> {-# SCC "AigerModel_I" #-} all not (elems (as_state as)),
-  _T = \a1 a2 -> {-# SCC "AigerModel_T" #-}
-           case aig_step aig (as_input a1) (as_state a1) of
-              (_, ns) -> ns == as_state a2,
+  _T = \a -> {-# SCC "AigerModel_T" #-} do
+          ni <- freeVector (aig_num_inputs aig)
+          case aig_step aig (as_input a) (as_state a) of
+             (_, ns) -> return (AigerState ni ns),
   _S = aigerfreestate aig
 }
 
+freeVector :: Int -> Symbolic Vector
+freeVector n = do
+  xs <- replicateM n free_Bool
+  return $ listArray (1, n) xs
+
 aigerfreestate :: Aiger -> Symbolic AigerState
 aigerfreestate aig = do
-   inputs <- replicateM (aig_num_inputs aig) free_Bool
-   state <- replicateM (aig_num_latches aig) free_Bool
+   inputs <- freeVector (aig_num_inputs aig)
+   state <- freeVector (aig_num_latches aig)
    return $ AigerState {
-        as_input = listArray (1, aig_num_inputs aig) inputs,
-        as_state = listArray (1, aig_num_latches aig) state
+        as_input = inputs,
+        as_state = state
      }
 
 aigerpred :: Aiger -> Literal -> (AigerState -> Bool)

@@ -10,7 +10,6 @@
 module PCheck (Model(..), pcheck) where
 
 import Smten.Prelude
-import Smten.Control.Monad
 import Smten.Symbolic
 import Smten.Symbolic.SMT
 
@@ -19,7 +18,9 @@ data Model s = Model {
    _I :: s -> Bool,
 
    -- | The transition relation for the system
-   _T :: s -> s -> Bool,
+   -- Given a state, return a symbolic state representing all possible
+   -- next states of the system.
+   _T :: s -> Symbolic s,
 
    -- | Construct a free state
    _S :: Symbolic s
@@ -67,14 +68,15 @@ pcheck k ki m p = do
                 
 -- Make a symbolic path of the given length.
 mkPath :: Model s -> Int -> Symbolic [s]
+mkPath m 0 = return []
 mkPath m n = do
-  xs <- replicateM n (_S m)
-  assert $ path m xs
-  return xs
-
-path :: Model s -> [s] -> Bool
-path _ [x] = True
-path m (a:b:xs) = _T m a b && path m (b:xs)
+  s0 <- _S m
+  let extend 0 s = return [s]
+      extend k s = do
+        s' <- _T m s
+        ss <- extend (k-1) s'
+        return (s : ss)
+  extend (n-1) s0
 
 distinct :: (Eq a) => [a] -> Bool
 distinct [] = True
