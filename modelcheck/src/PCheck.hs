@@ -19,16 +19,18 @@ data Model s = Model {
    _I :: s -> Bool,
 
    -- | The transition relation for the system
-   _T :: s -> s -> Bool
+   _T :: s -> s -> Bool,
+
+   -- | Construct a free state
+   _S :: Symbolic s
 }
 
--- | pcheck k0 ki m mkS p
+-- | pcheck k0 ki m p
 -- Verify the property p holds for all states reachable from the initial
 -- state.
 --   k0 - initial bound to use
 --   ki - how much to increment the bound if initial bound is not enough
 --   m - the model
---   mkS - a constructor for symbolic states
 --   p - the property to verify
 --
 -- Returns Nothing if the property holds for all states reachable from the
@@ -38,11 +40,11 @@ data Model s = Model {
 -- state not satisfying the property>
 --
 -- Note: This corresponds to Algorithm 3 of the paper.
-pcheck :: (Eq s) => Int -> Int -> Model s -> (Symbolic s) -> (s -> Bool) -> SMT (Maybe [s])
-pcheck k ki m mkS p = do
+pcheck :: (Eq s) => Int -> Int -> Model s -> (s -> Bool) -> SMT (Maybe [s])
+pcheck k ki m p = do
    -- Search for a failing path of this length
    ra <- query $ do
-      xs <- sequence $ replicate (k+1) mkS
+      xs <- sequence $ replicate (k+1) (_S m)
       assert (_I m (head xs) && path m xs && not (all p xs))
       return xs
    case ra of
@@ -50,18 +52,18 @@ pcheck k ki m mkS p = do
      Nothing -> do
        -- Search for a loopfree path of 1 greater length
        rb <- query $ do 
-          xs <- replicateM (k+2) mkS
+          xs <- replicateM (k+2) (_S m)
           assert (_I m (head xs) && all (not . _I m) (tail xs) && loopfree m xs)
        case rb of
           Nothing -> return Nothing
           _ -> do
             -- Search backwards for a loopfree path of 1 greater length
             rc <- query $ do
-                xs <- replicateM (k+2) mkS
+                xs <- replicateM (k+2) (_S m)
                 assert (loopfree m xs && all p (init xs) && not (p (last xs)))
             case rc of
               Nothing -> return Nothing
-              _ -> pcheck (k+ki) ki m mkS p
+              _ -> pcheck (k+ki) ki m p
                 
 
 path :: Model s -> [s] -> Bool
