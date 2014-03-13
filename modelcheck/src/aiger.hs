@@ -15,10 +15,9 @@ import AigerPCheck
 
 usage :: String
 usage = unlines $ [
-    "aiger [-d debug] [-a 1 | 2 | 3] [-k0 n] [-ki n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE",
-    "  -a n     Use algorithm number n",
-    "  -k0 n    Start with initial bound n instead of 0 when using -a 3",
-    "  -ki n    Increment by n instead of 1 for each iteration when using -a 3"
+    "aiger [-d debug] [-k0 n] [-ki n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE",
+    "  -k0 n    Start with initial bound n",
+    "  -ki n    Use increments of n for the bound"
     ]
 
 lookuparg :: String -> [String] -> Maybe String
@@ -55,20 +54,12 @@ main = do
           Just n -> return (read n)
           Nothing -> return 1
 
-  alg <- case lookuparg "-a" args of
-                Just "1" -> return A1
-                Just "2" -> return A2
-                Just "3" -> return $ A3 k0 ki
-                Just x -> fail $ "Unknown algorithm: " ++ show x ++ ".\n" ++ usage
-                Nothing -> return A1
-  
-
   txt <- getContents
   let aig = readAsciiAiger txt
 
   -- Note: we only look for the first output.
   -- Presumably we need to check for them all?
-  result <- runSMT solver $ aigercheck alg aig (aig_outputs aig ! 1)
+  result <- runSMT solver $ aigercheck k0 ki aig (aig_outputs aig ! 1)
   case result of
     Nothing -> putStrLn "0\n."
     Just v -> do

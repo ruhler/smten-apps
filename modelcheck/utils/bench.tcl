@@ -14,7 +14,7 @@ proc withtimeout {args} {
 puts "  saiger pdtrav"
 foreach x [glob tests/sat/*.aig tests/unsat/*.aig tests/slow/sat/*.aig tests/slow/unsat/*.aig] {
     set saiger [mytime "withtimeout ./utils/run $x"]
-    set pdtrav [mytime "withtimeout ./utils/pdtrav $x"]
-    puts "$x $saiger $pdtrav"
+    #set pdtrav [mytime "withtimeout ./utils/pdtrav $x"]
+    puts "$x $saiger"
 }
 
