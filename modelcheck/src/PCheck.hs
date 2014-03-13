@@ -44,27 +44,33 @@ pcheck :: (Eq s) => Int -> Int -> Model s -> (s -> Bool) -> SMT (Maybe [s])
 pcheck k ki m p = do
    -- Search for a failing path of this length
    ra <- query $ do
-      xs <- sequence $ replicate (k+1) (_S m)
-      assert (_I m (head xs) && path m xs && not (all p xs))
+      xs <- mkPath m (k+1)
+      assert (_I m (head xs) && not (all p xs))
       return xs
    case ra of
      Just xs -> return (Just xs)
      Nothing -> do
        -- Search for a loopfree path of 1 greater length
        rb <- query $ do 
-          xs <- replicateM (k+2) (_S m)
+          xs <- mkPath m (k+2)
           assert (_I m (head xs) && all (not . _I m) (tail xs) && loopfree m xs)
        case rb of
           Nothing -> return Nothing
           _ -> do
             -- Search backwards for a loopfree path of 1 greater length
             rc <- query $ do
-                xs <- replicateM (k+2) (_S m)
+                xs <- mkPath m (k+2)
                 assert (loopfree m xs && all p (init xs) && not (p (last xs)))
             case rc of
               Nothing -> return Nothing
               _ -> pcheck (k+ki) ki m p
                 
+-- Make a symbolic path of the given length.
+mkPath :: Model s -> Int -> Symbolic [s]
+mkPath m n = do
+  xs <- replicateM n (_S m)
+  assert $ path m xs
+  return xs
 
 path :: Model s -> [s] -> Bool
 path _ [x] = True
@@ -75,5 +81,5 @@ distinct [] = True
 distinct (x:xs) = x `notElem` xs && distinct xs
 
 loopfree :: (Eq s) => Model s -> [s] -> Bool
-loopfree m xs = path m xs && distinct xs
+loopfree m xs = distinct xs
 
