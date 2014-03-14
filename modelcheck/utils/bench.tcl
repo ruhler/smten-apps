@@ -1,4 +1,7 @@
 
+set ::cmd [lindex $argv 0]
+set ::tests [lrange $argv 1 end]
+
 set ::runspertest 1
 set ::timeout 900
 
@@ -11,10 +14,9 @@ proc withtimeout {args} {
     catch "exec timeout ${::timeout}s $args"
 }
 
-puts "  saiger pdtrav"
-foreach x [glob tests/sat/*.aig tests/unsat/*.aig tests/slow/sat/*.aig tests/slow/unsat/*.aig] {
-    set saiger [mytime "withtimeout ./utils/run $x"]
-    #set pdtrav [mytime "withtimeout ./utils/pdtrav $x"]
-    puts "$x $saiger"
+puts "$::cmd"
+foreach x $::tests {
+    set t [mytime "withtimeout $::cmd $x"]
+    puts "$x $t"
 }
 
