@@ -148,7 +148,6 @@ tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/structs/*.sk: STRUCT_TYPES
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/hfun/*.sk: higher order and local functions.
-tests/broken/void/*.sk: unclassified test cases
 tests/broken/char/*.sk: CHAR_TYPE
 tests/broken/double/*.sk: FLOATS
 tests/broken/include/*.sk: include keyword

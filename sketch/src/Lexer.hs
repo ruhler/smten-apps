@@ -118,6 +118,10 @@ keywords = [
 isIDChar :: Char -> Bool
 isIDChar c = isAlphaNum c || c == '_'
 
+-- Return True if the character could be the first character of an ID
+isIDChar0 :: Char -> Bool
+isIDChar0 c = isAlpha c || c == '_'
+
 closeblockcomment :: String -> String
 closeblockcomment ('*':'/':cs) = cs
 closeblockcomment [] = []
@@ -134,7 +138,7 @@ lex = do
       (a:b:cs) | Just tok <- lookup [a, b] doubles -> put cs >> return tok
       (c:cs) | Just tok <- lookup c singles -> put cs >> return tok
       (c:cs) | isSpace c -> put cs >> lex
-      (c:cs) | isAlpha c ->
+      (c:cs) | isIDChar0 c ->
          let (ns, rest) = span isIDChar cs
          in case (c:ns) of
               id | Just t <- lookup id keywords -> put rest >> return t
