@@ -96,13 +96,16 @@ evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
   case c' of
     BitV False -> return OK
     BitV True -> do
-      evalS s   -- TODO: if this statement returns, do we break out of the loop?
+      evalS s   -- TODO: if this statement returns, should we break out of the loop?
       evalS w
-evalS (DeclS ty nm) = {-# SCC "DeclS" #-} do
-  v0 <- case ty of
-          t@(ArrT {}) -> return $ pad t
-          _ -> return (error $ nm ++ " not initialized")
-  insertVar nm v0
+evalS (DeclS ty vars) = {-# SCC "DeclS" #-} do
+  let f (nm, mval) = do
+          let defv = case ty of
+                        t@(ArrT {}) -> pad t
+                        _ -> error $ "variable " ++ nm ++ " uninitialized"
+          v0 <- evalE $ fromMaybe (ValE defv) mval
+          insertVar nm v0
+  mapM_ f vars
   return OK
 evalS (UpdateS lv e) = {-# SCC "UpdateS" #-} do
   e' <- evalE e

@@ -90,12 +90,17 @@ instance Static Stmt where
   staticM (WhileS c s) = liftM2 WhileS (withty BitT $ staticM c) (staticM s)
   staticM (ForS init cond incr body) =
     liftM4 ForS (staticM init) (withty BitT (staticM cond)) (staticM incr) (staticM body)
-  staticM (DeclS ty nm) = do
+  staticM (DeclS ty vars) = do
     ty' <- staticM ty
-    env <- gets ss_tyenv
-    let env' = Map.insert nm ty' env
-    modify $ \s -> s { ss_tyenv = env' }
-    return $ DeclS ty' nm
+    let svars (nm, mval) = do
+          env <- gets ss_tyenv
+          let env' = Map.insert nm ty' env
+          modify $ \s -> s { ss_tyenv = env' }
+          mval' <- case mval of
+                      Nothing -> return Nothing
+                      Just e -> Just <$> withty ty' (staticM e)
+          return (nm, mval')
+    DeclS ty' <$> mapM svars vars
 
   staticM (UpdateS lv e) = do
     (lv', ty) <- staticLV lv

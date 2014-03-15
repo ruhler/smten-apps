@@ -99,7 +99,12 @@ pprS (RepeatS n s) = infirst ("repeat (" ++ pretty n ++ ") ") (pprS s)
 pprS (ForS init cond incr b)
  = infirst ("for (" ++ pretty init ++ pretty cond ++ ";" ++ pretty incr ++ ") ") (pprS b)
 pprS (WhileS c s) = infirst ("while (" ++ pretty c ++ ") ") (pprS s)
-pprS (DeclS ty nm) = [pretty ty ++ " " ++ pretty nm ++ ";"]
+pprS (DeclS ty vars) =
+  let pvars [(n, Nothing)] = pretty n
+      pvars [(n, Just v)] = pretty n ++ " = " ++ pretty v
+      pvars ((n, Nothing):xs) = pretty n ++ ", " ++ pvars xs
+      pvars ((n, Just v):xs) = pretty n ++ " = " ++ pretty v ++ ", " ++ pvars xs
+  in [pretty ty ++ " " ++ pvars vars ++ ";"]
 pprS (UpdateS lv ex) = [pretty lv ++ " = " ++ pretty ex ++ ";"]
 pprS (BlockS xs) = concat [["{"], map ("   " ++) (concatMap pprS xs), ["}"]]
 pprS (IfS p a (BlockS []))

@@ -139,17 +139,17 @@ asLVal (BulkAccessE arr lo w) = do
 asLVal _ = Nothing
 
 data Stmt =
-     ReturnS Expr                   -- ^ return e;
-   | ExprS Expr                     -- ^ foo
-   | AssertS Expr                   -- ^ assert e;
-   | RepeatS Expr Stmt              -- ^ repeat (n) s
+     ReturnS Expr                    -- ^ return e;
+   | ExprS Expr                      -- ^ foo
+   | AssertS Expr                    -- ^ assert e;
+   | RepeatS Expr Stmt               -- ^ repeat (n) s
    | ReorderS [Stmt]                 -- ^ reorder { stmts }
-   | WhileS Expr Stmt               -- ^ while (c) s
-   | ForS Stmt Expr Stmt Stmt       -- ^ for (init ; cond ; incr ) body
-   | DeclS Type Name                -- ^ ty foo;
-   | UpdateS LVal Expr              -- ^ foo = e;
-   | IfS Expr Stmt Stmt             -- ^ if (e) s1 else s2
-   | BlockS [Stmt]                  -- ^ { stmts }
+   | WhileS Expr Stmt                -- ^ while (c) s
+   | ForS Stmt Expr Stmt Stmt        -- ^ for (init ; cond ; incr ) body
+   | DeclS Type [(Name, Maybe Expr)] -- ^ ty foo = x, bar = y, ...;
+   | UpdateS LVal Expr               -- ^ foo = e;
+   | IfS Expr Stmt Stmt              -- ^ if (e) s1 else s2
+   | BlockS [Stmt]                   -- ^ { stmts }
     deriving (Show)
 
 -- Construct a block of statements.

@@ -109,7 +109,13 @@ genS (RepeatS en s) = do
 genS (WhileS c s) = liftM2 WhileS (genE c) (genS s)
 genS (ForS init cond incr body) =
     liftM4 ForS (genS init) (genE cond) (genS incr) (genS body)
-genS s@(DeclS {}) = return s
+genS (DeclS ty vars) = do
+  let genVar v@(nm, Nothing) = return v
+      genVar (nm, Just e) = do
+        e' <- genE e    
+        return (nm, Just e')
+  vars' <- mapM genVar vars
+  return (DeclS ty vars')
 genS (UpdateS lv e) = liftM2 UpdateS (genLV lv) (genE e)
 genS (IfS p a b) = liftM3 IfS (genE p) (genS a) (genS b)
 genS (BlockS xs) = blockS <$> mapM genS xs
