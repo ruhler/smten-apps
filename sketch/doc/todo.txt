@@ -71,10 +71,6 @@ INTEQ_SLOW
 STACK_OVERFLOW
  A mysterious stack overflow
 
-MULTI_VARS
-support multiple var decls on one line.
-  ex: int x=0, y=0;
-
 PERF3
  In pc[1] < 4, 
  pc[1] can have so many possible values, we have an exponential blowup?
@@ -91,8 +87,6 @@ Features needed, by test case::
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
-tests/broken/miniTestb129.sk: MULTI_VARS
-tests/broken/miniTestb130.sk: MULTI_VARS
 tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
 tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
@@ -103,12 +97,10 @@ tests/broken/miniTestb208.sk,
 tests/broken/miniTest213ArrExpScaling.sk,
 tests/broken/miniTest215Choice.sk: C Preprocessor?
 
-tests/broken/miniTestb209.sk: MULTI_VARS
 tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb540.sk: Missed incorrect TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
-tests/broken/miniTestb279.sk: MULTI_VARS
 
 tests/broken/miniTestb317.sk: INCR_OP
 tests/broken/miniTestb318.sk: INCR_OP
@@ -127,7 +119,6 @@ tests/broken/miniTestb352.sk:
 tests/broken/miniTestb479.sk: Cast IntV to Int? Why is this showing up?
 tests/broken/miniTestb513.sk: BUGGY: bug in scalar/array promotion?
 
-tests/broken/miniTestb347.sk: MULTI_VARS
 tests/broken/miniTestb366.sk:
 tests/broken/miniTestb532.sk:
   sketch takes reference parameter - but it's given no arguments to update?
@@ -168,6 +159,7 @@ tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
 tests/broken/slow/miniTestb276.sk: slow: why?
 tests/broken/slow/miniTestb277.sk: slow: why?
 tests/broken/slow/miniTestb278.sk: slow: why?
+tests/broken/slow/miniTestb279.sk: slow: why?
 tests/broken/slow/miniTestb280.sk: slow: why?
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
