@@ -189,12 +189,10 @@ staticE (OrE a b) = bitwiseop OrE "|" a b
 staticE (LOrE a b) = bitwiseop LOrE "||" a b
 staticE (ShlE a b) = shiftop ShlE "<<" a b
 staticE (ShrE a b) = shiftop ShrE ">>" a b
-staticE (PostIncrE a) = do
-  ty <- asks sr_oty
-  case ty of
-    IntT -> return ()
-    _ -> error $ "unsupported type for post-increment: " ++ show ty
-  PostIncrE <$> (staticM a)
+staticE (PostIncrE a) = incrop PostIncrE "post ++" a
+staticE (PostDecrE a) = incrop PostDecrE "post --" a
+staticE (PreIncrE a) = incrop PreIncrE "pre ++" a
+staticE (PreDecrE a) = incrop PreDecrE "pre --" a
 
 staticE (BitChooseE _ a b) = do
   ty <- asks sr_oty
@@ -465,6 +463,14 @@ typeofshift a = do
              IntT -> ty
              _ -> UnknownT
 
+incrop :: (LVal -> Expr) -> String -> LVal -> SM Expr
+incrop f nm a = do
+  ty <- asks sr_oty
+  case ty of
+    IntT -> return ()
+    _ -> error $ "unsupported type for " ++ nm ++ ": " ++ show ty
+  f <$> staticM a
+
 -- Determine as best as possible the type of the given expression.
 -- Returns 'UnknownT' if the type is not certain.
 typeof :: Expr -> SM Type
@@ -492,6 +498,9 @@ typeof (LOrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (ShlE a b) = typeofshift a
 typeof (ShrE a b) = typeofshift a
 typeof (PostIncrE a) = snd <$> staticLV a
+typeof (PostDecrE a) = snd <$> staticLV a
+typeof (PreIncrE a) = snd <$> staticLV a
+typeof (PreDecrE a) = snd <$> staticLV a
 typeof (NotE a) = typeof a
 typeof (HoleE ty _) = return ty
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)

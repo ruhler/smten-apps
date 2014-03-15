@@ -250,6 +250,23 @@ evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
     case a' of
         IntV av -> updateLV lv (IntV (av + 1))
     return a'
+evalE (PostDecrE lv) = {-# SCC "PostDecrE" #-} do
+    a' <- lookupLV lv
+    case a' of
+        IntV av -> updateLV lv (IntV (av - 1))
+    return a'
+evalE (PreIncrE lv) = {-# SCC "PreIncrE" #-} do
+    a <- lookupLV lv
+    let a' = case a of
+                IntV av -> IntV (av + 1)
+    updateLV lv a'
+    return a'
+evalE (PreDecrE lv) = {-# SCC "PreDecrE" #-} do
+    a <- lookupLV lv
+    let a' = case a of
+                IntV av -> IntV (av - 1)
+    updateLV lv a'
+    return a'
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     mval <- lookupVar nm

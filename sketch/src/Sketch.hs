@@ -111,7 +111,10 @@ data Expr =
  | NotE Expr             -- ^ ! a
  | ShrE Expr Expr        -- ^ a >> b
  | ShlE Expr Expr        -- ^ a << b
- | PostIncrE LVal         -- ^ x++
+ | PostIncrE LVal        -- ^ x++
+ | PostDecrE LVal        -- ^ x--
+ | PreIncrE LVal         -- ^ ++x
+ | PreDecrE LVal         -- ^ --x
  | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Type (Maybe Int)   -- ^ ??(n)      n is the number of bits to use
  | BitChooseE Type Expr Expr  -- ^ a {|} b

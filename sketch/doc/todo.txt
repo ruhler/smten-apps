@@ -48,11 +48,11 @@ STATIC_EVAL::
 
 INCR_OP::
   Support pre and post increment and decrement in expressions.
-  * add PostIncr, PostDecr, PreIncr, and PreDecr expressions.
-    They should take an LVal argument.
   * switch to ExprS rather than desugar for statements which do these
-    operations.
+    operations. Except I'm worried about parsing ambiguity with +=?
   * support arbitrary lvals, not just VarLV.
+    Except I'm worried about parsing ambiguity: maybe parse as an exp, then
+    convert to an LVal.
     
 
 INSERT_INTO

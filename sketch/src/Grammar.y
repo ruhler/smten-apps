@@ -161,9 +161,9 @@ stmt :: { Stmt }
  | 'do' stmt 'while' '(' expr ')' ';' { BlockS [$2, WhileS $5 $2] }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
- | '++' id ';' { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
+ | '++' id ';' { ExprS (PreIncrE (VarLV $2)) }
  | id '++' ';' { ExprS (PostIncrE (VarLV $1)) }
- | id '--' ';' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
+ | id '--' ';' { ExprS (PostDecrE (VarLV $1)) }
  | id '+=' expr ';' { UpdateS (VarLV $1) (AddE (VarE $1) $3) }
  | id '(' ')' { ExprS (AppE $1 []) }
  | id '(' exprs ')' { ExprS (AppE $1 $3) }
@@ -188,9 +188,9 @@ lval :: { LVal }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
- | '++' id { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
+ | '++' id { ExprS (PreIncrE (VarLV $2)) }
  | id '++' { ExprS (PostIncrE (VarLV $1)) }
- | id '--' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
+ | id '--' { ExprS (PostDecrE (VarLV $1)) }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

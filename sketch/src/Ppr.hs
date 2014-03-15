@@ -65,6 +65,9 @@ instance Ppr Expr where
    pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
    pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
    pretty (PostIncrE a) = prettya a ++ "++"
+   pretty (PostDecrE a) = prettya a ++ "--"
+   pretty (PreIncrE a) = "++" ++ prettya a
+   pretty (PreDecrE a) = "--" ++ prettya a
    pretty (HoleE _ (Just v)) = "??(" ++ show v ++ ")"
    pretty (HoleE _ Nothing) = "??"
    pretty (BitChooseE _ a b) = prettya a ++ " {|} " ++ prettya b
