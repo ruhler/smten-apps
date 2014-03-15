@@ -188,9 +188,7 @@ lval :: { LVal }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
- | '++' id { ExprS (PreIncrE (VarLV $2)) }
- | id '++' { ExprS (PostIncrE (VarLV $1)) }
- | id '--' { ExprS (PostDecrE (VarLV $1)) }
+ | expr { ExprS $1 }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }

@@ -49,10 +49,9 @@ STATIC_EVAL::
 INCR_OP::
   Support pre and post increment and decrement in expressions.
   * switch to ExprS rather than desugar for statements which do these
-    operations. Except I'm worried about parsing ambiguity with +=?
+    operations. Except I'm worried about parsing ambiguity...
   * support arbitrary lvals, not just VarLV.
-    Except I'm worried about parsing ambiguity: maybe parse as an exp, then
-    convert to an LVal.
+    Except I'm worried about parsing ambiguity...
     
 
 INSERT_INTO
