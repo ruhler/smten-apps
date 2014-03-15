@@ -189,17 +189,11 @@ evalE (GeE a b) = {-# SCC "GeE" #-} do
 evalE (EqE a b) = {-# SCC "EqE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (BitV av, BitV bv) -> return $ BitV (av == bv)
-      (BitsV av, BitsV bv) -> return $ BitV (av == bv)
-      (IntV av, IntV bv) -> return $ BitV (av == bv)
+    return $ BitV (a' == b')
 evalE (NeqE a b) = {-# SCC "NeqE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (BitV av, BitV bv) -> return $ BitV (av /= bv)
-      (BitsV av, BitsV bv) -> return $ BitV (av /= bv)
-      (IntV av, IntV bv) -> return $ BitV (av /= bv)
+    return $ BitV (a' /= b')
 evalE (ArrayE xs) = {-# SCC "ArrayE" #-} arrayV <$> mapM evalE xs
 evalE (NotE a) = {-# SCC "NotE" #-} do
     a' <- evalE a

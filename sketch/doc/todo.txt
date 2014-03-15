@@ -61,9 +61,6 @@ INSERT_INTO
 TYPEOFV_SLOW
  Looks like we are getting stuck in a false infinite finite formula.
 
-ARR_EQ
- Support == and != on general arrays.
-
 INSERTVAR_SLOW
  Stuck in false symbolic execution?
 
@@ -127,12 +124,8 @@ tests/broken/miniTest209Globals.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb345.sk: ARR_EQ
-tests/broken/miniTestb464.sk: ARR_EQ
-tests/broken/miniTestb479.sk: ARR_EQ
-tests/broken/miniTestb513.sk: ARR_EQ
-
-tests/broken/miniTestb517.sk: parse name starting with _
+tests/broken/miniTestb479.sk: Cast IntV to Int? Why is this showing up?
+tests/broken/miniTestb513.sk: BUGGY: bug in scalar/array promotion?
 
 tests/broken/miniTestb347.sk: MULTI_VARS
 tests/broken/miniTestb366.sk:
@@ -181,6 +174,7 @@ tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 
 Clean::
 * TODO's inlined
+
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them

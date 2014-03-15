@@ -389,12 +389,12 @@ eqop f nm a b = do
     -- We need to determine the argument types here.
     -- See if we can infer them from the arguments.
     targ <- liftM2 unify (typeof a) (typeof b)
-    case targ of
-      UnknownT -> error $ "ambiguous type for " ++ nm ++ " operator"
-      BitT -> return ()
-      IntT -> return ()
-      ArrT BitT _ -> return ()
-      _ -> error $ "TODO: does " ++ nm ++ " operator support type: " ++ show targ
+    let eqtycheck UnknownT = error $ "ambiguous type for " ++ nm ++ " operator"
+        eqtycheck BitT = return ()
+        eqtycheck IntT = return ()
+        eqtycheck (ArrT ty _) = eqtycheck ty
+        eqtycheck _ = error $ "TODO: does " ++ nm ++ " operator support type: " ++ show targ
+    eqtycheck targ
     liftM2 f (withty targ $ staticM a) (withty targ $ staticM b)
 
 -- Bitwise Operators
