@@ -145,6 +145,7 @@ genE (ModE a b) = liftM2 ModE (genE a) (genE b)
 genE (DivE a b) = liftM2 DivE (genE a) (genE b)
 genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
 genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)
+genE (PostIncrE lv) = PostIncrE <$> genLV lv
 genE (NotE a) = NotE <$> genE a
 genE (CondE p a b) = liftM3 CondE (genE p) (genE a) (genE b)
 genE (HoleE ty mbnd) = do

@@ -162,7 +162,7 @@ stmt :: { Stmt }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
  | '++' id ';' { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
- | id '++' ';' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
+ | id '++' ';' { ExprS (PostIncrE (VarLV $1)) }
  | id '--' ';' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
  | id '+=' expr ';' { UpdateS (VarLV $1) (AddE (VarE $1) $3) }
  | id '(' ')' { ExprS (AppE $1 []) }
@@ -189,7 +189,7 @@ lval :: { LVal }
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
  | '++' id { UpdateS (VarLV $2) (AddE (VarE $2) (ValE $ IntV 1)) }
- | id '++' { UpdateS (VarLV $1) (AddE (VarE $1) (ValE $ IntV 1)) }
+ | id '++' { ExprS (PostIncrE (VarLV $1)) }
  | id '--' { UpdateS (VarLV $1) (SubE (VarE $1) (ValE $ IntV 1)) }
 
 expr :: { Expr }

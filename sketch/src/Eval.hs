@@ -245,6 +245,11 @@ evalE (ShrE a b) = {-# SCC "ShrE" #-} do
     case (a', b') of
       (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
       (IntV av, IntV bv) -> return $ IntV (av `shrI` bv)
+evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
+    a' <- lookupLV lv
+    case a' of
+        IntV av -> updateLV lv (IntV (av + 1))
+    return a'
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     mval <- lookupVar nm

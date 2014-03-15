@@ -109,6 +109,8 @@ instance Static Stmt where
   staticM (IfS p a b) = liftM3 IfS (withty BitT $ staticM p) (staticM a) (staticM b)
   staticM (BlockS xs) = blockS <$> mapM staticM xs
 
+instance Static LVal where
+    staticM x = fst <$> staticLV x
 
 -- Return the LVal with static check done, and return the type of 
 -- expression expected.
@@ -187,6 +189,13 @@ staticE (OrE a b) = bitwiseop OrE "|" a b
 staticE (LOrE a b) = bitwiseop LOrE "||" a b
 staticE (ShlE a b) = shiftop ShlE "<<" a b
 staticE (ShrE a b) = shiftop ShrE ">>" a b
+staticE (PostIncrE a) = do
+  ty <- asks sr_oty
+  case ty of
+    IntT -> return ()
+    _ -> error $ "unsupported type for post-increment: " ++ show ty
+  PostIncrE <$> (staticM a)
+
 staticE (BitChooseE _ a b) = do
   ty <- asks sr_oty
   bitwiseop (BitChooseE ty) "{|}" a b
@@ -482,6 +491,7 @@ typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (LOrE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (ShlE a b) = typeofshift a
 typeof (ShrE a b) = typeofshift a
+typeof (PostIncrE a) = snd <$> staticLV a
 typeof (NotE a) = typeof a
 typeof (HoleE ty _) = return ty
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)
