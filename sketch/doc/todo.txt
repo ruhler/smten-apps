@@ -102,10 +102,6 @@ tests/broken/miniTestb540.sk: Missed incorrect TYPE ERROR - bit supports + and -
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
 
-tests/broken/miniTestb317.sk: INCR_OP
-tests/broken/miniTestb318.sk: INCR_OP
-tests/broken/miniTestb399.sk: INCR_OP
-tests/broken/miniTestb419.sk: INCR_OP
 tests/broken/miniTestb524.sk: INCR_OP
 
 tests/broken/miniTestb519.sk: support += in for incr.
@@ -113,6 +109,7 @@ tests/broken/miniTestb519.sk: support += in for incr.
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
 tests/broken/miniTest209Globals.sk,
+tests/broken/miniTestb399.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 

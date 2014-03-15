@@ -215,6 +215,10 @@ expr :: { Expr }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
+ | id '++'         { PostIncrE (VarLV $1) }
+ | id '--'         { PostDecrE (VarLV $1) }
+ | '++' id         { PreIncrE (VarLV $2) }
+ | '--' id         { PreDecrE (VarLV $2) }
  | expr '{|}' expr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }
  | 'false'          { ValE (BitV False) }
