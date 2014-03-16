@@ -52,6 +52,24 @@ INCR_OP::
     operations. Except I'm worried about parsing ambiguity...
   * support arbitrary lvals, not just VarLV.
     Except I'm worried about parsing ambiguity...
+
+ 1. Switch to ExprS rather than desugar.
+    Concern is: 
+    1. expr  doesn't support nullary application?
+    2. id += expr : the id part looks like an expr.
+       Note: this should probably be an LVal in general, not id.
+    3. lval '=' expr : the lval part looks like an expr.
+    4. id '(' ...
+        function application is an id, not an lval. But it looks like
+        an lval.
+
+  Steps:
+    1. += operator can work on expressions, just like ++.
+       This gets rid of that conflict.
+    2. In assignment, parse it as expr '=' expr;, and convert
+       the expr to an lval.
+    3. Now we should be safe to switch to expr ';' as a statement.
+
     
 
 INSERT_INTO

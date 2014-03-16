@@ -172,23 +172,19 @@ evalE (SubE a b) = {-# SCC "SubE" #-} do
 evalE (LtE a b) = {-# SCC "LtE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (IntV av, IntV bv) -> return $ BitV (av < bv)
+    return $ BitV (a' < b')
 evalE (GtE a b) = {-# SCC "GtE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (IntV av, IntV bv) -> return $ BitV (av > bv)
+    return $ BitV (a' > b')
 evalE (LeE a b) = {-# SCC "LeE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (IntV av, IntV bv) -> return $ BitV (av <= bv)
+    return $ BitV (a' <= b')
 evalE (GeE a b) = {-# SCC "GeE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (IntV av, IntV bv) -> return $ BitV (av >= bv)
+    return $ BitV (a' >= b')
 evalE (EqE a b) = {-# SCC "EqE" #-} do
     a' <- evalE a
     b' <- evalE b

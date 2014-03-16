@@ -48,6 +48,28 @@ data Value =
   | VoidV
     deriving (Show)
 
+instance Eq Value where
+    (==) (ArrayV as) (ArrayV bs) = as == bs
+    (==) (BitV a) (BitV b) = a == b
+    (==) (BitsV a) (BitsV b) = a == b
+    (==) (IntV a) (IntV b) = a == b
+    (==) VoidV VoidV = True
+    (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
+
+instance Ord Value where
+    (<=) (IntV av) (IntV bv) = av <= bv
+    (<=) a b = error $ "Value.<=: bad args: " ++ show (a, b)
+
+    (<) (IntV av) (IntV bv) = av < bv
+    (<) a b = error $ "Value.<: bad args: " ++ show (a, b)
+
+    (>=) (IntV av) (IntV bv) = av >= bv
+    (>=) a b = error $ "Value.>=: bad args: " ++ show (a, b)
+
+    (>) (IntV av) (IntV bv) = av > bv
+    (>) a b = error $ "Value.>: bad args: " ++ show (a, b)
+
+
 -- Make an array value.
 -- Automatically constructs a BitsV if the argument type is Bit.
 arrayV :: [Value] -> Value
@@ -80,14 +102,6 @@ dimension IntT = 1
 dimension (FunT {}) = 1
 dimension UnknownT = error "dimension: UnknownT"
 
-
-instance Eq Value where
-    (==) (ArrayV as) (ArrayV bs) = as == bs
-    (==) (BitV a) (BitV b) = a == b
-    (==) (BitsV a) (BitsV b) = a == b
-    (==) (IntV a) (IntV b) = a == b
-    (==) VoidV VoidV = True
-    (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
 
 data Expr = 
    ValE Value
