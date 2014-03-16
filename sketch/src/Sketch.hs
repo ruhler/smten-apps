@@ -69,6 +69,22 @@ instance Ord Value where
     (>) (IntV av) (IntV bv) = av > bv
     (>) a b = error $ "Value.>: bad args: " ++ show (a, b)
 
+instance Num Value where
+    (+) (BitsV a) (BitsV b) = BitsV (a `addB` b)
+    (+) (IntV a) (IntV b) = IntV (a + b)
+    (+) a b = error $ "Value.+: bad args: " ++ show (a, b)
+
+    (-) (BitsV a) (BitsV b) = BitsV (a `subB` b)
+    (-) (IntV a) (IntV b) = IntV (a - b)
+    (-) a b = error $ "Value.-: bad args: " ++ show (a, b)
+
+    (*) (IntV a) (IntV b) = IntV (a * b)
+    (*) a b = error $ "Value.+: bad args: " ++ show (a, b)
+
+    abs = error $ "Value.abs: not supported"
+    signum = error $ "Value.signum: not supported"
+    fromInteger = error $ "Value.fromInteger: not supported"
+
 
 -- Make an array value.
 -- Automatically constructs a BitsV if the argument type is Bit.

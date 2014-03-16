@@ -160,15 +160,11 @@ evalE (LOrE a b) = {-# SCC "LOrE" #-} do
 evalE (AddE a b) = {-# SCC "AddE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (BitsV av, BitsV bv) -> return $ BitsV (av `addB` bv)
-      (IntV av, IntV bv) -> return $ IntV (av + bv)
+    return $ a' + b'
 evalE (SubE a b) = {-# SCC "SubE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (BitsV av, BitsV bv) -> return $ BitsV (av `subB` bv)
-      (IntV av, IntV bv) -> return $ IntV (av - bv)
+    return $ a' - b'
 evalE (LtE a b) = {-# SCC "LtE" #-} do
     a' <- evalE a
     b' <- evalE b
@@ -213,8 +209,7 @@ evalE (XorE a b) = {-# SCC "XorE" #-} do
 evalE (MulE a b) = {-# SCC "MulE" #-} do
     a' <- evalE a
     b' <- evalE b
-    case (a', b') of
-      (IntV av, IntV bv) -> return $ IntV (av * bv)
+    return $ a' * b'
 evalE (ModE a b) = {-# SCC "ModE" #-} do
     a' <- evalE a
     b' <- evalE b
