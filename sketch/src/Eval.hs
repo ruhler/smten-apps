@@ -157,38 +157,14 @@ evalE (LOrE a b) = {-# SCC "LOrE" #-} do
             b' <- evalE b
             case b' of
                 BitsV bv -> return $ BitsV (av `orB` bv)
-evalE (AddE a b) = {-# SCC "AddE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ a' + b'
-evalE (SubE a b) = {-# SCC "SubE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ a' - b'
-evalE (LtE a b) = {-# SCC "LtE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' < b')
-evalE (GtE a b) = {-# SCC "GtE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' > b')
-evalE (LeE a b) = {-# SCC "LeE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' <= b')
-evalE (GeE a b) = {-# SCC "GeE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' >= b')
-evalE (EqE a b) = {-# SCC "EqE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' == b')
-evalE (NeqE a b) = {-# SCC "NeqE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ BitV (a' /= b')
+evalE (AddE a b) = liftM2 (+) (evalE a) (evalE b)
+evalE (SubE a b) = liftM2 (-) (evalE a) (evalE b)
+evalE (LtE a b) = BitV <$> liftM2 (<) (evalE a) (evalE b)
+evalE (GtE a b) = BitV <$> liftM2 (>) (evalE a) (evalE b)
+evalE (LeE a b) = BitV <$> liftM2 (<=) (evalE a) (evalE b)
+evalE (GeE a b) = BitV <$> liftM2 (>=) (evalE a) (evalE b)
+evalE (EqE a b) = BitV <$> liftM2 (==) (evalE a) (evalE b)
+evalE (NeqE a b) = BitV <$> liftM2 (/=) (evalE a) (evalE b)
 evalE (ArrayE xs) = {-# SCC "ArrayE" #-} arrayV <$> mapM evalE xs
 evalE (NotE a) = {-# SCC "NotE" #-} do
     a' <- evalE a
@@ -206,10 +182,7 @@ evalE (XorE a b) = {-# SCC "XorE" #-} do
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `xorB` bv)
       (BitV av, BitV bv) -> return $ BitV (av `xor` bv)
-evalE (MulE a b) = {-# SCC "MulE" #-} do
-    a' <- evalE a
-    b' <- evalE b
-    return $ a' * b'
+evalE (MulE a b) = liftM2 (*) (evalE a) (evalE b)
 evalE (ModE a b) = {-# SCC "ModE" #-} do
     a' <- evalE a
     b' <- evalE b
