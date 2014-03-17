@@ -149,7 +149,12 @@ stmt :: { Stmt }
  | 'return' ';' { ReturnS (ValE VoidV) }
  | 'assert' expr ';' { AssertS $2 }
  | type vardecls ';' { DeclS $1 $2 }
- | lval '=' expr ';' { UpdateS $1 $3 }
+ | expr '=' expr ';' {%
+      -- Note: we parse the lval as an expr to avoid reduce/reduce conflicts.
+      case asLVal $1 of
+        Just lv -> return $ UpdateS lv $3
+        Nothing -> fail $ "expected lval, but got: " ++ show $1
+    }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
@@ -161,12 +166,7 @@ stmt :: { Stmt }
  | 'do' stmt 'while' '(' expr ')' ';' { BlockS [$2, WhileS $5 $2] }
  | 'for' '(' for_init ';' expr ';' for_incr ')' stmt { ForS $3 $5 $7 $9 }
  | ';' { blockS [] }
- | '++' id ';' { ExprS (PreIncrE (VarLV $2)) }
- | id '++' ';' { ExprS (PostIncrE (VarLV $1)) }
- | id '--' ';' { ExprS (PostDecrE (VarLV $1)) }
- | id '+=' expr ';' { ExprS (PlusEqE (VarLV $1) $3) }
- | id '(' ')' { ExprS (AppE $1 []) }
- | id '(' exprs ')' { ExprS (AppE $1 $3) }
+ | expr ';'    { ExprS $1 }
 
 vardecl :: { (Name, Maybe Expr) }
  : id           { ($1, Nothing) }
@@ -180,11 +180,6 @@ for_init :: { Stmt }
  : type vardecls { DeclS $1 $2 }
  | id '=' expr { UpdateS (VarLV $1) $3 }
  | id '[' expr ']' '=' expr { UpdateS (ArrLV (VarLV $1) $3) $6 }
-
-lval :: { LVal }
- : id { VarLV $1 }
- | lval '[' expr ']' { ArrLV $1 $3 }
- | lval '[' expr '::' expr ']' { BulkLV $1 $3 $5 }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
@@ -230,7 +225,7 @@ expr :: { Expr }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
- | '{' exprs '}' { ArrayE $2 }
+ | '{' someexprs '}' { ArrayE $2 }
  | id '(' ')' { AppE $1 [] }
  | id '(' exprs ')' { AppE $1 $3 }
 

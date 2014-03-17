@@ -12,7 +12,7 @@ proc hrun {args} {
 # Run from the sketch/ directory.
 hrun mkdir -p build/release build/profile
 
-hrun happy src/Grammar.y -o build/profile/Grammar.hs
+hrun happy src/Grammar.y -o build/profile/Grammar.hs -ibuild/Grammar.info
 hrun smten --make -o build/profile/sketch -prof -fprof-auto-top -ibuild/profile -isrc -hidir build/profile -odir build/profile src/sketch.hs -fwarn-unused-imports -rtsopts
 
 hrun happy src/Grammar.y -o build/release/Grammar.hs

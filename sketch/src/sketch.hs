@@ -113,11 +113,12 @@ main = do
        Just err -> putStrLn $ unlines ["warning: " ++ err, "(from use of a pragma)"]
        Nothing -> return ()
     putStrLn $ "Using Options: " ++ show opts
+    putStrLn $ "Parsed: " ++ show sk
       
 
     -- Perform static analysis and execution
     let st = static (envof sk)
-    putStrLn (show st)
+    putStrLn $ "Statically Evaluated: " ++ show st
 
     -- Run the synthesizer
     syn <- runSMT solver (synthesize opts (envof st))
