@@ -149,12 +149,7 @@ stmt :: { Stmt }
  | 'return' ';' { ReturnS (ValE VoidV) }
  | 'assert' expr ';' { AssertS $2 }
  | type vardecls ';' { DeclS $1 $2 }
- | expr '=' expr ';' {%
-      -- Note: we parse the lval as an expr to avoid reduce/reduce conflicts.
-      case asLVal $1 of
-        Just lv -> return $ UpdateS lv $3
-        Nothing -> fail $ "expected lval, but got: " ++ show $1
-    }
+ | expr '=' expr ';' {% asLValM (flip UpdateS $3) $1 }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
  | 'if' '(' expr ')' stmt { IfS $3 $5 (blockS [])}
@@ -208,11 +203,11 @@ expr :: { Expr }
  | expr '^' expr    { XorE $1 $3 }
  | expr '>>' expr    { ShrE $1 $3 }
  | expr '<<' expr    { ShlE $1 $3 }
- | id '++'         { PostIncrE (VarLV $1) }
- | id '--'         { PostDecrE (VarLV $1) }
- | '++' id         { PreIncrE (VarLV $2) }
- | '--' id         { PreDecrE (VarLV $2) }
- | id '+=' expr    { PlusEqE (VarLV $1) $3 }
+ | expr '++'         {% asLValM PostIncrE $1 }
+ | expr '--'         {% asLValM PostDecrE $1 }
+ | '++' expr         {% asLValM PreIncrE $2 }
+ | '--' expr         {% asLValM PreDecrE $2 }
+ | expr '+=' expr    {% asLValM (flip PlusEqE $3) $1 }
  | expr '{|}' expr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }
  | 'false'          { ValE (BitV False) }
@@ -247,6 +242,13 @@ parseError tok = do
 
 seq :: a -> b -> b
 seq = const id
+
+-- Note: we parse lvals as an expr to avoid reduce/reduce conflicts.
+-- This converts the Expr back to an LVal, failing if it doesn't convert.
+asLValM :: (LVal -> a) -> Expr -> ParserMonad a
+asLValM f x = case asLVal x of
+                Just lv -> return $ f lv
+                Nothing -> fail $ "expected lval, but got: " ++ show x
 
 }
 

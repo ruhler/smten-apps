@@ -93,9 +93,6 @@ tests/broken/miniTestb540.sk: Missed incorrect TYPE ERROR - bit supports + and -
 tests/broken/miniTestb225.sk: C Preprocessor?
 tests/broken/miniTestb232.sk: Uninitialized variable?
 
-tests/broken/miniTestb524.sk: Parser precedence bug
-    ++x[4] should parse as ++(x[4]), not (++x)[4]
-
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
 tests/broken/miniTest209Globals.sk,
