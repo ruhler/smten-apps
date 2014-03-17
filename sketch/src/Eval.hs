@@ -211,24 +211,28 @@ evalE (ShrE a b) = {-# SCC "ShrE" #-} do
       (IntV av, IntV bv) -> return $ IntV (av `shrI` bv)
 evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
     a' <- lookupLV lv
+    updateLV lv (a' + IntV 1)
     case a' of
         IntV av -> updateLV lv (IntV (av + 1))
     return a'
 evalE (PostDecrE lv) = {-# SCC "PostDecrE" #-} do
     a' <- lookupLV lv
-    case a' of
-        IntV av -> updateLV lv (IntV (av - 1))
+    updateLV lv (a' - IntV 1)
     return a'
 evalE (PreIncrE lv) = {-# SCC "PreIncrE" #-} do
     a <- lookupLV lv
-    let a' = case a of
-                IntV av -> IntV (av + 1)
+    let a' = a + IntV 1
     updateLV lv a'
     return a'
 evalE (PreDecrE lv) = {-# SCC "PreDecrE" #-} do
     a <- lookupLV lv
-    let a' = case a of
-                IntV av -> IntV (av - 1)
+    let a' = a - IntV 1
+    updateLV lv a'
+    return a'
+evalE (PlusEqE lv x) = {-# SCC "PlusEqE" #-} do
+    a <- lookupLV lv
+    x' <- evalE x
+    let a' = a + x'
     updateLV lv a'
     return a'
 evalE (HoleE {}) = {-# SCC "HoleE" #-} error "HoleE in evalE"

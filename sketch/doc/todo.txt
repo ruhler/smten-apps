@@ -64,11 +64,9 @@ INCR_OP::
         an lval.
 
   Steps:
-    1. += operator can work on expressions, just like ++.
-       This gets rid of that conflict.
-    2. In assignment, parse it as expr '=' expr;, and convert
+    1. In assignment, parse it as expr '=' expr;, and convert
        the expr to an lval.
-    3. Now we should be safe to switch to expr ';' as a statement.
+    2. Now we should be safe to switch to expr ';' as a statement.
 
     
 

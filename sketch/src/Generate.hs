@@ -149,6 +149,7 @@ genE (PostIncrE lv) = PostIncrE <$> genLV lv
 genE (PostDecrE lv) = PostDecrE <$> genLV lv
 genE (PreIncrE lv) = PreIncrE <$> genLV lv
 genE (PreDecrE lv) = PreDecrE <$> genLV lv
+genE (PlusEqE lv a) = liftM2 PlusEqE (genLV lv) (genE a)
 genE (NotE a) = NotE <$> genE a
 genE (CondE p a b) = liftM3 CondE (genE p) (genE a) (genE b)
 genE (HoleE ty mbnd) = do

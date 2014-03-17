@@ -145,6 +145,7 @@ data Expr =
  | PostDecrE LVal        -- ^ x--
  | PreIncrE LVal         -- ^ ++x
  | PreDecrE LVal         -- ^ --x
+ | PlusEqE LVal Expr     -- ^ x += e
  | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Type (Maybe Int)   -- ^ ??(n)      n is the number of bits to use
  | BitChooseE Type Expr Expr  -- ^ a {|} b

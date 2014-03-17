@@ -193,6 +193,12 @@ staticE (PostIncrE a) = incrop PostIncrE "post ++" a
 staticE (PostDecrE a) = incrop PostDecrE "post --" a
 staticE (PreIncrE a) = incrop PreIncrE "pre ++" a
 staticE (PreDecrE a) = incrop PreDecrE "pre --" a
+staticE (PlusEqE a b) = do
+  ty <- asks sr_oty
+  case ty of
+    IntT -> return ()
+    _ -> error $ "unsupported type for +=:" ++ show ty
+  liftM2 PlusEqE (staticM a) (staticM b)
 
 staticE (BitChooseE _ a b) = do
   ty <- asks sr_oty
@@ -501,6 +507,7 @@ typeof (PostIncrE a) = snd <$> staticLV a
 typeof (PostDecrE a) = snd <$> staticLV a
 typeof (PreIncrE a) = snd <$> staticLV a
 typeof (PreDecrE a) = snd <$> staticLV a
+typeof (PlusEqE a b) = liftM2 unify (snd <$> staticLV a) (typeof b)
 typeof (NotE a) = typeof a
 typeof (HoleE ty _) = return ty
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)

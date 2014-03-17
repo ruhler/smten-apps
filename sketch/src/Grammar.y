@@ -164,7 +164,7 @@ stmt :: { Stmt }
  | '++' id ';' { ExprS (PreIncrE (VarLV $2)) }
  | id '++' ';' { ExprS (PostIncrE (VarLV $1)) }
  | id '--' ';' { ExprS (PostDecrE (VarLV $1)) }
- | id '+=' expr ';' { UpdateS (VarLV $1) (AddE (VarE $1) $3) }
+ | id '+=' expr ';' { ExprS (PlusEqE (VarLV $1) $3) }
  | id '(' ')' { ExprS (AppE $1 []) }
  | id '(' exprs ')' { ExprS (AppE $1 $3) }
 
@@ -217,6 +217,7 @@ expr :: { Expr }
  | id '--'         { PostDecrE (VarLV $1) }
  | '++' id         { PreIncrE (VarLV $2) }
  | '--' id         { PreDecrE (VarLV $2) }
+ | id '+=' expr    { PlusEqE (VarLV $1) $3 }
  | expr '{|}' expr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }
  | 'false'          { ValE (BitV False) }
