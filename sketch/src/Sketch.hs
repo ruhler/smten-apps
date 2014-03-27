@@ -6,7 +6,6 @@ module Sketch (
     LVal(..), Stmt(..),
     Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),
     FunctionInput, ProgramInput,
-    Options(..), defaultOptions,
     envof, declsof, d_type, d_val, f_type,
     blockS, typeofV, dimension, arrayV, pad,
     asLVal,
@@ -253,21 +252,6 @@ type FunctionInput = [Value]
 -- The input to a program is a sample function input for each of its top level
 -- harnesses.
 type ProgramInput = Map.Map String FunctionInput
-
-data Options = Options {
-  bnd_cbits :: Int,
-  bnd_inbits :: Int,
-  bnd_unroll_amnt :: Int,
-  bnd_inline_amnt :: Int
-} deriving (Show)
-
-defaultOptions :: Options
-defaultOptions = Options {
-    bnd_cbits = 5,
-    bnd_inbits = 5,
-    bnd_unroll_amnt = 8,
-    bnd_inline_amnt = 5
-}
 
 pad :: Type -> Value
 pad BitT = BitV False

@@ -11,6 +11,7 @@ import Cegis
 import Eval
 import Input
 import Generate
+import Options
 import Sketch
 
 synthesize :: Options -> ProgEnv -> SMT (Maybe Prog)

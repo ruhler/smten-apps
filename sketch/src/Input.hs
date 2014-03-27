@@ -10,6 +10,7 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 import Smten.Symbolic
 
+import Options
 import Sketch
 
 -- Construct a sample input for the given program.

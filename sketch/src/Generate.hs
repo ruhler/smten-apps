@@ -10,6 +10,7 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Input
+import Options
 import Sketch
 
 -- Given a program with explicit holes, generate a corrisponding symbolic

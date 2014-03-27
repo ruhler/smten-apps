@@ -170,4 +170,5 @@ Performance Ideas:: (consider only AFTER we run into performance problems)
     This would also help with implementing repeat properly, and static
     evaluation of types.
 * do incremental unrolling on the size of inputs and holes we try?
+* Use "random" solver for synthesis query?
 
