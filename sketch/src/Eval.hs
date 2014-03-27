@@ -12,6 +12,7 @@ import qualified Smten.Data.Map as Map
 
 import Bits
 import EvalMonad
+import Input
 import Syntax
 
 -- Evaluate a sketch program on the given program input.

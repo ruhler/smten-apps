@@ -7,6 +7,7 @@ import Smten.Control.Monad.Trans
 import Smten.Symbolic
 import Smten.Symbolic.SMT
 
+import Input
 import Ppr
 import Syntax
 

@@ -4,7 +4,6 @@ module Syntax (
     Prog, ProgEnv, Decl(..), Type(..), Name,
     LVal(..), Stmt(..),
     Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),
-    FunctionInput, ProgramInput,
     envof, declsof, d_type, d_val, f_type,
     blockS, typeofV, dimension, arrayV, pad,
     asLVal,
@@ -244,13 +243,6 @@ envof p = Map.fromList [(d_name d, d) | d <- p]
 
 declsof :: ProgEnv -> Prog
 declsof p = Map.elems p
-
--- The input to a function is the list of its arguments.
-type FunctionInput = [Value]
-
--- The input to a program is a sample function input for each of its top level
--- harnesses.
-type ProgramInput = Map.Map String FunctionInput
 
 pad :: Type -> Value
 pad BitT = BitV False

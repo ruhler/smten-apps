@@ -13,6 +13,13 @@ import Smten.Symbolic
 import Options
 import Syntax
 
+-- The input to a function is the list of its arguments.
+type FunctionInput = [Value]
+
+-- The input to a program is a sample function input for each of its top level
+-- harnesses.
+type ProgramInput = Map.Map String FunctionInput
+
 -- Construct a sample input for the given program.
 mkFreeProgramInput :: Options -> Prog -> Symbolic ProgramInput
 mkFreeProgramInput opts p = do
