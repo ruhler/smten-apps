@@ -34,7 +34,7 @@ type Program = Map.Map String Decl
 
 -- Return the type of a declaration
 declT :: Decl -> Type
-declT d@(FunD {}) = f_type $ fd_val d
+declT d@(FunD {}) = functionT $ fd_val d
 declT d@(VarD {}) = vd_ty d
 
 -- Return the expression value of a declaration.

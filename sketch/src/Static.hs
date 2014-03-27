@@ -292,7 +292,7 @@ staticE (AppE fnm xs) = do
   env <- asks sr_env
   case Map.lookup fnm env of
      Just (FunD _ f _) -> do
-        FunT foty txs <- staticM $ f_type f
+        FunT foty txs <- staticM $ functionT f
         if oty == foty
            then return ()
            else error $ "[004]expected type " ++ show oty ++ " but found type: " ++ show foty

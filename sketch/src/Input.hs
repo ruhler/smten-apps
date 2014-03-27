@@ -33,7 +33,7 @@ mkFreeProgramInput opts p = do
                HarnessF -> True
                WithSpecF _ -> True
         if needsinputs 
-            then case (f_type . fd_val $ d) of
+            then case (functionT . fd_val $ d) of
                     FunT _ ts -> do
                       i <- mkFreeArgs opts ts
                       return $ Just (d_name d, i)

@@ -4,7 +4,7 @@ module Syntax (
     Type(..), Name,
     LVal(..), Stmt(..),
     Expr(..), Value(..), Arg(..), Function(..),
-    f_type,
+    functionT,
     blockS, typeofV, dimension, arrayV, pad,
     asLVal,
     ) where
@@ -98,7 +98,7 @@ typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
 typeofV (IntV 0) = BitT     -- it may be a bit literal, so indicate that:
 typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
-typeofV (FunV f) = f_type f
+typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
 
 -- Return the dimension of a type.
@@ -203,8 +203,9 @@ data Function = Function {
     f_body :: Stmt
 } deriving (Show)
 
-f_type :: Function -> Type
-f_type f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
+-- | Return the type of a function.
+functionT :: Function -> Type
+functionT f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
 
 pad :: Type -> Value
 pad BitT = BitV False
