@@ -11,7 +11,7 @@ import Smten.Symbolic
 
 import Input
 import Options
-import Sketch
+import Syntax
 
 -- Given a program with explicit holes, generate a corrisponding symbolic
 -- candidate program without holes.

@@ -12,7 +12,7 @@ import qualified Smten.Data.Map as Map
 
 import Bits
 import EvalMonad
-import Sketch
+import Syntax
 
 -- Evaluate a sketch program on the given program input.
 --   It runs each harness on the harness's input, and returns whether all the

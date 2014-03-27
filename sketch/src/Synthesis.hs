@@ -12,7 +12,7 @@ import Eval
 import Input
 import Generate
 import Options
-import Sketch
+import Syntax
 
 synthesize :: Options -> ProgEnv -> SMT (Maybe Prog)
 synthesize opts p = cegis (mkFreeProgramInput opts (declsof p)) (generate opts p) [] evalP

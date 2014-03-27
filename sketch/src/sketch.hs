@@ -15,7 +15,7 @@ import Smten.System.IO
 import Grammar
 import Options
 import Ppr
-import Sketch
+import Syntax
 import Static
 import Synthesis
 

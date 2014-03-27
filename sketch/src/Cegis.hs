@@ -8,7 +8,7 @@ import Smten.Symbolic
 import Smten.Symbolic.SMT
 
 import Ppr
-import Sketch
+import Syntax
 
 -- Answer the question:
 --   Does there exist a value 'c' such that for all 'x', p(x, c) is satisfied?

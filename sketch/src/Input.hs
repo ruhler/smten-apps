@@ -11,7 +11,7 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Options
-import Sketch
+import Syntax
 
 -- Construct a sample input for the given program.
 mkFreeProgramInput :: Options -> Prog -> Symbolic ProgramInput

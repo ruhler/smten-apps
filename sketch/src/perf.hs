@@ -11,7 +11,7 @@ import Smten.Data.Functor
 import Smten.Data.Maybe
 
 import Eval
-import Sketch
+import Syntax
 
 insertX :: String -> v -> State (Map.Map String v) ()
 insertX  k v = modify $ Map.insert k v

@@ -8,7 +8,7 @@ module EvalMonad (
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
-import Sketch
+import Syntax
 
 type Env = Map.Map Name Decl
 type Vars = Map.Map Name Value

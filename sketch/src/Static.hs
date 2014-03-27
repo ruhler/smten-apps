@@ -11,7 +11,7 @@ import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 
 import Eval
-import Sketch
+import Syntax
 
 -- Perform static analysis and evaluation on the given program.
 -- Currently does the following: 

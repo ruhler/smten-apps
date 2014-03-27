@@ -10,7 +10,7 @@ import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 
 import Lexer
-import Sketch
+import Syntax
 
 }
 

@@ -1,7 +1,6 @@
 
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
-module Sketch (
+-- | Abstract syntax tree for a Sketch program.
+module Syntax (
     Prog, ProgEnv, Decl(..), Type(..), Name,
     LVal(..), Stmt(..),
     Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),

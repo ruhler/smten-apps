@@ -6,7 +6,7 @@ module Ppr (pretty) where
 
 
 import Smten.Prelude
-import Sketch
+import Syntax
 
 class Ppr a where
    pretty :: a -> String
