@@ -11,15 +11,16 @@ import Smten.Symbolic
 
 import Input
 import Options
+import Program
 import Syntax
 
 -- Given a program with explicit holes, generate a corrisponding symbolic
 -- candidate program without holes.
-generate :: Options -> ProgEnv -> Symbolic Prog
+generate :: Options -> Program -> Symbolic Program
 generate opts p = do
-  let readed = runReaderT (mapM genD (declsof p)) (GR opts p Map.empty)
+  let readed = runReaderT (mapM genD (decls p)) (GR opts p Map.empty)
   (ds, s) <- runStateT readed (TS [])
-  return $ ts_decls s ++ ds
+  return $ program (ts_decls s ++ ds)
 
 type TypeEnv = Map.Map Name Type
 
@@ -27,7 +28,7 @@ data GR = GR {
     gr_opts :: Options,
 
     -- | The program environment.
-    gr_env :: ProgEnv,
+    gr_env :: Program,
 
     -- | The call stack: used to bound recursion properly.
     gr_stack :: Map.Map Name Int

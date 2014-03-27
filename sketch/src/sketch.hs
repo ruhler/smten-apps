@@ -15,7 +15,7 @@ import Smten.System.IO
 import Grammar
 import Options
 import Ppr
-import Syntax
+import Program
 import Static
 import Synthesis
 
@@ -105,7 +105,7 @@ main = do
     input <- readFile fin
     (sk, skopts) <- case evalStateT parseSketch input of
              Left msg -> fail msg
-             Right x -> return x
+             Right (ds, opts) -> return (program ds, opts)
 
     -- Update the options based on any pragmas in the file
     let args' = parseargs (argv ++ words skopts)
@@ -118,11 +118,11 @@ main = do
       
 
     -- Perform static analysis and execution
-    let st = static (envof sk)
+    let st = static sk
     putStrLn $ "Statically Evaluated: " ++ show st
 
     -- Run the synthesizer
-    syn <- runSMT solver (synthesize opts (envof st))
+    syn <- runSMT solver (synthesize opts st)
     case syn of
       Nothing -> fail "sketch not satisfiable"
       Just v -> putStrLn (pretty v)

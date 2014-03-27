@@ -1,4 +1,7 @@
 
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+
 module Static (
     static,
   ) where
@@ -11,6 +14,7 @@ import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 
 import Eval
+import Program
 import Syntax
 
 -- Perform static analysis and evaluation on the given program.
@@ -20,16 +24,16 @@ import Syntax
 --      the form: ValE (IntV n)
 --   * typechecks the program.
 --      Reports an error if the program does not type check.
-static :: ProgEnv -> Prog
+static :: Program -> Program
 static p = do
-  let readed = runReaderT (mapM staticM (declsof p)) (SR p (error "no top level output type"))
+  let readed = runReaderT (staticM p) (SR p (error "no top level output type"))
   evalState readed (SS Map.empty)
 
 type TypeEnv = Map.Map Name Type
 
 data SR = SR {
     -- | The program environment.
-    sr_env :: ProgEnv,
+    sr_env :: Program,
 
     -- | The target output type.
     sr_oty :: Type
@@ -47,6 +51,9 @@ withty t = local (\r -> r { sr_oty = t })
 
 class Static a where
    staticM :: a -> SM a
+
+instance Static Program where
+   staticM p = program <$> mapM staticM (decls p)
 
 instance Static Type where
    staticM t = do
@@ -517,7 +524,7 @@ typeof (VarE nm) = do
     case Map.lookup nm tyenv of
         Just v -> staticM v
         Nothing -> case Map.lookup nm env of    
-                      Just d -> staticM $ d_type d
+                      Just d -> staticM $ declT d
                       Nothing -> return UnknownT
 typeof (AccessE a b) = do
     ta <- typeof a

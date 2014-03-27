@@ -13,17 +13,18 @@ import qualified Smten.Data.Map as Map
 import Bits
 import EvalMonad
 import Input
+import Program
 import Syntax
 
 -- Evaluate a sketch program on the given program input.
 --   It runs each harness on the harness's input, and returns whether all the
 --   harnesses completed successfully.
-evalP :: Prog -> ProgramInput -> Bool
-evalP p i = all (evalD (envof p) i) p
+evalP :: Program -> ProgramInput -> Bool
+evalP p i = all (evalD p i) (decls p)
 
 -- Evaluate a type.
 -- It should not fail.
-evalT :: ProgEnv -> Type -> Type
+evalT :: Program -> Type -> Type
 evalT env VoidT = VoidT
 evalT env BitT = BitT
 evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromJust $ runEvalM env (evalE e))
@@ -31,7 +32,7 @@ evalT env IntT = IntT
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env UnknownT = UnknownT
 
-evalD :: ProgEnv -> ProgramInput -> Decl -> Bool
+evalD :: Program -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True
 evalD env i d@(FunD {}) =
   case fd_kind d of
@@ -242,7 +243,7 @@ evalE (VarE nm) = {-# SCC "VarE" #-} do
     mdecl <- lookupDecl nm
     case (mval, mdecl) of
         (Just v, _) -> return v
-        (_, Just d) -> evalE (d_val d)
+        (_, Just d) -> evalE (declE d)
         _ -> error $ "Variable " ++ show nm ++ " not found"
 evalE (AccessE a i) = {-# SCC "AccessE" #-} do
     a' <- evalE a

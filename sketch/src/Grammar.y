@@ -10,6 +10,7 @@ import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 
 import Lexer
+import Program
 import Syntax
 
 }
@@ -96,7 +97,7 @@ import Syntax
 
 %%
 
-sketch :: { (Prog, String) }
+sketch :: { ([Decl], String) }
  : declorpragma { $1 }
  | sketch declorpragma {
      case ($1, $2) of

@@ -1,16 +1,15 @@
 
 -- | Abstract syntax tree for a Sketch program.
 module Syntax (
-    Prog, ProgEnv, Decl(..), Type(..), Name,
+    Type(..), Name,
     LVal(..), Stmt(..),
-    Expr(..), Value(..), Arg(..), Function(..), FunctionKind(..),
-    envof, declsof, d_type, d_val, f_type,
+    Expr(..), Value(..), Arg(..), Function(..),
+    f_type,
     blockS, typeofV, dimension, arrayV, pad,
     asLVal,
     ) where
 
 import Smten.Prelude
-import qualified Smten.Data.Map as Map
 
 import Bits
 
@@ -206,43 +205,6 @@ data Function = Function {
 
 f_type :: Function -> Type
 f_type f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
-
-data FunctionKind = NormalF          -- ^ a normal function
-                  | WithSpecF Name   -- ^ the function has a spec
-                  | HarnessF         -- ^ the function is a harness
-                  | GeneratorF       -- ^ the function is a generator
-    deriving (Show)
-
-data Decl =
-   FunD {
-      d_name :: Name,
-      fd_val :: Function,
-      fd_kind :: FunctionKind }
- | VarD {
-      vd_ty :: Type,
-      d_name :: Name,
-      vd_val :: Expr
-   }
- deriving (Show)
-
-d_type :: Decl -> Type
-d_type d@(FunD {}) = f_type $ fd_val d
-d_type d@(VarD {}) = vd_ty d
-
-d_val :: Decl -> Expr
-d_val x =
-    case x of
-        VarD {} -> vd_val x
-        FunD {} -> ValE (FunV (fd_val x))
-
-type Prog = [Decl]
-type ProgEnv = Map.Map String Decl
-
-envof :: Prog -> ProgEnv
-envof p = Map.fromList [(d_name d, d) | d <- p]
-
-declsof :: ProgEnv -> Prog
-declsof p = Map.elems p
 
 pad :: Type -> Value
 pad BitT = BitV False

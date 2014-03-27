@@ -9,7 +9,7 @@ import Smten.Symbolic.SMT
 
 import Input
 import Ppr
-import Syntax
+import Program
 
 -- Answer the question:
 --   Does there exist a value 'c' such that for all 'x', p(x, c) is satisfied?
@@ -23,7 +23,7 @@ import Syntax
 --
 --  x has type a
 --  c has type b
-cegis :: Symbolic ProgramInput -> Symbolic Prog -> [ProgramInput] -> (Prog -> ProgramInput -> Bool) -> SMT (Maybe Prog)
+cegis :: Symbolic ProgramInput -> Symbolic Program -> [ProgramInput] -> (Program -> ProgramInput -> Bool) -> SMT (Maybe Program)
 cegis freeX freeC xs p = do
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.

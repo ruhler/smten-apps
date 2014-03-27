@@ -8,9 +8,10 @@ module EvalMonad (
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
+
+import Program
 import Syntax
 
-type Env = Map.Map Name Decl
 type Vars = Map.Map Name Value
 
 type LocalVars = Map.Map Name Value
@@ -21,7 +22,7 @@ type LocalVars = Map.Map Name Value
 --  it has access to a read/write output value,
 --  and it can fail.
 newtype EvalM a = EvalM {
-   runEvalM_ :: Env -> LocalVars -> Maybe (a, LocalVars)
+   runEvalM_ :: Program -> LocalVars -> Maybe (a, LocalVars)
 }
 
 instance Functor EvalM where
@@ -33,7 +34,7 @@ instance Monad EvalM where
       (v, s') <- runEvalM_ x e s
       runEvalM_ (f v) e s'
 
-runEvalM :: ProgEnv -> EvalM a -> Maybe a
+runEvalM :: Program -> EvalM a -> Maybe a
 runEvalM env q = fst <$> runEvalM_ q env Map.empty
 
 -- Evaluate the monad in the given scope.

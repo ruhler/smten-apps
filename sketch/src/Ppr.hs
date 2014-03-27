@@ -6,6 +6,8 @@ module Ppr (pretty) where
 
 
 import Smten.Prelude
+
+import Program
 import Syntax
 
 class Ppr a where
@@ -142,8 +144,8 @@ instance Ppr [Arg] where
    pretty [x] = pretty x
    pretty (x:xs) = pretty x ++ ", " ++ pretty xs
 
-instance Ppr Prog where
-   pretty xs = unlines (map pretty xs)
+instance Ppr Program where
+   pretty p = unlines (map pretty (decls p))
 
 pprkindl :: FunctionKind -> String
 pprkindl NormalF = ""

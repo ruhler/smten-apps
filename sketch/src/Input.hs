@@ -11,6 +11,7 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Options
+import Program
 import Syntax
 
 -- The input to a function is the list of its arguments.
@@ -21,7 +22,7 @@ type FunctionInput = [Value]
 type ProgramInput = Map.Map String FunctionInput
 
 -- Construct a sample input for the given program.
-mkFreeProgramInput :: Options -> Prog -> Symbolic ProgramInput
+mkFreeProgramInput :: Options -> Program -> Symbolic ProgramInput
 mkFreeProgramInput opts p = do
   let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) = do
@@ -38,7 +39,7 @@ mkFreeProgramInput opts p = do
                       return $ Just (d_name d, i)
             else return Nothing
       mkDeclInput _ = return Nothing
-  inputs <- mapM mkDeclInput p
+  inputs <- mapM mkDeclInput (decls p)
   return $ Map.fromList (catMaybes inputs)
 
 -- Given a list of types, return a list of free inputs corresponding to those
