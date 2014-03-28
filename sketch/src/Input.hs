@@ -36,7 +36,7 @@ mkFreeProgramInput opts p = do
             then case (functionT . fd_val $ d) of
                     FunT _ ts -> do
                       i <- mkFreeArgs opts ts
-                      return $ Just (d_name d, i)
+                      return $ Just (declN d, i)
             else return Nothing
       mkDeclInput _ = return Nothing
   inputs <- mapM mkDeclInput (decls p)

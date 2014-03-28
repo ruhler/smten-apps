@@ -46,8 +46,8 @@ type GM = ReaderT GR (StateT TS Symbolic)
 emit :: Decl -> GM Name
 emit d = do
     s <- get
-    let nm = d_name d ++ "_" ++ show (length $ ts_decls s)
-    put $ s { ts_decls = d { d_name = nm } : ts_decls s }
+    let nm = declN d ++ "_" ++ show (length $ ts_decls s)
+    put $ s { ts_decls = d { declN = nm } : ts_decls s }
     return nm
 
 liftSymbolic :: Symbolic a -> GM a

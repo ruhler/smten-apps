@@ -20,12 +20,12 @@ data FunctionKind =
 
 data Decl =
    FunD {
-      d_name :: Name,
+      declN :: Name,
       fd_val :: Function,
       fd_kind :: FunctionKind }
  | VarD {
       vd_ty :: Type,
-      d_name :: Name,
+      declN :: Name,
       vd_val :: Expr
    }
  deriving (Show)
@@ -45,7 +45,7 @@ declE x =
         FunD {} -> ValE (FunV (fd_val x))
 
 program :: [Decl] -> Program
-program ds = Map.fromList [(d_name d, d) | d <- ds]
+program ds = Map.fromList [(declN d, d) | d <- ds]
 
 decls :: Program -> [Decl]
 decls = Map.elems
