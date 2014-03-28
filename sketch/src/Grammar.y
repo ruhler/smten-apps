@@ -44,6 +44,7 @@ import Syntax
     '/'     { TkSlash }
     '='     { TkEquals }
     ','     { TkComma }
+    '.'     { TkDot }
     ';'     { TkSemicolon }
     '||'    { TkDoubleBar }
     '&&'    { TkDoubleAmp }
@@ -79,6 +80,8 @@ import Syntax
     'false' { TkFalse }
     'pragma' { TkPragma }
     'options' { TkOptions }
+    'struct' { TkStruct }
+    'new' { TkNew }
     id      { TkID $$ }
     integer { TkInteger $$ }
     string { TkString $$ }
@@ -118,12 +121,14 @@ decl :: { Decl }
  | 'harness' type id '(' args ')' '{' stmts '}'
     { FunD $3 (Function $2 $5 (blockS $8)) HarnessF }
  | type id '=' expr ';' { VarD $1 $2 $4 }
+ | 'struct' id '{' fields '}'   { StructD $2 $4 }
 
 type :: { Type }
  : 'bit' { BitT }
  | 'void' { VoidT }
  | type '[' expr ']' { ArrT $1 $3 }
  | 'int' { IntT }
+ | id    { ConT $1 }
 
 args :: { [Arg] }
  : { [] }       -- Empty list is allowed
@@ -136,6 +141,13 @@ someargs :: { [Arg] }
 arg :: { Arg }
  : type id { Arg $2 $1 False }
  | 'ref' type id { Arg $3 $2 True }
+
+fields :: { [(Name, Type)] }
+ : field        { [$1] }
+ | fields field { $1 ++ [$2] }
+
+field :: { (Name, Type) }
+ : type id ';'   { ($2, $1) }
 
 stmts :: { [Stmt] }
  : { [] }       -- Empty list is allowed
@@ -221,6 +233,8 @@ expr :: { Expr }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
+ | expr '.' id    { FieldE $1 $3 }
+ | 'new' expr       { NewE $2 }
  | '{' someexprs '}' { ArrayE $2 }
  | id '(' ')' { AppE $1 [] }
  | id '(' exprs ')' { AppE $1 $3 }

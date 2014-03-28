@@ -28,6 +28,10 @@ data Decl =
       declN :: Name,
       vd_val :: Expr
    }
+ | StructD {
+      declN :: Name,
+      fields :: [(Name, Type)]
+   }
  deriving (Show)
 
 type Program = Map.Map String Decl

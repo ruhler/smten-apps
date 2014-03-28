@@ -21,6 +21,7 @@ data Type =
   | ArrT Type Expr    -- T[n]
   | IntT              -- int
   | FunT Type [Type]  -- function type: output and argument types
+  | ConT Name         -- Foo
   | UnknownT          -- type is not known
     deriving (Show)
 
@@ -148,6 +149,8 @@ data Expr =
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | BulkAccessE Expr Expr Expr -- ^ foo[lo::N]
+ | FieldE Expr Name      -- ^ foo.bar
+ | NewE Expr             -- ^ new foo(...)
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)
@@ -155,7 +158,8 @@ data Expr =
 
 data LVal = VarLV Name                  -- foo
           | ArrLV LVal Expr             -- foo[i]
-          | BulkLV LVal Expr Expr    -- foo[lo::N]
+          | BulkLV LVal Expr Expr       -- foo[lo::N]
+          | FieldLV LVal Name           -- foo.bar
     deriving (Show)
 
 -- Convert an expression to its corresponding LVal.
@@ -167,6 +171,9 @@ asLVal (AccessE arr idx) = do
 asLVal (BulkAccessE arr lo w) = do
     lv <- asLVal arr 
     return (BulkLV lv lo w)
+asLVal (FieldE x nm) = do
+    lv <- asLVal x
+    return (FieldLV lv nm)
 asLVal _ = Nothing
 
 data Stmt =

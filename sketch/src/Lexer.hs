@@ -17,7 +17,7 @@ data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace
   | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
-  | TkStar | TkEquals | TkComma | TkSemicolon | TkPercent | TkSlash
+  | TkStar | TkEquals | TkComma | TkDot | TkSemicolon | TkPercent | TkSlash
   | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq | TkQuestionMark
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
   | TkDoublePlus | TkDoubleDash | TkBitChoose  | TkDoubleBar | TkDoubleAmp
@@ -25,7 +25,7 @@ data Token =
   | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkHarness | TkTrue | TkFalse | TkDo
-  | TkPragma | TkOptions | TkRef
+  | TkPragma | TkOptions | TkRef | TkStruct | TkNew
   | TkID String
   | TkString String
   | TkInteger Int
@@ -64,6 +64,7 @@ singles = [
     ('>', TkGT),
     ('=', TkEquals),
     (',', TkComma),
+    ('.', TkDot),
     (';', TkSemicolon),
     ('?', TkQuestionMark),
     (':', TkColon)
@@ -105,6 +106,8 @@ keywords = [
     ("generator", TkGenerator),
     ("harness", TkHarness),
     ("ref", TkRef),
+    ("struct", TkStruct),
+    ("new", TkNew),
     ("true", TkTrue),
     ("false", TkFalse),
     ("repeat", TkRepeat),
