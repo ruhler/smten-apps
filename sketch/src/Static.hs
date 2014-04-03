@@ -408,6 +408,12 @@ instance Static Value where
     case ty of
         VoidT {} -> return VoidV
         _ -> error $ "expected type " ++ show ty ++ " but got void"
+
+  staticM NullV = do
+    ty <- asks sr_oty
+    case ty of
+      StructT {} -> return NullV
+      _ -> error $ "expected type " ++ show ty ++ " but got null"
       
 
   -- I don't expect to find any other value in the program at this point.

@@ -20,13 +20,6 @@ UNINTERPRETED_FUNCTION
 FLOATS
   Support double and float.
 
-STRUCT_TYPES
-  Support struct types.
-  Needs:
-  * 'null' pointer.
-    Which just means: all values uninitialized?
-  
-
 STATIC_EVAL::
   Evaluate local variables statically if possible.
   Because we might have:
@@ -108,7 +101,7 @@ tests/broken/miniTestb492.sk: Global variable without final value given.
 
 tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/static/*.sk: STATIC_EVAL
-tests/broken/structs/*.sk: STRUCT_TYPES
+tests/broken/structs/*.sk: Needs reclassification
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/char/*.sk: CHAR_TYPE

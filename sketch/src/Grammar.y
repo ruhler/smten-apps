@@ -82,6 +82,7 @@ import Syntax
     'options' { TkOptions }
     'struct' { TkStruct }
     'new' { TkNew }
+    'null' { TkNull }
     id      { TkID $$ }
     integer { TkInteger $$ }
     string { TkString $$ }
@@ -235,6 +236,7 @@ expr :: { Expr }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
  | expr '.' id    { FieldE $1 $3 }
  | 'new' id '(' ')' { NewE $2 }
+ | 'null' { ValE NullV }
  | '{' someexprs '}' { ArrayE $2 }
  | id '(' exprs ')' { AppE $1 $3 }
 

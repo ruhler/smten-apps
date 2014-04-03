@@ -25,7 +25,7 @@ data Token =
   | TkIf | TkElse | TkBit | TkInt | TkVoid | TkImplements | TkReturn | TkReorder
   | TkAssert
   | TkRepeat | TkWhile | TkFor | TkGenerator | TkHarness | TkTrue | TkFalse | TkDo
-  | TkPragma | TkOptions | TkRef | TkStruct | TkNew
+  | TkPragma | TkOptions | TkRef | TkStruct | TkNew | TkNull
   | TkID String
   | TkString String
   | TkInteger Int
@@ -108,6 +108,7 @@ keywords = [
     ("ref", TkRef),
     ("struct", TkStruct),
     ("new", TkNew),
+    ("null", TkNull),
     ("true", TkTrue),
     ("false", TkFalse),
     ("repeat", TkRepeat),

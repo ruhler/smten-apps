@@ -43,6 +43,7 @@ instance Ppr Value where
    pretty (IntV n) = pretty n
    pretty (FunV f) = error $ "No way to pretty print an anonymous function"
    pretty VoidV = error $ "No way to pretty print a void value"
+   pretty NullV = "null"
 
 instance Ppr Expr where
    pretty (ValE v) = pretty v

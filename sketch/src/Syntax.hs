@@ -45,6 +45,7 @@ data Value =
   | IntV Int
   | FunV Function
   | VoidV
+  | NullV
   | StructV Name (Map.Map Name Value)
     deriving (Show)
 
@@ -104,6 +105,7 @@ typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
 typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
+typeofV NullV = UnknownT
 
 -- Return the dimension of a type.
 -- - void, bit, int, and function types have dimension 1.
