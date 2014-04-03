@@ -128,7 +128,7 @@ type :: { Type }
  | 'void' { VoidT }
  | type '[' expr ']' { ArrT $1 $3 }
  | 'int' { IntT }
- | id    { ConT $1 }
+ | id    { StructT $1 }
 
 args :: { [Arg] }
  : { [] }       -- Empty list is allowed

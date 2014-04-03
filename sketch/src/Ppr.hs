@@ -24,6 +24,7 @@ instance Ppr Type where
    pretty BitT = "bit"
    pretty (ArrT t n) = pretty t ++ "[" ++ pretty n ++ "]"
    pretty IntT = "int"
+   pretty (StructT nm) = nm
 
    prettya = pretty
 

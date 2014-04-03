@@ -70,6 +70,14 @@ instance Static Decl where
       val' <- staticM val
       return $ FunD nm val' k
 
+  staticM (StructD nm fields) =
+      StructD nm <$> mapM staticM fields
+
+instance Static (Name, Type) where
+  staticM (nm, ty) = do
+     ty' <- staticM ty
+     return (nm, ty')
+
 instance Static Arg where
   staticM (Arg nm ty isref) = do
     ty' <- staticM ty

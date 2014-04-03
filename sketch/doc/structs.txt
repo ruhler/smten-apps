@@ -1,0 +1,53 @@
+
+Thu Mar 27 14:22:19 EDT 2014
+
+Goal: add support for struct types.
+
+StructV 
+  A value of a struct type will be a mapping from field name to Value.
+  StructV :: Map Name Value -> Value
+
+That's the easy part.
+
+
+The hard part is types.
+
+We add a declaration
+  StructD
+  With:
+   Name - the name of the struct type.
+   Map Name Type - the fields of the struct type.
+
+We add a type:
+  ConT :: Name -> Type
+  Which refers to a type by name.
+
+We add a type:
+  StructT :: Map Name Type
+  The type of a struct value.
+
+The challenge will be having an environment in which we can look up the type
+of a ConT.
+
+
+First concern: Currently declarations are kind of messy?
+
+Thu Apr  3 14:27:17 EDT 2014
+
+Question: How do deal with struct types?
+
+That is, we use a named type. A ConT.
+Two distinct named types are distinct types.
+
+It's possible two structs with different names have the same kinds of fields.
+
+So I propose the following:
+
+Rename ConT StructT, and have it just give the name of the struct type. Anyone
+who cares about more details of the fields will have to look that struct up in
+the program environment.
+
+Note: we should verify all struct types used are defined.
+
+Sounds like a plan to me.
+

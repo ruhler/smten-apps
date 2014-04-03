@@ -25,12 +25,9 @@ evalP p i = all (evalD p i) (decls p)
 -- Evaluate a type.
 -- It should not fail.
 evalT :: Program -> Type -> Type
-evalT env VoidT = VoidT
-evalT env BitT = BitT
 evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromJust $ runEvalM env (evalE e))
-evalT env IntT = IntT
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
-evalT env UnknownT = UnknownT
+evalT env t = t
 
 evalD :: Program -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True

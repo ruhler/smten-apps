@@ -21,7 +21,7 @@ data Type =
   | ArrT Type Expr    -- T[n]
   | IntT              -- int
   | FunT Type [Type]  -- function type: output and argument types
-  | ConT Name         -- Foo
+  | StructT Name         -- Foo
   | UnknownT          -- type is not known
     deriving (Show)
 
@@ -34,6 +34,7 @@ instance Eq Type where
        | a == b = error $ "type equality on arrays with unknown width: " ++ show (wa, wb)
     (==) IntT IntT = True
     (==) (FunT a as) (FunT b bs) = a == b && as == bs
+    (==) (StructT a) (StructT b) = a == b
     (==) _ _ = False
 
 data Value = 
@@ -113,6 +114,7 @@ dimension BitT = 1
 dimension (ArrT t _) = 1 + dimension t
 dimension IntT = 1
 dimension (FunT {}) = 1
+dimension (StructT {}) = 1
 dimension UnknownT = error "dimension: UnknownT"
 
 
