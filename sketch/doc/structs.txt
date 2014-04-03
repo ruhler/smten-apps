@@ -65,4 +65,18 @@ Where id is the name of the struct.
 
 Then I can refine it as I see more examples it fails on.
 
+Thu Apr  3 14:46:56 EDT 2014
+
+Question: How do we represent a struct value?
+
+Propose: StructV Name (Map Name Value)
+
+The name gives the type of struct just in case we need it?
+
+But why would we need it?
+
+We probably will. Maybe for pretty printing, struct literals, after
+simplifications, and all that fun stuff. I should leave it in.
+
+Everything else is easy, right?
 

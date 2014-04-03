@@ -56,6 +56,7 @@ instance Static Program where
    staticM p = program <$> mapM staticM (decls p)
 
 instance Static Type where
+   -- TODO: Assert StructT has an associated struct type declaration?
    staticM t = do
      env <- asks sr_env
      return $ evalT env t
@@ -154,6 +155,17 @@ staticLV (BulkLV lv lo w) = do
            | otherwise -> error $ "invalid bounds for bulk update of width: " ++ show wv
         (_, ArrT {}) -> error $ "bulk update width could not be determined statically: " ++ show (w')
         (_, _) -> error $ "expected array type, but found " ++ show t
+staticLV (FieldLV lv m) = do
+    (lv', t) <- staticLV lv
+    case t of
+      StructT nm -> do
+        env <- asks sr_env
+        case Map.lookup nm env of
+           Just (StructD _ fields)
+            | Just to <- lookup m fields -> return (FieldLV lv' m, to)
+            | otherwise -> error $ m ++ " is not a field of struct type " ++ nm
+           _ -> error $ nm ++ " does not a struct type"
+      _ -> error $ "field update expected struct type, but found type: " ++ show t
 
 
 instance Static Expr where
@@ -279,6 +291,38 @@ staticE (BulkAccessE x lo w) = do
     (_, ArrT {}, ValE (IntV {})) -> error $ "could not determine array width statically: " ++ show tarr
     (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w'
     _ -> error $ "expected array type, but found type: " ++ show tarr
+
+staticE (FieldE x m) = do
+  st <- typeof x
+  oty <- asks sr_oty
+  case st of
+    StructT nm -> do
+      env <- asks sr_env
+      case Map.lookup nm env of
+        Just (StructD _ fields)
+          | Just to <- lookup m fields -> 
+              if to == oty
+                 then do
+                   x' <- withty st (staticM x)
+                   return $ FieldE x' m
+                 else error $ "expected type " ++ show oty ++ ", but found type: " ++ show to
+          | otherwise -> error $ nm ++ " does not name a struct type"
+    _ -> error $ "expected struct, but got something of type: " ++ show st
+
+staticE e@(NewE nm) = do
+  -- Verify this has the type we expect
+  oty <- asks sr_oty
+  if oty == StructT nm
+    then return ()
+    else error $ "expected type " ++ show oty ++ " but found type: " ++ show (StructT nm)
+
+  -- Verify the struct type has been declared
+  env <- asks sr_env
+  case Map.lookup nm env of
+    Just (StructD {}) -> return ()
+    _ -> error $ nm ++ " does not name a struct type"
+
+  return e
 
 staticE (CastE t e) = do
   oty <- asks sr_oty
@@ -545,6 +589,16 @@ typeof (BulkAccessE a b c) = do
     case (ta, c) of
         (ArrT t _, ValE (IntV w)) -> return $ ArrT t (ValE (IntV w))
         _ -> return UnknownT
+typeof (FieldE x m) = do
+  tx <- typeof x
+  case tx of
+    StructT nm -> do
+      env <- asks sr_env
+      case Map.lookup nm env of
+        Just (StructD _ fields) | Just t <- lookup m fields -> return t
+        _ -> return UnknownT
+    _ -> return UnknownT
+typeof (NewE nm) = return (StructT nm)
 typeof (CastE t e) = staticM t
 typeof (AppE nm xs) = do
     env <- asks sr_env

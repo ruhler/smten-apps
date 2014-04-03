@@ -46,6 +46,7 @@ evalD env i d@(FunD {}) =
                 got <- apply (fd_val d) args
                 assert (want == got)
           in isJust (runEvalM env run)
+evalD env i (StructD {}) = True
 
 -- Apply a function to the given arguments.
 apply :: Function -> [Expr] -> EvalM Value
@@ -248,6 +249,10 @@ evalE (AccessE a i) = {-# SCC "AccessE" #-} do
 evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
     a' <- evalE a
     bulkAccess a' lo w
+evalE (FieldE a m) = do
+    a' <- evalE a
+    fieldAccess a' m
+evalE (NewE nm) = return $ StructV nm Map.empty
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
@@ -292,6 +297,12 @@ bulkAccess arr lo w = do
           let xs' = drop lo' xs
           assert (lo' >= 0 && w' <= length xs')
           return (ArrayV (take w' xs'))
+
+-- Access a field of a structure
+fieldAccess :: Value -> Name -> EvalM Value
+fieldAccess x m = do
+    case x of
+      StructV _ fields | Just v <- Map.lookup m fields -> return v
     
 lookupLV :: LVal -> EvalM Value
 lookupLV (VarLV nm) = fromJust <$> lookupVar nm
@@ -301,6 +312,9 @@ lookupLV (ArrLV lv i) = do
 lookupLV (BulkLV lv lo w) = do
     arr <- lookupLV lv
     bulkAccess arr lo w
+lookupLV (FieldLV lv m) = do
+    x <- lookupLV lv
+    fieldAccess x m
 
 updateLV :: LVal -> Value -> EvalM ()
 updateLV (VarLV nm) x = insertVar nm x
@@ -327,6 +341,10 @@ updateLV (BulkLV lv lo _) x = do
              (ArrayV xs, IntV lo', ArrayV xs') -> do
                 return (ArrayV $ arrbulkupd xs lo' xs')
   updateLV lv arr'
+updateLV (FieldLV lv m) v = do
+  StructV nm fields <- lookupLV lv
+  updateLV lv $ StructV nm (Map.insert m v fields)
+      
 
             
     

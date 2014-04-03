@@ -61,6 +61,7 @@ genD d@(FunD {}) = do
     body' <- genS (f_body . fd_val $ d)
     let val' = (fd_val d) { f_body = body' }
     return $ d { fd_val = val' }
+genD d@(StructD {}) = return d
 
 genS :: Stmt -> GM Stmt
 genS (ReturnS x) = ReturnS <$> genE x
@@ -126,6 +127,9 @@ genLV :: LVal -> GM LVal
 genLV v@(VarLV nm) = return v
 genLV (ArrLV lv x) = liftM2 ArrLV (genLV lv) (genE x)
 genLV (BulkLV lv lo w) = liftM3 BulkLV (genLV lv) (genE lo) (genE w)
+genLV (FieldLV lv m) = do
+  lv' <- genLV lv
+  return $ FieldLV lv' m
 
 genE :: Expr -> GM Expr
 genE (AndE a b) = liftM2 AndE (genE a) (genE b)
@@ -168,6 +172,10 @@ genE x@(ValE {}) = return x
 genE x@(VarE {}) = return x
 genE (AccessE a b) = liftM2 AccessE (genE a) (genE b)
 genE (BulkAccessE a b c) = liftM3 BulkAccessE (genE a) (genE b) (genE c)
+genE (FieldE x nm) = do
+   x' <- genE x
+   return (FieldE x' nm)
+genE x@(NewE {}) = return x
 genE (CastE t e) = CastE t <$> genE e
 genE (ICastE d e) = ICastE d <$> genE e
 genE (AppE fnm xs) = do

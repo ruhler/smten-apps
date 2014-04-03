@@ -10,6 +10,7 @@ module Syntax (
     ) where
 
 import Smten.Prelude
+import qualified Smten.Data.Map as Map
 
 import Bits
 
@@ -44,6 +45,7 @@ data Value =
   | IntV Int
   | FunV Function
   | VoidV
+  | StructV Name (Map.Map Name Value)
     deriving (Show)
 
 instance Eq Value where

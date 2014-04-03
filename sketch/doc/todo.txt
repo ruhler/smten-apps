@@ -23,13 +23,8 @@ FLOATS
 STRUCT_TYPES
   Support struct types.
   Needs:
-  * Declaration for struct.
-  * StructT type
-  * new operator: new Foo();
   * 'null' pointer.
-  * member access via '.'  May be multi-level
-  * member update via '.'  May be multi-level
-  * passing structs as arguments
+    Which just means: all values uninitialized?
   
 
 STATIC_EVAL::

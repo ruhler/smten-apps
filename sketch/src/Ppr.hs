@@ -79,6 +79,8 @@ instance Ppr Expr where
    pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
    pretty (BulkAccessE a b c)
     = prettya a ++ "[" ++ pretty b ++ "::" ++ pretty c ++ "]"
+   pretty (FieldE x nm) = pretty x ++ "." ++ nm
+   pretty (NewE nm) = "new " ++ nm ++ "()"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
    pretty (ICastE _ e) = pretty e
    pretty (AppE f xs) =
@@ -129,6 +131,7 @@ instance Ppr LVal where
    pretty (VarLV nm) = pretty nm
    pretty (ArrLV lv idx) = pretty lv ++ "[" ++ pretty idx ++ "]"
    pretty (BulkLV lv lo w) = pretty lv ++ "[" ++ pretty lv ++ "::" ++ pretty w ++ "]"
+   pretty (FieldLV lv m) = pretty lv ++ "." ++ m
 
 instance Ppr Arg where
    pretty (Arg nm ty False) = pretty ty ++ " " ++ pretty nm
@@ -139,6 +142,9 @@ instance Ppr Decl where
      pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
         ++ pprkindr kind ++ pretty body
    pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
+   pretty (StructD nm fields) =
+     let f (n, ty) = pretty ty ++ " " ++ n ++ ";"
+     in "struct " ++ nm ++ " {\n" ++ unlines (map (("  " ++) . f) fields) ++ "}"
 
 instance Ppr [Arg] where
    pretty [] = ""
