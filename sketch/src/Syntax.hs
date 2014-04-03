@@ -152,7 +152,7 @@ data Expr =
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
  | BulkAccessE Expr Expr Expr -- ^ foo[lo::N]
  | FieldE Expr Name      -- ^ foo.bar
- | NewE Expr             -- ^ new foo(...)
+ | NewE Name             -- ^ new Foo()
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)

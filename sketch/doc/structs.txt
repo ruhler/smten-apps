@@ -51,3 +51,18 @@ Note: we should verify all struct types used are defined.
 
 Sounds like a plan to me.
 
+Thu Apr  3 14:35:51 EDT 2014
+
+Question: How to handle NewE?
+
+Currently it is parsed as an expression to avoid ambiguity? Actually, that
+shouldn't be an issue.
+
+How about this: for now, parse it as:
+  new id()
+
+Where id is the name of the struct.
+
+Then I can refine it as I see more examples it fails on.
+
+

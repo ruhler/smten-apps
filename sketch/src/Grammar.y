@@ -234,7 +234,7 @@ expr :: { Expr }
  | expr '[' expr ']' { AccessE $1 $3 }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
  | expr '.' id    { FieldE $1 $3 }
- | 'new' expr       { NewE $2 }
+ | 'new' id '(' ')' { NewE $2 }
  | '{' someexprs '}' { ArrayE $2 }
  | id '(' ')' { AppE $1 [] }
  | id '(' exprs ')' { AppE $1 $3 }
