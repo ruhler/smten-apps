@@ -6,6 +6,11 @@ POOR_TYPE_BIT_LITERAL
   I think this is a bug in the original sketch implementation. Should I
   emulate the bug, or try to have them fix the original sketch implementation?
 
+STRUCTS
+  * Fields should be initialized to default values (presumably "pad"?)
+  * New can take named fields:  new Foo(x = 3, y = 4);
+  
+
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
   Not sure how to implement this.
@@ -101,7 +106,8 @@ tests/broken/miniTestb492.sk: Global variable without final value given.
 
 tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/static/*.sk: STATIC_EVAL
-tests/broken/structs/*.sk: Needs reclassification
+tests/broken/structs/*.sk: STRUCTS
+
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/char/*.sk: CHAR_TYPE

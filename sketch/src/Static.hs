@@ -409,11 +409,11 @@ instance Static Value where
         VoidT {} -> return VoidV
         _ -> error $ "expected type " ++ show ty ++ " but got void"
 
-  staticM NullV = do
+  staticM x@(PointerV {}) = do
     ty <- asks sr_oty
     case ty of
-      StructT {} -> return NullV
-      _ -> error $ "expected type " ++ show ty ++ " but got null"
+      StructT {} -> return x
+      _ -> error $ "expected type " ++ show ty ++ " but got a pointer"
       
 
   -- I don't expect to find any other value in the program at this point.

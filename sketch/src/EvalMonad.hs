@@ -3,11 +3,13 @@
 module EvalMonad (
     EvalM, runEvalM, scope, assert, efail,
     lookupDecl, lookupVar, insertVar,
+    newStruct, lookupStruct, updateStruct,
  ) where
 
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
+import Smten.Data.Maybe
 
 import Program
 import Syntax
@@ -16,13 +18,22 @@ type Vars = Map.Map Name Value
 
 type LocalVars = Map.Map Name Value
 
+-- The heap maps pointer locations into struct values.
+type Heap = Map.Map Int (Map.Map Name Value)
+
+data State = State {
+  s_vars :: LocalVars,
+  s_heap :: Heap
+}
+
 -- The evaluation monad.
 --  It has access to a read-only global environment,
 --  it has access to a read/write local environment,
+--  it has access to a read/write heap,
 --  it has access to a read/write output value,
 --  and it can fail.
 newtype EvalM a = EvalM {
-   runEvalM_ :: Program -> LocalVars -> Maybe (a, LocalVars)
+   runEvalM_ :: Program -> State -> Maybe (a, State)
 }
 
 instance Functor EvalM where
@@ -35,7 +46,7 @@ instance Monad EvalM where
       runEvalM_ (f v) e s'
 
 runEvalM :: Program -> EvalM a -> Maybe a
-runEvalM env q = fst <$> runEvalM_ q env Map.empty
+runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
 
 -- Evaluate the monad in the given scope.
 -- Outer scopes are not visible.
@@ -43,8 +54,8 @@ runEvalM env q = fst <$> runEvalM_ q env Map.empty
 -- completes
 scope :: LocalVars -> EvalM a -> EvalM (a, LocalVars)
 scope vars x = EvalM $ \e s -> do
-  r <- runEvalM_ x e vars
-  return (r, s)
+  (r, State vs' h') <- runEvalM_ x e (s { s_vars = vars })
+  return ((r, vs'), s { s_heap = h' })
 
 -- Evaluation which fails.
 efail :: EvalM a
@@ -60,9 +71,25 @@ lookupDecl nm = EvalM $ \e s -> return (Map.lookup nm e, s)
 
 -- Look for the given variable in the local scope
 lookupVar :: Name -> EvalM (Maybe Value)
-lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm s, s)
+lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (s_vars s), s)
 
 insertVar :: Name -> Value -> EvalM ()
 insertVar nm val = EvalM $ \_ s ->
-    return ((), Map.insert nm val s)
+    return ((), s { s_vars = Map.insert nm val (s_vars s)})
 
+newStruct :: Map.Map Name Value -> EvalM Pointer
+newStruct v = EvalM $ \_ s ->
+   let ptr = 1 + Map.size (s_heap s)
+       s' = s { s_heap = Map.insert ptr v (s_heap s) }
+   in return (Pointer ptr, s')
+
+lookupStruct :: Pointer -> EvalM (Map.Map Name Value)
+lookupStruct Null = efail
+lookupStruct (Pointer x) = EvalM $ \_ s ->
+   return (fromJust $ Map.lookup x (s_heap s), s)
+
+updateStruct :: Pointer -> Map.Map Name Value -> EvalM ()
+updateStruct Null _ = efail
+updateStruct (Pointer ptr) v = EvalM $ \_ s ->
+   return ((), s { s_heap = Map.insert ptr v (s_heap s) })
+  

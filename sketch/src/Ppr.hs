@@ -36,6 +36,10 @@ commas :: (Ppr a) => [a] -> String
 commas [x] = pretty x
 commas (x:xs) = pretty x ++ ", " ++ commas xs
 
+instance Ppr Pointer where
+   pretty Null = "null"
+   pretty (Pointer _) = error $ "No way to pretty print a pointer"
+
 instance Ppr Value where
    pretty (ArrayV xs) = "{" ++ commas xs ++ "}"
    pretty (BitV b) = if b then "true" else "false"
@@ -43,7 +47,7 @@ instance Ppr Value where
    pretty (IntV n) = pretty n
    pretty (FunV f) = error $ "No way to pretty print an anonymous function"
    pretty VoidV = error $ "No way to pretty print a void value"
-   pretty NullV = "null"
+   pretty (PointerV p) = pretty p
 
 instance Ppr Expr where
    pretty (ValE v) = pretty v

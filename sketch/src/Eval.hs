@@ -252,7 +252,9 @@ evalE (BulkAccessE a lo w) = {-# SCC "BulkAccessE" #-} do
 evalE (FieldE a m) = do
     a' <- evalE a
     fieldAccess a' m
-evalE (NewE nm) = return $ StructV nm Map.empty
+
+-- TODO: initialize fields with pad
+evalE (NewE nm) = PointerV <$> newStruct Map.empty
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
@@ -302,7 +304,9 @@ bulkAccess arr lo w = do
 fieldAccess :: Value -> Name -> EvalM Value
 fieldAccess x m = do
     case x of
-      StructV _ fields | Just v <- Map.lookup m fields -> return v
+      PointerV ptr -> do
+        fields <- lookupStruct ptr
+        return . fromJust $ Map.lookup m fields
     
 lookupLV :: LVal -> EvalM Value
 lookupLV (VarLV nm) = fromJust <$> lookupVar nm
@@ -342,11 +346,9 @@ updateLV (BulkLV lv lo _) x = do
                 return (ArrayV $ arrbulkupd xs lo' xs')
   updateLV lv arr'
 updateLV (FieldLV lv m) v = do
-  StructV nm fields <- lookupLV lv
-  updateLV lv $ StructV nm (Map.insert m v fields)
-      
-
-            
+  PointerV ptr <- lookupLV lv
+  fields <- lookupStruct ptr
+  updateStruct ptr (Map.insert m v fields)
     
 -- Update the ith element of an array
 -- Does nothing if the index is out of bounds.

@@ -3,14 +3,13 @@
 module Syntax (
     Type(..), Name,
     LVal(..), Stmt(..),
-    Expr(..), Value(..), Arg(..), Function(..),
+    Pointer(..), Expr(..), Value(..), Arg(..), Function(..),
     functionT,
-    blockS, typeofV, dimension, arrayV, pad,
+    blockS, typeofV, dimension, arrayV, nullV, pad,
     asLVal,
     ) where
 
 import Smten.Prelude
-import qualified Smten.Data.Map as Map
 
 import Bits
 
@@ -38,6 +37,9 @@ instance Eq Type where
     (==) (StructT a) (StructT b) = a == b
     (==) _ _ = False
 
+data Pointer = Null | Pointer Int
+    deriving (Eq, Show)
+
 data Value = 
     ArrayV [Value]
   | BitV Bit
@@ -45,8 +47,7 @@ data Value =
   | IntV Int
   | FunV Function
   | VoidV
-  | NullV
-  | StructV Name (Map.Map Name Value)
+  | PointerV Pointer
     deriving (Show)
 
 instance Eq Value where
@@ -95,6 +96,9 @@ arrayV xs =
     (BitV {} : _) -> BitsV [v | BitV v <- xs]
     _ -> ArrayV xs
 
+nullV :: Value
+nullV = PointerV Null
+
 typeofV :: Value -> Type
 typeofV (ArrayV []) = ArrT UnknownT (ValE (IntV 0))
 typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
@@ -105,7 +109,7 @@ typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
 typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
-typeofV NullV = UnknownT
+typeofV (PointerV {}) = UnknownT
 
 -- Return the dimension of a type.
 -- - void, bit, int, and function types have dimension 1.
