@@ -56,6 +56,7 @@ instance Eq Value where
     (==) (BitsV a) (BitsV b) = a == b
     (==) (IntV a) (IntV b) = a == b
     (==) VoidV VoidV = True
+    (==) (PointerV a) (PointerV b) = a == b
     (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
 
 instance Ord Value where

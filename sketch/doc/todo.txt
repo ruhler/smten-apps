@@ -9,6 +9,8 @@ POOR_TYPE_BIT_LITERAL
 STRUCTS
   * Fields should be initialized to default values (presumably "pad"?)
   * New can take named fields:  new Foo(x = 3, y = 4);
+  * Support: x == null. Note, this compares pointer values, and does
+    not access the struct x!
   
 
 UNINTERPRETED_FUNCTION

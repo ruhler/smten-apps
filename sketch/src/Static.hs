@@ -476,6 +476,7 @@ eqop f nm a b = do
         eqtycheck BitT = return ()
         eqtycheck IntT = return ()
         eqtycheck (ArrT ty _) = eqtycheck ty
+        eqtycheck (StructT {}) = return ()
         eqtycheck _ = error $ "TODO: does " ++ nm ++ " operator support type: " ++ show targ
     eqtycheck targ
     liftM2 f (withty targ $ staticM a) (withty targ $ staticM b)
