@@ -11,6 +11,8 @@ STRUCTS
   * New can take named fields:  new Foo(x = 3, y = 4);
   * Support: x == null. Note, this compares pointer values, and does
     not access the struct x!
+  * Support arrays of structs.
+     In particular, the syntax: foo[3] blah;
   
 
 UNINTERPRETED_FUNCTION
