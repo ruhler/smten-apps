@@ -7,13 +7,14 @@ POOR_TYPE_BIT_LITERAL
   emulate the bug, or try to have them fix the original sketch implementation?
 
 STRUCTS
-  * Fields should be initialized to default values (presumably "pad"?)
-  * New can take named fields:  new Foo(x = 3, y = 4);
-  * Support: x == null. Note, this compares pointer values, and does
-    not access the struct x!
   * Support arrays of structs.
      In particular, the syntax: foo[3] blah;
-  
+     The problem is, when we see: foo[, we don't know if
+     this will be: foo[3] blah, in which case foo should be a struct type,
+     or if it will be: foo[3]++, in which case foo should be a VarE. That's
+     giving a reduce/reduce conflict.
+  * New can take named fields:  new Foo(x = 3, y = 4);
+  * Support unboxed structs, with syntax |Foo| for the type.
 
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.

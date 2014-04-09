@@ -3,7 +3,7 @@
 module EvalMonad (
     EvalM, runEvalM, scope, assert, efail,
     lookupDecl, lookupVar, insertVar,
-    newStruct, lookupStruct, updateStruct,
+    newStruct, lookupStruct, updateStruct, lookupStructType,
  ) where
 
 import Smten.Prelude
@@ -93,3 +93,8 @@ updateStruct Null _ = efail
 updateStruct (Pointer ptr) v = EvalM $ \_ s ->
    return ((), s { s_heap = Map.insert ptr v (s_heap s) })
   
+lookupStructType :: Name -> EvalM [(Name, Type)]
+lookupStructType n = EvalM $ \e s ->
+  case Map.lookup n e of
+     Just (StructD _ fields) -> return (fields, s)
+

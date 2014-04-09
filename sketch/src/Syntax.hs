@@ -229,4 +229,5 @@ pad :: Type -> Value
 pad BitT = BitV False
 pad IntT = IntV 0
 pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
+pad (StructT _) = PointerV Null
 

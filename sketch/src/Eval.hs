@@ -253,8 +253,10 @@ evalE (FieldE a m) = do
     a' <- evalE a
     fieldAccess a' m
 
--- TODO: initialize fields with pad
-evalE (NewE nm) = PointerV <$> newStruct Map.empty
+evalE (NewE nm) = do
+  fields <- lookupStructType nm
+  PointerV <$> newStruct (Map.fromList [(m, pad t) | (m, t) <- fields])
+
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
