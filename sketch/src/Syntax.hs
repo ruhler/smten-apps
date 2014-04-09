@@ -6,7 +6,7 @@ module Syntax (
     Pointer(..), Expr(..), Value(..), Arg(..), Function(..),
     functionT,
     blockS, typeofV, dimension, arrayV, nullV, pad,
-    asLVal,
+    asLVal, asType,
     ) where
 
 import Smten.Prelude
@@ -186,6 +186,18 @@ asLVal (FieldE x nm) = do
     lv <- asLVal x
     return (FieldLV lv nm)
 asLVal _ = Nothing
+
+-- Types are parsed as expressions to avoid conflicts. This
+-- converts a type represented as an Expr to a Type
+asType :: Expr -> Maybe Type
+asType (VarE "bit") = Just BitT
+asType (VarE "void") = Just VoidT
+asType (VarE "int") = Just IntT
+asType (VarE nm) = Just (StructT nm)
+asType (AccessE a m) = do
+  ta <- asType a
+  return (ArrT ta m)
+asType _ = Nothing
 
 data Stmt =
      ReturnS Expr                    -- ^ return e;

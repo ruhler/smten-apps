@@ -113,23 +113,16 @@ declorpragma :: { ([Decl], String) }
  | 'pragma' 'options' string ';' { ([], $3) }
 
 decl :: { Decl }
- : type id '(' args ')' '{' stmts '}'
-    { FunD $2 (Function $1 $4 (blockS $7)) NormalF }
- | type id '(' args ')' 'implements' id '{' stmts '}'
-    { FunD $2 (Function $1 $4 (blockS $9)) (WithSpecF $7) }
- | 'generator' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function $2 $5 (blockS $8)) GeneratorF }
- | 'harness' type id '(' args ')' '{' stmts '}'
-    { FunD $3 (Function $2 $5 (blockS $8)) HarnessF }
- | type id '=' expr ';' { VarD $1 $2 $4 }
+ : expr id '(' args ')' '{' stmts '}'
+    {% asTypeM $1 $ \ty -> FunD $2 (Function ty $4 (blockS $7)) NormalF }
+ | expr id '(' args ')' 'implements' id '{' stmts '}'
+    {% asTypeM $1 $ \ty -> FunD $2 (Function ty $4 (blockS $9)) (WithSpecF $7) }
+ | 'generator' expr id '(' args ')' '{' stmts '}'
+    {% asTypeM $2 $ \ty -> FunD $3 (Function ty $5 (blockS $8)) GeneratorF }
+ | 'harness' expr id '(' args ')' '{' stmts '}'
+    {% asTypeM $2 $ \ty -> FunD $3 (Function ty $5 (blockS $8)) HarnessF }
+ | expr id '=' expr ';' {% asTypeM $1 $ \ty -> VarD ty $2 $4 }
  | 'struct' id '{' fields '}'   { StructD $2 $4 }
-
-type :: { Type }
- : 'bit' { BitT }
- | 'void' { VoidT }
- | type '[' expr ']' { ArrT $1 $3 }
- | 'int' { IntT }
- | id    { StructT $1 }
 
 args :: { [Arg] }
  : { [] }       -- Empty list is allowed
@@ -140,15 +133,15 @@ someargs :: { [Arg] }
  | someargs ',' arg { $1 ++ [$3] }
 
 arg :: { Arg }
- : type id { Arg $2 $1 False }
- | 'ref' type id { Arg $3 $2 True }
+ : expr id {% asTypeM $1 $ \ty -> Arg $2 ty False }
+ | 'ref' expr id {% asTypeM $2 $ \ty -> Arg $3 ty True }
 
 fields :: { [(Name, Type)] }
  : field        { [$1] }
  | fields field { $1 ++ [$2] }
 
 field :: { (Name, Type) }
- : type id ';'   { ($2, $1) }
+ : expr id ';'   {% asTypeM $1 $ \ty -> ($2, ty) }
 
 stmts :: { [Stmt] }
  : { [] }       -- Empty list is allowed
@@ -162,7 +155,7 @@ stmt :: { Stmt }
  : 'return' expr ';' { ReturnS $2 }
  | 'return' ';' { ReturnS (ValE VoidV) }
  | 'assert' expr ';' { AssertS $2 }
- | type vardecls ';' { DeclS $1 $2 }
+ | expr vardecls ';' {% asTypeM $1 $ \ty -> DeclS ty $2 }
  | expr '=' expr ';' {% asLValM (flip UpdateS $3) $1 }
  | 'reorder' '{' stmts '}' { ReorderS $3 }
  | '{' stmts '}' { blockS $2 }
@@ -186,7 +179,7 @@ vardecls :: { [(Name, Maybe Expr)] }
  | vardecls ',' vardecl { $1 ++ [$3] }
 
 for_init :: { Stmt }
- : type vardecls { DeclS $1 $2 }
+ : expr vardecls {% asTypeM $1 $ \ty -> DeclS ty $2 }
  | id '=' expr { UpdateS (VarLV $1) $3 }
  | id '[' expr ']' '=' expr { UpdateS (ArrLV (VarLV $1) $3) $6 }
 
@@ -196,7 +189,15 @@ for_incr :: { Stmt }
 
 expr :: { Expr }
  : '(' expr ')'     { $2 }
- | '(' type ')' expr { CastE $2 $4 }
+ | '(' expr ')' expr {%
+      -- $4 might be of the form (-e), in which case
+      -- $2 should be treated as an expression, and this overall as
+      -- a subtract expression. Otherwise $2 is a type, and this is
+      -- a cast.
+      case $4 of
+        SubE (ValE (IntV 0)) x -> return (SubE $2 x)
+        _ -> asTypeM $2 $ \ty -> CastE ty $4
+    }
  | expr '?' expr ':' expr { CondE $1 $3 $5 }
  | expr '&' expr    { AndE $1 $3 }
  | expr '<' expr    { LtE $1 $3 }
@@ -239,6 +240,11 @@ expr :: { Expr }
  | 'null' { ValE nullV }
  | '{' someexprs '}' { ArrayE $2 }
  | id '(' exprs ')' { AppE $1 $3 }
+    -- The following rules allow types to be parsed as exprs:
+ | 'bit' { VarE "bit" }
+ | 'void' { VarE "void" }
+ | 'int' { VarE "int" }
+ 
 
 exprs :: { [Expr] }
  : { [] }       -- empty list is allowed
@@ -265,6 +271,14 @@ asLValM :: (LVal -> a) -> Expr -> ParserMonad a
 asLValM f x = case asLVal x of
                 Just lv -> return $ f lv
                 Nothing -> fail $ "expected lval, but got: " ++ show x
+
+-- Note: we parse types as an expr to avoid reduce/reduce conflicts.
+-- This converts the Expr back to an Type, failing if it doesn't convert.
+asTypeM :: Expr -> (Type -> a) -> ParserMonad a
+asTypeM x f = case asType x of
+                Just ty -> return $ f ty
+                Nothing -> fail $ "expected type, but got: " ++ show x
+
 
 }
 
