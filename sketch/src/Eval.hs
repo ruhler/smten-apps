@@ -387,6 +387,7 @@ icast dst v
   | dimension dst > dimension (typeofV v) = icast dst (arrayV [v])
 icast IntT (BitV False) = IntV 0
 icast IntT (BitV True) = IntV 1
+icast (StructT {}) v@(PointerV {}) = v
 icast (ArrT BitT (ValE (IntV w))) (BitsV xs) = BitsV (take w (xs ++ replicate w False))
 icast t@(ArrT {}) (BitsV xs) = icast t (ArrayV (map BitV xs))
 icast (ArrT t (ValE (IntV w))) (ArrayV xs) = ArrayV $ take w (map (icast t) xs ++ replicate w (pad t))

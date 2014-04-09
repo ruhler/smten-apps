@@ -25,6 +25,10 @@ data Type =
   | UnknownT          -- type is not known
     deriving (Show)
 
+-- Note: The type (StructT "") is used to represent a type
+-- which is known to be a struct type, but which specific struct type
+-- is unknown.
+
 instance Eq Type where
     (==) VoidT VoidT = True
     (==) BitT BitT = True
@@ -110,7 +114,7 @@ typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
 typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
-typeofV (PointerV {}) = UnknownT
+typeofV (PointerV {}) = StructT ""
 
 -- Return the dimension of a type.
 -- - void, bit, int, and function types have dimension 1.

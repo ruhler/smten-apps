@@ -430,6 +430,8 @@ unify UnknownT b = b
 unify a UnknownT = a
 unify IntT BitT = IntT
 unify BitT IntT = IntT
+unify (StructT "") (StructT nm) = StructT nm
+unify (StructT nm) (StructT "") = StructT nm
 unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
   = ArrT (unify a b) (ValE (IntV (max wa wb)))
 unify a b
@@ -444,6 +446,7 @@ matches a b | a == b = True
 matches UnknownT _ = True
 matches (FunT a as) (FunT b bs) = and (zipWith matches (a:as) (b:bs))
 matches (ArrT a (ValE wa)) (ArrT b (ValE wb)) = wa == wb && a `matches` b
+matches (StructT "") (StructT {}) = True
 matches _ _ = False
 
 -- Comparison operators: <, >, <=, >=
@@ -622,5 +625,6 @@ subtype a b
 subtype BitT IntT = True
 subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
   | ta `subtype` tb && wa <= wb = True
+  | ta `matches` tb && wa < wb = True
 subtype _ _ = False
 
