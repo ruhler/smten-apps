@@ -88,7 +88,7 @@ instance Ppr Expr where
    pretty (NewE nm fields) =
     let pfields [] = ""
         pfields [(n, v)] = pretty n ++ " = " ++ pretty v
-        pfields ((n,v):xs) = pretty n ++ " = " ++ pretty v ++ pfields xs
+        pfields ((n,v):xs) = pretty n ++ " = " ++ pretty v ++ "," ++ pfields xs
     in "new " ++ nm ++ "(" ++ pfields fields ++ ")"
    pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
    pretty (ICastE _ e) = pretty e

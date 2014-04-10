@@ -178,6 +178,17 @@ vardecls :: { [(Name, Maybe Expr)] }
  : vardecl  { [$1] }
  | vardecls ',' vardecl { $1 ++ [$3] }
 
+initentry :: { (Name, Expr) }
+ : id '=' expr  { ($1, $3 ) }
+
+someinitentries :: { [(Name, Expr)] }
+ : initentry { [$1] }
+ | someinitentries ',' initentry { $1 ++ [$3] }
+
+initentries :: { [(Name, Expr)] }
+ :  { [] }
+ | someinitentries { $1 }
+
 for_init :: { Stmt }
  : expr vardecls {% asTypeM $1 $ \ty -> DeclS ty $2 }
  | id '=' expr { UpdateS (VarLV $1) $3 }
@@ -236,7 +247,7 @@ expr :: { Expr }
  | expr '[' expr ']' { AccessE $1 $3 }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
  | expr '.' id    { FieldE $1 $3 }
- | 'new' id '(' ')' { NewE $2 [] }
+ | 'new' id '(' initentries ')' { NewE $2 $4 }
  | 'null' { ValE nullV }
  | '{' someexprs '}' { ArrayE $2 }
  | id '(' exprs ')' { AppE $1 $3 }

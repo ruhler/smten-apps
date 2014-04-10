@@ -7,8 +7,6 @@ POOR_TYPE_BIT_LITERAL
   emulate the bug, or try to have them fix the original sketch implementation?
 
 STRUCTS
-  * New can take named fields:  new Foo(x = 3, y = 4);
-     See test b392
   * Support unboxed structs, with syntax |Foo| for the type.
 
 UNINTERPRETED_FUNCTION
