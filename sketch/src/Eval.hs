@@ -253,9 +253,16 @@ evalE (FieldE a m) = do
     a' <- evalE a
     fieldAccess a' m
 
-evalE (NewE nm) = do
+evalE (NewE nm init) = do
   fields <- lookupStructType nm
-  PointerV <$> newStruct (Map.fromList [(m, pad t) | (m, t) <- fields])
+  let mkInit :: (Name, Type) -> EvalM (Name, Value)
+      mkInit (n, ty)
+        | Just e <- lookup n init = do
+            v <- evalE e
+            return (n, v)
+        | otherwise = return (n, pad ty)
+  initialized <- mapM mkInit fields
+  PointerV <$> newStruct (Map.fromList initialized)
 
 evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e

@@ -159,13 +159,13 @@ data Expr =
  | PreDecrE LVal         -- ^ --x
  | PlusEqE LVal Expr     -- ^ x += e
  | ArrayE [Expr]         -- ^ {a, b, ... }
- | HoleE Type (Maybe Int)   -- ^ ??(n)      n is the number of bits to use
- | BitChooseE Type Expr Expr  -- ^ a {|} b
+ | HoleE Type (Maybe Int)       -- ^ ??(n)      n is the number of bits to use
+ | BitChooseE Type Expr Expr    -- ^ a {|} b
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int
- | BulkAccessE Expr Expr Expr -- ^ foo[lo::N]
+ | BulkAccessE Expr Expr Expr   -- ^ foo[lo::N]
  | FieldE Expr Name      -- ^ foo.bar
- | NewE Name             -- ^ new Foo()
+ | NewE Name [(Name, Expr)]     -- ^ new Foo(x=..., y=..., ...)
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)

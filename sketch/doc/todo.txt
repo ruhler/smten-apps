@@ -8,6 +8,7 @@ POOR_TYPE_BIT_LITERAL
 
 STRUCTS
   * New can take named fields:  new Foo(x = 3, y = 4);
+     See test b392
   * Support unboxed structs, with syntax |Foo| for the type.
 
 UNINTERPRETED_FUNCTION
@@ -131,6 +132,7 @@ tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb181.sk: arrsub takes all time?
 tests/broken/slow/miniTestb182.sk: takes many iterations
 tests/broken/slow/miniTestb189.sk: (==) takes all time?
+tests/broken/slow/miniTestb216.sk: slow: dominated by updateLV?
 tests/broken/slow/miniTestb218.sk: slow: TODO: look into why
 tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
 tests/broken/slow/miniTestb276.sk: slow: why?
@@ -142,6 +144,9 @@ tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 
 Clean::
+* Static phase does a lot of duplicated type evaluation.
+  Perhaps do type evaluation in a dependency order kind of way using a state
+  monad?
 * TODO's inlined
 
 

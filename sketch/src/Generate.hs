@@ -175,7 +175,11 @@ genE (BulkAccessE a b c) = liftM3 BulkAccessE (genE a) (genE b) (genE c)
 genE (FieldE x nm) = do
    x' <- genE x
    return (FieldE x' nm)
-genE x@(NewE {}) = return x
+genE x@(NewE nm fields) = do
+  let genF (n, e) = do
+         e' <- genE e
+         return (n, e')
+  NewE nm <$> mapM genF fields
 genE (CastE t e) = CastE t <$> genE e
 genE (ICastE d e) = ICastE d <$> genE e
 genE (AppE fnm xs) = do

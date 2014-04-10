@@ -309,20 +309,29 @@ staticE (FieldE x m) = do
           | otherwise -> error $ nm ++ " does not name a struct type"
     _ -> error $ "expected struct, but got something of type: " ++ show st
 
-staticE e@(NewE nm) = do
+staticE (NewE nm initlist) = do
   -- Verify this has the type we expect
   oty <- asks sr_oty
   if oty == StructT nm
     then return ()
     else error $ "expected type " ++ show oty ++ " but found type: " ++ show (StructT nm)
 
-  -- Verify the struct type has been declared
+  -- Verify the struct type has been declared,
+  -- and get the field types
   env <- asks sr_env
-  case Map.lookup nm env of
-    Just (StructD {}) -> return ()
-    _ -> error $ nm ++ " does not name a struct type"
+  fieldtypes <- case Map.lookup nm env of
+                    Just (StructD _ fields) -> return fields
+                    _ -> error $ nm ++ " does not name a struct type"
 
-  return e
+  -- Statically evaluate each field in the init list
+  let staticF (n, e) =
+        case lookup n fieldtypes of
+          Just ty -> do
+            e' <- withty ty $ staticM e
+            return (n, e')
+          Nothing -> error $ nm ++ " does not contain a member named " ++ show n
+  initlist' <- mapM staticF initlist
+  return (NewE nm initlist')
 
 staticE (CastE t e) = do
   oty <- asks sr_oty
@@ -608,7 +617,7 @@ typeof (FieldE x m) = do
         Just (StructD _ fields) | Just t <- lookup m fields -> return t
         _ -> return UnknownT
     _ -> return UnknownT
-typeof (NewE nm) = return (StructT nm)
+typeof (NewE nm _) = return (StructT nm)
 typeof (CastE t e) = staticM t
 typeof (AppE nm xs) = do
     env <- asks sr_env
