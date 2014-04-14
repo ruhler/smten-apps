@@ -27,9 +27,11 @@ STATIC_EVAL::
   Evaluate local variables statically if possible.
   Because we might have:
     int x = foo(K);
-    bit bar[x] = ...
+    bit[x] bar = ...
   So we have to inline x to know the type of bar.
   Question: don't we already have some infrastructure for this?
+  Question: perhaps an alternate approach would be to allow dynamic
+    array lengths in general?
   Operations to support at least:
     * multiplication, addition
     * left shift
@@ -78,10 +80,16 @@ tests/broken/miniTestb196.sk: support h_assert statement.
 tests/broken/miniTestb208.sk,
 tests/broken/miniTest213ArrExpScaling.sk,
 tests/broken/miniTest215Choice.sk: C Preprocessor?
-
-tests/broken/miniTestb215.sk: TYPE ERROR - bit supports + and -?
-tests/broken/miniTestb540.sk: Missed incorrect TYPE ERROR - bit supports + and -?
 tests/broken/miniTestb225.sk: C Preprocessor?
+
+tests/broken/bitarith.smten.sk, 
+tests/broken/miniTestb215.sk,
+tests/broken/miniTestb540.sk: bit supports + and -?
+    The problem with these are, it's not clear what 1 + 1 is, or
+    0 - 1 for bit. Then it's not clear that (-1) should be treated
+    as an int, rather than a cast from (0 - 1) to an int, which would
+    give the wrong result.    
+
 tests/broken/miniTestb232.sk: Uninitialized variable?
 
 tests/broken/miniTestb338.sk,

@@ -1,0 +1,8 @@
+bit foo(bit x) implements fooSK{
+    return x - 1 + ??;
+}
+
+bit fooSK(bit x){
+	return x;
+}
+

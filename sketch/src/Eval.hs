@@ -25,7 +25,7 @@ evalP p i = all (evalD p i) (decls p)
 -- Evaluate a type.
 -- It should not fail.
 evalT :: Program -> Type -> Type
-evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromJust $ runEvalM env (evalE e))
+evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env (evalE e))
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env t = t
 
@@ -58,8 +58,8 @@ apply f xs = do
     let updref :: Arg -> Expr -> EvalM ()
         updref (Arg _ _ False) _ = return ()
         updref (Arg nm _ True) x = do
-           let lv = fromJust $ asLVal x
-               v = fromJust $ Map.lookup nm args'
+           let lv = fromMaybe (error "updref arg not an lval") $ asLVal x
+               v = fromMaybe (error "updref ref arg not in scope") $ Map.lookup nm args'
            updateLV lv v
     zipWithM_ updref (f_args f) xs
     return v
@@ -315,10 +315,10 @@ fieldAccess x m = do
     case x of
       PointerV ptr -> do
         fields <- lookupStruct ptr
-        return . fromJust $ Map.lookup m fields
+        return . fromMaybe (error "fieldAccess: no such member") $ Map.lookup m fields
     
 lookupLV :: LVal -> EvalM Value
-lookupLV (VarLV nm) = fromJust <$> lookupVar nm
+lookupLV (VarLV nm) = fromMaybe (error "lookupLV: no such var") <$> lookupVar nm
 lookupLV (ArrLV lv i) = do
     arr <- lookupLV lv
     arrayAccess arr i

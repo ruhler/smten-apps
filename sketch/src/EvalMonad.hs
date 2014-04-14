@@ -86,7 +86,7 @@ newStruct v = EvalM $ \_ s ->
 lookupStruct :: Pointer -> EvalM (Map.Map Name Value)
 lookupStruct Null = efail
 lookupStruct (Pointer x) = EvalM $ \_ s ->
-   return (fromJust $ Map.lookup x (s_heap s), s)
+   return (fromMaybe (error "lookupStruct: invalid pointer") $ Map.lookup x (s_heap s), s)
 
 updateStruct :: Pointer -> Map.Map Name Value -> EvalM ()
 updateStruct Null _ = efail
