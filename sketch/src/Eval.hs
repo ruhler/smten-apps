@@ -25,7 +25,7 @@ evalP p i = all (evalD p i) (decls p)
 -- Evaluate a type.
 -- It should not fail.
 evalT :: Program -> Type -> Type
-evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env (evalE e))
+evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env Map.empty (evalE e))
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env t = t
 
@@ -37,19 +37,24 @@ evalD env i d@(FunD {}) =
     GeneratorF -> True
     HarnessF
       | Just args <- map ValE <$> Map.lookup (declN d) i ->
-          isJust (runEvalM env (apply (fd_val d) args))
+          isJust (runEvalM env Map.empty (apply' (fd_val d) args))
     WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
-      , Just args <- map ValE <$> Map.lookup (declN d) i ->
-          let want = runEvalM env $ apply (fd_val sd) args
-              got = runEvalM env $ apply (fd_val d) args
+      , Just inputs <- Map.lookup (declN d) i ->
+          let ivars = ["__i" ++ show n | n <- [1..length inputs]]
+              vars = Map.fromList $ zip ivars inputs
+              args = map VarE ivars
+
+              want = runEvalM env vars $ apply' (fd_val sd) args
+              got = runEvalM env vars $ apply' (fd_val d) args
           in want == got
 evalD env i (StructD {}) = True
 
 -- Apply a function to the given arguments.
--- Any arguments passed by reference should be value LVals.
-apply :: Function -> [Expr] -> EvalM Value
-apply f xs = do
+-- Returns the resulting value, and any updated values for reference
+-- arguments.
+apply' :: Function -> [Expr] -> EvalM (Value, [Maybe Value])
+apply' f xs = do
     xs' <- mapM evalE xs
     let argnms = [nm | Arg nm _ _ <- f_args f]
         args = Map.fromList $ zip argnms xs'
@@ -58,19 +63,25 @@ apply f xs = do
         getref (Arg _ _ False) = return Nothing
         getref (Arg nm _ True) = lookupVar nm
 
-        updref :: Expr -> Maybe Value -> EvalM ()
+    scoped args $ do
+       res <- returned <$> evalS (f_body f)
+       refs <- mapM getref (f_args f)
+       return (res, refs)
+
+-- Apply a function to the given arguments.
+-- Returns the resulting value, and commits updates to reference arguments to
+-- the local scope.
+-- Any arguments passed by reference should be value LVals.
+apply :: Function -> [Expr] -> EvalM Value
+apply f xs = do
+    let updref :: Expr -> Maybe Value -> EvalM ()
         updref _ Nothing = return ()
         updref x (Just v) = do
            let lv = fromMaybe (error "updref arg not an lval") $ asLVal x
            updateLV lv v
-
-    (v, refs) <- scoped args $ do
-        res <- returned <$> evalS (f_body f)
-        refs <- mapM getref (f_args f)
-        return (res, refs)
-
+    (res, refs) <- apply' f xs
     zipWithM_ updref xs refs
-    return v
+    return res
 
 data StmtResult = OK | RET Value
 

@@ -38,7 +38,7 @@ main = do
                  insertVar "c" (BitV False)
                  insertVar "d" (BitV False)
                  lookupVar "d"
-         res = runEvalM env run
+         res = runEvalM env Map.empty run
      Smten.Symbolic.assert (Just (Just (BitV True)) == res) 
   putStrLn $ show r
 

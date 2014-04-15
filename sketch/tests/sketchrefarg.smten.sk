@@ -1,0 +1,7 @@
+void foo(ref int x){    
+    x = 3;
+}
+
+void moo(ref int x) implements foo{
+    x = ??;
+}

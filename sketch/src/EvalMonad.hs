@@ -45,8 +45,8 @@ instance Monad EvalM where
       (v, s') <- runEvalM_ x e s
       runEvalM_ (f v) e s'
 
-runEvalM :: Program -> EvalM a -> Maybe a
-runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
+runEvalM :: Program -> LocalVars -> EvalM a -> Maybe a
+runEvalM env vars q = fst <$> runEvalM_ q env (State vars Map.empty)
 
 -- Evaluate the monad in the given scope.
 -- Outer scopes are not visible.

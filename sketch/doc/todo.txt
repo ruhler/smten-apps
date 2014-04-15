@@ -106,16 +106,6 @@ tests/broken/miniTestb399.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb366.sk:
-tests/broken/miniTestb532.sk:
-  sketch takes reference parameter - but it's given no arguments to update?
-  In this case, the arguments should be treated as outputs which must match
-  the spec.
-  To fix this:
-    * Define free inputs as a variable scope.
-    * Pass LVars as arguments to the top level function.
-    * Assert equality on the resulting scopes as well.
-
 tests/broken/miniTestb442.sk: Global hole?
 tests/broken/miniTestb456.sk: Hole in type?
 tests/broken/miniTestb492.sk: Global variable without final value given.
@@ -164,6 +154,7 @@ tests/broken/slow/miniTestb278.sk: slow: why?
 tests/broken/slow/miniTestb279.sk: slow: why?
 tests/broken/slow/miniTestb280.sk: slow: why?
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
+tests/broken/slow/miniTestb366.sk: blowup of int possibilities
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 
 Clean::
