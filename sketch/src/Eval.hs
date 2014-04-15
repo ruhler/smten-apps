@@ -41,14 +41,13 @@ evalD env i d@(FunD {}) =
     WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just args <- map ValE <$> Map.lookup (declN d) i ->
-          let run = do
-                want <- apply (fd_val sd) args
-                got <- apply (fd_val d) args
-                assert (want == got)
-          in isJust (runEvalM env run)
+          let want = runEvalM env $ apply (fd_val sd) args
+              got = runEvalM env $ apply (fd_val d) args
+          in want == got
 evalD env i (StructD {}) = True
 
 -- Apply a function to the given arguments.
+-- Any arguments passed by reference should be value LVals.
 apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
