@@ -105,8 +105,6 @@ tests/broken/miniTestb399.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb513.sk: BUGGY: bug in scalar/array promotion?
-
 tests/broken/miniTestb366.sk:
 tests/broken/miniTestb532.sk:
   sketch takes reference parameter - but it's given no arguments to update?
