@@ -443,9 +443,10 @@ unify (StructT "") (StructT nm) = StructT nm
 unify (StructT nm) (StructT "") = StructT nm
 unify (ArrT a (ValE (IntV wa))) (ArrT b (ValE (IntV wb)))
   = ArrT (unify a b) (ValE (IntV (max wa wb)))
-unify a b
-  | dimension a < dimension b = unify (ArrT a (ValE (IntV 1))) b
-  | dimension a > dimension b = unify a (ArrT b (ValE (IntV 1)))
+unify a@(ArrT {}) b@(ArrT {})
+  = error $ "unable to unify array types: " ++ show (a, b)
+unify (ArrT a wa) b = unify (ArrT a wa) (ArrT b (ValE (IntV 1)))
+unify a (ArrT b wb) = unify (ArrT b (ValE (IntV 1))) (ArrT b wb)
 unify a b = error $ "unable to unify types: " ++ show (a, b)
 
 -- Given types A and B,
@@ -630,10 +631,11 @@ typeof (AppE nm xs) = do
 subtype :: Type -> Type -> Bool
 subtype a b
   | a == b = True
-  | dimension a < dimension b = subtype (ArrT a (ValE (IntV 1))) b
 subtype BitT IntT = True
 subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
   | ta `subtype` tb && wa <= wb = True
   | ta `matches` tb && wa < wb = True
+subtype (ArrT a wa) (ArrT b wb) = error "subtype: unknown array widths"
+subtype a b@(ArrT {}) = subtype (ArrT a (ValE (IntV 1))) b
 subtype _ _ = False
 

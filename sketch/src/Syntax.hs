@@ -5,7 +5,7 @@ module Syntax (
     LVal(..), Stmt(..),
     Pointer(..), Expr(..), Value(..), Arg(..), Function(..),
     functionT,
-    blockS, typeofV, dimension, arrayV, nullV, pad,
+    blockS, typeofV, arrayV, nullV, pad,
     asLVal, asType,
     ) where
 
@@ -115,21 +115,6 @@ typeofV (IntV w) = IntT
 typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
 typeofV (PointerV {}) = StructT ""
-
--- Return the dimension of a type.
--- - void, bit, int, and function types have dimension 1.
--- - array types have dimension greater than 1
--- - The user should ensure the type passed to dimension is fully known. 
---   That is, it should contain no UnknownT
-dimension :: Type -> Int
-dimension VoidT = 1
-dimension BitT = 1
-dimension (ArrT t _) = 1 + dimension t
-dimension IntT = 1
-dimension (FunT {}) = 1
-dimension (StructT {}) = 1
-dimension UnknownT = error "dimension: UnknownT"
-
 
 data Expr = 
    ValE Value
