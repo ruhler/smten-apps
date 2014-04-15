@@ -175,7 +175,6 @@ Clean::
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
-* Some precedences are wrong.
 
 Refactor Ideas::
 * Do more stuff in Static pass

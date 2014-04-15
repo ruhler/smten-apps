@@ -1,7 +1,7 @@
 
 -- A monad used in evaluation.
 module EvalMonad (
-    EvalM, runEvalM, scope, assert, efail,
+    EvalM, runEvalM, scoped, assert, efail,
     lookupDecl, lookupVar, insertVar,
     newStruct, lookupStruct, updateStruct, lookupStructType,
  ) where
@@ -50,12 +50,10 @@ runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
 
 -- Evaluate the monad in the given scope.
 -- Outer scopes are not visible.
--- Returns the result of computation, and the local scope after computation
--- completes
-scope :: LocalVars -> EvalM a -> EvalM (a, LocalVars)
-scope vars x = EvalM $ \e s -> do
-  (r, State vs' h') <- runEvalM_ x e (s { s_vars = vars })
-  return ((r, vs'), s { s_heap = h' })
+scoped :: LocalVars -> EvalM a -> EvalM a
+scoped vars x = EvalM $ \e s -> do
+  (r, State _ h') <- runEvalM_ x e (s { s_vars = vars })
+  return (r, s { s_heap = h' })
 
 -- Evaluation which fails.
 efail :: EvalM a

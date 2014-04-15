@@ -52,16 +52,25 @@ evalD env i (StructD {}) = True
 apply :: Function -> [Expr] -> EvalM Value
 apply f xs = do
     xs' <- mapM evalE xs
-    let args = Map.fromList (zip [nm | Arg nm _ _ <- f_args f] xs')
-    (v, args') <- scope args $ returned <$> evalS (f_body f)
+    let argnms = [nm | Arg nm _ _ <- f_args f]
+        args = Map.fromList $ zip argnms xs'
 
-    let updref :: Arg -> Expr -> EvalM ()
-        updref (Arg _ _ False) _ = return ()
-        updref (Arg nm _ True) x = do
+        getref :: Arg -> EvalM (Maybe Value)
+        getref (Arg _ _ False) = return Nothing
+        getref (Arg nm _ True) = lookupVar nm
+
+        updref :: Expr -> Maybe Value -> EvalM ()
+        updref _ Nothing = return ()
+        updref x (Just v) = do
            let lv = fromMaybe (error "updref arg not an lval") $ asLVal x
-               v = fromMaybe (error "updref ref arg not in scope") $ Map.lookup nm args'
            updateLV lv v
-    zipWithM_ updref (f_args f) xs
+
+    (v, refs) <- scoped args $ do
+        res <- returned <$> evalS (f_body f)
+        refs <- mapM getref (f_args f)
+        return (res, refs)
+
+    zipWithM_ updref xs refs
     return v
 
 data StmtResult = OK | RET Value
