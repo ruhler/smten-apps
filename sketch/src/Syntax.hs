@@ -150,6 +150,7 @@ data Expr =
  | PlusEqE LVal Expr     -- ^ x += e
  | ArrayE [Expr]         -- ^ {a, b, ... }
  | HoleE Type (Maybe Int)       -- ^ ??(n)      n is the number of bits to use
+ | ChooseE Expr Expr     -- ^ {| a | b |}
  | BitChooseE Type Expr Expr    -- ^ a {|} b
  | VarE Name             -- ^ foo
  | AccessE Expr Expr     -- ^ foo[i]    Note: i has type Int

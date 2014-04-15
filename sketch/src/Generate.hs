@@ -158,6 +158,10 @@ genE (HoleE ty mbnd) = do
   opts <- asks gr_opts
   let bnd = fromMaybe (bnd_cbits opts) mbnd
   ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
+genE (ChooseE a b) = do
+  a' <- genE a
+  b' <- genE b
+  liftSymbolic $ mplus (return a') (return b')
 genE (BitChooseE ty a b) = do
   -- TODO: use the bit width of a and b, not 32.
   x <- ValE <$> (liftSymbolic $ mkFreeArg 32 ty)

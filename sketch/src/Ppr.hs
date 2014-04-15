@@ -106,6 +106,7 @@ pprE p e =
     ArrayE xs -> "{" ++ commas (map pretty xs) ++ "}"
     HoleE _ Nothing -> "??"
     HoleE _ (Just n) -> "??(" ++ show n ++ ")"
+    ChooseE a b -> error $ "pprE: TODO: handle chooseE"
     BitChooseE _ a b -> left p "{|}" a b
     VarE nm -> nm
     AccessE a b -> pretty a ++ "[" ++ pretty b ++ "]"
