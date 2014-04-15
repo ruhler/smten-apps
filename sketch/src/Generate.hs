@@ -19,7 +19,7 @@ import Syntax
 generate :: Options -> Program -> Symbolic Program
 generate opts p = do
   let readed = runReaderT (mapM genD (decls p)) (GR opts p Map.empty)
-  (ds, s) <- runStateT readed (TS [])
+  (ds, s) <- runStateT readed (TS [] 0)
   return $ program (ts_decls s ++ ds)
 
 type TypeEnv = Map.Map Name Type
@@ -36,7 +36,8 @@ data GR = GR {
 
 data TS = TS {
     -- | Emmitted (generated) declarations
-    ts_decls :: [Decl]
+    ts_decls :: [Decl],
+    ts_fresh :: Int
 }
 
 type GM = ReaderT GR (StateT TS Symbolic)
@@ -49,6 +50,14 @@ emit d = do
     let nm = declN d ++ "_" ++ show (length $ ts_decls s)
     put $ s { ts_decls = d { declN = nm } : ts_decls s }
     return nm
+
+-- Return a fresh variable name.
+fresh :: GM Name
+fresh = do
+  s <- get
+  let nm = "__x" ++ show (ts_fresh s)
+  put $ s { ts_fresh = ts_fresh s + 1 }
+  return nm
 
 liftSymbolic :: Symbolic a -> GM a
 liftSymbolic = lift . lift
@@ -90,24 +99,28 @@ genS (ReorderS xs) = do
   let stmts = map (\(x, s) -> if x then s else BlockS []) (concat matrix)
   return $ blockS stmts
 
-genS (RepeatS en s) = do
-  -- TODO: evaluate n statically as much as possible here
-  -- Perhaps a 'simplify' operation on expressions would be useful
-  --
-  -- TODO: what if the statement changes the condition? How do we keep track
-  -- of the original condition?
+-- Note: The body of the expression is repeated before generation occurs in
+-- the body.
+-- TODO: evaluate n statically as much as possible here.
+genS (RepeatS (ValE (IntV v)) s) = genS $ blockS (replicate v s) 
+genS (RepeatS e s) = do
+  -- We don't know the repeat, so repeat it at most bnd_unroll_amnt times.
+  -- We form the following program:
+  --  int __x = e;
+  --  if (__x >= 0) s
+  --  if (__x >= 1) s
+  --  ...
+  --  if (__x >= 8) s
   opts <- asks gr_opts
-  let count = case en of
-                ValE (IntV v) -> v
-                _ -> bnd_unroll_amnt opts
-  en' <- genE en
-  let unroll n
-        | n >= count = blockS []
+  x <- fresh
+  let bnd = bnd_unroll_amnt opts
+      unroll n
+        | n >= bnd = blockS []
         | otherwise =
             let ifthen = blockS [s, unroll (n+1)]
                 ifelse = (blockS [])
-            in IfS (GtE en' (ValE (IntV n))) ifthen ifelse
-  genS (unroll 0)
+            in IfS (GtE (VarE x) (ValE (IntV n))) ifthen ifelse
+  genS $ blockS [DeclS IntT [(x, Just e)], unroll 0]
 
 genS (WhileS c s) = liftM2 WhileS (genE c) (genS s)
 genS (ForS init cond incr body) =

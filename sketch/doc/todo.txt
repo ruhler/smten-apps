@@ -1,19 +1,11 @@
 
 Features::
-POOR_TYPE_BIT_LITERAL
-  * bit N = 5;
-  Works at global scope after inlining, but not locally.
-  I think this is a bug in the original sketch implementation. Should I
-  emulate the bug, or try to have them fix the original sketch implementation?
-
 STRUCTS
   * Support unboxed structs, with syntax |Foo| for the type.
 
 REGEX
   * Support regex holes
     see doc/regex.txt
-
-       
 
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
@@ -74,23 +66,17 @@ PERF3
 
 Features needed, by test case::
 
+Sketch Inconsistencies
+----------------------
 tests/broken/expectfail/uninitint.smten.sk:
   Sketch is not consistent about whether ints are initialized or not.
   I assume they are initialized.
 
-tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
-tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
-tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
-tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
-tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
-tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
-tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
-tests/broken/miniTestb196.sk: support h_assert statement.
-
-tests/broken/miniTestb208.sk,
-tests/broken/miniTest213ArrExpScaling.sk,
-tests/broken/miniTest215Choice.sk: C Preprocessor?
-tests/broken/miniTestb225.sk: C Preprocessor?
+tests/broken/miniTest78.sk: poor type bit literal
+  Sketch is not consistent about whether you can have:
+     bit N = 5;
+  In some contexts it says it's poorly typed, in other contexts it accepts
+  it just fine. I think it's poorly typed.
 
 tests/broken/bitarith.smten.sk, 
 tests/broken/miniTestb215.sk,
@@ -100,7 +86,18 @@ tests/broken/miniTestb540.sk: bit supports + and -?
     as an int, rather than a cast from (0 - 1) to an int, which would
     give the wrong result.    
 
-tests/broken/miniTestb232.sk: Uninitialized variable?
+Features Needed
+---------------
+tests/broken/miniTestb196.sk: support h_assert statement.
+  After parsing of string literals is supported, probably just ignore the
+  string argument and parse this as a normal assert.
+
+tests/broken/miniTestb208.sk,
+tests/broken/miniTest213ArrExpScaling.sk,
+tests/broken/miniTest215Choice.sk,
+tests/broken/miniTestb225.sk: C Preprocessor?
+  Sketch appears to perform C preprocessing on source files.
+  Can I do that too?
 
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
@@ -137,6 +134,14 @@ tests/broken/package/*.sk: package keyword
 tests/broken/insertinto/*.sk: INSERT_INTO
 tests/broken/stencil/*.sk: stencil keyword
 tests/broken/unknownN/*.sk: Global N not defined?
+
+Performance Bugs
+----------------
+tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
+tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
+tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
+tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
+tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 
 tests/broken/slow/perf3.smten.sk: PERF3
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
