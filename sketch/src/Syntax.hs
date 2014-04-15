@@ -5,7 +5,7 @@ module Syntax (
     LVal(..), Stmt(..),
     Pointer(..), Value(..), BinOp(..), Expr(..), Arg(..), Function(..),
     functionT,
-    blockS, typeofV, arrayV, nullV, pad,
+    blockS, typeofV, arrayV, nullV, pad, binaryChoiceE,
     asLVal, asType,
     ) where
 
@@ -237,4 +237,9 @@ pad BitT = BitV False
 pad IntT = IntV 0
 pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
 pad (StructT _) = PointerV Null
+
+binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr
+binaryChoiceE [] a b = error "binaryChoiceE: no operators given"
+binaryChoiceE [x] a b = BinaryE x a b
+binaryChoiceE (x:xs) a b = ChoiceE (BinaryE x a b) (binaryChoiceE xs a b)
 

@@ -281,6 +281,7 @@ regexpr :: { Expr }
         BinaryE SubOp (ValE (IntV 0)) x -> return (BinaryE SubOp $2 x)
         _ -> asTypeM $2 $ \ty -> CastE ty $4
     }
+ | regexpr '(' regbinops ')' regexpr { binaryChoiceE $3 $1 $5 }
  | regexpr '&' regexpr    { BinaryE AndOp $1 $3 }
  | regexpr '<' regexpr    { BinaryE LtOp $1 $3 }
  | regexpr '>' regexpr    { BinaryE GtOp $1 $3 }
@@ -327,6 +328,30 @@ regexpr :: { Expr }
  | 'void' { VarE "void" }
  | 'int' { VarE "int" }
  
+binop :: { BinOp }
+ : '&' { AndOp }
+ | '&&' { LAndOp }
+ | '+' { AddOp }
+ | '-' { SubOp }
+ | '<' { LtOp }
+ | '>' { GtOp }
+ | '<=' { LeOp }
+ | '>=' { GeOp }
+ | '==' { EqOp }
+ | '!=' { NeqOp }
+ | '||' { LOrOp }
+ | '^' { XorOp }
+ | '*' { MulOp }
+ | '%' { ModOp }
+ | '/' { DivOp }
+ | '>>' { ShrOp }
+ | '<<' { ShlOp }
+ 
+
+regbinops :: { [BinOp] }
+ : binop { [$1] }
+ | regbinops '|' binop { $1 ++ [$3] }
+
 
 regexprs :: { [Expr] }
  : { [] }       -- empty list is allowed

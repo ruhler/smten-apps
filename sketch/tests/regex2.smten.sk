@@ -1,0 +1,9 @@
+
+bit sketch(int in) implements spec {
+    return {| 2 (> | <) in |};
+}
+   
+bit spec(int in) {
+    return 2 > in;
+}
+
