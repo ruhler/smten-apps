@@ -105,6 +105,12 @@ tests/broken/miniTestb513.sk: BUGGY: bug in scalar/array promotion?
 tests/broken/miniTestb366.sk:
 tests/broken/miniTestb532.sk:
   sketch takes reference parameter - but it's given no arguments to update?
+  In this case, the arguments should be treated as outputs which must match
+  the spec.
+  To fix this:
+    * Define free inputs as a variable scope.
+    * Pass LVars as arguments to the top level function.
+    * Assert equality on the resulting scopes as well.
 
 tests/broken/miniTestb442.sk: Global hole?
 tests/broken/miniTestb456.sk: Hole in type?

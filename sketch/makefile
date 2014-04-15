@@ -4,6 +4,10 @@ all:
 	tclsh utils/make.tcl
 	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices2"
 
+unit:
+	tclsh utils/makeunit.tcl
+	./build/release/unit
+
 perfer:
 	tclsh utils/makeperf.tcl
 	./build/profile/perf +RTS -p
