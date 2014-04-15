@@ -247,7 +247,7 @@ staticE (NotE a) = do
 staticE (HoleE _ mbnd) = do
   oty <- asks sr_oty
   return $ HoleE oty mbnd
-staticE (ChooseE a b) = liftM2 ChooseE (staticE a) (staticE b)
+staticE (ChoiceE a b) = liftM2 ChoiceE (staticE a) (staticE b)
 staticE (ValE v) = ValE <$> staticM v
 staticE x@(VarE nm) = do
   oty <- asks sr_oty
@@ -593,7 +593,7 @@ typeof (PreDecrE a) = snd <$> staticLV a
 typeof (PlusEqE a b) = liftM2 unify (snd <$> staticLV a) (typeof b)
 typeof (NotE a) = typeof a
 typeof (HoleE ty _) = return ty
-typeof (ChooseE a b) = liftM2 unify (typeof a) (typeof b)
+typeof (ChoiceE a b) = liftM2 unify (typeof a) (typeof b)
 typeof (BitChooseE _ a b) = liftM2 unify (typeof a) (typeof b)
 typeof (VarE nm) = do
     env <- asks sr_env

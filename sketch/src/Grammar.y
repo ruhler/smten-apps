@@ -28,6 +28,8 @@ import Syntax
     ']'     { TkCloseBracket }
     '{'     { TkOpenBrace }
     '}'     { TkCloseBrace }
+    '{|'     { TkOpenBraceBar }
+    '|}'     { TkCloseBraceBar }
     '|'     { TkBar }
     '&'     { TkAmp }
     '<'     { TkLT }
@@ -242,6 +244,7 @@ expr :: { Expr }
  | '??' { HoleE UnknownT Nothing }
  | '??' '(' integer ')' { HoleE UnknownT (Just $3) }
  | '{' '*' '}' { HoleE UnknownT Nothing }
+ | '{|' regexpr '|}' { $2 }
  | integer { ValE (IntV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
@@ -265,6 +268,84 @@ someexprs :: { [Expr] }
  : expr { [$1] }
  | someexprs ',' expr { $1 ++ [$3] }
 
+-- An expression inside {| ... |} block
+-- '|' is interpreted as choice, not bitwise OR.
+regexpr :: { Expr }
+ : '(' regexpr ')'     { $2 }
+ | '(' regexpr ')' regexpr {%
+      -- $4 might be of the form (-e), in which case
+      -- $2 should be treated as an expression, and this overall as
+      -- a subtract expression. Otherwise $2 is a type, and this is
+      -- a cast.
+      case $4 of
+        BinaryE SubOp (ValE (IntV 0)) x -> return (BinaryE SubOp $2 x)
+        _ -> asTypeM $2 $ \ty -> CastE ty $4
+    }
+ | regexpr '&' regexpr    { BinaryE AndOp $1 $3 }
+ | regexpr '<' regexpr    { BinaryE LtOp $1 $3 }
+ | regexpr '>' regexpr    { BinaryE GtOp $1 $3 }
+ | regexpr '<=' regexpr   { BinaryE LeOp $1 $3 }
+ | regexpr '>=' regexpr   { BinaryE GeOp $1 $3 }
+ | regexpr '==' regexpr   { BinaryE EqOp $1 $3 }
+ | regexpr '!=' regexpr   { BinaryE NeqOp $1 $3 }
+ | regexpr '+' regexpr    { BinaryE AddOp $1 $3 }
+ | regexpr '-' regexpr    { BinaryE SubOp $1 $3 }
+ | '-' regexpr         { BinaryE SubOp (ValE (IntV 0)) $2 }
+ | regexpr '*' regexpr    { BinaryE MulOp $1 $3 }
+ | regexpr '%' regexpr    { BinaryE ModOp $1 $3 }
+ | regexpr '/' regexpr    { BinaryE DivOp $1 $3 }
+ | regexpr '|' regexpr    { ChoiceE $1 $3 }
+ | regexpr '||' regexpr    { BinaryE LOrOp $1 $3 }
+ | regexpr '&&' regexpr    { BinaryE LAndOp $1 $3 }
+ | regexpr '^' regexpr    { BinaryE XorOp $1 $3 }
+ | regexpr '>>' regexpr    { BinaryE ShrOp $1 $3 }
+ | regexpr '<<' regexpr    { BinaryE ShlOp $1 $3 }
+ | regexpr '++'         {% asLValM PostIncrE $1 }
+ | regexpr '--'         {% asLValM PostDecrE $1 }
+ | '++' regexpr         {% asLValM PreIncrE $2 }
+ | '--' regexpr         {% asLValM PreDecrE $2 }
+ | regexpr '+=' regexpr    {% asLValM (flip PlusEqE $3) $1 }
+ | regexpr '{|}' regexpr   { BitChooseE UnknownT $1 $3 }
+ | 'true'           { ValE (BitV True) }
+ | 'false'          { ValE (BitV False) }
+ | '!' regexpr         { NotE $2 }
+ | '~' regexpr         { NotE $2 }
+ | '??' { HoleE UnknownT Nothing }
+ | '??' '(' integer ')' { HoleE UnknownT (Just $3) }
+ | '{' '*' '}' { HoleE UnknownT Nothing }
+ | integer { ValE (IntV $1) }
+ | id { VarE $1 }
+ | regexpr '[' regexpr ']' { AccessE $1 $3 }
+ | regexpr '[' regexpr '::' regexpr ']' { BulkAccessE $1 $3 $5 }
+ | regexpr '.' id    { FieldE $1 $3 }
+ | 'new' id '(' reginitentries ')' { NewE $2 $4 }
+ | 'null' { ValE nullV }
+ | '{' regsomeexprs '}' { ArrayE $2 }
+ | id '(' regexprs ')' { AppE $1 $3 }
+    -- The following rules allow types to be parsed as exprs:
+ | 'bit' { VarE "bit" }
+ | 'void' { VarE "void" }
+ | 'int' { VarE "int" }
+ 
+
+regexprs :: { [Expr] }
+ : { [] }       -- empty list is allowed
+ | regsomeexprs { $1 }
+
+regsomeexprs :: { [Expr] }
+ : regexpr { [$1] }
+ | regsomeexprs ',' regexpr { $1 ++ [$3] }
+
+reginitentry :: { (Name, Expr) }
+ : id '=' regexpr  { ($1, $3 ) }
+
+regsomeinitentries :: { [(Name, Expr)] }
+ : reginitentry { [$1] }
+ | regsomeinitentries ',' reginitentry { $1 ++ [$3] }
+
+reginitentries :: { [(Name, Expr)] }
+ :  { [] }
+ | regsomeinitentries { $1 }
 
 {
 

@@ -256,7 +256,7 @@ evalE (PlusEqE lv x) = {-# SCC "PlusEqE" #-} do
     updateLV lv a'
     return a'
 evalE (HoleE {}) = error "HoleE in evalE"
-evalE (ChooseE {}) = error "ChooseE in evalE"
+evalE (ChoiceE {}) = error "ChoiceE in evalE"
 evalE (VarE nm) = {-# SCC "VarE" #-} do
     mval <- lookupVar nm
     mdecl <- lookupDecl nm

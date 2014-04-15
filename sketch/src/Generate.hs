@@ -158,7 +158,7 @@ genE (HoleE ty mbnd) = do
   opts <- asks gr_opts
   let bnd = fromMaybe (bnd_cbits opts) mbnd
   ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
-genE (ChooseE a b) = do
+genE (ChoiceE a b) = do
   a' <- genE a
   b' <- genE b
   liftSymbolic $ mplus (return a') (return b')
