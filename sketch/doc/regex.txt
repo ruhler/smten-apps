@@ -1,0 +1,70 @@
+
+Tue Apr 15 11:20:26 EDT 2014
+
+Question: how to support regular expression holes in Sketch?
+
+Examples:
+  {| x | y | z |}
+  {| foo (+ | - | *) bar |}
+  {| (foo | bar).sludge |}
+  {| foo(.next)? |}
+  {| foo(.x | .y) |}
+  {| foo (& | \| | ^) bar |}
+
+
+There are clearly two separate parts:
+1. expressing regular expression holes in the syntax
+2. properly parsing regular expression holes.
+
+I think we can add the following to get regular expression holes in the
+syntax:
+
+ChoiceE Expr Expr           -- a | b        a regular expression choice
+ChoiceOpE ChoiceOp Expr Expr   -- a (? | ? | ?) b
+data ChoiceField = Field | None | Choice ChoiceField ChoiceField
+data ChoiceOp = Op | ChoiceOp ChoiceOp ChoiceOp
+
+
+In fact, I think that may be the complete list of constructs we need to add.
+
+Now, given these constructs, it's very easy in the generate phase to make them
+work I think.
+
+ChoiceE is literaly just a choice.
+ChoiceOpE is slightly more difficult. Because we separate the notion of a
+binary operator from the expression. This might suggest we want to re-organize
+the syntax of Expr. Instead of all those separate binary operators, have a
+single: BinaryE Op Expr Expr, where Op represents an operation.
+
+If we did that, then ChocieOpE would be easy.
+
+Or... Just have a synthesize function which takes the operands as arguments.
+Then, once again, it's simple. (I think I like this better)
+
+Except, regardless, we need a representation for an operator, and as soon as
+we have that, doesn't it make more sense to have BinaryE?
+
+We can do an analogous thing for fields.
+
+See?
+Yes.
+
+So this is easy to do.
+
+The really hard part ... or the annoying part will be figuring out how to
+parse regular expression holes. Given that they support arbitrary expressions,
+except that | has a different meaning. That's rather annoying.
+
+Here's what I propose.
+
+1. Add backend support for ChoiceE (should be easy)
+2. Define Op which specifies the operators.
+3. Switch to BinaryE 
+    This should at least simplify things like genE and pprE, and shouldn't
+    make anything harder.
+4. Add backend support for ChoiceOpE (should now be easy)
+5. Add backend support for ChoiceField (should be fairly easy)
+6. Update that parser to parse these things.
+   I think it will have to be yucky: duplicate expr as regexpr, with slight
+   modification to | and ?
+

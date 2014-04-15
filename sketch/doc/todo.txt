@@ -9,6 +9,12 @@ POOR_TYPE_BIT_LITERAL
 STRUCTS
   * Support unboxed structs, with syntax |Foo| for the type.
 
+REGEX
+  * Support regex holes
+    see doc/regex.txt
+
+       
+
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
   Not sure how to implement this.
@@ -99,7 +105,6 @@ tests/broken/miniTestb399.sk,
 tests/broken/miniTestb352.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb479.sk: Cast IntV to Int? Why is this showing up?
 tests/broken/miniTestb513.sk: BUGGY: bug in scalar/array promotion?
 
 tests/broken/miniTestb366.sk:
@@ -116,10 +121,10 @@ tests/broken/miniTestb442.sk: Global hole?
 tests/broken/miniTestb456.sk: Hole in type?
 tests/broken/miniTestb492.sk: Global variable without final value given.
 
-tests/broken/annotations/*.sk: support @ annotations.
-tests/broken/static/*.sk: STATIC_EVAL
+tests/broken/regex/*.sk: Support REGEX hole expressions.
 tests/broken/structs/*.sk: STRUCTS
-
+tests/broken/static/*.sk: STATIC_EVAL
+tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/char/*.sk: CHAR_TYPE
@@ -128,7 +133,6 @@ tests/broken/include/*.sk: include keyword
 tests/broken/implicit/*.sk: implicit arguments
 tests/broken/package/*.sk: package keyword
 tests/broken/insertinto/*.sk: INSERT_INTO
-tests/broken/regex/*.sk: Support REGEX hole expressions.
 tests/broken/stencil/*.sk: stencil keyword
 tests/broken/unknownN/*.sk: Global N not defined?
 
