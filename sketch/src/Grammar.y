@@ -206,29 +206,29 @@ expr :: { Expr }
       -- a subtract expression. Otherwise $2 is a type, and this is
       -- a cast.
       case $4 of
-        SubE (ValE (IntV 0)) x -> return (SubE $2 x)
+        BinaryE SubOp (ValE (IntV 0)) x -> return (BinaryE SubOp $2 x)
         _ -> asTypeM $2 $ \ty -> CastE ty $4
     }
  | expr '?' expr ':' expr { CondE $1 $3 $5 }
- | expr '&' expr    { AndE $1 $3 }
- | expr '<' expr    { LtE $1 $3 }
- | expr '>' expr    { GtE $1 $3 }
- | expr '<=' expr   { LeE $1 $3 }
- | expr '>=' expr   { GeE $1 $3 }
- | expr '==' expr   { EqE $1 $3 }
- | expr '!=' expr   { NeqE $1 $3 }
- | expr '+' expr    { AddE $1 $3 }
- | expr '-' expr    { SubE $1 $3 }
- | '-' expr         { SubE (ValE (IntV 0)) $2 }
- | expr '*' expr    { MulE $1 $3 }
- | expr '%' expr    { ModE $1 $3 }
- | expr '/' expr    { DivE $1 $3 }
- | expr '|' expr    { OrE $1 $3 }
- | expr '||' expr    { LOrE $1 $3 }
- | expr '&&' expr    { LAndE $1 $3 }
- | expr '^' expr    { XorE $1 $3 }
- | expr '>>' expr    { ShrE $1 $3 }
- | expr '<<' expr    { ShlE $1 $3 }
+ | expr '&' expr    { BinaryE AndOp $1 $3 }
+ | expr '<' expr    { BinaryE LtOp $1 $3 }
+ | expr '>' expr    { BinaryE GtOp $1 $3 }
+ | expr '<=' expr   { BinaryE LeOp $1 $3 }
+ | expr '>=' expr   { BinaryE GeOp $1 $3 }
+ | expr '==' expr   { BinaryE EqOp $1 $3 }
+ | expr '!=' expr   { BinaryE NeqOp $1 $3 }
+ | expr '+' expr    { BinaryE AddOp $1 $3 }
+ | expr '-' expr    { BinaryE SubOp $1 $3 }
+ | '-' expr         { BinaryE SubOp (ValE (IntV 0)) $2 }
+ | expr '*' expr    { BinaryE MulOp $1 $3 }
+ | expr '%' expr    { BinaryE ModOp $1 $3 }
+ | expr '/' expr    { BinaryE DivOp $1 $3 }
+ | expr '|' expr    { BinaryE OrOp $1 $3 }
+ | expr '||' expr    { BinaryE LOrOp $1 $3 }
+ | expr '&&' expr    { BinaryE LAndOp $1 $3 }
+ | expr '^' expr    { BinaryE XorOp $1 $3 }
+ | expr '>>' expr    { BinaryE ShrOp $1 $3 }
+ | expr '<<' expr    { BinaryE ShlOp $1 $3 }
  | expr '++'         {% asLValM PostIncrE $1 }
  | expr '--'         {% asLValM PostDecrE $1 }
  | '++' expr         {% asLValM PreIncrE $2 }

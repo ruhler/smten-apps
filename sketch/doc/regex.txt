@@ -58,8 +58,8 @@ except that | has a different meaning. That's rather annoying.
 Here's what I propose.
 
 1. Add backend support for ChoiceE (should be easy)
-2. Define Op which specifies the operators.
-3. Switch to BinaryE 
+2+ Define Op which specifies the operators.
+3+ Switch to BinaryE 
     This should at least simplify things like genE and pprE, and shouldn't
     make anything harder.
 4. Add backend support for ChoiceOpE (should now be easy)

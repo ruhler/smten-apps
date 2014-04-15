@@ -147,13 +147,13 @@ evalS (BlockS (x:xs)) = {-# SCC "BlockS" #-} do
 
 evalE :: Expr -> EvalM Value
 evalE (ValE v) = {-# SCC "ValE" #-} return v
-evalE (AndE a b) = {-# SCC "AndE" #-} do
+evalE (BinaryE AndOp a b) = {-# SCC "AndE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `andB` bv)
       (BitV av, BitV bv) -> return $ BitV (av && bv)
-evalE (LAndE a b) = {-# SCC "LAndE" #-} do
+evalE (BinaryE LAndOp a b) = {-# SCC "LAndE" #-} do
     a' <- evalE a
     case a' of
         BitV True -> evalE b
@@ -162,13 +162,13 @@ evalE (LAndE a b) = {-# SCC "LAndE" #-} do
             b' <- evalE b
             case b' of
                 BitsV bv -> return $ BitsV (av `andB` bv)
-evalE (OrE a b) = {-# SCC "OrE" #-} do
+evalE (BinaryE OrOp a b) = {-# SCC "OrE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `orB` bv)
       (BitV av, BitV bv) -> return $ BitV (av || bv)
-evalE (LOrE a b) = {-# SCC "LOrE" #-} do
+evalE (BinaryE LOrOp a b) = {-# SCC "LOrE" #-} do
     a' <- evalE a
     case a' of
         BitV True -> return a'
@@ -177,14 +177,14 @@ evalE (LOrE a b) = {-# SCC "LOrE" #-} do
             b' <- evalE b
             case b' of
                 BitsV bv -> return $ BitsV (av `orB` bv)
-evalE (AddE a b) = liftM2 (+) (evalE a) (evalE b)
-evalE (SubE a b) = liftM2 (-) (evalE a) (evalE b)
-evalE (LtE a b) = BitV <$> liftM2 (<) (evalE a) (evalE b)
-evalE (GtE a b) = BitV <$> liftM2 (>) (evalE a) (evalE b)
-evalE (LeE a b) = BitV <$> liftM2 (<=) (evalE a) (evalE b)
-evalE (GeE a b) = BitV <$> liftM2 (>=) (evalE a) (evalE b)
-evalE (EqE a b) = BitV <$> liftM2 (==) (evalE a) (evalE b)
-evalE (NeqE a b) = BitV <$> liftM2 (/=) (evalE a) (evalE b)
+evalE (BinaryE AddOp a b) = liftM2 (+) (evalE a) (evalE b)
+evalE (BinaryE SubOp a b) = liftM2 (-) (evalE a) (evalE b)
+evalE (BinaryE LtOp a b) = BitV <$> liftM2 (<) (evalE a) (evalE b)
+evalE (BinaryE GtOp a b) = BitV <$> liftM2 (>) (evalE a) (evalE b)
+evalE (BinaryE LeOp a b) = BitV <$> liftM2 (<=) (evalE a) (evalE b)
+evalE (BinaryE GeOp a b) = BitV <$> liftM2 (>=) (evalE a) (evalE b)
+evalE (BinaryE EqOp a b) = BitV <$> liftM2 (==) (evalE a) (evalE b)
+evalE (BinaryE NeqOp a b) = BitV <$> liftM2 (/=) (evalE a) (evalE b)
 evalE (ArrayE xs) = {-# SCC "ArrayE" #-} arrayV <$> mapM evalE xs
 evalE (NotE a) = {-# SCC "NotE" #-} do
     a' <- evalE a
@@ -196,34 +196,34 @@ evalE (CondE p a b) = {-# SCC "CondE" #-} do
     case p' of
         BitV True -> evalE a
         BitV False -> evalE b
-evalE (XorE a b) = {-# SCC "XorE" #-} do
+evalE (BinaryE XorOp a b) = {-# SCC "XorE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, BitsV bv) -> return $ BitsV (av `xorB` bv)
       (BitV av, BitV bv) -> return $ BitV (av `xor` bv)
-evalE (MulE a b) = liftM2 (*) (evalE a) (evalE b)
-evalE (ModE a b) = {-# SCC "ModE" #-} do
+evalE (BinaryE MulOp a b) = liftM2 (*) (evalE a) (evalE b)
+evalE (BinaryE ModOp a b) = {-# SCC "ModE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> do
          assert (bv /= 0)
          return $ IntV (av `rem` bv)
-evalE (DivE a b) = {-# SCC "DivE" #-} do
+evalE (BinaryE DivOp a b) = {-# SCC "DivE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (IntV av, IntV bv) -> do
          assert (bv /= 0)
          return $ IntV (av `quot` bv)
-evalE (ShlE a b) = {-# SCC "ShlE" #-} do
+evalE (BinaryE ShlOp a b) = {-# SCC "ShlE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
       (BitsV av, IntV bv) -> return $ BitsV (av `shlB` bv)
       (IntV av, IntV bv) -> return $ IntV (av `shlI` bv)
-evalE (ShrE a b) = {-# SCC "ShrE" #-} do
+evalE (BinaryE ShrOp a b) = {-# SCC "ShrE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of

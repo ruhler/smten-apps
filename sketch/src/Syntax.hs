@@ -3,7 +3,7 @@
 module Syntax (
     Type(..), Name,
     LVal(..), Stmt(..),
-    Pointer(..), Expr(..), Value(..), Arg(..), Function(..),
+    Pointer(..), Value(..), BinOp(..), Expr(..), Arg(..), Function(..),
     functionT,
     blockS, typeofV, arrayV, nullV, pad,
     asLVal, asType,
@@ -116,28 +116,33 @@ typeofV (FunV f) = functionT f
 typeofV VoidV = VoidT
 typeofV (PointerV {}) = StructT ""
 
+-- | Binary operators
+data BinOp = 
+   AndOp        -- ^ a & b
+ | LAndOp       -- ^ a && b
+ | AddOp        -- ^ a + b
+ | SubOp        -- ^ a - b
+ | LtOp         -- ^ a < b
+ | GtOp         -- ^ a > b
+ | LeOp         -- ^ a <= b
+ | GeOp         -- ^ a >= b
+ | EqOp         -- ^ a == b
+ | NeqOp        -- ^ a != b
+ | OrOp         -- ^ a | b
+ | LOrOp        -- ^ a || b
+ | XorOp        -- ^ a ^ b
+ | MulOp        -- ^ a * b
+ | ModOp        -- ^ a % b
+ | DivOp        -- ^ a / b
+ | ShrOp        -- ^ a >> b
+ | ShlOp        -- ^ a << b
+    deriving (Show)
+
 data Expr = 
    ValE Value
- | AndE Expr Expr        -- ^ a & b
- | LAndE Expr Expr       -- ^ a && b
- | AddE Expr Expr        -- ^ a + b
- | SubE Expr Expr        -- ^ a - b
- | LtE Expr Expr         -- ^ a < b
- | GtE Expr Expr         -- ^ a > b
- | LeE Expr Expr         -- ^ a <= b
- | GeE Expr Expr         -- ^ a >= b
- | EqE Expr Expr         -- ^ a == b
- | NeqE Expr Expr        -- ^ a != b
+ | BinaryE BinOp Expr Expr  -- ^ a <op> b
  | CondE Expr Expr Expr  -- ^ p ? a : b
- | OrE Expr Expr         -- ^ a | b
- | LOrE Expr Expr        -- ^ a || b
- | XorE Expr Expr        -- ^ a ^ b
- | MulE Expr Expr        -- ^ a * b
- | ModE Expr Expr        -- ^ a % b
- | DivE Expr Expr        -- ^ a / b
  | NotE Expr             -- ^ ! a
- | ShrE Expr Expr        -- ^ a >> b
- | ShlE Expr Expr        -- ^ a << b
  | PostIncrE LVal        -- ^ x++
  | PostDecrE LVal        -- ^ x--
  | PreIncrE LVal         -- ^ ++x

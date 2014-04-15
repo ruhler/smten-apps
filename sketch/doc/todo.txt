@@ -103,12 +103,12 @@ tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
 tests/broken/miniTest209Globals.sk,
 tests/broken/miniTestb399.sk,
-tests/broken/miniTestb352.sk:
+tests/broken/miniTestb352.sk,
+tests/broken/miniTestb442.sk,
+tests/broken/miniTestb492.sk:
   Support use of global variables in normal code, not just type declarations.
 
-tests/broken/miniTestb442.sk: Global hole?
 tests/broken/miniTestb456.sk: Hole in type?
-tests/broken/miniTestb492.sk: Global variable without final value given.
 
 tests/broken/regex/*.sk: Support REGEX hole expressions.
 tests/broken/structs/*.sk: STRUCTS

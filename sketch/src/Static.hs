@@ -15,6 +15,7 @@ import Smten.Data.Functor
 
 import Eval
 import Program
+import Ppr
 import Syntax
 
 -- Perform static analysis and evaluation on the given program.
@@ -178,24 +179,24 @@ instance Static Expr where
        | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
 staticE :: Expr -> SM Expr
-staticE (AndE a b) = bitwiseop AndE "&" a b
-staticE (LAndE a b) = bitwiseop LAndE "&&" a b
+staticE (BinaryE AndOp a b) = bitwiseop AndOp a b
+staticE (BinaryE LAndOp a b) = bitwiseop LAndOp a b
 
-staticE (AddE a b) = do
+staticE (BinaryE AddOp a b) = do
   ty <- asks sr_oty
   case ty of
     IntT -> return ()
     ArrT BitT _ -> return ()
     _ -> error $ "unsupported type for addition: " ++ show ty
-  liftM2 AddE (staticM a) (staticM b)
+  liftM2 (BinaryE AddOp) (staticM a) (staticM b)
 
-staticE (SubE a b) = intop SubE (-) "-" a b
-staticE (LtE a b) = cmpop LtE "<" a b
-staticE (GtE a b) = cmpop GtE ">" a b
-staticE (LeE a b) = cmpop LeE "<=" a b
-staticE (GeE a b) = cmpop GeE ">=" a b
-staticE (EqE a b) = eqop EqE "==" a b
-staticE (NeqE a b) = eqop NeqE "!=" a b
+staticE (BinaryE SubOp a b) = intop SubOp (-) a b
+staticE (BinaryE LtOp a b) = cmpop LtOp a b
+staticE (BinaryE GtOp a b) = cmpop GtOp a b
+staticE (BinaryE LeOp a b) = cmpop LeOp a b
+staticE (BinaryE GeOp a b) = cmpop GeOp a b
+staticE (BinaryE EqOp a b) = eqop EqOp a b
+staticE (BinaryE NeqOp a b) = eqop NeqOp a b
 staticE (CondE p a b) = do
   ty <- asks sr_oty  
   p' <- withty BitT $ staticM p
@@ -208,14 +209,14 @@ staticE (ArrayE a) = do
       ArrT t _ -> ArrayE <$> withty t (mapM staticM a)
       _ -> error $ "expected array type for array expression, but got: " ++ show ty
 
-staticE (XorE a b) = bitwiseop XorE "xor" a b
-staticE (MulE a b) = intop MulE (*) "*" a b
-staticE (ModE a b) = intop ModE rem "%" a b
-staticE (DivE a b) = intop DivE quot "/" a b
-staticE (OrE a b) = bitwiseop OrE "|" a b
-staticE (LOrE a b) = bitwiseop LOrE "||" a b
-staticE (ShlE a b) = shiftop ShlE "<<" a b
-staticE (ShrE a b) = shiftop ShrE ">>" a b
+staticE (BinaryE XorOp a b) = bitwiseop XorOp a b
+staticE (BinaryE MulOp a b) = intop MulOp (*) a b
+staticE (BinaryE ModOp a b) = intop ModOp rem a b
+staticE (BinaryE DivOp a b) = intop DivOp quot a b
+staticE (BinaryE OrOp a b) = bitwiseop OrOp a b
+staticE (BinaryE LOrOp a b) = bitwiseop LOrOp a b
+staticE (BinaryE ShlOp a b) = shiftop ShlOp a b
+staticE (BinaryE ShrOp a b) = shiftop ShrOp a b
 staticE (PostIncrE a) = incrop PostIncrE "post ++" a
 staticE (PostDecrE a) = incrop PostDecrE "post --" a
 staticE (PreIncrE a) = incrop PreIncrE "pre ++" a
@@ -229,7 +230,11 @@ staticE (PlusEqE a b) = do
 
 staticE (BitChooseE _ a b) = do
   ty <- asks sr_oty
-  bitwiseop (BitChooseE ty) "{|}" a b
+  case ty of
+    BitT -> return ()
+    ArrT BitT _ -> return ()
+    _ -> error $ "unsupported type for bitwise {|}: " ++ show ty
+  liftM2 (BitChooseE ty) (staticM a) (staticM b)
 
 staticE (NotE a) = do
   ty <- asks sr_oty
@@ -463,81 +468,79 @@ matches _ _ = False
 -- Typing Rules:
 --   * Return type is bit
 --   * Argument types are int.
-cmpop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
-cmpop f nm a b = do
+cmpop :: BinOp -> Expr -> Expr -> SM Expr
+cmpop op a b = do
     ty <- asks sr_oty
     case ty of
       BitT -> return ()
-      _ -> error $ "unsupported return type for " ++ nm ++ " operator: " ++ show ty
-    liftM2 f (withty IntT $ staticM a) (withty IntT $ staticM b)
+      _ -> error $ "unsupported return type for " ++ pretty op ++ " operator: " ++ show ty
+    liftM2 (BinaryE op) (withty IntT $ staticM a) (withty IntT $ staticM b)
 
 
 -- Equality operators: == and !=
 -- Typing Rules:
 --   * Return type is bit
 --   * Argument types are the same.
-eqop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
-eqop f nm a b = do
+eqop :: BinOp -> Expr -> Expr -> SM Expr
+eqop op a b = do
     ty <- asks sr_oty
     case ty of
       BitT -> return ()
-      _ -> error $ "unsupported return type for " ++ nm ++ " operator: " ++ show ty
+      _ -> error $ "unsupported return type for " ++ pretty op ++ " operator: " ++ show ty
     -- We need to determine the argument types here.
     -- See if we can infer them from the arguments.
     targ <- liftM2 unify (typeof a) (typeof b)
-    let eqtycheck UnknownT = error $ "ambiguous type for " ++ nm ++ " operator"
+    let eqtycheck UnknownT = error $ "ambiguous type for " ++ pretty op ++ " operator"
         eqtycheck BitT = return ()
         eqtycheck IntT = return ()
         eqtycheck (ArrT ty _) = eqtycheck ty
         eqtycheck (StructT {}) = return ()
-        eqtycheck _ = error $ "TODO: does " ++ nm ++ " operator support type: " ++ show targ
+        eqtycheck _ = error $ "TODO: does " ++ pretty op ++ " operator support type: " ++ show targ
     eqtycheck targ
-    liftM2 f (withty targ $ staticM a) (withty targ $ staticM b)
+    liftM2 (BinaryE op) (withty targ $ staticM a) (withty targ $ staticM b)
 
 -- Bitwise Operators
 -- Typing Rules:
 --   * The return type is either bit or bit[]
 --   * The argument types match the return type.
-bitwiseop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
-bitwiseop f nm a b = do
+bitwiseop :: BinOp -> Expr -> Expr -> SM Expr
+bitwiseop op a b = do
     ty <- asks sr_oty
     case ty of
       BitT -> return ()
       ArrT BitT _ -> return ()
-      _ -> error $ "unsupported type for bitwise " ++ nm ++ ": " ++ show ty
-    liftM2 f (staticM a) (staticM b)
+      _ -> error $ "unsupported type for bitwise " ++ pretty op ++ ": " ++ show ty
+    liftM2 (BinaryE op) (staticM a) (staticM b)
 
 -- Integer operators
 -- Typing Rules:
 --   * The return type is int
 --   * The argument types are int
-intop :: (Expr -> Expr -> Expr)
-         -> (Int -> Int -> Int)
-         -> String -> Expr -> Expr -> SM Expr
-intop mk f nm a b = do
+intop :: BinOp -> (Int -> Int -> Int) -> Expr -> Expr -> SM Expr
+intop op f a b = do
     ty <- asks sr_oty
     case ty of
       IntT -> return ()
-      _ -> error $ "unsupported type for operator " ++ nm ++ ": " ++ show ty
+      _ -> error $ "unsupported type for operator " ++ pretty op ++ ": " ++ show ty
     a' <- staticM a
     b' <- staticM b
     case (a', b') of
        (ValE (IntV av), ValE (IntV bv)) -> return $ ValE (IntV (f av bv))
-       _ -> return $ mk a' b'
+       _ -> return $ BinaryE op a' b'
 
 -- Shift operators
 -- Typing Rules:
 --   * The return type is bit[] or int.
 --   * The first argument type matches the return type
 --   * The second argument type is Int.
-shiftop :: (Expr -> Expr -> Expr) -> String -> Expr -> Expr -> SM Expr
-shiftop f nm a b = do
+shiftop :: BinOp -> Expr -> Expr -> SM Expr
+shiftop op a b = do
     ty <- asks sr_oty
     ty' <- case ty of
               ArrT BitT _ -> return ty
               IntT -> return ty
-              _ -> error $ "unsupported type for operator " ++ nm ++ ": " ++ show ty
-    liftM2 f (withty ty $ staticM a) (withty IntT $ staticM b)
+              _ -> error $ "unsupported type for operator " ++ pretty op ++ ": " ++ show ty
+    liftM2 (BinaryE op) (withty ty $ staticM a) (withty IntT $ staticM b)
 
 -- return the type of a shift expression given its first argument.
 typeofshift :: Expr -> SM Type
@@ -560,28 +563,28 @@ incrop f nm a = do
 -- Returns 'UnknownT' if the type is not certain.
 typeof :: Expr -> SM Type
 typeof (ValE v) = return $ typeofV v
-typeof (AndE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (LAndE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (AddE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (SubE a b) = return IntT
-typeof (LtE a b) = return BitT
-typeof (GtE a b) = return BitT
-typeof (LeE a b) = return BitT
-typeof (GeE a b) = return BitT
-typeof (EqE a b) = return BitT
-typeof (NeqE a b) = return BitT
+typeof (BinaryE AndOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE LAndOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE AddOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE SubOp a b) = return IntT
+typeof (BinaryE LtOp a b) = return BitT
+typeof (BinaryE GtOp a b) = return BitT
+typeof (BinaryE LeOp a b) = return BitT
+typeof (BinaryE GeOp a b) = return BitT
+typeof (BinaryE EqOp a b) = return BitT
+typeof (BinaryE NeqOp a b) = return BitT
 typeof (ArrayE a) = do
    ty <- foldr unify UnknownT <$> mapM typeof a
    return $ ArrT ty (ValE (IntV (length a)))
-typeof (XorE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (MulE a b) = return IntT
-typeof (ModE a b) = return IntT
-typeof (DivE a b) = return IntT
+typeof (BinaryE XorOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE MulOp a b) = return IntT
+typeof (BinaryE ModOp a b) = return IntT
+typeof (BinaryE DivOp a b) = return IntT
 typeof (CondE _ a b) = liftM2 unify (typeof a) (typeof b)
-typeof (OrE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (LOrE a b) = liftM2 unify (typeof a) (typeof b)
-typeof (ShlE a b) = typeofshift a
-typeof (ShrE a b) = typeofshift a
+typeof (BinaryE OrOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE LOrOp a b) = liftM2 unify (typeof a) (typeof b)
+typeof (BinaryE ShlOp a b) = typeofshift a
+typeof (BinaryE ShrOp a b) = typeofshift a
 typeof (PostIncrE a) = snd <$> staticLV a
 typeof (PostDecrE a) = snd <$> staticLV a
 typeof (PreIncrE a) = snd <$> staticLV a

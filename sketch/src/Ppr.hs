@@ -37,6 +37,26 @@ pprV VoidV = error "pprV: no way to print void value"
 pprV (PointerV Null) = "null"
 pprV (PointerV {}) = error "pprV: no way to print non-null pointer value"
 
+pprOp :: BinOp -> String
+pprOp AndOp = "&"
+pprOp LAndOp = "&&"
+pprOp AddOp = "+"
+pprOp SubOp = "-"
+pprOp LtOp = "<"
+pprOp GtOp = ">"
+pprOp LeOp = "<="
+pprOp GeOp = ">="
+pprOp EqOp = "=="
+pprOp NeqOp = "!="
+pprOp OrOp = "|"
+pprOp LOrOp = "||"
+pprOp XorOp = "^"
+pprOp MulOp = "*"
+pprOp ModOp = "%"
+pprOp DivOp = "/"
+pprOp ShrOp = ">>"
+pprOp ShlOp = "<<"
+
 type Prec = Int
 p_min = 0
 p_max = length pbin
@@ -75,26 +95,9 @@ pprE :: Prec -> Expr -> String
 pprE p e =
   case e of
     ValE v -> pprV v
-    AndE a b -> left p "&" a b
-    LAndE a b -> left p "&&" a b
-    AddE a b -> left p "+" a b
-    SubE a b -> left p "-" a b
-    LtE a b -> left p "<" a b
-    GtE a b -> left p ">" a b
-    LeE a b -> left p "<=" a b
-    GeE a b -> left p ">=" a b
-    EqE a b -> left p "==" a b
-    NeqE a b -> left p "!=" a b
-    OrE a b -> left p "|" a b
-    LOrE a b -> left p "||" a b
-    XorE a b -> left p "^" a b
-    MulE a b -> left p "*" a b
-    DivE a b -> left p "/" a b
-    ModE a b -> left p "%" a b
+    BinaryE op a b -> left p (pprOp op) a b
     NotE a -> "!" ++ pprE p_max a
     CondE p a b -> pprE p_max p ++ " ? " ++ pprE p_max a ++ " : " ++ pprE p_max b
-    ShrE a b -> left p ">>" a b
-    ShlE a b -> left p "<<" a b
     PostIncrE a -> pprLV a ++ "++"
     PostDecrE a -> pprLV a ++ "--"
     PreIncrE a -> "++" ++ pprLV a
@@ -168,6 +171,10 @@ instance Pretty Value where
 
 instance Pretty Expr where
    pretty = pprE 0
+
+instance Pretty BinOp where
+   pretty = pprOp
+
 
 instance Pretty Stmt where
    pretty s = unlines (pprS s)

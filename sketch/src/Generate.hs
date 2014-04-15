@@ -119,7 +119,7 @@ genS (RepeatS e s) = do
         | otherwise =
             let ifthen = blockS [s, unroll (n+1)]
                 ifelse = (blockS [])
-            in IfS (GtE (VarE x) (ValE (IntV n))) ifthen ifelse
+            in IfS (BinaryE GtOp (VarE x) (ValE (IntV n))) ifthen ifelse
   genS $ blockS [DeclS IntT [(x, Just e)], unroll 0]
 
 genS (WhileS c s) = liftM2 WhileS (genE c) (genS s)
@@ -145,25 +145,8 @@ genLV (FieldLV lv m) = do
   return $ FieldLV lv' m
 
 genE :: Expr -> GM Expr
-genE (AndE a b) = liftM2 AndE (genE a) (genE b)
-genE (LAndE a b) = liftM2 LAndE (genE a) (genE b)
-genE (OrE a b) = liftM2 OrE (genE a) (genE b)
-genE (LOrE a b) = liftM2 LOrE (genE a) (genE b)
-genE (AddE a b) = liftM2 AddE (genE a) (genE b)
-genE (SubE a b) = liftM2 SubE (genE a) (genE b)
-genE (LtE a b) = liftM2 LtE (genE a) (genE b)
-genE (GtE a b) = liftM2 GtE (genE a) (genE b)
-genE (LeE a b) = liftM2 LeE (genE a) (genE b)
-genE (GeE a b) = liftM2 GeE (genE a) (genE b)
-genE (EqE a b) = liftM2 EqE (genE a) (genE b)
-genE (NeqE a b) = liftM2 NeqE (genE a) (genE b)
+genE (BinaryE op a b) = liftM2 (BinaryE op) (genE a) (genE b)
 genE (ArrayE a) = ArrayE <$> mapM genE a
-genE (XorE a b) = liftM2 XorE (genE a) (genE b)
-genE (MulE a b) = liftM2 MulE (genE a) (genE b)
-genE (ModE a b) = liftM2 ModE (genE a) (genE b)
-genE (DivE a b) = liftM2 DivE (genE a) (genE b)
-genE (ShlE a b) = liftM2 ShlE (genE a) (genE b)
-genE (ShrE a b) = liftM2 ShrE (genE a) (genE b)
 genE (PostIncrE lv) = PostIncrE <$> genLV lv
 genE (PostDecrE lv) = PostDecrE <$> genLV lv
 genE (PreIncrE lv) = PreIncrE <$> genLV lv
@@ -180,7 +163,7 @@ genE (BitChooseE ty a b) = do
   x <- ValE <$> (liftSymbolic $ mkFreeArg 32 ty)
   a' <- genE a
   b' <- genE b
-  return (OrE (AndE a' x) (AndE b' (NotE x)))
+  return (BinaryE OrOp (BinaryE AndOp a' x) (BinaryE AndOp b' (NotE x)))
 genE x@(ValE {}) = return x
 genE x@(VarE {}) = return x
 genE (AccessE a b) = liftM2 AccessE (genE a) (genE b)
