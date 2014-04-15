@@ -164,9 +164,7 @@ Clean::
 
 Pretty Print::
 * in type errors: pretty print types, don't just "show" them
-* is it safe to print bit as 'true' and 'false'? What if they are used as int?
-* don't need parens around integer literals
-* 'for loop' init and incr don't print properly
+* Some precedences are wrong.
 
 Refactor Ideas::
 * Do more stuff in Static pass

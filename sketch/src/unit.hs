@@ -3,7 +3,7 @@ import Smten.Prelude
 import Smten.Tests.Test
 
 import Syntax
-import Ppr2
+import Ppr
 
 main :: IO ()
 main = do
@@ -25,7 +25,6 @@ main = do
     test "(1+2)*3" ("(1 + 2) * 3" == pretty (MulE (AddE (ValE (IntV 1)) (ValE (IntV 2))) (ValE (IntV 3))))
     test "1-2-3" ("1 - 2 - 3" == pretty (SubE (SubE (ValE (IntV 1)) (ValE (IntV 2))) (ValE (IntV 3))))
     test "1-(2-3)" ("1 - (2 - 3)" == pretty (SubE (ValE (IntV 1)) (SubE (ValE (IntV 2)) (ValE (IntV 3)))))
-    test "1+(2+3)" ("1 + 2 + 3" == pretty (AddE (ValE (IntV 1)) (AddE (ValE (IntV 2)) (ValE (IntV 3)))))
 
     putStrLn "Sketch UNIT PASSED"
 

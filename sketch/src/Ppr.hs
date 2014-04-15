@@ -4,127 +4,151 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 module Ppr (pretty) where
 
-
 import Smten.Prelude
 
 import Program
 import Syntax
 
-class Ppr a where
-   pretty :: a -> String
-   prettya :: a -> String
-   prettya x = "(" ++ pretty x ++ ")"
+-- | Pretty print a type.
+pprT :: Type -> String
+pprT VoidT = "void"
+pprT BitT = "bit"
+pprT (ArrT ty w) = pprT ty ++ "[" ++ pretty w ++ "]"
+pprT IntT = "int"
+pprT (FunT {}) = error $ "pprT: no way to print function type"
+pprT (StructT nm) = nm
+pprT UnknownT = error $ "pprT: unknown type"
 
-instance Ppr Name where
-   pretty = id
-   prettya = pretty
+-- Separate the given strings with commas.
+commas :: [String] -> String
+commas [] = []
+commas [x] = x
+commas (x:xs) = x ++ "," ++ commas xs
 
-instance Ppr Type where
-   pretty VoidT = "void"
-   pretty BitT = "bit"
-   pretty (ArrT t n) = pretty t ++ "[" ++ pretty n ++ "]"
-   pretty IntT = "int"
-   pretty (StructT nm) = nm
+-- | Pretty print a value.
+pprV :: Value -> String
+pprV (ArrayV vs) = "{" ++ commas (map pprV vs) ++ "}"
+pprV (BitV True) = "1"
+pprV (BitV False) = "0"
+pprV (BitsV b) = pprV (ArrayV (map BitV b))
+pprV (IntV i) = show i
+pprV (FunV {}) = error "pprV: no way to print function value"
+pprV VoidV = error "pprV: no way to print void value"
+pprV (PointerV Null) = "null"
+pprV (PointerV {}) = error "pprV: no way to print non-null pointer value"
 
-   prettya = pretty
+type Prec = Int
+p_min = 0
+p_max = length pbin
 
-instance Ppr Int where
-   pretty = show
-   prettya = show
+-- Precedence table for left associative binary operators:
+-- Operators in the earlier groups have lower precedence
+pbin :: [[String]]
+pbin = [["||", "?"], ["&&"], ["|", "{|}"], ["^"], ["&"], ["==", "!="],
+        ["<", ">", "<=", ">="], ["<<", ">>"],
+        ["+", "-"], ["*", "%", "/"]]
 
-commas :: (Ppr a) => [a] -> String
-commas [x] = pretty x
-commas (x:xs) = pretty x ++ ", " ++ commas xs
+pbinof :: [[String]] -> String -> Int
+pbinof [] op = error $ "pbinof: operator " ++ op ++ " not in pbin table"
+pbinof (x:xs) op
+  | op `elem` x = 0
+  | otherwise = 1 + pbinof xs op
 
-instance Ppr Pointer where
-   pretty Null = "null"
-   pretty (Pointer _) = error $ "No way to pretty print a pointer"
+-- | parens p p_op x
+-- Parenthesize the given expression if p_op is lower than p.
+parens :: Prec -> Prec -> String -> String
+parens p p_op x
+  | p_op < p = "(" ++ x ++ ")"
+  | otherwise = x
 
-instance Ppr Value where
-   pretty (ArrayV xs) = "{" ++ commas xs ++ "}"
-   pretty (BitV b) = if b then "true" else "false"
-   pretty (BitsV n) = pretty (ArrayV (map BitV n))
-   pretty (IntV n) = pretty n
-   pretty (FunV f) = error $ "No way to pretty print an anonymous function"
-   pretty VoidV = error $ "No way to pretty print a void value"
-   pretty (PointerV p) = pretty p
+-- | left p op a b
+-- Pretty print a left associative binary operator in the given precedence.
+left :: Prec -> String -> Expr -> Expr -> String
+left p op a b =
+  let p_op = pbinof pbin op
+  in parens p p_op $ pprE p_op a ++ " " ++ op ++ " " ++ pprE (p_op+1) b
 
-instance Ppr Expr where
-   pretty (ValE v) = pretty v
-   pretty (AndE a b) = prettya a ++ " & " ++ prettya b
-   pretty (LAndE a b) = prettya a ++ " && " ++ prettya b
-   pretty (AddE a b) = prettya a ++ " + " ++ prettya b
-   pretty (SubE a b) = prettya a ++ " - " ++ prettya b
-   pretty (ModE a b) = prettya a ++ " % " ++ prettya b
-   pretty (DivE a b) = prettya a ++ " / " ++ prettya b
-   pretty (LtE a b) = prettya a ++ " < " ++ prettya b
-   pretty (GtE a b) = prettya a ++ " > " ++ prettya b
-   pretty (LeE a b) = prettya a ++ " <= " ++ prettya b
-   pretty (GeE a b) = prettya a ++ " >= " ++ prettya b
-   pretty (EqE a b) = prettya a ++ " == " ++ prettya b
-   pretty (NeqE a b) = prettya a ++ " != " ++ prettya b
-   pretty (ArrayE xs) = "{" ++ commas xs ++ "}"
-   pretty (OrE a b) = prettya a ++ " | " ++ prettya b
-   pretty (LOrE a b) = prettya a ++ " || " ++ prettya b
-   pretty (XorE a b) = prettya a ++ " ^ " ++ prettya b
-   pretty (MulE a b) = prettya a ++ " * " ++ prettya b
-   pretty (NotE a) = "!" ++ prettya a
-   pretty (CondE p a b) = prettya p ++ " ? " ++ prettya a ++ " : " ++ prettya b
-   pretty (ShlE a b) = prettya a ++ " << " ++ prettya b
-   pretty (ShrE a b) = prettya a ++ " >> " ++ prettya b
-   pretty (PostIncrE a) = prettya a ++ "++"
-   pretty (PostDecrE a) = prettya a ++ "--"
-   pretty (PreIncrE a) = "++" ++ prettya a
-   pretty (PreDecrE a) = "--" ++ prettya a
-   pretty (PlusEqE a b) = pretty a ++ " += " ++ pretty b
-   pretty (HoleE _ (Just v)) = "??(" ++ show v ++ ")"
-   pretty (HoleE _ Nothing) = "??"
-   pretty (BitChooseE _ a b) = prettya a ++ " {|} " ++ prettya b
-   pretty (VarE nm) = pretty nm
-   pretty (AccessE a b) = prettya a ++ "[" ++ pretty b ++ "]"
-   pretty (BulkAccessE a b c)
-    = prettya a ++ "[" ++ pretty b ++ "::" ++ pretty c ++ "]"
-   pretty (FieldE x nm) = pretty x ++ "." ++ nm
-   pretty (NewE nm fields) =
-    let pfields [] = ""
-        pfields [(n, v)] = pretty n ++ " = " ++ pretty v
-        pfields ((n,v):xs) = pretty n ++ " = " ++ pretty v ++ "," ++ pfields xs
-    in "new " ++ nm ++ "(" ++ pfields fields ++ ")"
-   pretty (CastE t e) = "(" ++ pretty t ++ ") " ++ prettya e
-   pretty (ICastE _ e) = pretty e
-   pretty (AppE f xs) =
-     let pargs [] = ""
-         pargs [x] = pretty x
-         pargs (x:xs) = pretty x ++ ", " ++ pargs xs
-     in pretty f ++ "(" ++ pargs xs ++ ")"
+-- | Pretty print an expression.
+-- If the precedence of the operator is lower than given p, then the
+-- expression must be parenthesized.
+pprE :: Prec -> Expr -> String
+pprE p e =
+  case e of
+    ValE v -> pprV v
+    AndE a b -> left p "&" a b
+    LAndE a b -> left p "&&" a b
+    AddE a b -> left p "+" a b
+    SubE a b -> left p "-" a b
+    LtE a b -> left p "<" a b
+    GtE a b -> left p ">" a b
+    LeE a b -> left p "<=" a b
+    GeE a b -> left p ">=" a b
+    EqE a b -> left p "==" a b
+    NeqE a b -> left p "!=" a b
+    OrE a b -> left p "|" a b
+    LOrE a b -> left p "||" a b
+    XorE a b -> left p "^" a b
+    MulE a b -> left p "*" a b
+    DivE a b -> left p "/" a b
+    ModE a b -> left p "%" a b
+    NotE a -> "!" ++ pprE p_max a
+    CondE p a b -> pprE p_max p ++ " ? " ++ pprE p_max a ++ " : " ++ pprE p_max b
+    ShrE a b -> left p ">>" a b
+    ShlE a b -> left p "<<" a b
+    PostIncrE a -> pprLV a ++ "++"
+    PostDecrE a -> pprLV a ++ "--"
+    PreIncrE a -> "++" ++ pprLV a
+    PreDecrE a -> "--" ++ pprLV a
+    PlusEqE a b -> pprLV a ++ " += " ++ pretty b
+    ArrayE xs -> "{" ++ commas (map pretty xs) ++ "}"
+    HoleE _ Nothing -> "??"
+    HoleE _ (Just n) -> "??(" ++ show n ++ ")"
+    BitChooseE _ a b -> left p "{|}" a b
+    VarE nm -> nm
+    AccessE a b -> pretty a ++ "[" ++ pretty b ++ "]"
+    BulkAccessE a b c -> pretty a ++ "[" ++ pretty b ++ "::" ++ pretty c ++ "]"
+    FieldE x nm -> pretty x ++ "." ++ nm
+    NewE nm fields ->
+        let pfields [] = ""
+            pfields [(n, v)] = n ++ " = " ++ pretty v
+            pfields ((n,v):xs) = n ++ " = " ++ pretty v ++ "," ++ pfields xs
+        in "new " ++ nm ++ "(" ++ pfields fields ++ ")"
+    CastE t e -> "(" ++ pretty t ++ ") " ++ pprE p_max e
+    ICastE _ e -> pprE p e
+    AppE nm xs -> nm ++ "(" ++ commas (map pretty xs) ++ ")"
 
-   prettya (HoleE _ (Just v)) = "??(" ++ show v ++ ")"
-   prettya (HoleE _ Nothing) = "??"
-   prettya (VarE nm) = pretty nm
-   prettya x = "(" ++ pretty x ++ ")"
 
+pprLV :: LVal -> String
+pprLV (VarLV nm) = nm
+pprLV (ArrLV lv idx) = pprLV lv ++ "[" ++ pretty idx ++ "]"
+pprLV (BulkLV lv lo w) = pprLV lv ++ "[" ++ pretty lo ++ "::" ++ pretty w ++ "]"
+pprLV (FieldLV lv m) = pprLV lv ++ "." ++ m
+
+-- | Prefix the string to the first line of the given block.
 infirst :: String -> [String] -> [String]
 infirst x [] = [x]
 infirst x (l:ls) = (x ++ l) : ls
-
--- A statement is printed as a list of lines
+    
+-- | Pretty print a statement.
+-- A statement is printed as a list of lines to facilitate indenting.
 pprS :: Stmt -> [String]
 pprS (ReturnS (ValE VoidV)) = ["return;"]
-pprS (ReturnS x) = ["return " ++ prettya x ++ ";"]
-pprS (ExprS x) = [prettya x ++ ";"]
+pprS (ReturnS x) = ["return " ++ pretty x ++ ";"]
+pprS (ExprS x) = [pretty x ++ ";"]
 pprS (ReorderS xs) = concat [["reorder {"], map ("    " ++) (concatMap pprS xs), ["}"]]
-pprS (AssertS x) = ["assert " ++ prettya x ++ ";"]
-pprS (RepeatS n s) = infirst ("repeat (" ++ pretty n ++ ") ") (pprS s)
-pprS (ForS init cond incr b)
- = infirst ("for (" ++ pretty init ++ pretty cond ++ ";" ++ pretty incr ++ ") ") (pprS b)
+pprS (AssertS x) = ["assert " ++ pretty x ++ ";"]
+pprS (RepeatS n s) = infirst ("repeat (" ++ show n ++ ") ") (pprS s)
+pprS (ForS i cond incr b@(BlockS {}))
+  = infirst ("for (" ++ concat (pprS i) ++ " " ++ pretty cond ++ "; " ++ init (concat (pprS incr)) ++ ") ") (pprS b)
+pprS (ForS i cond incr b) = pprS (ForS i cond incr (BlockS [b]))
 pprS (WhileS c s) = infirst ("while (" ++ pretty c ++ ") ") (pprS s)
 pprS (DeclS ty vars) =
-  let pvars [(n, Nothing)] = pretty n
-      pvars [(n, Just v)] = pretty n ++ " = " ++ pretty v
-      pvars ((n, Nothing):xs) = pretty n ++ ", " ++ pvars xs
-      pvars ((n, Just v):xs) = pretty n ++ " = " ++ pretty v ++ ", " ++ pvars xs
+  let pvars [(n, Nothing)] = n
+      pvars [(n, Just v)] = n ++ " = " ++ pretty v
+      pvars ((n, Nothing):xs) = n ++ ", " ++ pvars xs
+      pvars ((n, Just v):xs) = n ++ " = " ++ pretty v ++ ", " ++ pvars xs
   in [pretty ty ++ " " ++ pvars vars ++ ";"]
-pprS (UpdateS lv ex) = [pretty lv ++ " = " ++ pretty ex ++ ";"]
+pprS (UpdateS lv ex) = [pprLV lv ++ " = " ++ pretty ex ++ ";"]
 pprS (BlockS xs) = concat [["{"], map ("   " ++) (concatMap pprS xs), ["}"]]
 pprS (IfS p a (BlockS []))
  = infirst ("if (" ++ pretty p ++ ") ") (pprS a)
@@ -133,36 +157,42 @@ pprS (IfS p a b)
      case (pprS a) of
         ls -> init ls ++ (infirst (last ls ++ " else ") (pprS b))
 
-instance Ppr Stmt where
+class Pretty a where
+   pretty :: a -> String
+
+instance Pretty Type where
+   pretty = pprT
+
+instance Pretty Value where
+   pretty = pprV
+
+instance Pretty Expr where
+   pretty = pprE 0
+
+instance Pretty Stmt where
    pretty s = unlines (pprS s)
 
-instance Ppr LVal where
-   pretty (VarLV nm) = pretty nm
-   pretty (ArrLV lv idx) = pretty lv ++ "[" ++ pretty idx ++ "]"
-   pretty (BulkLV lv lo w) = pretty lv ++ "[" ++ pretty lv ++ "::" ++ pretty w ++ "]"
-   pretty (FieldLV lv m) = pretty lv ++ "." ++ m
-
-instance Ppr Arg where
-   pretty (Arg nm ty False) = pretty ty ++ " " ++ pretty nm
-   pretty (Arg nm ty True) = pretty "ref " ++ pretty ty ++ " " ++ pretty nm
-
-instance Ppr Decl where
+instance Pretty Decl where
    pretty (FunD nm (Function oty xs body) kind) = 
-     pprkindl kind ++ pretty oty ++ " " ++ pretty nm ++ "(" ++ pretty xs ++ ")"
+     pprkindl kind ++ pretty oty ++ " " ++ nm ++ "(" ++ pretty xs ++ ")"
         ++ pprkindr kind ++ pretty body
-   pretty (VarD ty nm x) = pretty ty ++ " " ++ pretty nm ++ " = " ++ pretty x ++ ";"
+   pretty (VarD ty nm x) = pretty ty ++ " " ++ nm ++ " = " ++ pretty x ++ ";"
    pretty (StructD nm fields) =
      let f (n, ty) = pretty ty ++ " " ++ n ++ ";"
      in "struct " ++ nm ++ " {\n" ++ unlines (map (("  " ++) . f) fields) ++ "}"
 
-instance Ppr [Arg] where
+instance Pretty Arg where
+   pretty (Arg nm ty False) = pretty ty ++ " " ++ nm
+   pretty (Arg nm ty True) = "ref " ++ pretty ty ++ " " ++ nm
+
+instance Pretty [Arg] where
    pretty [] = ""
    pretty [x] = pretty x
    pretty (x:xs) = pretty x ++ ", " ++ pretty xs
 
-instance Ppr Program where
+instance Pretty Program where
    pretty p = unlines (map pretty (decls p))
-
+   
 pprkindl :: FunctionKind -> String
 pprkindl NormalF = ""
 pprkindl GeneratorF = "generator "
@@ -173,5 +203,5 @@ pprkindr :: FunctionKind -> String
 pprkindr NormalF = " "
 pprkindr GeneratorF = " "
 pprkindr HarnessF = " "
-pprkindr (WithSpecF v) = " implements " ++ pretty v ++ " "
+pprkindr (WithSpecF v) = " implements " ++ v ++ " "
 
