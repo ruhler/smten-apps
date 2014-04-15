@@ -102,6 +102,7 @@ evalS (DeclS ty vars) = {-# SCC "DeclS" #-} do
   let f (nm, mval) = do
           let defv = case ty of
                         t@(ArrT {}) -> pad t
+                        IntT -> IntV 0  -- TODO: not sure if this should be 0 or uninitialized
                         _ -> error $ "variable " ++ nm ++ " uninitialized"
           v0 <- evalE $ fromMaybe (ValE defv) mval
           insertVar nm v0

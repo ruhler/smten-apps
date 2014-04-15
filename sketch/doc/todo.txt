@@ -74,6 +74,10 @@ PERF3
 
 Features needed, by test case::
 
+tests/broken/expectfail/uninitint.smten.sk:
+  Sketch is not consistent about whether ints are initialized or not.
+  I assume they are initialized.
+
 tests/broken/miniTest78.sk: POOR_TYPE_BIT_LITERAL
 tests/broken/miniTest86.sk: WRONG ANSWER: says unsat
 tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?

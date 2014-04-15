@@ -1,0 +1,19 @@
+
+int sketch(int x) implements spec {
+   int t = ??;
+   if (t < 1) { 
+       return x;
+   } else {
+       return x + 1;
+   }
+}
+
+int spec(int x) {
+   int t;
+   if (t < 1) { 
+       return x;
+   } else {
+       return x + 1;
+   }
+}
+
