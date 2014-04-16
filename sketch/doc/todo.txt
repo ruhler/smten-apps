@@ -110,7 +110,18 @@ tests/broken/miniTestb492.sk:
 
 tests/broken/miniTestb456.sk: Hole in type?
 
-tests/broken/regex/*.sk: Support REGEX hole expressions.
+tests/broken/regex/*.sk:
+    b184.sk - a case we still fail to parse
+    b228.sk - c-preprocessor
+    b231.sk - HoleE in evaluation?
+    b270.sk - need to pretty print choiceE?
+    b301.sk - c-preprocessor
+    b358.sk - use \| as bitwise operator in {| ... |}
+    b383.sk - need to pretty print choiceE?
+    b418.sk - empty array in initializer
+    b460.sk - minrepeat statement
+    All others are just slow.
+
 tests/broken/structs/*.sk: STRUCTS
 tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/annotations/*.sk: support @ annotations.

@@ -283,6 +283,8 @@ regexpr :: { Expr }
         _ -> asTypeM $2 $ \ty -> CastE ty $4
     }
  | regexpr '(' regbinops ')' regexpr { binaryChoiceE $3 $1 $5 }
+ | regexpr '(' '.' regfieldlist ')'  { fieldChoiceE $1 $4 }
+ | regexpr '(' '.' regfieldlist ')' '?' { ChoiceE $1 (fieldChoiceE $1 $4) }
  | regexpr '&' regexpr    { BinaryE AndOp $1 $3 }
  | regexpr '<' regexpr    { BinaryE LtOp $1 $3 }
  | regexpr '>' regexpr    { BinaryE GtOp $1 $3 }
@@ -353,6 +355,9 @@ regbinops :: { [BinOp] }
  : binop { [$1] }
  | regbinops '|' binop { $1 ++ [$3] }
 
+regfieldlist :: { [Name] }
+ : id { [$1] }
+ | regfieldlist '|' '.' id { $1 ++ [$4] }
 
 regexprs :: { [Expr] }
  : { [] }       -- empty list is allowed

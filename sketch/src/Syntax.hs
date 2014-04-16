@@ -5,7 +5,7 @@ module Syntax (
     LVal(..), Stmt(..),
     Pointer(..), Value(..), BinOp(..), Expr(..), Arg(..), Function(..),
     functionT,
-    blockS, typeofV, arrayV, nullV, pad, binaryChoiceE,
+    blockS, typeofV, arrayV, nullV, pad, binaryChoiceE, fieldChoiceE,
     asLVal, asType,
     ) where
 
@@ -242,4 +242,9 @@ binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr
 binaryChoiceE [] a b = error "binaryChoiceE: no operators given"
 binaryChoiceE [x] a b = BinaryE x a b
 binaryChoiceE (x:xs) a b = ChoiceE (BinaryE x a b) (binaryChoiceE xs a b)
+
+fieldChoiceE :: Expr -> [Name] -> Expr
+fieldChoiceE e [] = error "fieldChoiceE: no fields given"
+fieldChoiceE e [m] = FieldE e m
+fieldChoiceE e (m:ms) = ChoiceE (FieldE e m) (fieldChoiceE e ms)
 

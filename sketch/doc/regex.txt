@@ -83,3 +83,22 @@ Bugs:
 Idea:
  * Could I always parse Expr, then just re-interpret '|' as ChoiceE instead
    of BinaryE when in the context of {| and |}?
+
+Wed Apr 16 14:38:52 EDT 2014
+
+The parser bug has been resolved.
+Next todo:
+
+* Support field choices:
+   foo(.a | .b)
+   foo(.a | .b)?
+
+1. backend support:
+   fieldChoiceE :: Expr -> Maybe [Name] -> Expr
+2. parser support:
+    Perhaps recognize '(' '.' as the start, then have a list:
+      id '|' '.' fieldlist
+    Then followed by optional '?'
+
+  And hopefully precedence works out okay.
+
