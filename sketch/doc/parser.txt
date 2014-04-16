@@ -1,0 +1,109 @@
+
+Wed Apr 16 10:50:53 EDT 2014
+
+Goal: understand and eliminate all conflicts (including shift/reduce) in the
+parser.
+
+First step: try and understand one of them, and see how it should be resolved.
+
+Parser state: I have just read an 'expr', I'm trying to form an 'expr', and I
+get another symbol.
+
+It would probably help to start with a simplified grammar, just to get a sense
+of how precedence shows up in the .info file.
+
+It appears there are different states depending on the operator just parsed.
+If the precedence is specified, then for, say, '+', a reduce will happen
+instead of a shift.
+
+The key, then, will be understanding the current state, because there are many
+rules with the state: I have just read an 'expr', I'm trying to form an
+'expr', and I get another symbol.
+
+
+Note: we are at 585 conflicts.
+Conflict to analyze:
+
+State 36
+  expr -> expr . '<'
+
+Conflict:
+A. shift, and enter state 66
+B. reduce using rule 78
+ Meaning expression is '--' expr
+
+Case:
+   --foo < bar
+
+Could be parsed as:
+A. (--foo) < bar
+B. --(foo < bar)
+
+Which does the parser actually do?
+How can I eliminate the conflict?
+How do I tell Happy that I want it to do (A)?
+
+The idea is: -- bounds more tightly than <.
+So -- should have higher precedence than <.
+
+How it does this:
+  '--' is the last terminal in the rule '--' expr
+  '<' is the next token.
+
+So, if I say precedence of '--' is higher, it should reduce.
+Default is to shift.
+
+I should be able to exhibit this as a bug.
+
+Yes! It's a bug. But I can fix it.
+
+Wed Apr 16 13:05:50 EDT 2014
+
+It worked. It's fixed.
+
+Next bugs:
+
+
+expr -> expr . '['
+
+Is either:
+A. shift, and enter state 63
+B. Reduce with 78
+
+Example:
+   --foo[x]
+
+Could be:
+A. --(foo[x])
+B. (--foo)[x]
+
+
+* --foo[x]      --(foo[x])  vs. (--foo)[x]
+* --foo.x       --(foo.x)   vs. (--foo).x
+* --foo++       --(foo++)   vs. (--foo)++
+* --foo--       --(foo--)   vs. (--foo)--
+* --foo+=       --(foo+=)   vs. (--foo)+=
+* --foo {|} bar     --(foo {|} bar)  vs. (--foo) {|} bar
+
+Wed Apr 16 13:41:06 EDT 2014
+
+I've reduced it to 4 conflicts:
+
+*  foo (...) bar
+    Where 'foo' is either:
+    A. The name of a function being called
+    B. foo is the first argument to a regex operator choice
+
+*  (foo) x
+    A. (foo) x is an expression with a type cast.
+    B. x is an identifier, which might be used as a function.
+
+*  for (foo [x] ...
+    A. foo[x] is a type, part of a declaration.
+    B. foo[x] is an expression being assigned a value.
+
+*  if/else conflict
+    if (p) if (q) b else c
+   Which 'if' does the 'else' attach to?
+
+

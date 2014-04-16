@@ -89,9 +89,11 @@ import Syntax
     integer { TkInteger $$ }
     string { TkString $$ }
 
-%left '||' '?'
+%nonassoc '??'
+%right '?' ':' '=' '+='
+%left '||'
 %left '&&'
-%left '|'
+%left '|' '{|}'     -- TODO: not sure about precedence of '{|}'
 %left '^'
 %left '&'
 %left '==' '!='
@@ -99,7 +101,8 @@ import Syntax
 %left '<<' '>>'
 %left '+' '-'
 %left '*' '%' '/'
-%right '!' '~'
+%right '!' '~' PREINC
+%left '.' '++' '--' '(' ')' '[' ']'
 
 %%
 
@@ -231,10 +234,10 @@ expr :: { Expr }
  | expr '^' expr    { BinaryE XorOp $1 $3 }
  | expr '>>' expr    { BinaryE ShrOp $1 $3 }
  | expr '<<' expr    { BinaryE ShlOp $1 $3 }
- | expr '++'         {% asLValM PostIncrE $1 }
- | expr '--'         {% asLValM PostDecrE $1 }
- | '++' expr         {% asLValM PreIncrE $2 }
- | '--' expr         {% asLValM PreDecrE $2 }
+ | expr '++' {% asLValM PostIncrE $1 }
+ | expr '--' {% asLValM PostDecrE $1 }
+ | '++' expr %prec PREINC  {% asLValM PreIncrE $2 }
+ | '--' expr %prec PREINC  {% asLValM PreDecrE $2 }
  | expr '+=' expr    {% asLValM (flip PlusEqE $3) $1 }
  | expr '{|}' expr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }
@@ -301,10 +304,10 @@ regexpr :: { Expr }
  | regexpr '^' regexpr    { BinaryE XorOp $1 $3 }
  | regexpr '>>' regexpr    { BinaryE ShrOp $1 $3 }
  | regexpr '<<' regexpr    { BinaryE ShlOp $1 $3 }
- | regexpr '++'         {% asLValM PostIncrE $1 }
- | regexpr '--'         {% asLValM PostDecrE $1 }
- | '++' regexpr         {% asLValM PreIncrE $2 }
- | '--' regexpr         {% asLValM PreDecrE $2 }
+ | regexpr '++'             {% asLValM PostIncrE $1 }
+ | regexpr '--'             {% asLValM PostDecrE $1 }
+ | '++' regexpr %prec PREINC {% asLValM PreIncrE $2 }
+ | '--' regexpr %prec PREINC {% asLValM PreDecrE $2 }
  | regexpr '+=' regexpr    {% asLValM (flip PlusEqE $3) $1 }
  | regexpr '{|}' regexpr   { BitChooseE UnknownT $1 $3 }
  | 'true'           { ValE (BitV True) }

@@ -1,0 +1,11 @@
+
+bit sketch(int in) implements spec {
+    int x = 3;
+    return --in < 3;
+}
+   
+bit spec(int in) {
+    int x = 3;
+    return (--in) < 3;
+}
+

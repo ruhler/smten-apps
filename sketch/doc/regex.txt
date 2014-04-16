@@ -62,7 +62,7 @@ Here's what I propose.
 3+ Switch to BinaryE 
     This should at least simplify things like genE and pprE, and shouldn't
     make anything harder.
-4. Add backend support for ChoiceOpE (should now be easy)
+4+ Add backend support for ChoiceOpE (should now be easy)
 5. Add backend support for ChoiceField (should be fairly easy)
 6+ Update that parser to parse these things.
    I think it will have to be yucky: duplicate expr as regexpr, with slight
@@ -73,3 +73,13 @@ Tue Apr 15 17:21:26 EDT 2014
 Initial support is working.
 There is a problem though: it seems to blow up very quickly.
 
+Tue Apr 15 17:50:19 EDT 2014
+
+Bugs:
+ * in parser, I think there's a conflict with AppE for regex which isn't
+   getting resolved properly: x (> | <) y  fails to parse, but
+                              2 (> | <) y  doesn't.
+
+Idea:
+ * Could I always parse Expr, then just re-interpret '|' as ChoiceE instead
+   of BinaryE when in the context of {| and |}?
