@@ -107,3 +107,20 @@ I've reduced it to 4 conflicts:
    Which 'if' does the 'else' attach to?
 
 
+Let me leave the if/else one for now.
+The others I should be able to fix.
+
+The trouble is using 'id' where something more general (expr) should be used.
+
+Wed Apr 16 14:33:30 EDT 2014
+
+Down to two: if/else, and:
+
+ '(' expr ')' x
+
+Which is either a type casted expression, or...?
+
+I'm not sure.
+
+Anyway, let's leave it there for now.
+

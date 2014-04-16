@@ -161,7 +161,7 @@ Clean::
 * Static phase does a lot of duplicated type evaluation.
   Perhaps do type evaluation in a dependency order kind of way using a state
   monad?
-* Understand and remove conflicts in parser.
+* Understand and remove conflicts in parser. (see doc/parser.txt)
 * TODO's inlined
 
 

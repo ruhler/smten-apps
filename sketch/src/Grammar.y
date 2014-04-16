@@ -2,7 +2,6 @@
 -- vim: ft=haskell
 {
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Grammar (parseSketch) where
 
 import Smten.Prelude
@@ -101,8 +100,8 @@ import Syntax
 %left '<<' '>>'
 %left '+' '-'
 %left '*' '%' '/'
-%right '!' '~' PREINC
-%left '.' '++' '--' '(' ')' '[' ']'
+%right '!' '~' PREINC ')'
+%left '.' '++' '--' '(' '['
 
 %%
 
@@ -196,8 +195,7 @@ initentries :: { [(Name, Expr)] }
 
 for_init :: { Stmt }
  : expr vardecls {% asTypeM $1 $ \ty -> DeclS ty $2 }
- | id '=' expr { UpdateS (VarLV $1) $3 }
- | id '[' expr ']' '=' expr { UpdateS (ArrLV (VarLV $1) $3) $6 }
+ | expr '=' expr {% asLValM (flip UpdateS $3) $1 }
 
 for_incr :: { Stmt }
  : id '=' expr { UpdateS (VarLV $1) $3 }
@@ -256,7 +254,7 @@ expr :: { Expr }
  | 'new' id '(' initentries ')' { NewE $2 $4 }
  | 'null' { ValE nullV }
  | '{' someexprs '}' { ArrayE $2 }
- | id '(' exprs ')' { AppE $1 $3 }
+ | expr '(' exprs ')' {% asVarM $1 $ \v -> AppE v $3 }
     -- The following rules allow types to be parsed as exprs:
  | 'bit' { VarE "bit" }
  | 'void' { VarE "void" }
@@ -325,7 +323,7 @@ regexpr :: { Expr }
  | 'new' id '(' reginitentries ')' { NewE $2 $4 }
  | 'null' { ValE nullV }
  | '{' regsomeexprs '}' { ArrayE $2 }
- | id '(' regexprs ')' { AppE $1 $3 }
+ | regexpr '(' regexprs ')' {% asVarM $1 $ \v -> AppE v $3 }
     -- The following rules allow types to be parsed as exprs:
  | 'bit' { VarE "bit" }
  | 'void' { VarE "void" }
@@ -398,6 +396,10 @@ asTypeM :: Expr -> (Type -> a) -> ParserMonad a
 asTypeM x f = case asType x of
                 Just ty -> return $ f ty
                 Nothing -> fail $ "expected type, but got: " ++ show x
+
+asVarM :: Expr -> (Name -> a) -> ParserMonad a
+asVarM (VarE nm) f = return $ f nm
+asVarM x f = fail $ "expected identifier, but got: " ++ show x
 
 
 }
