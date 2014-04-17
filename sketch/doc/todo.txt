@@ -92,13 +92,6 @@ tests/broken/miniTestb196.sk: support h_assert statement.
   After parsing of string literals is supported, probably just ignore the
   string argument and parse this as a normal assert.
 
-tests/broken/miniTestb208.sk,
-tests/broken/miniTest213ArrExpScaling.sk,
-tests/broken/miniTest215Choice.sk,
-tests/broken/miniTestb225.sk: C Preprocessor?
-  Sketch appears to perform C preprocessing on source files.
-  Can I do that too?
-
 tests/broken/miniTestb338.sk,
 tests/broken/miniTest208Globals.sk,
 tests/broken/miniTest209Globals.sk,
@@ -112,28 +105,26 @@ tests/broken/miniTestb456.sk: Hole in type?
 
 tests/broken/regex/*.sk:
     b184.sk - a case we still fail to parse
-    b228.sk - c-preprocessor
     b231.sk - HoleE in evaluation?
     b270.sk - need to pretty print choiceE?
-    b301.sk - c-preprocessor
-    b358.sk - use \| as bitwise operator in {| ... |}
     b383.sk - need to pretty print choiceE?
     b418.sk - empty array in initializer
     b460.sk - minrepeat statement
     All others are just slow.
 
-tests/broken/structs/*.sk: STRUCTS
-tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/annotations/*.sk: support @ annotations.
-tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
-tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/char/*.sk: CHAR_TYPE
+tests/broken/cpp/*.sk: C preprocessor needed
 tests/broken/double/*.sk: FLOATS
-tests/broken/include/*.sk: include keyword
+tests/broken/hfun/*.sk: higher order and local functions.
 tests/broken/implicit/*.sk: implicit arguments
-tests/broken/package/*.sk: package keyword
+tests/broken/include/*.sk: include keyword
 tests/broken/insertinto/*.sk: INSERT_INTO
+tests/broken/package/*.sk: package keyword
+tests/broken/static/*.sk: STATIC_EVAL
 tests/broken/stencil/*.sk: stencil keyword
+tests/broken/structs/*.sk: STRUCTS
+tests/broken/uninterp/*.sk: UNINTERPRETED_FUNCTION
 tests/broken/unknownN/*.sk: Global N not defined?
 
 Performance Bugs

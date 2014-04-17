@@ -16,7 +16,7 @@ import Smten.Data.Functor ((<$>))
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
   | TkOpenBrace | TkCloseBrace | TkOpenBraceBar | TkCloseBraceBar
-  | TkBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
+  | TkBar | TkEscBar | TkAmp | TkPlus | TkMinus | TkBang | TkTilde
   | TkStar | TkEquals | TkComma | TkDot | TkSemicolon | TkPercent | TkSlash
   | TkHat | TkLT | TkGT | TkLE | TkGE | TkBangEq | TkQuestionMark
   | TkDoubleQuestionMark | TkDoubleLt | TkDoubleGt | TkDoubleEq
@@ -83,6 +83,7 @@ doubles = [
     ("--", TkDoubleDash),
     ("+=", TkPlusEquals),
     ("||", TkDoubleBar),
+    ("\\|", TkEscBar),
     ("&&", TkDoubleAmp),
     ("::", TkDoubleColon),
     ("{|", TkOpenBraceBar),

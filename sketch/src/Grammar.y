@@ -30,6 +30,7 @@ import Syntax
     '{|'     { TkOpenBraceBar }
     '|}'     { TkCloseBraceBar }
     '|'     { TkBar }
+    '\|'    { TkEscBar }
     '&'     { TkAmp }
     '<'     { TkLT }
     '>'     { TkGT }
@@ -92,7 +93,7 @@ import Syntax
 %right '?' ':' '=' '+='
 %left '||'
 %left '&&'
-%left '|' '{|}'     -- TODO: not sure about precedence of '{|}'
+%left '|' '\|' '{|}'     -- TODO: not sure about precedence of '{|}'
 %left '^'
 %left '&'
 %left '==' '!='
@@ -299,6 +300,7 @@ regexpr :: { Expr }
  | regexpr '%' regexpr    { BinaryE ModOp $1 $3 }
  | regexpr '/' regexpr    { BinaryE DivOp $1 $3 }
  | regexpr '|' regexpr    { ChoiceE $1 $3 }
+ | regexpr '\|' regexpr    { BinaryE OrOp $1 $3 }
  | regexpr '||' regexpr    { BinaryE LOrOp $1 $3 }
  | regexpr '&&' regexpr    { BinaryE LAndOp $1 $3 }
  | regexpr '^' regexpr    { BinaryE XorOp $1 $3 }
@@ -342,6 +344,7 @@ binop :: { BinOp }
  | '>=' { GeOp }
  | '==' { EqOp }
  | '!=' { NeqOp }
+ | '\|' { OrOp }
  | '||' { LOrOp }
  | '^' { XorOp }
  | '*' { MulOp }
