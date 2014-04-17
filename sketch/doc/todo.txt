@@ -3,10 +3,6 @@ Features::
 STRUCTS
   * Support unboxed structs, with syntax |Foo| for the type.
 
-REGEX
-  * Support regex holes
-    see doc/regex.txt
-
 UNINTERPRETED_FUNCTION
   * Support: int moo(int x);   at top level.
   Not sure how to implement this.
@@ -102,15 +98,15 @@ tests/broken/miniTestb492.sk:
   Support use of global variables in normal code, not just type declarations.
 
 tests/broken/miniTestb456.sk: Hole in type?
+tests/broken/miniTestb231.sk: Hole in type?
 
-tests/broken/regex/*.sk:
-    b184.sk - a case we still fail to parse
-    b231.sk - HoleE in evaluation?
-    b270.sk - need to pretty print choiceE?
-    b383.sk - need to pretty print choiceE?
-    b418.sk - empty array in initializer
-    b460.sk - minrepeat statement
-    All others are just slow.
+tests/broken/miniTestb460.sk: minrepeat statement
+
+tests/broken/miniTestb418.sk - empty array in initializer (parser bug)
+tests/broken/miniTestb184.sk - support regex update:
+  {| q(.a | .b) |} = n;
+  Perhaps by making assignment an expression instead of a statement
+  (but do check if that's allowed in general or not).
 
 tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/char/*.sk: CHAR_TYPE
@@ -158,6 +154,10 @@ tests/broken/slow/miniTestb280.sk: slow: why?
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
 tests/broken/slow/miniTestb366.sk: blowup of int possibilities
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
+tests/broken/slow/regex/*.sk: slow regex examples
+  Perhaps because we enumerate the whole space with ChoiceE before
+  making it symbolic? Would it be better to represent the choices
+  explicitly in the syntax and let symbolic merge things?
 
 Clean::
 * Static phase does a lot of duplicated type evaluation.
