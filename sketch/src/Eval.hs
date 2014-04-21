@@ -177,8 +177,8 @@ evalE (BinaryE LOrOp a b) = {-# SCC "LOrE" #-} do
             b' <- evalE b
             case b' of
                 BitsV bv -> return $ BitsV (av `orB` bv)
-evalE (BinaryE AddOp a b) = liftM2 (+) (evalE a) (evalE b)
-evalE (BinaryE SubOp a b) = liftM2 (-) (evalE a) (evalE b)
+evalE (BinaryE AddOp a b) = {-# SCC "AddE" #-} liftM2 (+) (evalE a) (evalE b)
+evalE (BinaryE SubOp a b) = {-# SCC "SubE" #-} liftM2 (-) (evalE a) (evalE b)
 evalE (BinaryE LtOp a b) = BitV <$> liftM2 (<) (evalE a) (evalE b)
 evalE (BinaryE GtOp a b) = BitV <$> liftM2 (>) (evalE a) (evalE b)
 evalE (BinaryE LeOp a b) = BitV <$> liftM2 (<=) (evalE a) (evalE b)

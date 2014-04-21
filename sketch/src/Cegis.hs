@@ -27,6 +27,7 @@ cegis :: Symbolic ProgramInput -> Symbolic Program -> [ProgramInput] -> (Program
 cegis freeX freeC xs p = do
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.
+  liftIO $ putStrLn ("searching for candidate satisfying: " ++ show xs)
   rc <- query $ do
       c <- freeC
       assert (all (p c) xs)

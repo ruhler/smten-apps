@@ -60,6 +60,9 @@ PERF3
  argument to &&? Something like: predicated evaluation of the second argument.
  It only can cause failure if the predicate is true? That may or may not help.
 
+PERF4
+ See doc/perf4.txt
+
 Features needed, by test case::
 
 Sketch Inconsistencies
@@ -106,7 +109,8 @@ tests/broken/miniTestb418.sk - empty array in initializer (parser bug)
 tests/broken/miniTestb184.sk - support regex update:
   {| q(.a | .b) |} = n;
   Perhaps by making assignment an expression instead of a statement
-  (but do check if that's allowed in general or not).
+  Note: sketch doesn't support (foo = bar) as an expression.
+  This doesn't necessarily mean I can't.
 
 tests/broken/annotations/*.sk: support @ annotations.
 tests/broken/char/*.sk: CHAR_TYPE
@@ -132,6 +136,7 @@ tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 
 tests/broken/slow/perf3.smten.sk: PERF3
+tests/broken/slow/perf4.smten.sk: PERF4
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW

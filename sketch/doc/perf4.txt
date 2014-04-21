@@ -1,0 +1,123 @@
+
+Mon Apr 21 13:36:23 EDT 2014
+
+Performance Bug:
+    int test(int x) {
+       if (x > 5) return x;
+       return 2;
+    }
+
+    int spec(int x)implements test{
+        if({| x > ?? |}) return {| x (+|-) ?? | ?? |};
+        return 2;
+    }
+
+If the return expression is changed to:
+    {| x (+-) ?? |}
+then it finishes reasonably quickly.
+
+Otherwise stack overflow when trying to synthesize a candidate program which
+satisfies x = 31.
+
+Why so hard?
+
+I expect: exponential blowup?
+
+How many choices are there?
+
+32 * 2 * 32 * 2 & 32 = 2 ^ 17 = 131072.
+
+Maybe this should be blowing up?
+
+Let me tune the size of the holes to see how that helps.
+
+All the time is in LAND according to profiling?
+That's odd, considering there is no LAndE here.
+
+Let me shrink the problem, see how it helps, and what blows up.
+
+Mon Apr 21 13:57:52 EDT 2014
+
+Even simpler problem:
+
+int test(bit x) {
+   return 2;
+}
+
+int spec(bit x)implements test{
+   int a = ??(2);
+   return {| 1 + a | a |};
+}
+
+How could this possibly be blowing up?
+
+Initial candidate:
+  int a = 3
+  return a;
+
+Counter example:
+  x = false
+
+Next candidate:
+  gets stuck.
+
+And why does it say all the time is in LAndE?
+
+Could this be the same as perf3.txt?
+
+We don't know for sure what the operator is.
+
+Yes. I can make the program even simpler:
+
+int spec(bit x)implements test{
+   int a = 3;
+   return {| 3 + a | a |};
+}
+
+Now, we return either:
+    BinaryE AddOp (ValE (IntV 3)) (VarE "a")
+or: VarE "a"
+
+So we must evaluate.
+  BinaryE with p
+  VarE with not p
+  everything else False.
+
+  AddOp with ite p true unreachable = true, right?
+  LAndOp with False, right?
+
+This should not blow up. I don't think.
+
+LAndE does a case on 'a'. Why does that matter?
+Why do we not know that this can't happen?
+
+What I need to do is understand what the symbolic expression looks like.
+Can I print it somehow?
+
+I do the following:
+  a' <- genE (BinaryE AddOp (ValE (IntV 3)) (VarE "a"))
+  b' <- genE (VarE "a")
+  liftSymbolic $ mplus (return a') (return b')
+
+What do I get?
+
+a' = BinaryE AddOp (ValE (IntV 3)) (VarE "a")
+b' = VarE "a"
+
+If I do mplus, I get:
+
+Here's one potential issue: in generateE, the returned state is potentially
+symbolic. But I don't want that. Could that be the problem?
+
+What I want is: Run generate, that returns a Symbolic Program (not a Symbolic
+state!). Right?
+
+Except, some things might effect the state?
+
+But nothing symbolic, right?
+
+That's something worth trying to fix.
+Only values should by symbolic, not the actual generate process.
+
+Let me try that, and see if it helps anything.
+
