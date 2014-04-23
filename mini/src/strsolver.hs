@@ -2,7 +2,6 @@
 -- Example of a string constraint solver in Smten.
 
 import Smten.Prelude
-import Smten.Control.Monad
 import Smten.Search
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.Yices2
@@ -30,7 +29,7 @@ match2 a b (sa, sb) = match a sa && match b sb
 splits :: [Int] -> [a] -> [([a], [a])]
 splits ns x = map (\n -> splitAt n x) ns
 
-data Template = Str String | Cat Template Template | Free Int Int
+data Template = Str String | Cat Template Template | Free Int
 
 choose :: [a] -> Space a
 choose [] = empty
@@ -43,10 +42,11 @@ mkString (Cat ta tb) = do
   a <- mkString ta
   b <- mkString tb
   single (a ++ b)
-mkString (Free l h) = do
-  chars <- replicateM h (choose ['a'..'z'])
-  w <- choose [l..h]
-  single (take w chars)
+mkString (Free 0) = single ""
+mkString (Free w) = do
+  hd <- choose ['a'..'z']
+  tl <- mkString (Free (w-1))
+  single (hd : tl)
 
 mkSolution :: Template -> RegEx -> Space String
 mkSolution t r = do
@@ -65,7 +65,7 @@ solve t r = do
 
 main :: IO ()
 main = do
-  let t = Cat (Str "ab") (Cat (Free 2 2) (Str "cd"))
+  let t = Cat (Str "ab") (Cat (Free 2) (Str "cd"))
       r = Concat (Star (Concat (Atom 'a') (Atom 'b')))
                  (Star (Concat (Atom 'c') (Atom 'd')))
   solve t r
