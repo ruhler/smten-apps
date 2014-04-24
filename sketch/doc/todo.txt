@@ -180,13 +180,11 @@ gallery/isolateRightmost.sk: SLOW
   Answer: most likely before, but currently I do it after.
 gallery/jburnim_morton.sk: FINISHES
 gallery/karatsuba.sk: UNKNOWN_N
-gallery/listReverse.sk: REGEX_PARSER
-  {| null | ((l1 | l2)(.head | .tail) )(.next)? |} doesn't parse.
+gallery/listReverse.sk: REGEX_UPDATE
 gallery/log2.sk: comma in global DeclS:
    int W = 32, logW = 5;
 gallery/logcount.sk: FINISHES
-gallery/lss.sk: REGEX_PARSER
-    {| (sum | psum | ??) (+|-) (sum | psum | ??) |}
+gallery/lss.sk: SLOW: memory blowup
 gallery/parity.sk: FINISHES
 gallery/partition.cpped.sk: LOCAL_GEN
 gallery/polynomial.sk: FINISHES

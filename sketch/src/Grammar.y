@@ -274,15 +274,6 @@ someexprs :: { [Expr] }
 -- '|' is interpreted as choice, not bitwise OR.
 regexpr :: { Expr }
  : '(' regexpr ')'     { $2 }
- | '(' regexpr ')' regexpr {%
-      -- $4 might be of the form (-e), in which case
-      -- $2 should be treated as an expression, and this overall as
-      -- a subtract expression. Otherwise $2 is a type, and this is
-      -- a cast.
-      case $4 of
-        BinaryE SubOp (ValE (IntV 0)) x -> return (BinaryE SubOp $2 x)
-        _ -> asTypeM $2 $ \ty -> CastE ty $4
-    }
  | regexpr '(' regbinops ')' regexpr { binaryChoiceE $3 $1 $5 }
  | regexpr '(' '.' regfieldlist ')'  { fieldChoiceE $1 $4 }
  | regexpr '(' '.' regfieldlist ')' '?' { ChoiceE $1 (fieldChoiceE $1 $4) }

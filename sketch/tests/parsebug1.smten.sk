@@ -1,0 +1,16 @@
+
+struct foo{
+    foo next;
+	int val;	
+}
+
+int spec(int x){
+	return x;
+}
+
+int sketch(int x) implements spec{
+    foo n = new foo(val=x, next=null);
+    foo nx = {| (n)(.next)?  |};
+	return nx.val;
+}
+
