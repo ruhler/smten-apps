@@ -167,6 +167,14 @@ staticLV (FieldLV lv m) = do
             | otherwise -> error $ m ++ " is not a field of struct type " ++ nm
            _ -> error $ nm ++ " does not a struct type"
       _ -> error $ "field update expected struct type, but found type: " ++ show t
+staticLV (ChoiceLV a b) = do
+    (lva, ta) <- staticLV a
+    (lvb, tb) <- staticLV b
+    if (ta == tb)
+       then return ()
+       else error $ "types don't match in LV choice: " ++ show ta ++ " vs. " ++ show tb
+    return (ChoiceLV lva lvb, ta)
+ 
 
 
 instance Static Expr where

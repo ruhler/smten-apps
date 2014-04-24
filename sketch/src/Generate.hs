@@ -143,6 +143,10 @@ genLV (BulkLV lv lo w) = liftM3 BulkLV (genLV lv) (genE lo) (genE w)
 genLV (FieldLV lv m) = do
   lv' <- genLV lv
   return $ FieldLV lv' m
+genLV (ChoiceLV a b) = do
+  a' <- genLV a
+  b' <- genLV b
+  liftSymbolic $ mplus (return a') (return b')
 
 genE :: Expr -> GM Expr
 genE (BinaryE op a b) = liftM2 (BinaryE op) (genE a) (genE b)

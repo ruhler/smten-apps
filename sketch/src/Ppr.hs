@@ -127,6 +127,7 @@ pprLV (VarLV nm) = nm
 pprLV (ArrLV lv idx) = pprLV lv ++ "[" ++ pretty idx ++ "]"
 pprLV (BulkLV lv lo w) = pprLV lv ++ "[" ++ pretty lo ++ "::" ++ pretty w ++ "]"
 pprLV (FieldLV lv m) = pprLV lv ++ "." ++ m
+pprLV (ChoiceLV a b) = "{|" ++ pprLV a ++ " | " ++ pprLV b ++ "|}"
 
 -- | Prefix the string to the first line of the given block.
 infirst :: String -> [String] -> [String]

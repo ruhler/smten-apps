@@ -10,6 +10,7 @@ module Syntax (
     ) where
 
 import Smten.Prelude
+import Smten.Control.Monad
 
 import Bits
 
@@ -166,6 +167,7 @@ data LVal = VarLV Name                  -- foo
           | ArrLV LVal Expr             -- foo[i]
           | BulkLV LVal Expr Expr       -- foo[lo::N]
           | FieldLV LVal Name           -- foo.bar
+          | ChoiceLV LVal LVal          -- {| foo | bar |}
     deriving (Show)
 
 -- Convert an expression to its corresponding LVal.
@@ -180,6 +182,7 @@ asLVal (BulkAccessE arr lo w) = do
 asLVal (FieldE x nm) = do
     lv <- asLVal x
     return (FieldLV lv nm)
+asLVal (ChoiceE a b) = liftM2 ChoiceLV (asLVal a) (asLVal b)
 asLVal _ = Nothing
 
 -- Types are parsed as expressions to avoid conflicts. This
