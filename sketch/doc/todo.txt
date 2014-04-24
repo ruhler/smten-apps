@@ -106,7 +106,7 @@ tests/broken/miniTestb231.sk: Hole in type?
 tests/broken/miniTestb460.sk: minrepeat statement
 
 tests/broken/miniTestb418.sk - empty array in initializer (parser bug)
-tests/broken/miniTestb184.sk - support regex update:
+tests/broken/miniTestb184.sk - REGEX_UPDATE:
   {| q(.a | .b) |} = n;
   Perhaps by making assignment an expression instead of a statement
   Note: sketch doesn't support (foo = bar) as an expression.
@@ -163,6 +163,49 @@ tests/broken/slow/regex/*.sk: slow regex examples
   Perhaps because we enumerate the whole space with ChoiceE before
   making it symbolic? Would it be better to represent the choices
   explicitly in the syntax and let symbolic merge things?
+
+Gallery
+-------
+gallery/Pollard.sk: memory blowup
+gallery/SetTest.cpped.sk: REGEX_UPDATE
+gallery/compress.sk: FINISHES
+gallery/diagStencil.sk: STENCIL
+gallery/diagStencilClean.sk: STENCIL
+gallery/doublyLinkedList.sk: REGEX_UPDATE
+gallery/enqueueSeqSK.sk: REGEX_UPDATE
+gallery/isolateRightmost.sk: SLOW
+  Looks like it's making an exponential tree of generators (tens of
+  thousands), which is just leading to very large queries.
+  Question: are generators inlined before or after regex choice?
+  Answer: most likely before, but currently I do it after.
+gallery/jburnim_morton.sk: FINISHES
+gallery/karatsuba.sk: UNKNOWN_N
+gallery/listReverse.sk: REGEX_PARSER
+  {| null | ((l1 | l2)(.head | .tail) )(.next)? |} doesn't parse.
+gallery/log2.sk: comma in global DeclS:
+   int W = 32, logW = 5;
+gallery/logcount.sk: FINISHES
+gallery/lss.sk: REGEX_PARSER
+    {| (sum | psum | ??) (+|-) (sum | psum | ??) |}
+gallery/parity.sk: FINISHES
+gallery/partition.cpped.sk: LOCAL_GEN
+gallery/polynomial.sk: FINISHES
+gallery/registerlesSwap.sk:  MINREPEAT
+gallery/reverse.sk: SLOW
+  looks like it will finish, just slow. Maybe 2 hours?
+gallery/signedAvg.sk: UNKNOWN_N
+gallery/sort.included.sk: LOCAL_GEN
+gallery/talbeBasedAddition.sk: STATIC
+  Static evaluation on local variables:
+  int exp = 1 << W*2;
+  bit [W*exp] tmp = ...
+gallery/tutorial1.sk: FINISHES
+gallery/tutorial2.sk: SLOW: memory blowup
+  Because of int arithmetic blowup?
+gallery/tutorial3.sk: SLOW: memory blowup
+  Because of int arithmetic blowup?
+gallery/xpose.sk: SLOW: memory blowup
+ 
 
 Clean::
 * Static phase does a lot of duplicated type evaluation.

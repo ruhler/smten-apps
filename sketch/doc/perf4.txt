@@ -121,3 +121,124 @@ Only values should by symbolic, not the actual generate process.
 
 Let me try that, and see if it helps anything.
 
+Mon Apr 21 15:38:43 EDT 2014
+
+No. That doesn't even make sense.
+
+But I have minimized the test case using "perf".
+
+It really is just from evalE where the expression is either (1+a) or a, and it
+has to equal a:
+
+  r <- run_symbolic solver $ do
+     e <- mplus (return $ BinaryE AddOp (ValE (IntV 1)) (VarE "a")) (return $ VarE "a")
+     let env = Map.empty
+         run = do
+            insertVar "a" (IntV 3)
+            evalE e
+         res = runEvalM env Map.empty run
+     Smten.Symbolic.assert (Just (IntV 3) == res) 
+
+Let me walk through it by hand then:
+
+Goal 1:
+    e = ite p (BinaryE AddOp (ValE (IntV 1)) (VarE "a")) (VarE "a")
+
+BinaryE AddOp (valE (IntV 1)) = 
+  Expr {
+    gdBinaryE = trueF,
+    flBinaryE1 = BinOp {
+       gdAddOp = trueF,
+       gd* = falseF
+    }
+    flBinaryE2 = Expr {
+       gdValE = trueF,
+       flValE1 = Value {
+           gdIntV = trueF,
+           flIntV = 1,
+           gd* = falseF,
+           fl* = unreachable
+         }
+       gd* = falseF,
+       fl* = unreachable
+    }
+    flBinaryE3 = Expr {
+       gdVarE = trueF,
+       flVarE = "a",
+       gd* = falseF,
+       fl* = unreachable
+    }
+    gd* = falseF,
+    fl* = unreachable
+}
+
+VarE "a" = Expr {
+   gdVarE = trueF,
+   flVarE = "a",
+   gd* = falseF,
+   fl* = unreachable
+}
+
+
+Aha, some new information:
+ I can remove the var lookups and still see the problem, but only if we 
+ have an insertVar before doing the evaluation.
+
+Profiling still says the time is spent in LAnd.
+This must mean, for some reason, we think LAnd is possible.
+And somehow we are getting stuck there.
+Why?
+
+If I remove everything from myevalE except ValE and Add, it works fine.
+There must be a stray path I'm following.
+
+There are two questions:
+1. What is the stray path?
+2. Why are we following that path?
+
+1. My bets are on LAndE...
+But I should be able to find it relatively easily I think.
+
+Looks like NotE is somehow important? Why would that be?
+
+Yes: If all I do is comment out the NotE branch, everything works fine.
+If the NotE branch is included, we get a stack overflow.
+
+But it's not just NotE. Other expressions can effect it too?
+
+We need:
+  NotE, ArrayE, ValE, AddE, CondE,
+  PostIncrE, PostDecrE, PreIncrE, PreDecrE,
+
+It almost seems like we need to have one of every kind of Expr constructor.
+
+That way... if one of them is missing, we give an explicit error.
+
+Hypothesis:
+  When having exactly 2 possible constructors, we don't realize the last 
+  is unreachable: we ignore its guard value and take it as the default.
+
+I should be able to test this: put one of Add or ValE last, and I bet the
+blowup goes away, because it's no longer possible for AppE?
+
+No. Moving ValE to the end changes nothing.
+
+But, what if I do change smten for Case to emit an extra branch:
+  use unreachable for default?
+
+
+Well, that change makes a difference in this specific case.
+What effect does it have more broadly though? Because I feel like I've tried
+this before and decided it was a bad idea.
+
+Does sketch still work? Yes. No apparent difference.
+Does perf4 now work? Yes.
+Does the slow regex now work? No.
+What about the other smten benchmarks?
+  Shampi: suffers noticeably (about a second slower on each configuration)
+
+Hmm... What should I do about this?
+
+I think... for now, keep the change in Smten, work on Sketch with that fix, so
+at least I'm not distracted by it, then go from there.
+

@@ -14,7 +14,7 @@ import Options
 import Program
 import Syntax
 
--- Given a program with explicit holes, generate a corrisponding symbolic
+-- Given a program with explicit holes, generate a corresponding symbolic
 -- candidate program without holes.
 generate :: Options -> Program -> Symbolic Program
 generate opts p = do

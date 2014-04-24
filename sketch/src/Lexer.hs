@@ -141,6 +141,7 @@ lex = do
       [] -> return TkEOF
       ('/':'*':cs) -> put (closeblockcomment cs) >> lex
       ('/':'/':cs) -> put (dropWhile (/= '\n') cs) >> lex
+      ('#':' ':cs) -> put (dropWhile (/= '\n') cs) >> lex
       (a:b:c:cs) | Just tok <- lookup [a, b, c] triples -> put cs >> return tok
       (a:b:cs) | Just tok <- lookup [a, b] doubles -> put cs >> return tok
       (c:cs) | Just tok <- lookup c singles -> put cs >> return tok

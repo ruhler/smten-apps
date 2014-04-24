@@ -4,7 +4,6 @@ int test(bit x) {
 }
 
 int spec(bit x)implements test{
-   int a = 3;
-   return {| 3 + a | a |};
+   return {| 5 + 2 | 4 |};
 }
 
