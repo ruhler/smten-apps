@@ -207,8 +207,7 @@ gallery/SetTest.cpped.sk: UNINTERP
 gallery/compress.sk: FINISHES
 gallery/diagStencil.sk: STENCIL
 gallery/diagStencilClean.sk: STENCIL
-gallery/doublyLinkedList.sk: REGEX_PARSER
-    field lists can contain arbitrary lvals, not just names.
+gallery/doublyLinkedList.sk: SLOW: memory blowup
 gallery/enqueueSeqSK.sk: MINREPEAT
 gallery/isolateRightmost.sk: SLOW
   Looks like it's making an exponential tree of generators (tens of

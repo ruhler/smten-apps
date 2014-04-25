@@ -70,3 +70,37 @@ But, that's not the big problem I'm seeing, so let me not worry about it.
 I suspect the problem is... because of the conditional early exit, we loose
 alignment.
 
+Fri Apr 25 15:27:34 EDT 2014
+
+The count depends on the condition of the if statement.
+This means the number of possible results depends on the number of iterations.
+
+Let me try walking through by hand, and see if anything obvious comes up.
+Note that we are in a state monad.
+
+Let me simplify the problem.
+In fact, I suspect I could capture it easily in perf.
+
+Give me a state monad with Int state (for x).
+Do the while loop. See what happens.
+
+Yes, I would like to replicate this.
+
+Fri Apr 25 15:45:54 EDT 2014
+
+I tried using a state monad with the state an Int, but that doesn't seem to
+blow up as much as it does in sketch. Why is that?
+
+Do you think it could have anything to do with using Data.Map for local
+variables?
+
+What if I used a different structure, which captured sharing better in
+conditional updates?
+
+For example... an association list updated at the back?
+
+But really, that shouldn't matter at all, because the structure of the map is
+fixed as long as I don't introduce new variables.
+
+No. I should replicate the problem better first before suggesting solutions.
+

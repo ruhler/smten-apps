@@ -7,11 +7,9 @@ import Smten.Symbolic.Solver.Yices2
 import qualified Smten.Data.Map as Map
 import EvalMonad
 
-import Bits
 import Eval
 import Syntax
 import Options
-import Program
 
 insertX :: String -> v -> State (Map.Map String v) ()
 insertX  k v = modify $ Map.insert k v
@@ -59,6 +57,43 @@ perf4 = do
      Smten.Symbolic.assert (Just (IntV 3) == res) 
   putStrLn $ show r
 
-main = perf4
+perf5 :: IO ()
+perf5 = do
+  let solver = yices2
+
+      spec :: State Int Int
+      spec = do
+        x1 <- get
+        if (x1 < 3)
+          then do
+            x2 <- get
+            return (x2-1)
+          else do
+            x3 <- get
+            if (x3 < 6)
+                then return 1
+                else get
+
+      sketch :: State Int Int
+      sketch = do
+        x1 <- get
+        if (x1 < 6)
+          then do
+            put (x1-1)
+            x2 <- get
+            if (x2 < 2)
+              then get
+              else sketch
+          else get
+
+  r <- run_symbolic solver $ do
+     x <- msum (map return [0..50])
+     let got = evalState sketch x
+         wnt = evalState spec x
+     guard (not $ {-# SCC "EQ" #-} got == wnt)
+     return (x, (wnt, got))
+  putStrLn $ show r
+
+main = perf5
 
 

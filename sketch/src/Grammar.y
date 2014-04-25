@@ -349,9 +349,13 @@ regbinops :: { [BinOp] }
  : binop { [$1] }
  | regbinops '|' binop { $1 ++ [$3] }
 
-regfieldlist :: { [Name] }
- : id { [$1] }
- | regfieldlist '|' '.' id { $1 ++ [$4] }
+regfieldlist :: { [Member] }
+ : regfield { [$1] }
+ | regfieldlist '|' '.' regfield { $1 ++ [$4] }
+
+regfield :: { Member }
+ : id { FieldM $1 }
+ | regfield '.' id { SubM $1 $3 }
 
 regexprs :: { [Expr] }
  : { [] }       -- empty list is allowed
