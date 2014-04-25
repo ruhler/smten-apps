@@ -17,4 +17,3 @@ int[N] testSK0(int N, int[N] in) implements test0 {
   return out;
 }
 
-    

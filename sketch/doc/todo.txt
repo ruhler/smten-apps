@@ -14,6 +14,47 @@ UNINTERPRETED_FUNCTION
   if x1 = x2 then y1 = y2
   etc...
 
+UNKNOWN_N
+  * Support unknown array bounds?
+  This happens when N is used for an array width, and where N is a dynamic
+  value (computed locally, or an input to the function).
+
+  The real question is: why do we have to evaluate N statically?
+  When do we need to know the width of an array statically?
+
+  If we don't, then I say just don't evaluate it statically, then everything
+  should work fine.
+
+  Reasons we need the width statically known:
+  * CastE will need to evaluate the width (this can be done dynamically)
+  * icast needs the width evaluated (this can be done dynamically)
+  * mkFreeArg needs to know the width
+     So there is some dependency in the order you do mkFreeArg:
+      Scalars first, then arrays?
+      Can it even be sorted in some reasonable order?
+  * to check bulk update width bounds statically (we can just skip this I suppose)
+  * to statically pad array values (why not do this dynamically?)
+  * to statically check array widths (we can just skip this?)
+  * to properly pad an array
+
+  In summary, looks like the only problem is with mkFreeArg, trying to order
+  the arguments properly. Perhaps I can assume the go left to right and be
+  okay. I just need to put previous arguments in scope of later arguments.
+  Yes: I double checked, this is what the language reference says.
+  The scope of the type is: arguments to the left. And all arguments are in
+  the scope of the output type.
+
+  Steps to fix:
+  1. Remove static evaluation of types, and fix problems so that all test
+     cases still work.
+  2. Do the fix to mkFreeArg
+  That's it. Everything should work out fine then.
+
+  Actually: I should think some more about how to deal with arrays.
+   Idea: We pad when we make an ArrayV based on desired type, and don't do
+         any other implicit cast between arrays of the same value type (but
+         possibly different widths?)
+
 FLOATS
   Support double and float.
 
@@ -60,8 +101,8 @@ PERF3
  argument to &&? Something like: predicated evaluation of the second argument.
  It only can cause failure if the predicate is true? That may or may not help.
 
-PERF4
- See doc/perf4.txt
+PERF5
+ See doc/perf5.txt
 
 Features needed, by test case::
 
@@ -131,7 +172,7 @@ tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
 tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
 
 tests/broken/slow/perf3.smten.sk: PERF3
-tests/broken/slow/perf4.smten.sk: PERF4
+tests/broken/slow/perf5.smten.sk: PERF5
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW

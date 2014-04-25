@@ -1,0 +1,72 @@
+
+Fri Apr 25 14:25:50 EDT 2014
+
+Performance bug:
+
+    int test(int x) {
+        while(x < 6){
+            x = x-1;
+            if(x < 3) return x;		
+        }	
+        
+        return x;	
+    }
+
+    int spec(int x)implements test{
+        if(x < 4) return (x-1);
+        if(x < 6) return 2;
+        return x;
+    }
+
+Why?
+
+Is there a way I can simplify it any?
+
+Fri Apr 25 14:25:44 EDT 2014
+
+Looks to be a correctness bug actually: return inside a while loop.
+Let me try to take care of that.
+
+Fri Apr 25 14:31:18 EDT 2014
+
+Fixed the correctness bug. Now it's a performance bug:
+  We can see it scales poorly with bnd-inbits.
+  --bnd-inbits of 3 is okay, --bnd-inbits of 4 is slow.
+
+Profile says:
+
+All the time is in integer equality, specifically, itePF_.
+Note: we have 308975 integer equality operations.
+Where does that come from? That seems like way too many.
+
+I would expect: 8*8 = 64 to be enough...
+
+I bet I can simplify this?
+
+With inbits = 2, we have 
+1 (==) requires 16 PRIM_INT_EQ
+
+This makes sense:
+  inbits = 2 means 4 possible values for x.
+  Run sketch: gives 4 results.
+  Run spec: gives 4 results.
+  Cross product: gives 16.
+
+With inbits = 3, we have
+1 (==) requires 308976 PRIM_INT_EQ 
+  inbits = 3 means 8 possible values for x.
+  Run sketch: gives 8 results.
+  Run spec: gives 8 results.
+  Cross product: gives 64.
+
+Let me see if I can simplify this.
+
+If we don't compute anything, then I get the expected number of comparisons.
+Not that the expected number is good.
+Ideally we could do just one comparison if we used bit vectors or integers.
+
+But, that's not the big problem I'm seeing, so let me not worry about it.
+
+I suspect the problem is... because of the conditional early exit, we loose
+alignment.
+

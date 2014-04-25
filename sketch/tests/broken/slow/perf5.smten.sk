@@ -1,0 +1,19 @@
+
+pragma options "--bnd-inbits 4";
+
+int test(int x) {
+	
+	while(x < 6){
+		x = x-1;
+		if(x < 3) return x;		
+	}	
+	
+	return x;	
+}
+
+int spec(int x)implements test{
+	if(x < 4) return (x-1);
+	if(x < 6) return 2;
+	return x;
+}
+

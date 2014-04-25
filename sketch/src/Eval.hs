@@ -115,8 +115,10 @@ evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
   case c' of
     BitV False -> return OK
     BitV True -> do
-      evalS s   -- TODO: if this statement returns, should we break out of the loop?
-      evalS w
+      ret <- evalS s
+      case ret of
+        OK -> evalS w
+        RET v -> return ret
 evalS (DeclS ty vars) = {-# SCC "DeclS" #-} do
   let f (nm, mval) = do
           let defv = case ty of
