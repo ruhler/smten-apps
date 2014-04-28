@@ -60,38 +60,20 @@ perf4 = do
 perf5 :: IO ()
 perf5 = do
   let solver = yices2
-
-      spec :: State Int Int
-      spec = do
-        x1 <- get
-        if (x1 < 3)
-          then do
-            x2 <- get
-            return (x2-1)
-          else do
-            x3 <- get
-            if (x3 < 6)
-                then return 1
-                else get
-
-      sketch :: State Int Int
-      sketch = do
-        x1 <- get
-        if (x1 < 6)
-          then do
-            put (x1-1)
-            x2 <- get
-            if (x2 < 2)
-              then get
-              else sketch
-          else get
+      opts = defaultOptions
 
   r <- run_symbolic solver $ do
-     x <- msum (map return [0..50])
-     let got = evalState sketch x
-         wnt = evalState spec x
-     guard (not $ {-# SCC "EQ" #-} got == wnt)
-     return (x, (wnt, got))
+     let spec = BlockS [IfS (BinaryE LtOp (VarE "x") (ValE (IntV 3))) (ReturnS (BinaryE SubOp (VarE "x") (ICastE IntT (ValE (BitV True))))) (BlockS []),IfS (BinaryE LtOp (VarE "x") (ValE (IntV 6))) (ReturnS (ICastE IntT (ValE (BitV True)))) (BlockS []),ReturnS (VarE "x")]
+         sketch = BlockS [WhileS (BinaryE LtOp (VarE "x") (ValE (IntV 6))) (BlockS [UpdateS (VarLV "x") (BinaryE SubOp (VarE "x") (ICastE IntT (ValE (BitV True)))),IfS (BinaryE LtOp (VarE "x") (ValE (IntV 2))) (ReturnS (VarE "x")) (BlockS [])]),ReturnS (VarE "x")]
+     x <- msum (map return [0..8])
+     let got = runEvalM Map.empty Map.empty $ do
+            insertVar "x" (IntV x)
+            evalS sketch
+         wnt = runEvalM Map.empty Map.empty $ do
+            insertVar "x" (IntV x)
+            evalS spec
+     guard ({-# SCC "PERF5_GUARD" #-} got == wnt)
+     return x
   putStrLn $ show r
 
 main = perf5

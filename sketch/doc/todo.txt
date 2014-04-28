@@ -1,3 +1,10 @@
+Priority::
+* Re-design type checking for arrays
+  Assuming width is not checked statically.
+* Replicate better the perf5 bug
+  By starting with calling evalS, then inlining and simplifying to see
+  what the core problem is.
+* Brainstorm how to support global variables properly in general.
 
 Features::
 STRUCTS
@@ -202,38 +209,43 @@ tests/broken/slow/regex/*.sk: slow regex examples
 
 Gallery
 -------
-gallery/Pollard.sk: memory blowup
-gallery/SetTest.cpped.sk: UNINTERP
+Finished::
 gallery/compress.sk: FINISHES
+gallery/jburnim_morton.sk: FINISHES
+gallery/logcount.sk: FINISHES
+gallery/parity.sk: FINISHES
+gallery/polynomial.sk: FINISHES
+gallery/tutorial1.sk: FINISHES
+
+Unsupported::
+gallery/SetTest.cpped.sk: UNINTERP
 gallery/diagStencil.sk: STENCIL
 gallery/diagStencilClean.sk: STENCIL
-gallery/doublyLinkedList.sk: SLOW: memory blowup
 gallery/enqueueSeqSK.sk: MINREPEAT
+gallery/registerlesSwap.sk:  MINREPEAT
+gallery/karatsuba.sk: UNKNOWN_N
+gallery/signedAvg.sk: UNKNOWN_N
+gallery/tableBasedAddition.sk: STATIC
+  Static evaluation on local variables:
+  int exp = 1 << W*2;
+  bit [W*exp] tmp = ...
+gallery/log2.sk: comma in global DeclS:
+   int W = 32, logW = 5;
+gallery/partition.cpped.sk: LOCAL_GEN
+gallery/sort.included.sk: LOCAL_GEN
+
+Slow::
+gallery/Pollard.sk: memory blowup
+gallery/doublyLinkedList.sk: SLOW: memory blowup
 gallery/isolateRightmost.sk: SLOW
   Looks like it's making an exponential tree of generators (tens of
   thousands), which is just leading to very large queries.
   Question: are generators inlined before or after regex choice?
   Answer: most likely before, but currently I do it after.
-gallery/jburnim_morton.sk: FINISHES
-gallery/karatsuba.sk: UNKNOWN_N
 gallery/listReverse.sk: SLOW: memory blowup
-gallery/log2.sk: comma in global DeclS:
-   int W = 32, logW = 5;
-gallery/logcount.sk: FINISHES
 gallery/lss.sk: SLOW: memory blowup
-gallery/parity.sk: FINISHES
-gallery/partition.cpped.sk: LOCAL_GEN
-gallery/polynomial.sk: FINISHES
-gallery/registerlesSwap.sk:  MINREPEAT
 gallery/reverse.sk: SLOW
   looks like it will finish, just slow. Maybe 2 hours?
-gallery/signedAvg.sk: UNKNOWN_N
-gallery/sort.included.sk: LOCAL_GEN
-gallery/talbeBasedAddition.sk: STATIC
-  Static evaluation on local variables:
-  int exp = 1 << W*2;
-  bit [W*exp] tmp = ...
-gallery/tutorial1.sk: FINISHES
 gallery/tutorial2.sk: SLOW: memory blowup
   Because of int arithmetic blowup?
 gallery/tutorial3.sk: SLOW: memory blowup

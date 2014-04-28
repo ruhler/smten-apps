@@ -84,6 +84,7 @@ apply f xs = do
     return res
 
 data StmtResult = OK | RET Value
+  deriving (Eq)
 
 returned :: StmtResult -> Value
 returned OK = VoidV
