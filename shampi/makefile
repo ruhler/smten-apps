@@ -11,19 +11,7 @@ build/perf.data: utils/perf.tcl build/shampi
 	tclsh utils/perf.tcl | tee $@
 
 perf:
-	time -f %E ./build/shampi -s stp -e Bit `cat utils/benchmarks.txt` > /dev/null
-	#time -f %E ./build/shampi -s stp -e Char `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices2 -e Bit `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices2 -e Integer `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices2 -e Char `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices1 -e Bit `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices1 -e Integer `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s yices1 -e Char `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s z3 -e Bit `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s z3 -e Integer `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s z3 -e Char `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s minisat -e Bit `cat utils/benchmarks.txt` > /dev/null
-	time -f %E ./build/shampi -s minisat -e Char `cat utils/benchmarks.txt` > /dev/null
+	tclsh utils/perffast.tcl `cat utils/benchmarks.txt` | tee build/perf.txt
 
 
 clean:

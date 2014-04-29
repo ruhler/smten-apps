@@ -2,12 +2,12 @@
 data <- read.table("build/perf.data")
 lim = c(min(data), max(data))
 
-pdf(file="build/hVy2b.pdf")
-plot(data[,c("hampi","Shampi.yices2.Bit")], log="xy", xlim=lim, ylim=lim)
+pdf(file="build/hVy2b.pdf", width=4,height=4)
+plot(data[,c("hampi","Shampi.yices2.Bit")], log="xy", xlim=lim, ylim=lim, pch=20)
 abline(0, 1)
 
-pdf(file="build/hVstpb.pdf")
-plot(data[,c("hampi","Shampi.stp.Bit")], log="xy", xlim=lim, ylim=lim)
+pdf(file="build/hVstpb.pdf", width=4, height=4)
+plot(data[,c("hampi","Shampi.stp.Bit")], log="xy", xlim=lim, ylim=lim, pch=20)
 abline(0, 1)
 
 pdf(file="build/hVms.pdf")

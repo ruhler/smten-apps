@@ -102,7 +102,8 @@ fixN regs x n = {-# SCC "FixN" #-}
       maxsid = snd (bounds regs)
       bnds = ((0, 0), (maxsid, n))
       elems = Map.toList (fs_cache s)
-  in FixResult {    
+  in --traceShow r $
+      FixResult {    
         fr_regs = array bnds elems,
         fr_top = r
       }
