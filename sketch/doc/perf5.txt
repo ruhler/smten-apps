@@ -104,3 +104,294 @@ fixed as long as I don't introduce new variables.
 
 No. I should replicate the problem better first before suggesting solutions.
 
+Mon Apr 28 14:43:21 EDT 2014
+
+Replicating the code.
+This means I can scale the input argument a little at a time.
+
+x: number of PRIM_INT_EQ ops for one call to (==)
+1:  1        [0]
+2:  4        [0,1]
+3:  9        [0,1,2]
+4:  260      etc.
+5:  1710
+6:  9786
+7:  236376
+8:  1232624
+9:  6225732
+10: 30680580 [0,1,2,3,4,5,6,7,8,9]
+
+This scales very poorly.
+The question is: why?
+
+We should at least be able to do as well as the cross product of options:
+1:  1
+2:  4
+3:  9
+4:  16
+5:  25
+6:  36
+7:  49
+8:  64
+9:  81
+10: 100
+
+Indeed, for 1, 2, and 3 that is the case. Those are when x is less than 3, and
+x - 1 is less than 2.
+
+But as soon as we throw in x = 4, things get bad fast.
+
+Question: is it from the sketch, the spec, or a combination of both?
+
+Let me manually write out the spec, and see how that changes scaling.
+
+8: goes down to 511088, a little less than half.
+So yes, something about the spec matters.
+
+Perhaps I can focus in on trying to identify that.
+
+The change: The last variable lookup. If we directly inline the value, it goes
+down to 511088, if we look up 'x' in the last branch, it stays at 1232624.
+Why?
+
+Note: I should be able to replicate this with sketch doing nothing, right?
+
+It's not the only issue.
+Let me reconstruct from the base case.
+
+sketch x = x
+spec x = x
+
+For 8 possibilities of x, gives 64 equality comparisons.
+
+spec x = if (x < 4)
+            then x 
+            else x
+gives 128 comparisons.
+
+This depends on the value in the condition. Anything between 1 and 7 gives 128
+comparisons. Outside that: 0 or 100 for example, gives 64 comparisons.
+
+This is probably because we can use optimizations to simplify the formula to
+'true' or 'false' after applying it everywhere, so we only execute one half of
+the if expression.
+
+spec x = if (x < 3)
+            then x 
+            else if (x < 6)
+              then x
+              else x
+gives 192 executions.
+
+spec x = if (x < 3)
+            then x 
+            else if (x < 6)
+              then 1
+              else x
+gives 132 executions.
+
+Why?
+
+Let's work this one by hand.
+
+x = a ? 0 
+      : b ? 1
+          : c ? 2
+              : d ? 3
+                  : e ? 4
+                      : f ? 5
+                          : g ? 6
+                              : 7
+(x < 3) = a ? True 
+            : b ? True
+                : c ? True
+                    : False
+        = (a | b | c)
+
+(x < 6) = (a | b | c | d | e | f)
+
+We get:
+
+  ite (a | b | c)
+      x
+      (ite (a | b | c | d | e | f)
+           1
+           x)
+
+Now how many choices?
+  (8 + 1 + 8) * 8 = 136
+
+So that makes sense.
+
+Now, the question is, can the entire blowup be explained this way?
+Just by counting all the possible paths?
+Is it nothing else than that?
+
+No. Because we saw, reading 'x' as a variable leads to different results than
+returning it directly.
+
+But this is clearly a first core source of blowup.
+
+Let's try to find the source of the next blowup.
+
+spec x = if (x < 3)
+            then return x 
+            else return "x"
+gives 128 executions, as expected.
+
+spec x = if (x < 3)
+            then return x 
+            else {}
+         return x
+gives 128 executions, as expected.
+
+spec x = if (x < 3)
+            then return x 
+            else {}
+         return "x"
+gives 192 executions.
+
+Why?
+
+Where are there 24 possible values for the result of 'x'? And why does using
+the environment make such a difference?
+
+The empty block does not "return"
+
+So we have something like:
+
+First: evaluate the 'if' expression, we get:
+    ite (a | b | c)
+        RET x
+        Ok
+
+Now, we conditionally evaluate the next expression:
+ 
+  case (ite (a | b | c) (RET x) OK) of
+     OK -> return (RET x)
+     RET v -> return (RET v)
+
+Why is that a problem?
+Let me inline some things a little bit more.
+    
+It's the difference between:
+
+            r <- return $
+               if x < 3
+                 then RET (IntV x)
+                 else OK
+and
+            r <- if x < 3
+                   then return (RET (IntV x))
+                   else return OK
+        
+Apparently.
+
+Let's compare based on the state monad, and see why it matters.
+
+On the one hand, we have:
+  (\s -> (if (x < 3) then RET ... else OK), s)
+
+On the other hand, we have:
+  ite (x < 3)
+     (\s -> (RET ..., s))
+     (\s -> (OK, s))
+
+Which is:
+  \s -> ite (x < 3)
+          (RET ..., s)
+          (OK, s)
+  \s -> (ite (x < 3) (RET ...) OK, ite (x < 3) s s)
+
+Hmm... I'm not sure.
+
+Let me replicate this with just a state monad?
+
+I've replicated it with just a state monad.
+
+Now, can I replicate it with just functions?
+That would be the real trick.
+
+Compare:
+  \s -> (if x < 3
+            then Just x
+            else Nothing, s)
+
+  if (x < 3)
+    then \s -> (Just x, s)
+    else \s -> (Nothing, s)
+
+Which reduces to:
+    \s -> (if x < 3
+             then Just x
+             else Nothing,
+           if x < 3
+              then s,
+              else s)
+
+But apparently it doesn't exactly. There is some difference...
+
+  if (x < 3)
+    then \s -> (Just x, s)
+    else \s -> (Nothing, s)
+
+  = ite (a | b | c)
+        (\s -> (Just x, s))
+        (\s -> (Nothing, s))
+
+  = \s -> ite (a | b | c)
+            ((\s -> (Just x, s)) s)
+            ((\s -> (Nothing, s)) s)
+
+What happens when we evaluate this function? How do we evaluate it?
+I give it an initial state. That should give me...
+
+A. (if x < 3 then Just x else Nothing,
+    if x < 3 then @1{[("x", x)]})
+
+B. ite (a | b | c)
+      ((\s -> (Just x, s))  @1{[("x", x)]})
+      ((\s -> (Nothing, s)) @1{[("x", x)]})
+
+To do this, we push the ite inside of the tuple:
+
+  (ite (a | b | c)
+      (fst ((\s -> (Just x, s))  @1{[("x", x)]}))
+      (fst ((\s -> (Nothing, s)) @1{[("x", x)]})),
+   ite (a | b | c)
+      (snd ((\s -> (Just x, s))  @1{[("x", x)]}))
+      (snd ((\s -> (Nothing, s)) @1{[("x", x)]})),
+     
+See the difference?
+In one case, we have introduced a bunch of thunks.
+
+Okay... What's the next step?
+
+We apply the arguments to the function f:
+
+A. f v s'
+ = let r = if x < 3 then Just x else Nothing
+       s = if x < 3 then @1{[("x", x)] else @1}
+   in case r of
+        Nothing ->
+          case lookup "x" s of
+            Just v -> v
+        Just v -> v
+
+ = case (if x < 3) then Just x else Nothing) of ...
+
+This forces the argument, so we get:
+
+ = case (Maybe { isJust = x < 3, fl1 = ite (x < 3) x - }) of ...
+ = ite (x < 3) x (case lookup "x" s of
+                    Just v -> v)
+This forces the argument:
+    lookup "x" (if x < 3 then @1 else @1)
+This forces the list argument:
+  And what do we get? One result, or two?
+
+This could be the crux of the problem?
+
+What if we ignored the x < 3 branch?
+
+

@@ -1,7 +1,7 @@
 
 module Eval (
     evalP, evalT,
-    evalS, evalE, -- Exposed only for performance debugging
+    StmtResult(..), evalS, evalE, -- Exposed only for performance debugging
   ) where
 
 import Smten.Prelude

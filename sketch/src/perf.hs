@@ -63,16 +63,32 @@ perf5 = do
       opts = defaultOptions
 
   r <- run_symbolic solver $ do
-     let spec = BlockS [IfS (BinaryE LtOp (VarE "x") (ValE (IntV 3))) (ReturnS (BinaryE SubOp (VarE "x") (ICastE IntT (ValE (BitV True))))) (BlockS []),IfS (BinaryE LtOp (VarE "x") (ValE (IntV 6))) (ReturnS (ICastE IntT (ValE (BitV True)))) (BlockS []),ReturnS (VarE "x")]
-         sketch = BlockS [WhileS (BinaryE LtOp (VarE "x") (ValE (IntV 6))) (BlockS [UpdateS (VarLV "x") (BinaryE SubOp (VarE "x") (ICastE IntT (ValE (BitV True)))),IfS (BinaryE LtOp (VarE "x") (ValE (IntV 2))) (ReturnS (VarE "x")) (BlockS [])]),ReturnS (VarE "x")]
-     x <- msum (map return [0..8])
-     let got = runEvalM Map.empty Map.empty $ do
-            insertVar "x" (IntV x)
-            evalS sketch
-         wnt = runEvalM Map.empty Map.empty $ do
-            insertVar "x" (IntV x)
-            evalS spec
-     guard ({-# SCC "PERF5_GUARD" #-} got == wnt)
+     x <- msum (map return [0..7 :: Int])
+     let got = x
+
+         wnt1 = (
+            let s = 
+--                m = (\s ->
+--                   (if x < 3
+--                     then Just x
+--                     else Nothing,
+--                    if x < 3
+--                     then s
+--                     else s))
+                m = if x < 3
+                       then (\s -> (Just x, s))
+                       else (\s -> (Nothing, s))
+                f = \r s ->
+                   case r of
+                      Nothing -> 
+                        case lookup "x" s of
+                           Just v -> v
+                      Just v -> v
+            in \s -> 
+                 let (v, s') = m s
+                 in f v s'
+          ) [("x", x)]
+     guard ({-# SCC "PERF5_GUARD" #-} got == wnt1)
      return x
   putStrLn $ show r
 
