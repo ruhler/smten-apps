@@ -127,7 +127,7 @@ evalS (DeclS ty vars) = {-# SCC "DeclS" #-} do
                         IntT -> IntV 0  -- TODO: not sure if this should be 0 or uninitialized
                         _ -> error $ "variable " ++ nm ++ " uninitialized"
           v0 <- evalE $ fromMaybe (ValE defv) mval
-          insertVar nm v0
+          declVar nm v0
   mapM_ f vars
   return OK
 evalS (UpdateS lv e) = {-# SCC "UpdateS" #-} do

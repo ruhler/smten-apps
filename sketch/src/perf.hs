@@ -31,10 +31,10 @@ perf3 = do
                  --case ([0, 1 :: Int] !! idx) of
                    0 -> return ()
                    1 -> return ()
-                 insertVar "a" (BitV False)
-                 insertVar "b" (BitV False)
-                 insertVar "c" (BitV False)
-                 insertVar "d" (BitV False)
+                 declVar "a" (BitV False)
+                 declVar "b" (BitV False)
+                 declVar "c" (BitV False)
+                 declVar "d" (BitV False)
                  lookupVar "d"
          res = runEvalM env Map.empty run
      Smten.Symbolic.assert (Just (Just (BitV True)) == res) 
@@ -51,7 +51,7 @@ perf4 = do
      e <- mplus (return a) (return b)
      let env = Map.empty
          run = do
-            insertVar "a" (IntV 3)
+            declVar "a" (IntV 3)
             evalE e
          res = runEvalM env Map.empty run
      Smten.Symbolic.assert (Just (IntV 3) == res) 

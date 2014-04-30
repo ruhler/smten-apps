@@ -60,6 +60,51 @@ UNKNOWN_N
    Idea: We pad when we make an ArrayV based on desired type, and don't do
          any other implicit cast between arrays of the same value type (but
          possibly different widths?)
+  The difficulty is: we want to avoid putting implicit casts everywhere, but
+  we want to ensure an implicit cast where needed. Can I check? Is it true you
+  can only have implicit casts when doing an assignment? Then maybe for arrays
+  we just always insert an implicit cast for an assignment, and never any
+  other time.
+
+CLOSURES
+  Support local functions.
+  Notes:
+  * local functions can modify functions in the scope of the context in which
+    they are defined
+  How should this be implemented?
+
+  Note, generators can be local too. Is that easier to implement?
+  I suspect not.
+
+  Here's an idea: Don't just have global and local scope. Have a nest of
+  scopes, with shadowing. Functions won't access outside of their scopes
+  (static evaluation should enforce this!)...
+  No, that's problematic, because a shadowed variable could be unshadowed by
+  adding another layer...
+
+  Anyway, we need a way to change variables in different scopes than our
+  current.
+
+GLOBALS
+  Support global variables properly.
+  * Global scope should be modifiable (not read-only).
+  * Global variables should be allowed to be holes.
+  * Global variables need not have initial value (use default).
+  * Syntax should support multiple global variable declarations.
+  * Global variables may depend on the value of other global variables.
+    We can assume those other variables come earlier in the source code.
+  Here's what I propose.
+  
+  Collect all global value declarations as Decl statements, in order.
+  Before executing the top level function, execute the Decl statements in a
+  local scope. The resulting local scope is used as the initial global scope.
+
+  Then have the global scope like localScope, and look up a variable there if
+  it isn't in the local scope. Easy.
+
+  Note: I suspect this will be easier to implement after array widths are
+  removed from consideration in static evaluation.
+
 
 FLOATS
   Support double and float.
@@ -89,26 +134,8 @@ TYPEOFV_SLOW
 INSERTVAR_SLOW
  Stuck in false symbolic execution?
 
-INTEQ_SLOW
- All the time is spent in Int equality. Perhaps some algebraic 
- simplifications are needed?
-
 STACK_OVERFLOW
  A mysterious stack overflow
-
-PERF3
- In pc[1] < 4, 
- pc[1] can have so many possible values, we have an exponential blowup?
- Looks like it's from the short circuiting of &&, which actually requires
- a lot more work, because we don't know if we are allowed to short circuit 
- or not.
-
- Can we have the same control-flow path, independent of the value of the first
- argument to &&? Something like: predicated evaluation of the second argument.
- It only can cause failure if the predicate is true? That may or may not help.
-
-PERF5
- See doc/perf5.txt
 
 Features needed, by test case::
 
@@ -144,7 +171,7 @@ tests/broken/miniTest209Globals.sk,
 tests/broken/miniTestb399.sk,
 tests/broken/miniTestb352.sk,
 tests/broken/miniTestb442.sk,
-tests/broken/miniTestb492.sk:
+tests/broken/miniTestb492.sk: GLOBALS
   Support use of global variables in normal code, not just type declarations.
 
 tests/broken/miniTestb456.sk: Hole in type?
@@ -171,10 +198,12 @@ tests/broken/unknownN/*.sk: Global N not defined?
 
 Performance Bugs
 ----------------
+tests/broken/slow/miniTest86.sk: ???
+tests/broken/slow/miniTest92.sk: ???
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
 tests/broken/slow/miniTestb147.sk: (==) takes all time?
-tests/broken/slow/miniTestb180.sk: takes many iterations
+tests/broken/slow/miniTestb156.sk: ???
 tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb181.sk: arrsub takes all time?
 tests/broken/slow/miniTestb182.sk: takes many iterations

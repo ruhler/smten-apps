@@ -133,12 +133,16 @@ instance Static LVal where
 -- expression expected.
 staticLV :: LVal -> SM (LVal, Type)
 staticLV lv@(VarLV nm) = do
+    env <- asks sr_env
     tyenv <- gets ss_tyenv
-    case Map.lookup nm tyenv of
-      Nothing -> error $ "variable " ++ nm ++ " not in scope"
-      Just ty -> do
-        ty' <- staticM ty
-        return (lv, ty')
+    ty <- case Map.lookup nm tyenv of
+            Just ty -> return ty
+            Nothing ->
+              case Map.lookup nm env of
+                Just (VarD ty _ _) -> return ty
+                Nothing -> error $ "variable " ++ nm ++ " not in scope"
+    ty' <- staticM ty
+    return (lv, ty')
 staticLV (ArrLV lv idx) = do
     (lv', arrt) <- staticLV lv
     t <- case arrt of

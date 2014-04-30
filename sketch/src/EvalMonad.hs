@@ -2,7 +2,7 @@
 -- A monad used in evaluation.
 module EvalMonad (
     EvalM, runEvalM, scoped, assert, efail,
-    lookupDecl, lookupVar, insertVar,
+    lookupDecl, declVar, lookupVar, insertVar,
     newStruct, lookupStruct, updateStruct, lookupStructType,
  ) where
 
@@ -67,13 +67,23 @@ assert False = efail
 lookupDecl :: Name -> EvalM (Maybe Decl)
 lookupDecl nm = EvalM $ \e s -> return (Map.lookup nm e, s)
 
+-- Declare a variable as a local variable with given initial value.
+declVar :: Name -> Value -> EvalM ()
+declVar nm val = EvalM $ \_ s ->
+    return ((), s { s_vars = Map.insert nm val (s_vars s)})
+
 -- Look for the given variable in the local scope
 lookupVar :: Name -> EvalM (Maybe Value)
 lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (s_vars s), s)
 
+-- Update the value of a variable.
+-- If the variable is local, it updates the local scope.
+-- If the variable is global, it updates the global scope.
 insertVar :: Name -> Value -> EvalM ()
 insertVar nm val = EvalM $ \_ s ->
-    return ((), s { s_vars = Map.insert nm val (s_vars s)})
+    if Map.member nm (s_vars s)
+      then return ((), s { s_vars = Map.insert nm val (s_vars s)})
+      else error ("insertVar: TODO: support nolocal var insert: " ++ nm)
 
 newStruct :: Map.Map Name Value -> EvalM Pointer
 newStruct v = EvalM $ \_ s ->
