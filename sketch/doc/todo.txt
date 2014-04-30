@@ -171,19 +171,8 @@ tests/broken/unknownN/*.sk: Global N not defined?
 
 Performance Bugs
 ----------------
-tests/broken/miniTestb112.sk: STACK_OVERFLOW: from REORDER statement?
-tests/broken/miniTestb144.sk: STACK_OVERFLOW on many solvers
-tests/broken/miniTestb153.sk: STACK_OVERFLOW on many solvers
-tests/broken/miniTestb160.sk: STACK_OVERFLOW on STP
-tests/broken/miniTestb161.sk: STACK_OVERFLOW on STP
-
-tests/broken/slow/perf3.smten.sk: PERF3
-tests/broken/slow/perf5.smten.sk: PERF5
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
-tests/broken/slow/miniTestb103.sk: TYPEOFV_SLOW
-tests/broken/slow/miniTestb104.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
-tests/broken/slow/miniTestb121.sk: INTEQ_SLOW
 tests/broken/slow/miniTestb147.sk: (==) takes all time?
 tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb180.sk: takes many iterations
@@ -193,15 +182,7 @@ tests/broken/slow/miniTestb189.sk: (==) takes all time?
 tests/broken/slow/miniTestb216.sk: slow: dominated by updateLV?
 tests/broken/slow/miniTestb218.sk: slow: TODO: look into why
 tests/broken/slow/miniTestb226.sk: slow on yices1, fine on yices2
-tests/broken/slow/miniTestb276.sk: slow: why?
-tests/broken/slow/miniTestb277.sk: slow: why?
-tests/broken/slow/miniTestb278.sk: slow: why?
-tests/broken/slow/miniTestb279.sk: slow: why?
-tests/broken/slow/miniTestb280.sk: slow: why?
-tests/broken/slow/miniTestb285.sk: blowup on STP
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
-tests/broken/slow/miniTestb366.sk: blowup of int possibilities
-tests/broken/slow/miniTestb367.sk: blowup on yices1
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 tests/broken/slow/regex/*.sk: slow regex examples
   Perhaps because we enumerate the whole space with ChoiceE before
