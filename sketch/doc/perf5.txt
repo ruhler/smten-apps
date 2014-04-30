@@ -394,4 +394,87 @@ This could be the crux of the problem?
 
 What if we ignored the x < 3 branch?
 
+Tue Apr 29 09:04:00 EDT 2014
+
+It comes down to this. Something I believe I've seen before, though I don't
+remember what, if anything, I did about it.
+
+We have some transformation we apply to the state.
+The transformation applied depends on a condition:
+  
+s' = if x < 3
+       then f s
+       else g s
+
+Let's say it turns out both of these conditions happen to do nothing to change
+the state.
+
+Let's further say the state is:
+  s = (True, x)
+
+I do a case on this:
+  case s' of
+    (True, v) -> v
+
+What happens?
+
+First, the case expression forces the argument:
+  ite (x < 3) (f s) (g s)
+
+Constructing a tuple:
+  
+  (ite (x < 3) (fst @1{f s}) (fst @2{g s}),
+   ite (x < 3) (snd @1{f s}) (snd @2{g s}))
+
+The case desugars into:
+  case (...) of
+    () a b -> case a of
+                True -> b
+
+Clearly the tuple structure matches. We get:
+  case (ite (x < 3) (fst @1{f s}) (fst @2{g s})) of
+    True -> ite (x < 3) (snd @1{f s}) (snd @2{g s})
+
+The case expression forces it's argument.
+Fine. We find it's always true.
+We get:
+
+ite (x < 3) (snd @1{f s}) (snd @2{g s})
+
+Both branches are integers. What happens with ite for integers?
+
+We put it on an ITE.
+Then, for the equality check, we call symapp, which duplicates the call.
+Thus leading to 128 checks instead of 64.
+
+In other words, ints don't preserve sharing.
+
+That's it.
+
+Let me try to summarize the entire perf5 problem then.
+
+Symbolic Int support is bad:
+ * binary operations lead to cross product of choices for inputs (no sharing)
+ * no additional sharing is recognized
+ * it leads to a combinatorial explosion
+
+What can be done to fix things?
+ * memoize symapp for Int (I've tried this before, I'm sure. I don't remember
+   why I didn't keep it)
+ * come up with a better structure for representing symbolic Ints
+   Perhaps: a map from Int# to formula saying when that int could exist.
+ * don't use 'Int' type for sketch ints. Use bit vectors or integers instead.
+
+I bet I can replicate the sharing blowup very easily.
+
+Yes.
+
+So, I would say, this is an issue to be fixed first in Smten.
+
+Wed Apr 30 09:42:41 EDT 2014
+
+Changes in Smten fix perf5, and a couple dozen other slow test cases,
+including perf3. It didn't help the gallery any.
+
+Thus closing this issue.
 

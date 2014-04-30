@@ -66,28 +66,17 @@ perf5 = do
      x <- msum (map return [0..7 :: Int])
      let got = x
 
-         wnt1 = (
-            let s = 
---                m = (\s ->
---                   (if x < 3
---                     then Just x
---                     else Nothing,
---                    if x < 3
---                     then s
---                     else s))
+         wnt1 =
+            let s0 = (True, x)
                 m = if x < 3
-                       then (\s -> (Just x, s))
-                       else (\s -> (Nothing, s))
-                f = \r s ->
-                   case r of
-                      Nothing -> 
-                        case lookup "x" s of
-                           Just v -> v
-                      Just v -> v
-            in \s -> 
-                 let (v, s') = m s
-                 in f v s'
-          ) [("x", x)]
+                     then s0
+                     else id s0
+--                m = if x < 3
+--                       then s0
+--                       else id s0
+            in case m of
+                 (True, v) -> v
+          
      guard ({-# SCC "PERF5_GUARD" #-} got == wnt1)
      return x
   putStrLn $ show r

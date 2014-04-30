@@ -1,10 +1,9 @@
 Priority::
+* Wait for Smten Symbolic Int to be improved
 * Re-design type checking for arrays
   Assuming width is not checked statically.
-* Replicate better the perf5 bug
-  By starting with calling evalS, then inlining and simplifying to see
-  what the core problem is.
 * Brainstorm how to support global variables properly in general.
+* Brainstorm how to support local function declarations properly.
 
 Features::
 STRUCTS
@@ -199,8 +198,10 @@ tests/broken/slow/miniTestb277.sk: slow: why?
 tests/broken/slow/miniTestb278.sk: slow: why?
 tests/broken/slow/miniTestb279.sk: slow: why?
 tests/broken/slow/miniTestb280.sk: slow: why?
+tests/broken/slow/miniTestb285.sk: blowup on STP
 tests/broken/slow/miniTestb334.sk: STACK_OVERFLOW
 tests/broken/slow/miniTestb366.sk: blowup of int possibilities
+tests/broken/slow/miniTestb367.sk: blowup on yices1
 tests/broken/slow/miniTestb390.sk: STACK_OVERFLOW
 tests/broken/slow/regex/*.sk: slow regex examples
   Perhaps because we enumerate the whole space with ChoiceE before
@@ -210,12 +211,12 @@ tests/broken/slow/regex/*.sk: slow regex examples
 Gallery
 -------
 Finished::
-gallery/compress.sk: FINISHES
-gallery/jburnim_morton.sk: FINISHES
-gallery/logcount.sk: FINISHES
-gallery/parity.sk: FINISHES
-gallery/polynomial.sk: FINISHES
-gallery/tutorial1.sk: FINISHES
+gallery/compress.sk: FINISHES (2m8.537s)
+gallery/jburnim_morton.sk: FINISHES (4m19.514s)
+gallery/logcount.sk: FINISHES (14.785s)
+gallery/parity.sk: FINISHES (0m0.717s)
+gallery/polynomial.sk: FINISHES (0.384s)
+gallery/tutorial1.sk: FINISHES (0m0.075s)
 
 Unsupported::
 gallery/SetTest.cpped.sk: UNINTERP
