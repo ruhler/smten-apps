@@ -198,8 +198,10 @@ tests/broken/unknownN/*.sk: Global N not defined?
 
 Performance Bugs
 ----------------
+tests/broken/slow/perf6.sk: see doc/perf6.txt
 tests/broken/slow/miniTest86.sk: ???
-tests/broken/slow/miniTest92.sk: ???
+tests/broken/slow/miniTest92.sk:
+  Actually finishes, just takes many iterations.
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
 tests/broken/slow/miniTestb147.sk: (==) takes all time?
@@ -260,7 +262,7 @@ gallery/reverse.sk: SLOW
 gallery/tutorial2.sk: SLOW: memory blowup
   Because of int arithmetic blowup?
 gallery/tutorial3.sk: SLOW: memory blowup
-  Because of int arithmetic blowup?
+  Recursive generator blowup?
 gallery/xpose.sk: SLOW: memory blowup
  
 

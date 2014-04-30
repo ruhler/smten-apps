@@ -14,8 +14,6 @@ import Smten.Data.Maybe
 import Program
 import Syntax
 
-type Vars = Map.Map Name Value
-
 type LocalVars = Map.Map Name Value
 
 -- The heap maps pointer locations into struct values.

@@ -1,0 +1,80 @@
+
+Wed Apr 30 14:37:35 EDT 2014
+
+tutorial2 from the gallery blows up. Why?
+
+    int spec( int x, int y ){
+       return (x + x) * (y + 5);
+    }
+
+    generator int axpb(int x){ /* automatically rewritten */
+       return ?? * x + ??;
+    }
+
+    int sketch( int x, int y ) implements spec{
+       return ( axpb(x) ) * ( axpb(y) );
+    }
+
+First step: minimize it. Let's ditch the generators.
+
+    int spec( int x, int y ){
+       return (x + x) * (y + 5);
+    }
+
+    int sketch( int x, int y ) implements spec{
+       return ( ?? * x + ?? ) * ( ?? * y + ??);
+    }
+
+
+Now, how big do we expect this to be?
+Is it just poorly scaling?
+
+It get's stuck after finding the counter-example x = 23, y = 14.
+Then the goal is to synthesize a candidate program.
+
+The expected result has 1 possible value:
+  (23 + 23) * (14 + 5) = 874
+
+For the sketch, we have:
+  ( a * x + b ) * ( c * y + d);
+
+Where a, b, c, and d are holes, each with 32 possible values.
+And x and y are known.
+
+a: 32 possible values: [0..31]
+a * x: 32 possible values [0,23,..23*31]
+a * x + b: Range: [0..24*31], or around 745 possible values.
+c * y + d: Analogous: 745 possible values.
+
+Total, we get a cross product: 555025 possible values.
+I expect that many comparisons.
+
+Question: how can I isolate just this query?
+Make a, b, c, and d the input holes? Hard code x and y?
+
+Have no inputs? Is that possible?
+
+Ah, interesting.
+
+It turns out this test works fine on yices1, z3, and minisat.
+It all depends on the counter-examples generated.
+If x and y are small, it's fine. If they are larger, then things blow up
+rather poorly, even in the original sketch program (it reports an integer
+which is too big).
+
+I'm not sure what the solution is here.
+We could do some of the following:
+
+* change sketch to start with small ranges for counter-examples, and grow
+  only as needed. But this is not really general. It assumes smaller values
+  of inputs will lead to smaller choices, but it's easy to change the program.
+  For example:  ??*(33-x) + ??
+  Which does much better if x is large.
+
+  Yes! And note: if I do this, then the original sketch implementation blows
+  up! So that's rather an unfair test case.
+
+* make support for ints better somehow.
+  But, considering the original sketch can't handle this case, is it really
+  worth the effort for me to?
+
