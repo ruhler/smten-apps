@@ -7,6 +7,7 @@ module EvalMonad (
  ) where
 
 import Smten.Prelude
+import Smten.Control.Monad
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 import Smten.Data.Maybe
@@ -14,21 +15,24 @@ import Smten.Data.Maybe
 import Program
 import Syntax
 
-type LocalVars = Map.Map Name Value
+type Vars = Map.Map Name Value
+type Addr = Int
+type StructVal = Map.Map Name Value
 
 -- The heap maps pointer locations into struct values.
-type Heap = Map.Map Int (Map.Map Name Value)
+type Heap = Map.Map Addr StructVal
 
 data State = State {
-  s_vars :: LocalVars,
+  s_globals :: Vars,
+  s_locals :: Vars,
   s_heap :: Heap
 }
 
 -- The evaluation monad.
---  It has access to a read-only global environment,
+--  It has access to a read-only  program environment,
+--  It has access to a read/write global environment,
 --  it has access to a read/write local environment,
 --  it has access to a read/write heap,
---  it has access to a read/write output value,
 --  and it can fail.
 newtype EvalM a = EvalM {
    runEvalM_ :: Program -> State -> Maybe (a, State)
@@ -44,13 +48,13 @@ instance Monad EvalM where
       runEvalM_ (f v) e s'
 
 runEvalM :: Program -> EvalM a -> Maybe a
-runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
+runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty Map.empty)
 
 -- Evaluate the computation in a fresh local variable scope.
 scoped :: EvalM a -> EvalM a
 scoped x = EvalM $ \e s -> do
-  (r, s') <- runEvalM_ x e (s { s_vars = Map.empty })
-  return (r, s' { s_vars = s_vars s })
+  (r, s') <- runEvalM_ x e (s { s_locals = Map.empty })
+  return (r, s' { s_locals = s_locals s })
 
 -- Evaluation which fails.
 efail :: EvalM a
@@ -67,11 +71,13 @@ lookupDecl nm = EvalM $ \e s -> return (Map.lookup nm e, s)
 -- Declare a variable as a local variable with given initial value.
 declVar :: Name -> Value -> EvalM ()
 declVar nm val = EvalM $ \_ s ->
-    return ((), s { s_vars = Map.insert nm val (s_vars s)})
+    return ((), s { s_locals = Map.insert nm val (s_locals s)})
 
--- Look for the given variable in the local scope
+-- Look for the given variable in the local or global scope
 lookupVar :: Name -> EvalM (Maybe Value)
-lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (s_vars s), s)
+lookupVar nm = EvalM $ \_ s ->
+   let mv = mplus (Map.lookup nm (s_locals s)) (Map.lookup nm (s_globals s))
+   in return (mv, s)
 
 -- Update the value of a variable.
 -- If the variable is local, it updates the local scope.
@@ -81,9 +87,9 @@ lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (s_vars s), s)
 -- assumed to be a global variable.
 insertVar :: Name -> Value -> EvalM ()
 insertVar nm val = EvalM $ \_ s ->
-    if Map.member nm (s_vars s)
-      then return ((), s { s_vars = Map.insert nm val (s_vars s)})
-      else error ("insertVar: TODO: support nolocal var insert: " ++ nm)
+   if Map.member nm (s_locals s)
+     then return ((), s { s_locals = Map.insert nm val (s_locals s)})
+     else return ((), s { s_globals = Map.insert nm val (s_globals s)})
 
 newStruct :: Map.Map Name Value -> EvalM Pointer
 newStruct v = EvalM $ \_ s ->

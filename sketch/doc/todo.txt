@@ -86,8 +86,9 @@ CLOSURES
 
 GLOBALS
   Support global variables properly.
-  * Global scope should be modifiable (not read-only).
+  + Global scope should be modifiable (not read-only).
   * Global variables should be allowed to be holes.
+    This means we need to do generate on global variable declarations.
   * Global variables need not have initial value (use default).
   * Syntax should support multiple global variable declarations.
   * Global variables may depend on the value of other global variables.
