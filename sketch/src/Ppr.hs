@@ -38,6 +38,10 @@ pprV (PointerV Null) = "null"
 pprV (PointerV {}) = error "pprV: no way to print non-null pointer value"
 
 pprOp :: BinOp -> String
+pprOp (ChoiceOp xs) = 
+  let f [x] = pprOp x
+      f (x:xs) = pprOp x ++ " | " ++ f xs
+  in "(" ++ f xs ++ ")"
 pprOp AndOp = "&"
 pprOp LAndOp = "&&"
 pprOp AddOp = "+"
@@ -69,7 +73,7 @@ pbin = [["||", "?"], ["&&"], ["|", "{|}"], ["^"], ["&"], ["==", "!="],
         ["+", "-"], ["*", "%", "/"]]
 
 pbinof :: [[String]] -> String -> Int
-pbinof [] op = error $ "pbinof: operator " ++ op ++ " not in pbin table"
+pbinof [] op = p_min
 pbinof (x:xs) op
   | op `elem` x = 0
   | otherwise = 1 + pbinof xs op

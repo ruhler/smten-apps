@@ -231,49 +231,48 @@ tests/broken/slow/regex/*.sk: slow regex examples
 Gallery
 -------
 Finished::
-gallery/compress.sk: FINISHES (2m8.537s)
-gallery/jburnim_morton.sk: FINISHES (4m19.514s)
-gallery/logcount.sk: FINISHES (14.785s)
-gallery/parity.sk: FINISHES (0m0.717s)
-gallery/polynomial.sk: FINISHES (0.384s)
+gallery/compress.sk (BIT): FINISHES (2m8.537s)
+gallery/jburnim_morton.sk(BIT): FINISHES (4m19.514s)
+gallery/logcount.sk(BIT): FINISHES (14.785s)
+gallery/parity.sk(BIT): FINISHES (0m0.717s)
+gallery/polynomial.sk(DATA): FINISHES (0.384s)
 gallery/tutorial1.sk: FINISHES (0m0.075s)
 
 Unsupported::
-gallery/SetTest.cpped.sk: UNINTERP
+gallery/SetTest.cpped.sk(DATA): UNINTERP
 gallery/diagStencil.sk: STENCIL
 gallery/diagStencilClean.sk: STENCIL
-gallery/enqueueSeqSK.sk: MINREPEAT
+gallery/enqueueSeqSK.sk(DATA): MINREPEAT
 gallery/registerlesSwap.sk:  MINREPEAT
-gallery/karatsuba.sk: UNKNOWN_N
+gallery/karatsuba.sk(INT): UNKNOWN_N
 gallery/signedAvg.sk: UNKNOWN_N
-gallery/tableBasedAddition.sk: STATIC
+gallery/tableBasedAddition.sk(BIT): STATIC
   Static evaluation on local variables:
   int exp = 1 << W*2;
   bit [W*exp] tmp = ...
-gallery/log2.sk: comma in global DeclS:
+gallery/log2.sk(BIT): comma in global DeclS:
    int W = 32, logW = 5;
 gallery/partition.cpped.sk: LOCAL_GEN
-gallery/sort.included.sk: LOCAL_GEN
+gallery/sort.included.sk(INT): LOCAL_GEN
 
 Slow::
-gallery/Pollard.sk: memory blowup
-gallery/doublyLinkedList.sk: SLOW: memory blowup
+gallery/Pollard.sk(INT): memory blowup
+gallery/doublyLinkedList.sk(DATA): SLOW: memory blowup
 gallery/isolateRightmost.sk: SLOW
   Because of:
-    1. duplicating generators in binaryChoice before inlining them.
-    2. not recognizing unreachable paths statically (to bound inlining)
-    3. something else to be determined.
+    1. not recognizing unreachable paths statically (to bound inlining)
+    2. something else to be determined.
   See doc/perf7.txt
-gallery/listReverse.sk: SLOW: memory blowup
-gallery/lss.sk: SLOW: memory blowup
-gallery/reverse.sk: SLOW
+gallery/listReverse.sk(DATA): SLOW: memory blowup
+gallery/lss.sk(INT): SLOW: memory blowup
+gallery/reverse.sk(BIT): SLOW
   looks like it will finish, just slow. Maybe 2 hours?
-gallery/tutorial2.sk: SLOW: memory blowup
+gallery/tutorial2.sk(INT): SLOW: memory blowup
   Because of mix of counter-example choice and large size of ints.
   See doc/perf6.txt.
-gallery/tutorial3.sk: SLOW: memory blowup
+gallery/tutorial3.sk(INT): SLOW: memory blowup
   Recursive generator blowup?
-gallery/xpose.sk: SLOW: memory blowup
+gallery/xpose.sk(INT): SLOW: memory blowup
  
 
 Clean::

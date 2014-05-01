@@ -138,6 +138,7 @@ data BinOp =
  | DivOp        -- ^ a / b
  | ShrOp        -- ^ a >> b
  | ShlOp        -- ^ a << b
+ | ChoiceOp [BinOp] -- ^ (op | op | ... | op)
     deriving (Show)
 
 data Expr = 
@@ -245,7 +246,7 @@ pad (StructT _) = PointerV Null
 binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr
 binaryChoiceE [] a b = error "binaryChoiceE: no operators given"
 binaryChoiceE [x] a b = BinaryE x a b
-binaryChoiceE (x:xs) a b = ChoiceE (BinaryE x a b) (binaryChoiceE xs a b)
+binaryChoiceE xs a b = BinaryE (ChoiceOp xs) a b
 
 data Member =
    FieldM Name 

@@ -191,6 +191,12 @@ instance Static Expr where
        | otherwise -> error $ "[000] expected type " ++ show dst ++ " but found type " ++ show src ++ " in the expression " ++ show e
 
 staticE :: Expr -> SM Expr
+staticE (BinaryE op@(ChoiceOp (x:_)) a b) = do
+   -- TODO: this is a bit of a hack. It should type check under all operators?
+   -- We just select a representative operator to type check it under.
+   BinaryE _ a' b' <- staticE (BinaryE x a b)
+   return $ BinaryE op a' b'
+
 staticE (BinaryE AndOp a b) = bitwiseop AndOp a b
 staticE (BinaryE LAndOp a b) = bitwiseop LAndOp a b
 
@@ -576,6 +582,8 @@ incrop f nm a = do
 -- Returns 'UnknownT' if the type is not certain.
 typeof :: Expr -> SM Type
 typeof (ValE v) = return $ typeofV v
+typeof (BinaryE (ChoiceOp xs) a b) =
+  foldl1 unify <$> mapM (\op -> typeof (BinaryE op a b)) xs
 typeof (BinaryE AndOp a b) = liftM2 unify (typeof a) (typeof b)
 typeof (BinaryE LAndOp a b) = liftM2 unify (typeof a) (typeof b)
 typeof (BinaryE AddOp a b) = liftM2 unify (typeof a) (typeof b)

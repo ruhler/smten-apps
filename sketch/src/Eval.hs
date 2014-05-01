@@ -154,6 +154,7 @@ evalS (BlockS (x:xs)) = {-# SCC "BlockS" #-} do
 
 evalE :: Expr -> EvalM Value
 evalE (ValE v) = {-# SCC "ValE" #-} return v
+evalE (BinaryE (ChoiceOp {}) _ _) = error "ChoiceOp encountered in evalE"
 evalE (BinaryE AndOp a b) = {-# SCC "AndE" #-} do
     a' <- evalE a
     b' <- evalE b

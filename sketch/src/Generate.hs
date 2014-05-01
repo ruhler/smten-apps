@@ -148,8 +148,14 @@ genLV (ChoiceLV a b) = do
   b' <- genLV b
   liftSymbolic $ mplus (return a') (return b')
 
+genOp :: BinOp -> GM BinOp
+genOp (ChoiceOp xs) = do
+  ops <- mapM genOp xs
+  liftSymbolic $ msum (map return ops)
+genOp op = return op
+
 genE :: Expr -> GM Expr
-genE (BinaryE op a b) = liftM2 (BinaryE op) (genE a) (genE b)
+genE (BinaryE op a b) = liftM3 BinaryE (genOp op) (genE a) (genE b)
 genE (ArrayE a) = ArrayE <$> mapM genE a
 genE (PostIncrE lv) = PostIncrE <$> genLV lv
 genE (PostDecrE lv) = PostDecrE <$> genLV lv
