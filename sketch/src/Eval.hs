@@ -25,7 +25,7 @@ evalP p i = all (evalD p i) (decls p)
 -- Evaluate a type.
 -- It should not fail.
 evalT :: Program -> Type -> Type
-evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env Map.empty (evalE e))
+evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env (evalE e))
 evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
 evalT env t = t
 
@@ -37,16 +37,20 @@ evalD env i d@(FunD {}) =
     GeneratorF -> True
     HarnessF
       | Just args <- map ValE <$> Map.lookup (declN d) i ->
-          isJust (runEvalM env Map.empty (apply' (fd_val d) args))
+          isJust (runEvalM env (apply' (fd_val d) args))
     WithSpecF snm
       | Just sd@(FunD {}) <- Map.lookup snm env
       , Just inputs <- Map.lookup (declN d) i ->
           let ivars = ["__i" ++ show n | n <- [1..length inputs]]
-              vars = Map.fromList $ zip ivars inputs
               args = map VarE ivars
 
-              want = runEvalM env vars $ apply' (fd_val sd) args
-              got = runEvalM env vars $ apply' (fd_val d) args
+              want = runEvalM env $ do
+                zipWithM declVar ivars inputs
+                apply' (fd_val sd) args
+
+              got = runEvalM env $ do
+                zipWithM declVar ivars inputs
+                apply' (fd_val d) args
           in want == got
 evalD env i (StructD {}) = True
 

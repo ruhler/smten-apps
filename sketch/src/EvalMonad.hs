@@ -43,8 +43,8 @@ instance Monad EvalM where
       (v, s') <- runEvalM_ x e s
       runEvalM_ (f v) e s'
 
-runEvalM :: Program -> LocalVars -> EvalM a -> Maybe a
-runEvalM env vars q = fst <$> runEvalM_ q env (State vars Map.empty)
+runEvalM :: Program -> EvalM a -> Maybe a
+runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
 
 -- Evaluate the monad in the given scope.
 -- Outer scopes are not visible.
@@ -77,6 +77,9 @@ lookupVar nm = EvalM $ \_ s -> return (Map.lookup nm (s_vars s), s)
 -- Update the value of a variable.
 -- If the variable is local, it updates the local scope.
 -- If the variable is global, it updates the global scope.
+--
+-- If declVar has not been used to declare this variable, the variable is
+-- assumed to be a global variable.
 insertVar :: Name -> Value -> EvalM ()
 insertVar nm val = EvalM $ \_ s ->
     if Map.member nm (s_vars s)

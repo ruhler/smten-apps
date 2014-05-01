@@ -36,7 +36,7 @@ perf3 = do
                  declVar "c" (BitV False)
                  declVar "d" (BitV False)
                  lookupVar "d"
-         res = runEvalM env Map.empty run
+         res = runEvalM env run
      Smten.Symbolic.assert (Just (Just (BitV True)) == res) 
   putStrLn $ show r
 
@@ -53,7 +53,7 @@ perf4 = do
          run = do
             declVar "a" (IntV 3)
             evalE e
-         res = runEvalM env Map.empty run
+         res = runEvalM env run
      Smten.Symbolic.assert (Just (IntV 3) == res) 
   putStrLn $ show r
 

@@ -1,5 +1,4 @@
 Priority::
-* Wait for Smten Symbolic Int to be improved
 * Re-design type checking for arrays
   Assuming width is not checked statically.
 * Brainstorm how to support global variables properly in general.
@@ -260,7 +259,8 @@ gallery/lss.sk: SLOW: memory blowup
 gallery/reverse.sk: SLOW
   looks like it will finish, just slow. Maybe 2 hours?
 gallery/tutorial2.sk: SLOW: memory blowup
-  Because of int arithmetic blowup?
+  Because of mix of counter-example choice and large size of ints.
+  See doc/perf6.txt.
 gallery/tutorial3.sk: SLOW: memory blowup
   Recursive generator blowup?
 gallery/xpose.sk: SLOW: memory blowup
