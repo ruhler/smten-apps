@@ -1,0 +1,12 @@
+
+int W = 3;
+
+int sketch1(int in) implements spec {
+    W = 2;
+    return in + W;
+}
+   
+int spec(int in) {
+    return in + 2;
+}
+

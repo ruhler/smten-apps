@@ -159,6 +159,14 @@ tests/broken/miniTestb540.sk: bit supports + and -?
     as an int, rather than a cast from (0 - 1) to an int, which would
     give the wrong result.    
 
+SSketch Bugs
+------------
+tests/broken/global2.smten.sk:
+  Global variables should not be inlined statically unless they are final.
+  To fix this: don't require array widths to be known statically.
+  Then we don't need to inline global variables at all, just initialize
+  them properly. Inline becomes an optimization in that case.
+
 Features Needed
 ---------------
 tests/broken/miniTestb196.sk: support h_assert statement.
