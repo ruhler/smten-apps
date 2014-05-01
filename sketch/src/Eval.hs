@@ -61,13 +61,13 @@ apply' :: Function -> [Expr] -> EvalM (Value, [Maybe Value])
 apply' f xs = do
     xs' <- mapM evalE xs
     let argnms = [nm | Arg nm _ _ <- f_args f]
-        args = Map.fromList $ zip argnms xs'
 
         getref :: Arg -> EvalM (Maybe Value)
         getref (Arg _ _ False) = return Nothing
         getref (Arg nm _ True) = lookupVar nm
 
-    scoped args $ do
+    scoped $ do
+       zipWithM declVar argnms xs'
        res <- returned <$> evalS (f_body f)
        refs <- mapM getref (f_args f)
        return (res, refs)

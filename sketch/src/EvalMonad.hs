@@ -46,12 +46,11 @@ instance Monad EvalM where
 runEvalM :: Program -> EvalM a -> Maybe a
 runEvalM env q = fst <$> runEvalM_ q env (State Map.empty Map.empty)
 
--- Evaluate the monad in the given scope.
--- Outer scopes are not visible.
-scoped :: LocalVars -> EvalM a -> EvalM a
-scoped vars x = EvalM $ \e s -> do
-  (r, State _ h') <- runEvalM_ x e (s { s_vars = vars })
-  return (r, s { s_heap = h' })
+-- Evaluate the computation in a fresh local variable scope.
+scoped :: EvalM a -> EvalM a
+scoped x = EvalM $ \e s -> do
+  (r, s') <- runEvalM_ x e (s { s_vars = Map.empty })
+  return (r, s' { s_vars = s_vars s })
 
 -- Evaluation which fails.
 efail :: EvalM a
