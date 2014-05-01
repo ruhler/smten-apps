@@ -259,10 +259,11 @@ Slow::
 gallery/Pollard.sk: memory blowup
 gallery/doublyLinkedList.sk: SLOW: memory blowup
 gallery/isolateRightmost.sk: SLOW
-  Looks like it's making an exponential tree of generators (tens of
-  thousands), which is just leading to very large queries.
-  Question: are generators inlined before or after regex choice?
-  Answer: most likely before, but currently I do it after.
+  Because of:
+    1. duplicating generators in binaryChoice before inlining them.
+    2. not recognizing unreachable paths statically (to bound inlining)
+    3. something else to be determined.
+  See doc/perf7.txt
 gallery/listReverse.sk: SLOW: memory blowup
 gallery/lss.sk: SLOW: memory blowup
 gallery/reverse.sk: SLOW

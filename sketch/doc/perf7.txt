@@ -1,0 +1,58 @@
+
+Thu May  1 11:20:34 EDT 2014
+
+perf7: isolateRightmost.sk from gallery.
+
+First observation:
+
+It makes a whole bunch of generator functions.
+More than necessary?
+
+It's a recursive generator, which is given an explicit bound using assert.
+Ah... but I'm ignoring the bound I suspect.
+
+So I think there are a few issues here:
+1. BinOpChoice is desugared before generators are generated.
+This is not a bug, because each choice is completely independent.
+It does mean the number of generators grows much more rapidly than we need it
+too, however, because there isn't as much sharing as there should be.
+
+2. Generator bound is ignored.
+So instead of inlining to a depth of 3, we inline to a depth of 8, or 10, or
+whatever the inline amount is, thus leading to an exponential explosion.
+
+These things should be fairly easy to test.
+
+First, the baseline: 19549 instances of the generator emitted.
+It would be nice if I knew where this number came from.
+
+Let me see what number I expect.
+
+Well, 3^9 gives us almost exactly that.
+
+If I pull the 'gen' out of the regex, it's much better.
+Down to just 363
+
+If I want, I could probably also share all the end cases, and just define a
+function: "__unreachable", always.
+
+Note, that even with this reduction, it's still slow.
+
+Ah, interesting results:
+ * the default inline amount is 5, not 8 or 10.
+ * If I lower it to 3, so it has the effect of paying attention to the assert
+   in the generator, it still blows up.
+
+This means there's yet a third performance issue here. Good.
+
+I should certainly fix the gen binaryChoice issue.
+That's easy, probably will clean up the code, and is all around good.
+
+I'm not sure if it's worth handling the assert (bnd > 0) thing yet.
+The implementation for that would be to be much more aggressive in
+static simplifications, and knowing that everything after
+assert (0 > 0) is unreachable.
+
+I should go on to minimize the test case as I can, with the proper inline
+amount in place.
+
