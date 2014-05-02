@@ -298,19 +298,15 @@ staticE (BulkAccessE x lo w) = do
   -- We don't know the width of the array x, so we must try to infer it.
   tarr <- typeof x
   w' <- withty IntT $ staticM w
-  case (oty, tarr, w') of
-    (ArrT ta (ValE (IntV wdst)),
-     ArrT tb (ValE (IntV wsrc)),
-     ValE (IntV wv))
-      | ta == tb && wdst <= wsrc && wdst == wv -> do
+  case (oty, tarr) of
+    (ArrT ta _, ArrT tb _)
+      | ta == tb -> do
            x' <- withty tarr $ staticM x
            lo' <- withty IntT $ staticM lo
            return $ BulkAccessE x' lo' w'
       | ta == tb -> error $ "bulk array access out of bounds"
       | otherwise -> error $ "[002]expected type " ++ show oty
                              ++ " but found type: " ++ show tarr
-    (_, ArrT {}, ValE (IntV {})) -> error $ "could not determine array width statically: " ++ show tarr
-    (_, ArrT {}, _) -> error $ "could not determine bulk width statically: " ++ show w'
     _ -> error $ "expected array type, but found type: " ++ show tarr
 
 staticE (FieldE x m) = do
