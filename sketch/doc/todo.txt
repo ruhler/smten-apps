@@ -65,6 +65,14 @@ UNKNOWN_N
   we just always insert an implicit cast for an assignment, and never any
   other time.
 
+  What about the following: Allow structural equality of the widths to be
+  considered equality. Then don't evaluate those width statically. Insert an
+  implicit cast if the widths are structurally identical.
+  I bet that works. Let me try first to not remove checks for greater or
+  equal, and see how things work. (That is, allow implicit cast from arrays of
+  larger sizes to smaller sizes statically).
+  
+
 CLOSURES
   Support local functions.
   Notes:
