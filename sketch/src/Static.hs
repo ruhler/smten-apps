@@ -154,12 +154,9 @@ staticLV (BulkLV lv lo w) = do
     (lv', t) <- staticLV lv
     lo' <- withty IntT $ staticM lo
     w' <- withty IntT $ staticM w
-    case (w', t) of
-        (ValE (IntV wv), ArrT et (ValE (IntV w)))
-           | wv <= w -> return (BulkLV lv' lo' w', ArrT et (ValE (IntV wv)))
-           | otherwise -> error $ "invalid bounds for bulk update of width: " ++ show wv
-        (_, ArrT {}) -> error $ "bulk update width could not be determined statically: " ++ show (w')
-        (_, _) -> error $ "expected array type, but found " ++ show t
+    case t of
+        ArrT et _ -> return (BulkLV lv' lo' w', ArrT et w')
+        _ -> error $ "expected array type, but found " ++ show t
 staticLV (FieldLV lv m) = do
     (lv', t) <- staticLV lv
     case t of
