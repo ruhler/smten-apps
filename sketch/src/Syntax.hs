@@ -17,6 +17,14 @@ import Bits
 
 type Name = String
 
+-- Type
+--
+-- Note: The type (StructT "") is used to represent a type
+-- which is known to be a struct type, but which specific struct type
+-- is unknown.
+--
+-- Note: Equality is structural equality.
+-- This means, for example, bit[3] is not (==) to bit[2+1]
 data Type = 
     VoidT             -- void
   | BitT              -- bit
@@ -25,23 +33,8 @@ data Type =
   | FunT Type [Type]  -- function type: output and argument types
   | StructT Name         -- Foo
   | UnknownT          -- type is not known
-    deriving (Show)
+    deriving (Eq, Show)
 
--- Note: The type (StructT "") is used to represent a type
--- which is known to be a struct type, but which specific struct type
--- is unknown.
-
-instance Eq Type where
-    (==) VoidT VoidT = True
-    (==) BitT BitT = True
-    (==) (ArrT a (ValE (IntV aw))) (ArrT b (ValE (IntV bw))) =
-        a == b && aw == bw
-    (==) (ArrT a wa) (ArrT b wb)
-       | a == b = error $ "type equality on arrays with unknown width: " ++ show (wa, wb)
-    (==) IntT IntT = True
-    (==) (FunT a as) (FunT b bs) = a == b && as == bs
-    (==) (StructT a) (StructT b) = a == b
-    (==) _ _ = False
 
 data Pointer = Null | Pointer Int
     deriving (Eq, Show)
@@ -54,16 +47,7 @@ data Value =
   | FunV Function
   | VoidV
   | PointerV Pointer
-    deriving (Show)
-
-instance Eq Value where
-    (==) (ArrayV as) (ArrayV bs) = as == bs
-    (==) (BitV a) (BitV b) = a == b
-    (==) (BitsV a) (BitsV b) = a == b
-    (==) (IntV a) (IntV b) = a == b
-    (==) VoidV VoidV = True
-    (==) (PointerV a) (PointerV b) = a == b
-    (==) a b = error $ "Value.==: bad args: " ++ show (a, b)
+    deriving (Eq, Show)
 
 instance Ord Value where
     (<=) (IntV av) (IntV bv) = av <= bv
@@ -141,6 +125,29 @@ data BinOp =
  | ChoiceOp [BinOp] -- ^ (op | op | ... | op)
     deriving (Show)
 
+instance Eq BinOp where
+ (==) AndOp              AndOp  = True
+ (==) LAndOp             LAndOp = True
+ (==) AddOp              AddOp  = True
+ (==) SubOp              SubOp  = True
+ (==) LtOp               LtOp   = True
+ (==) GtOp               GtOp   = True
+ (==) LeOp               LeOp   = True
+ (==) GeOp               GeOp   = True
+ (==) EqOp               EqOp   = True
+ (==) NeqOp              NeqOp  = True
+ (==) OrOp               OrOp   = True
+ (==) LOrOp              LOrOp  = True
+ (==) XorOp              XorOp  = True
+ (==) MulOp              MulOp  = True
+ (==) ModOp              ModOp  = True
+ (==) DivOp              DivOp  = True
+ (==) ShrOp              ShrOp  = True
+ (==) ShlOp              ShlOp  = True
+ (==) (ChoiceOp xs)      (ChoiceOp ys) = xs == ys
+ (==) _ _ = False
+
+
 data Expr = 
    ValE Value
  | BinaryE BinOp Expr Expr  -- ^ a <op> b
@@ -163,14 +170,14 @@ data Expr =
  | CastE Type Expr       -- ^ (T) e
  | ICastE Type Expr      -- ^ implicit cast of an expr to a given type
  | AppE Name [Expr]      -- ^ f(x, y, ...)
-    deriving (Show)
+    deriving (Eq, Show)
 
 data LVal = VarLV Name                  -- foo
           | ArrLV LVal Expr             -- foo[i]
           | BulkLV LVal Expr Expr       -- foo[lo::N]
           | FieldLV LVal Name           -- foo.bar
           | ChoiceLV LVal LVal          -- {| foo | bar |}
-    deriving (Show)
+    deriving (Eq, Show)
 
 -- Convert an expression to its corresponding LVal.
 asLVal :: Expr -> Maybe LVal
@@ -211,7 +218,7 @@ data Stmt =
    | UpdateS LVal Expr               -- ^ foo = e;
    | IfS Expr Stmt Stmt              -- ^ if (e) s1 else s2
    | BlockS [Stmt]                   -- ^ { stmts }
-    deriving (Show)
+    deriving (Eq, Show)
 
 -- Construct a block of statements.
 -- This flattens any blocks into the higher level.
@@ -225,13 +232,13 @@ blockS xs =
 -- Arg name type isref
 --   isref - True if the argument is pass by reference.
 data Arg = Arg Name Type Bool
-    deriving (Show)
+    deriving (Eq, Show)
 
 data Function = Function {
     f_outtype :: Type,
     f_args :: [Arg],
     f_body :: Stmt
-} deriving (Show)
+} deriving (Eq, Show)
 
 -- | Return the type of a function.
 functionT :: Function -> Type
