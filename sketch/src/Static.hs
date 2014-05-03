@@ -650,10 +650,10 @@ subtype :: Type -> Type -> Bool
 subtype a b
   | a == b = True
 subtype BitT IntT = True
-subtype (ArrT ta (ValE (IntV wa))) (ArrT tb (ValE (IntV wb)))
+subtype (ArrT ta _) (ArrT tb _)
   | ta `subtype` tb = True
   | ta `matches` tb = True
-subtype (ArrT a wa) (ArrT b wb) = error "subtype: unknown array widths"
+  | otherwise = False
 subtype a b@(ArrT {}) = subtype (ArrT a (ValE (IntV 1))) b
 subtype _ _ = False
 
