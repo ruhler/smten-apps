@@ -60,7 +60,7 @@ instance Static Type where
    -- TODO: Assert StructT has an associated struct type declaration?
    staticM t = do
      env <- asks sr_env
-     return $ evalT env t
+     return $ evalT_xxx env t
 
 instance Static Decl where
   staticM (VarD ty nm e) = do

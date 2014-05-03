@@ -1,6 +1,6 @@
 
 module Eval (
-    evalP, evalT,
+    evalP, evalT_xxx,
     StmtResult(..), evalS, evalE, -- Exposed only for performance debugging
   ) where
 
@@ -24,10 +24,11 @@ evalP p i = all (evalD p i) (decls p)
 
 -- Evaluate a type.
 -- It should not fail.
-evalT :: Program -> Type -> Type
-evalT env (ArrT t e) = ArrT (evalT env t) $ ValE (fromMaybe (error "evalT failed") $ runEvalM env (evalE e))
-evalT env (FunT x xs) = FunT (evalT env x) (map (evalT env) xs)
-evalT env t = t
+-- TODO: Remove this. We shouldn't have to evaluate types statically.
+evalT_xxx :: Program -> Type -> Type
+evalT_xxx env (ArrT t e) = ArrT (evalT_xxx env t) $ ValE (fromMaybe (error "evalT_xxx failed") $ runEvalM env (evalE e))
+evalT_xxx env (FunT x xs) = FunT (evalT_xxx env x) (map (evalT_xxx env) xs)
+evalT_xxx env t = t
 
 evalD :: Program -> ProgramInput -> Decl -> Bool
 evalD env i (VarD {}) = True
@@ -298,16 +299,35 @@ evalE (CastE t e) = {-# SCC "CastE" #-} do
     case (t, e') of
         (IntT, BitV v) -> return (IntV (if v then 1 else 0))
         (IntT, BitsV v) -> return (IntV (valB v))
-        (ArrT BitT (ValE (IntV w)), BitV x) -> return (BitsV (x : replicate (w-1) False))
-        (ArrT BitT (ValE (IntV w)), BitsV xs) -> return (BitsV (take w (xs ++ replicate w False)))
-        (ArrT t (ValE (IntV w)), ArrayV xs) -> return (ArrayV (take w (xs ++ replicate w (pad t))))
+        (ArrT BitT w, BitV x) -> do
+            IntV w' <- evalE w
+            return (BitsV (x : replicate (w'-1) False))
+        (ArrT BitT w, BitsV xs) -> do
+            IntV w' <- evalE w
+            return (BitsV (take w' (xs ++ replicate w' False)))
+        (ArrT t w, ArrayV xs) -> do
+            IntV w' <- evalE w
+            return (ArrayV (take w' (xs ++ replicate w' (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
-evalE (ICastE dst e) = {-# SCC "ICastE" #-} icast dst <$> evalE e
+evalE (ICastE dst e) = do
+    dst' <- evalT dst
+    icast dst' <$> evalE e
 evalE (AppE f xs) = {-# SCC "AppE" #-} do
     f' <- evalE (VarE f)
     case f' of
         FunV fv -> apply fv xs
         _ -> error $ "Expected function, but got: " ++ show f'
+
+evalT :: Type -> EvalM Type
+evalT (ArrT t w) = do
+    t' <- evalT t
+    w' <- evalE w
+    return (ArrT t' (ValE w'))
+evalT (FunT x xs) = do
+    x' <- evalT x
+    xs' <- mapM evalT xs
+    return (FunT x' xs')
+evalT t = return t
 
 -- Given an array value and index, return the value at that index.
 -- TODO: make an LValE, have it use lookupLV, then inline this into lookupLV.
