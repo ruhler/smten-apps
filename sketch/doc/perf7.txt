@@ -56,3 +56,253 @@ assert (0 > 0) is unreachable.
 I should go on to minimize the test case as I can, with the proper inline
 amount in place.
 
+Tue May 13 15:51:47 EDT 2014
+
+Profiling has all the time spent in arrsub.
+
+* 6900 calls to arrsub
+* leads to: 713424 calls to ite
+* leads to: 51500320 calls to andF
+
+Could this be a bug? Is it just we don't know the length of the array?
+
+It must be a problem with the spec, not the sketch.
+Let me try making an easier sketch.
+
+Yes. Now there are no generators going on, no issue with inlining.
+We have simply:
+
+  bit[W] isolate0 (bit[W] x) {     
+      bit[W] ret = 0;
+      for (int i = 0; i < W; i++)  
+          if (!x[i]) { ret[i] = 1; return ret;  } 
+  }
+
+  bit[W] isolate0sk (bit[W] x)  implements isolate0 {		
+      return (!x & (x+1));
+  }
+
+It has found a candidate program, which is not hard, because there are no
+holes. It's just having trouble proving the program correct.
+
+Now, we should be able to scaling it with W.
+
+Interesting. Even with small 'W', it hangs.
+
+This, to me, appears to be a potential bug?
+
+Question: is it related to the fact that the for loop jumps out of a
+condition?
+What if it doesn't reach the end? Then what does it return?
+
+Note: It is immediate if we don't jump out of the loop with a return
+statement.
+It appears not to be an issue with finishing the loop: because even if I
+return a result, it hangs.
+
+I suspect the problem is with explosion of possibilities given the
+short-circuiting. But... It shouldn't be that big of an explosion, should it?
+
+No. Something seems very wrong here.
+
+Maybe it's a problem with mixing 'i' with unreachable, because we don't know
+if we should continue doing the loop, and that somehow makes the loop not
+terminate?
+
+Wed May 14 10:32:16 EDT 2014
+
+What if I manually unroll the loop? Hypothesis: it works fine.
+Meaning something about the loop is what causes the blowup.
+
+If I manually unroll the loop, it's instantly solved.
+
+Here's what I believe must be happening:
+ * Somehow the value of 'i' depends on whether or not we take the branch.
+ * Which makes 'i' symbolic.
+ * Which means we don't know when to stop iterating over the loop.
+
+Here's what I believe should be happening:
+ * The value of 'i' depends on whether or not we take the branch.
+ * But if we take the branch, it is unreachable, so we should be able to
+   optimize that to a known value.
+
+The question is, how can I trace the value of 'i' to see what's happening?
+
+It would be really nice if I could trace-print the symbolic value of
+expressions. If want to start with specific types...
+
+traceS_Int :: Int -> a -> a
+
+Prints out the symbolic value of an integer.
+What say you? Shall I try to add such a primitive?
+
+Why not make this part of the SmtenHS class?
+Then I could have: traceS :: a -> b -> b.
+
+It shows the symbolic version of 'a' as best it can.
+We can default to '???'. But give instances for the primitives.
+
+I think it's at least worth a try. Who knows what the overhead will be, but oh
+well. It will be useful for debugging.
+
+Wed May 14 13:10:03 EDT 2014
+
+It's not terribly useful right now. To make tracing really useful, I need to
+support user defined data types. And maybe better pretty printing for boolean
+formulas.
+
+But one thing is clear: the value of 'i' is unknown.
+
+After one iteration, it is either '0' or '1'. Why?
+
+Because in one case we increment it (it goes to '1'), and in the other case,
+we leave it unchanged. The thing is... we could have incremented it if we
+wanted to. There would have been no problem with that.
+
+Actually, that's not true. Because what if we want to use 'i' outside of the
+loop? Then it certainly should have a different value at the end of the loop.
+
+But why are we ignoring the context? Why aren't we saying: it can only be 0 in
+this case (when v1 is false), otherwise we go to the next loop iteration?
+
+Actually, there's another question: shouldn't we bounding the number of
+iterations of the loop? Does this count as a static bound (because i < W) is
+known, or a dynamic bound, because the loop can break out earlier?
+
+No. Something is still not understood here. Why is there a difference seen in
+the condition, when we construct things bottom up?
+
+Mon May 19 14:26:38 EDT 2014
+
+Let me replicate the bug in perf.hs.
+
+I should be able to say: make x a list of bools.
+Do the for loop thing.
+All that fun stuff.
+
+Mon May 19 14:55:28 EDT 2014
+
+I seem unable to replicate the bug from the ground up.
+Looks like I should try to minimize it instead.
+
+Mon May 19 15:20:48 EDT 2014
+
+Okay, contrast the following two approaches:
+
+A.
+   do r2 <- do
+        r1 <- evalS body
+        case r1 of
+          OK -> evalS incr
+          RET v -> return r1
+      case r2 of
+        OK -> while
+        RET v -> return r2
+
+B. 
+  do  r1 <- evalS body
+      case r1 of
+         OK -> do
+           r2 <- evalS incr
+           case r2 of
+             OK -> while
+             RET v -> return r2
+         RET v -> return r1
+
+In case (B), it is clear from the context that i has been incremented whenever
+while is called.
+In case (A), depending on which branch r1 takes, i may or may not have
+been incremented.
+
+What we don't see in (A), is that evalS incr always returns OK, and return r1
+always returns RET v.
+Perhaps if we were smart enough, we could infer that to be the case (implied
+value concretization).
+But we aren't smart enough.
+
+So, now that I believe I understand the issue, what is the proper solution?
+
+Let me start by further minimization, just to make sure I understand the
+issue.
+
+Mon May 19 15:40:53 EDT 2014
+
+Brainstorm of solutions:
+
+A. [Smten] Implement implied value concretization.
+We should then recognize that in the branch where 'while' is called, we know i
+has been incremented.
+
+B. [Smten] Implement better heuristics for detecting non-termination.
+We should then break the loop, hopefully relatively quickly, and let the SMT
+solver figure out that iterations with i greater than the bound are unreachable.
+
+C. [Sketch] Statically bound unrolling of loops.
+This might be the proper behavior anyway, though it's unclear what is meant by
+a static bound on a loop when the body could be manipulating things.
+If the bound is 8, we don't want to cut off early here, if W is 32 though, so
+this somehow doesn't feel like the proper solution.
+
+D. [Sketch] Change evalS to take subsequent statements to run in a
+continuation style.
+This should have the effect of writing (B) from above instead of (A).
+It makes it explicit that the next iteration will only occur after the
+increment has occurred.
+
+
+Well, I already know I don't want to do (A), just because it's a lot of work,
+and it's a kind of a special case. There will always be some cases it misses.
+
+I don't want to do (B), because even if we did implement it, it would lead to
+grossly inefficient code. More inefficient than we should have to be.
+
+As we said, it is unclear how (C) should work. So I'd rather not do it.
+
+Which leaves (D): a fairly straight-forward change, which I hope should work.
+What do you think? Shall I try it?
+
+Here's the idea:
+
+evalS takes a statement to execute and a continuation: something to execute if
+the first statement does not return. At the top level, we will give (return
+OK) as the final continuation.
+
+And that's it. It is literally that easy. Or, it should be anyway.
+Let me give it a try.
+
+One question: could the continuation approach make some things worse?
+Could it cause replication instead of sharing?
+
+I fear it may.
+
+For example:
+
+  if p
+    then foo
+    else bar
+  sludge
+
+Imagine what foo and bar do have no impact on sludge.
+Without continuation, we execute sludge a single time.
+With continuation, we execute sludge twice: once in the foo branch and once in
+the bar branch.
+
+This suggests sometimes we want a continuation approach, and other times we
+don't, and it's not clear one is better than another.
+That's... unhappy.
+
+Should I try the continuation approach anyway, and see if it really does have
+these problems?
+
+Given that the purpose of Smten is to make it easy to try things like this,
+let me try it. If it doesn't work, it doesn't work, and I have a sense of why.
+     
+Results:
+ * b103, b104, and 48 all fail, when they didn't before.
+ * perf7, 86, b110, b147, b390 all pass now.
+It does not help any of the gallery, including the source example for perf7,
+because it leads to a stack overflow.
+
+I'm inclined not to accept this as the fix, and to think about it more for
+now.
+
