@@ -1,0 +1,14 @@
+
+int W = 32;
+
+bit[W] isolate0 (bit[W] x) {     
+	bit[W] ret = 0;
+	for (int i = 0; i < W; i++)  
+		if (!x[i]) { ret[i] = 1; return ret;  } 
+    return 0;
+}
+
+bit[W] isolate0sk (bit[W] x)  implements isolate0 {		
+	return (!x & (x+1));
+}
+

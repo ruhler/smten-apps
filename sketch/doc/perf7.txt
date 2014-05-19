@@ -306,3 +306,11 @@ because it leads to a stack overflow.
 I'm inclined not to accept this as the fix, and to think about it more for
 now.
 
+Mon May 19 19:32:54 EDT 2014
+
+Well, so as a hack, I specialized the evaluation of ForS, so that it does the
+increment only if the body succeeds. That avoids the ambiguity, and this case
+is solved quickly.
+
+Unfortunately, the only thing it helps with is that specific test case.
+

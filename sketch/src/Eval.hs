@@ -115,7 +115,16 @@ evalS (RepeatS {}) = {-# SCC "RepeatS" #-}
   error "unexpected RepeatS during evaluation"
 evalS (ForS init cond incr body) = {-# SCC "ForS" #-} do
   evalS init
-  evalS $ WhileS cond (blockS [body, incr])
+  let iter = do
+        c' <- evalE cond
+        case c' of
+          BitV False -> return OK
+          BitV True -> do
+            ret <- evalS body
+            case ret of
+              OK -> evalS incr >> iter
+              RET v -> return (RET v)
+  iter
 evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
   c' <- {-# SCC "WhileSCondition" #-} evalE c
   case c' of
@@ -124,7 +133,7 @@ evalS w@(WhileS c s) = {-# SCC "WhileS" #-} do
       ret <- evalS s
       case ret of
         OK -> evalS w
-        RET v -> return ret
+        RET v -> return (RET v)
 evalS (DeclS ty vars) = {-# SCC "DeclS" #-} do
   let f (nm, mval) = do
           let defv = case ty of
