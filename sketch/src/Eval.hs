@@ -464,3 +464,15 @@ icast (ArrT t (ValE (IntV w))) (ArrayV xs)
 icast t@(ArrT {}) v = icast t (arrayV [v])
 icast t v = error $ "TODO: implement implicit cast of " ++ show v ++ " to " ++ show t
 
+shlI :: (Num int, Ord int) => int -> int -> int
+shlI x n
+ | n < 0 = 0
+ | n == 0 = x
+ | otherwise = shlI (2*x) (n-1)
+
+shrI :: (Integral int) => int -> int -> int
+shrI x n
+ | n < 0 = 0
+ | n == 0 = x
+ | otherwise = shrI (x `quot` 2) (n-1)
+
