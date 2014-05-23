@@ -12,6 +12,7 @@ module Syntax (
 
 import Smten.Prelude
 import Smten.Control.Monad
+import Smten.Data.List
 
 import Bits
 import IntS
@@ -251,7 +252,7 @@ functionT f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
 pad :: Type -> Value
 pad BitT = BitV False
 pad IntT = IntV 0
-pad (ArrT t (ValE (IntV w))) = arrayV (replicateS w (pad t))
+pad (ArrT t (ValE (IntV w))) = arrayV (genericReplicate w (pad t))
 pad (StructT _) = PointerV Null
 
 binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr

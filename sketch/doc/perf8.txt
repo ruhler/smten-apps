@@ -1,0 +1,89 @@
+
+Wed May 21 15:01:52 EDT 2014
+
+A new test, based on tutorial3 from the gallery.
+Let's see if we can shrink it.
+
+I bet this is just a blowup of symbolic int choices.
+If we switched to bit-vectors, say, I imagine it would be much faster.
+
+Let me test the hypothesis by shrinking the input range considered.
+
+Oh, wait. Look. The initial guess has x y and z very large values.
+It gets stuck looking for a candidate program.
+
+Let me start by shrinking the input bits allowed.
+
+If I shrink it to 1 bit, it works.
+But even 2 bits blows up the memory.
+
+Suspicion: it's all in int maps.
+
+Could it be the int maps are leaking?
+Or is it really that much?
+
+It might be worth running through this by hand, or at least simplifying
+it.
+
+Wow. That makes a difference.
+
+So, inlining the generator 5 times leads to blowup, but less is fine for
+inbits 2.
+
+inline amount  & max inbits
+5 & 1
+4 & 4
+3 & 5
+
+So both parameters play an important role.
+And I suspect it's based no the number of possible integer values.
+
+Let's see what's taking up all that memory.
+
+Notice: Almost all the allocation comes from itePF_ and andFF.
+As well as all the time. It's in the implementation of AddE.
+
+The heap profile is dominated by '*'. What type is that?
+
+The cost center is itePF_ from Add. I bet this is ite for the Int type.
+Let me add some annotations, see what I see.
+
+While I'm waiting, let me look at the ranges of ints we expect.
+
+Hmm... Here's something interesting. What if 't' is not set? What if it runs
+off the end of the generator?
+  
+Some of it is this idea that values for t which are greater than 5 are all
+equivalent, so no need to try that.
+
+Note also we are dealing with potential "failures" when we reach the inlining bound.
+Could this be causing bad things to happen?
+
+rec0: range of x.
+rec1: range of x^2.
+rec2: range of x^4.
+rec3: range of x^8.
+recN: range of x^(2^N)
+
+In other words, it grows really poorly.
+
+And, as expected, the time is in multiplication and subtraction of these ints.
+
+24 calls to * leads to 37368 calls to itePF_.
+Which is 2.3 million calls to andFF.
+
+31 calls to - leads to 6 million calls to ite_IntF.
+
+Here's something I would like to try: using a different representation for
+ints. For example, bit vectors.
+
+And more generally, it would be fun to play around with different
+implementations. Can I abstract away the Int type used in sketch?
+Have an IntS type, for example?
+
+I could try Int, Integer, Bit-vector. All that fun stuff, see what difference
+it makes.
+
+In fact, it looks like most of the Int tests in the gallery suffer from this
+same kind of problem.
+

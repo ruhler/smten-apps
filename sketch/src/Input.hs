@@ -6,6 +6,7 @@ module Input (
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
+import Smten.Data.List
 import Smten.Data.Maybe
 import Smten.Symbolic
 
@@ -54,6 +55,6 @@ mkFreeArg bnd t =
   case t of
     BitT -> BitV <$> free
     ArrT t (ValE (IntV w)) -> do
-       arrayV <$> sequence (replicateS w (mkFreeArg bnd t))
+       arrayV <$> sequence (genericReplicate w (mkFreeArg bnd t))
     IntT -> IntV <$> freeInt bnd
 

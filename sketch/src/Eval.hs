@@ -7,6 +7,7 @@ module Eval (
 import Smten.Prelude
 import Smten.Control.Monad
 import Smten.Data.Functor
+import Smten.Data.List
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
 
@@ -240,13 +241,13 @@ evalE (BinaryE ShlOp a b) = {-# SCC "ShlE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsV av, IntV bv) -> return $ BitsV (av `shlB` toInt bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shlB` bv)
       (IntV av, IntV bv) -> return $ IntV (av `shlI` bv)
 evalE (BinaryE ShrOp a b) = {-# SCC "ShrE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsV av, IntV bv) -> return $ BitsV (av `shrB` toInt bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
       (IntV av, IntV bv) -> return $ IntV (av `shrI` bv)
 evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
     a' <- lookupLV lv
@@ -311,13 +312,13 @@ evalE (CastE t e) = {-# SCC "CastE" #-} do
         (IntT, BitsV v) -> return (intV (valB v))
         (ArrT BitT w, BitV x) -> do
             IntV w' <- evalE w
-            return (BitsV (x : replicateS (w'-1) False))
+            return (BitsV (x : genericReplicate (w'-1) False))
         (ArrT BitT w, BitsV xs) -> do
             IntV w' <- evalE w
-            return (BitsV (takeS w' (xs ++ replicateS w' False)))
+            return (BitsV (genericTake w' (xs ++ genericReplicate w' False)))
         (ArrT t w, ArrayV xs) -> do
             IntV w' <- evalE w
-            return (ArrayV (takeS w' (xs ++ replicateS w' (pad t))))
+            return (ArrayV (genericTake w' (xs ++ genericReplicate w' (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE (ICastE dst e) = do
     dst' <- evalT dst
@@ -348,10 +349,10 @@ arrayAccess arr i = do
                IntV iv -> iv
     case arr of
         BitsV av -> do
-          assert (idx >= 0 && idx < lengthS av)
+          assert (idx >= 0 && idx < genericLength av)
           return (BitV (arrsub av idx))
         ArrayV xs -> do
-          assert (idx >= 0 && idx < lengthS xs)
+          assert (idx >= 0 && idx < genericLength xs)
           return (arrsub xs idx)
 
 bulkAccess :: Value -> Expr -> Expr -> EvalM Value
@@ -360,13 +361,13 @@ bulkAccess arr lo w = do
     IntV w' <- evalE w
     case arr of
         BitsV xs -> do
-          let xs' = dropS lo' xs
+          let xs' = genericDrop lo' xs
           assert (lo' >= 0 && w' <= fromInt (length xs'))
-          return (BitsV (takeS w' xs'))
+          return (BitsV (genericTake w' xs'))
         ArrayV xs -> do
-          let xs' = dropS lo' xs
+          let xs' = genericDrop lo' xs
           assert (lo' >= 0 && w' <= fromInt (length xs'))
-          return (ArrayV (takeS w' xs'))
+          return (ArrayV (genericTake w' xs'))
 
 -- Access a field of a structure
 fieldAccess :: Value -> Name -> EvalM Value
@@ -441,9 +442,9 @@ arrsub (x:xs) n = if (n == 0)
 -- Do a bulk update starting at the given index.
 arrbulkupd :: [a] -> IntS -> [a] -> [a]
 arrbulkupd vals i vals' =
-  let lo = takeS i vals
+  let lo = genericTake i vals
       mid = vals'
-      hi = dropS (i + lengthS vals') vals
+      hi = genericDrop (i + genericLength vals') vals
   in concat [lo, mid, hi]
 
 -- Implicitly cast the given value to the given type.
@@ -454,11 +455,11 @@ icast IntT (BitV True) = IntV 1
 icast IntT v@(IntV {}) = v
 icast (StructT {}) v@(PointerV {}) = v
 icast (ArrT BitT (ValE (IntV w))) (BitsV xs)
- | lengthS xs <= w = BitsV (takeS w (xs ++ replicateS w False))
+ | genericLength xs <= w = BitsV (genericTake w (xs ++ genericReplicate w False))
  | otherwise = error $ "Implicit cast would truncate a bit vector"
 icast t@(ArrT {}) (BitsV xs) = icast t (ArrayV (map BitV xs))
 icast (ArrT t (ValE (IntV w))) (ArrayV xs)
- | lengthS xs <= w = ArrayV $ takeS w (map (icast t) xs ++ replicateS w (pad t))
+ | genericLength xs <= w = ArrayV $ genericTake w (map (icast t) xs ++ genericReplicate w (pad t))
  | otherwise = error $ "Implicit cast would truncate an array"
 icast t@(ArrT {}) v = icast t (arrayV [v])
 icast t v = error $ "TODO: implement implicit cast of " ++ show v ++ " to " ++ show t

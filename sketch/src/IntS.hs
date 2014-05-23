@@ -2,9 +2,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module IntS (
-    IntS, fromInt, toInt, freeInt,
+    IntS, fromInt, freeInt,
     shlI, shrI,
-    replicateS, takeS, lengthS, dropS,
   ) where
 
 import Smten.Prelude
@@ -20,9 +19,6 @@ instance Show IntS where
 
 fromInt :: Int -> IntS
 fromInt = IntS
-
-toInt :: IntS -> Int
-toInt (IntS x) = x
 
 -- Compute 2^n
 exp2 :: Int -> Int
@@ -44,21 +40,4 @@ shrI x n
  | n < 0 = 0
  | n == 0 = x
  | otherwise = shrI (x `quot` 2) (n-1)
-
-replicateS :: IntS -> a -> [a]
-replicateS n x = takeS n (repeat x)
-
-lengthS :: [a] -> IntS
-lengthS [] = 0
-lengthS (x:xs) = 1 + lengthS xs
-
-takeS                   :: IntS -> [a] -> [a]
-takeS n _      | n <= 0 =  []
-takeS _ []              =  []
-takeS n (x:xs)          =  x : takeS (n-1) xs
-
-dropS                   :: IntS -> [a] -> [a]
-dropS n xs     | n <= 0 =  xs
-dropS _ []              =  []
-dropS n (_:xs)          =  dropS (n-1) xs
 

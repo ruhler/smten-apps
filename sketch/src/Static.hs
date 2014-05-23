@@ -12,6 +12,7 @@ import Smten.Control.Monad.Reader
 import Smten.Control.Monad.State
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
+import Smten.Data.List
 
 import Eval
 import IntS
@@ -406,10 +407,10 @@ instance Static Value where
       ArrT _ (ValE (IntV 0)) -> error $ "TODO: integer literal for 0 length array"
       ArrT BitT (ValE (IntV w)) ->
          case v of
-           0 -> staticM (arrayV $ BitV False : replicateS (w-1) (pad BitT))
-           1 -> staticM (arrayV $ BitV True : replicateS (w-1) (pad BitT))
+           0 -> staticM (arrayV $ BitV False : genericReplicate (w-1) (pad BitT))
+           1 -> staticM (arrayV $ BitV True : genericReplicate (w-1) (pad BitT))
            _ -> error $ "cannot use integer literal for bits: " ++ show v
-      ArrT t (ValE (IntV w)) -> staticM (arrayV $ x : replicateS (w-1) (pad t))
+      ArrT t (ValE (IntV w)) -> staticM (arrayV $ x : genericReplicate (w-1) (pad t))
       _ -> error $ "unsupported type for integer literal: " ++ show ty
 
   staticM x@(BitV _) = do
@@ -590,7 +591,7 @@ typeof (BinaryE EqOp a b) = return BitT
 typeof (BinaryE NeqOp a b) = return BitT
 typeof (ArrayE a) = do
    ty <- foldr unify UnknownT <$> mapM typeof a
-   return $ ArrT ty (ValE (IntV (lengthS a)))
+   return $ ArrT ty (ValE (IntV (genericLength a)))
 typeof (BinaryE XorOp a b) = liftM2 unify (typeof a) (typeof b)
 typeof (BinaryE MulOp a b) = return IntT
 typeof (BinaryE ModOp a b) = return IntT

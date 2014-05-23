@@ -1,5 +1,5 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables #-}
 module Bits (
     Bit, Bits,
     xor,
@@ -12,6 +12,7 @@ module Bits (
 
 import Smten.Prelude
 import Smten.Symbolic
+import Smten.Data.List
 
 type Bit = Bool
 type Bits = [Bit] -- head is the least significant bit
@@ -41,12 +42,12 @@ notB :: Bits -> Bits
 notB = map not
 
 -- Right shift removes the least significant bits
-shrB :: Bits -> Int -> Bits
-shrB a b = take (length a) $ drop b a ++ repeat False
+shrB :: (Integral i) => Bits -> i -> Bits
+shrB a b = take (length a) $ genericDrop b a ++ repeat False
 
 -- Left shift removes the most significant bits
-shlB :: Bits -> Int -> Bits
-shlB a b = take (length a) $ replicate b False ++ a
+shlB :: (Integral i) => Bits -> i -> Bits
+shlB a b = take (length a) $ genericReplicate b False ++ a
 
 -- freeBits w n
 -- Construct a symbolic bit vector
