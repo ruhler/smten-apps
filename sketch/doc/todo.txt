@@ -266,21 +266,37 @@ gallery/sort.included.sk(INT): LOCAL_GEN
 Slow::
 gallery/Pollard.sk(INT): memory blowup
 gallery/doublyLinkedList.sk(DATA): SLOW: memory blowup
-gallery/isolateRightmost.sk: SLOW
+gallery/isolateRightmost.sk(BIT): SLOW
   Because of:
     1. not recognizing unreachable paths statically (to bound inlining)
     2. something else to be determined.
   See doc/perf7.txt
+
 gallery/listReverse.sk(DATA): SLOW: memory blowup
+  see doc/perf9.txt
+
 gallery/lss.sk(INT): SLOW: memory blowup
+
 gallery/reverse.sk(BIT): SLOW
   looks like it will finish, just slow. Maybe 2 hours?
+
 gallery/tutorial2.sk(INT): SLOW: memory blowup
   Because of mix of counter-example choice and large size of ints.
   See doc/perf6.txt.
+
 gallery/tutorial3.sk(INT): SLOW: memory blowup
-  Recursive generator blowup?
+  Looks like blowup of symbolic Ints.
+  See doc/perf8.txt.
+  
+
 gallery/xpose.sk(INT): SLOW: memory blowup
+  This actually appears to make slow progress.
+  The memory usage is still high, but not a complete blowup.
+  One thing that is interesting: it's not picking very good counter-examples.
+  A random counter-example would much more effectively find the answer by
+  exploring more paths at once.
+  Using z3 gives more interesting choices of counter-example. It's still slow
+  though.
  
 
 Clean::

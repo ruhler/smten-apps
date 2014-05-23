@@ -6,7 +6,7 @@ module Syntax (
     Pointer(..), Value(..), BinOp(..), Expr(..), Arg(..), Function(..),
     Member(..),
     functionT,
-    blockS, typeofV, arrayV, nullV, pad, binaryChoiceE, fieldChoiceE,
+    blockS, typeofV, arrayV, intV, nullV, pad, binaryChoiceE, fieldChoiceE,
     asLVal, asType,
     ) where
 
@@ -14,6 +14,7 @@ import Smten.Prelude
 import Smten.Control.Monad
 
 import Bits
+import IntS
 
 type Name = String
 
@@ -43,11 +44,14 @@ data Value =
     ArrayV [Value]
   | BitV Bit
   | BitsV Bits
-  | IntV Int
+  | IntV IntS
   | FunV Function
   | VoidV
   | PointerV Pointer
     deriving (Eq, Show)
+
+intV :: Int -> Value
+intV x = IntV (fromInt x)
 
 instance Ord Value where
     (<=) (IntV av) (IntV bv) = av <= bv
@@ -92,9 +96,9 @@ nullV = PointerV Null
 
 typeofV :: Value -> Type
 typeofV (ArrayV []) = ArrT UnknownT (ValE (IntV 0))
-typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (IntV (length xs)))
+typeofV (ArrayV xs) = ArrT (typeofV (head xs)) (ValE (intV (length xs)))
 typeofV (BitV {}) = BitT
-typeofV (BitsV b) = ArrT BitT (ValE (IntV $ length b))
+typeofV (BitsV b) = ArrT BitT (ValE (intV $ length b))
 typeofV (IntV 0) = BitT     -- it may be a bit literal, so indicate that:
 typeofV (IntV 1) = BitT     --  it will promote to int if needed
 typeofV (IntV w) = IntT
@@ -247,7 +251,7 @@ functionT f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
 pad :: Type -> Value
 pad BitT = BitV False
 pad IntT = IntV 0
-pad (ArrT t (ValE (IntV w))) = arrayV (replicate w (pad t))
+pad (ArrT t (ValE (IntV w))) = arrayV (replicateS w (pad t))
 pad (StructT _) = PointerV Null
 
 binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr

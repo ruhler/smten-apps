@@ -13,6 +13,7 @@ import qualified Smten.Data.Map as Map
 import Bits
 import EvalMonad
 import Input
+import IntS
 import Program
 import Syntax
 
@@ -239,13 +240,13 @@ evalE (BinaryE ShlOp a b) = {-# SCC "ShlE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsV av, IntV bv) -> return $ BitsV (av `shlB` bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shlB` toInt bv)
       (IntV av, IntV bv) -> return $ IntV (av `shlI` bv)
 evalE (BinaryE ShrOp a b) = {-# SCC "ShrE" #-} do
     a' <- evalE a
     b' <- evalE b
     case (a', b') of
-      (BitsV av, IntV bv) -> return $ BitsV (av `shrB` bv)
+      (BitsV av, IntV bv) -> return $ BitsV (av `shrB` toInt bv)
       (IntV av, IntV bv) -> return $ IntV (av `shrI` bv)
 evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
     a' <- lookupLV lv
@@ -307,16 +308,16 @@ evalE (CastE t e) = {-# SCC "CastE" #-} do
     e' <- evalE e
     case (t, e') of
         (IntT, BitV v) -> return (IntV (if v then 1 else 0))
-        (IntT, BitsV v) -> return (IntV (valB v))
+        (IntT, BitsV v) -> return (intV (valB v))
         (ArrT BitT w, BitV x) -> do
             IntV w' <- evalE w
-            return (BitsV (x : replicate (w'-1) False))
+            return (BitsV (x : replicateS (w'-1) False))
         (ArrT BitT w, BitsV xs) -> do
             IntV w' <- evalE w
-            return (BitsV (take w' (xs ++ replicate w' False)))
+            return (BitsV (takeS w' (xs ++ replicateS w' False)))
         (ArrT t w, ArrayV xs) -> do
             IntV w' <- evalE w
-            return (ArrayV (take w' (xs ++ replicate w' (pad t))))
+            return (ArrayV (takeS w' (xs ++ replicateS w' (pad t))))
         _ -> error $ "Unsupported cast of " ++ show e' ++ " to type " ++ show t
 evalE (ICastE dst e) = do
     dst' <- evalT dst
@@ -347,10 +348,10 @@ arrayAccess arr i = do
                IntV iv -> iv
     case arr of
         BitsV av -> do
-          assert (idx >= 0 && idx < length av)
+          assert (idx >= 0 && idx < lengthS av)
           return (BitV (arrsub av idx))
         ArrayV xs -> do
-          assert (idx >= 0 && idx < length xs)
+          assert (idx >= 0 && idx < lengthS xs)
           return (arrsub xs idx)
 
 bulkAccess :: Value -> Expr -> Expr -> EvalM Value
@@ -359,13 +360,13 @@ bulkAccess arr lo w = do
     IntV w' <- evalE w
     case arr of
         BitsV xs -> do
-          let xs' = drop lo' xs
-          assert (lo' >= 0 && w' <= length xs')
-          return (BitsV (take w' xs'))
+          let xs' = dropS lo' xs
+          assert (lo' >= 0 && w' <= fromInt (length xs'))
+          return (BitsV (takeS w' xs'))
         ArrayV xs -> do
-          let xs' = drop lo' xs
-          assert (lo' >= 0 && w' <= length xs')
-          return (ArrayV (take w' xs'))
+          let xs' = dropS lo' xs
+          assert (lo' >= 0 && w' <= fromInt (length xs'))
+          return (ArrayV (takeS w' xs'))
 
 -- Access a field of a structure
 fieldAccess :: Value -> Name -> EvalM Value
@@ -394,10 +395,10 @@ updateLV (ArrLV lv i) x = do
   ir <- evalE i
   arr' <- case (arr, ir, x) of
              (BitsV xs, IntV i', BitV e') -> do
-                assert (i' < length xs)
+                assert (i' < fromInt (length xs))
                 return (BitsV $ arrupd xs i' e')
              (ArrayV xs, IntV i', e') -> do
-                assert (i' < length xs)
+                assert (i' < fromInt (length xs))
                 return (ArrayV $ arrupd xs i' e')
   updateLV lv arr'
 updateLV (BulkLV lv lo _) x = do
@@ -422,7 +423,7 @@ updateLV (FieldLV lv m) v = do
 --
 -- Note: This is structured to be lazy in the Int argument, because we
 -- expect the index to be symbolic, but the list structure to be concrete.
-arrupd :: [a] -> Int -> a -> [a]
+arrupd :: [a] -> IntS -> a -> [a]
 arrupd [] _ _ = []
 arrupd (x:xs) n v = (if (n == 0) then v else x) : arrupd xs (n-1) v
 
@@ -430,7 +431,7 @@ arrupd (x:xs) n v = (if (n == 0) then v else x) : arrupd xs (n-1) v
 -- Assumes the index is in range.
 -- Tries to be lazy in the index to work better with symbolic index and
 -- concrete list structure.
-arrsub :: [a] -> Int -> a
+arrsub :: [a] -> IntS -> a
 arrsub [x] _ = x
 arrsub (x:xs) n = if (n == 0)
                     then x
@@ -438,11 +439,11 @@ arrsub (x:xs) n = if (n == 0)
                     
 
 -- Do a bulk update starting at the given index.
-arrbulkupd :: [a] -> Int -> [a] -> [a]
+arrbulkupd :: [a] -> IntS -> [a] -> [a]
 arrbulkupd vals i vals' =
-  let lo = take i vals
+  let lo = takeS i vals
       mid = vals'
-      hi = drop (i + length vals') vals
+      hi = dropS (i + lengthS vals') vals
   in concat [lo, mid, hi]
 
 -- Implicitly cast the given value to the given type.
@@ -453,24 +454,12 @@ icast IntT (BitV True) = IntV 1
 icast IntT v@(IntV {}) = v
 icast (StructT {}) v@(PointerV {}) = v
 icast (ArrT BitT (ValE (IntV w))) (BitsV xs)
- | length xs <= w = BitsV (take w (xs ++ replicate w False))
+ | lengthS xs <= w = BitsV (takeS w (xs ++ replicateS w False))
  | otherwise = error $ "Implicit cast would truncate a bit vector"
 icast t@(ArrT {}) (BitsV xs) = icast t (ArrayV (map BitV xs))
 icast (ArrT t (ValE (IntV w))) (ArrayV xs)
- | length xs <= w = ArrayV $ take w (map (icast t) xs ++ replicate w (pad t))
+ | lengthS xs <= w = ArrayV $ takeS w (map (icast t) xs ++ replicateS w (pad t))
  | otherwise = error $ "Implicit cast would truncate an array"
 icast t@(ArrT {}) v = icast t (arrayV [v])
 icast t v = error $ "TODO: implement implicit cast of " ++ show v ++ " to " ++ show t
-
-shlI :: Int -> Int -> Int
-shlI x n
- | n < 0 = 0
- | n == 0 = x
- | otherwise = shlI (2*x) (n-1)
-
-shrI :: Int -> Int -> Int
-shrI x n
- | n < 0 = 0
- | n == 0 = x
- | otherwise = shrI (x `quot` 2) (n-1)
 

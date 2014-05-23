@@ -4,12 +4,12 @@ module Input (
     ) where
 
 import Smten.Prelude
-import Smten.Control.Monad
 import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 import Smten.Data.Maybe
 import Smten.Symbolic
 
+import IntS
 import Options
 import Program
 import Syntax
@@ -54,14 +54,6 @@ mkFreeArg bnd t =
   case t of
     BitT -> BitV <$> free
     ArrT t (ValE (IntV w)) -> do
-       arrayV <$> sequence (replicate w (mkFreeArg bnd t))
+       arrayV <$> sequence (replicateS w (mkFreeArg bnd t))
     IntT -> IntV <$> freeInt bnd
-
--- Compute 2^n
-exp2 :: Int -> Int
-exp2 0 = 1
-exp2 n = 2 * exp2 (n-1)
-
-freeInt :: Int -> Symbolic Int
-freeInt n = msum (map return [0..(exp2 n - 1)])
 

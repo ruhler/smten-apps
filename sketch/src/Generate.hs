@@ -10,6 +10,7 @@ import Smten.Data.Maybe
 import Smten.Symbolic
 
 import Input
+import IntS
 import Options
 import Program
 import Syntax
@@ -102,7 +103,7 @@ genS (ReorderS xs) = do
 -- Note: The body of the expression is repeated before generation occurs in
 -- the body.
 -- TODO: evaluate n statically as much as possible here.
-genS (RepeatS (ValE (IntV v)) s) = genS $ blockS (replicate v s) 
+genS (RepeatS (ValE (IntV v)) s) = genS $ blockS (replicateS v s) 
 genS (RepeatS e s) = do
   -- We don't know the repeat, so repeat it at most bnd_unroll_amnt times.
   -- We form the following program:
@@ -119,7 +120,7 @@ genS (RepeatS e s) = do
         | otherwise =
             let ifthen = blockS [s, unroll (n+1)]
                 ifelse = (blockS [])
-            in IfS (BinaryE GtOp (VarE x) (ValE (IntV n))) ifthen ifelse
+            in IfS (BinaryE GtOp (VarE x) (ValE (intV n))) ifthen ifelse
   genS $ blockS [DeclS IntT [(x, Just e)], unroll 0]
 
 genS (WhileS c s) = liftM2 WhileS (genE c) (genS s)

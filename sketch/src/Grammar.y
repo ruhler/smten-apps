@@ -247,7 +247,7 @@ expr :: { Expr }
  | '??' '(' integer ')' { HoleE UnknownT (Just $3) }
  | '{' '*' '}' { HoleE UnknownT Nothing }
  | '{|' regexpr '|}' { $2 }
- | integer { ValE (IntV $1) }
+ | integer { ValE (intV $1) }
  | id { VarE $1 }
  | expr '[' expr ']' { AccessE $1 $3 }
  | expr '[' expr '::' expr ']' { BulkAccessE $1 $3 $5 }
@@ -310,7 +310,7 @@ regexpr :: { Expr }
  | '??' { HoleE UnknownT Nothing }
  | '??' '(' integer ')' { HoleE UnknownT (Just $3) }
  | '{' '*' '}' { HoleE UnknownT Nothing }
- | integer { ValE (IntV $1) }
+ | integer { ValE (intV $1) }
  | id { VarE $1 }
  | regexpr '[' regexpr ']' { AccessE $1 $3 }
  | regexpr '[' regexpr '::' regexpr ']' { BulkAccessE $1 $3 $5 }
