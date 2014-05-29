@@ -221,6 +221,7 @@ tests/broken/slow/miniTest92.sk:
 tests/broken/slow/miniTestb102.sk: TYPEOFV_SLOW
 tests/broken/slow/miniTestb110.sk: INSERTVAR_SLOW
 tests/broken/slow/miniTestb147.sk: (==) takes all time?
+    This is from IntS blowup
 tests/broken/slow/miniTestb156.sk: ???
 tests/broken/slow/miniTestb180.sk: takes many iterations
 tests/broken/slow/miniTestb181.sk: arrsub takes all time?

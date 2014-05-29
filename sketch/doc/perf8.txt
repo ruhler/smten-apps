@@ -87,3 +87,7 @@ it makes.
 In fact, it looks like most of the Int tests in the gallery suffer from this
 same kind of problem.
 
+Tue May 27 17:05:33 EDT 2014
+
+Note: switching to a bit-vector implementation of Int makes this solve easily.
+
