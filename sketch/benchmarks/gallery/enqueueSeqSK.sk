@@ -27,7 +27,8 @@ int enqueue(Queue q, int i){ /* automatically rewritten */
 	Node n = new Node();
 	n.val = i;
 	n.next = null;	
-	minrepeat{		
+	//minrepeat{		
+	repeat (??) {		
 		if(??){ if(cond(q)){ {| q( .head  | .tail )(.next)? |} = n;  } } // 
 	}
 	return 1;

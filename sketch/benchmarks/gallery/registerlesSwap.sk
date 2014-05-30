@@ -3,7 +3,8 @@
 int W = 32;
 
 void swap(ref bit[W] x, ref bit[W] y){		    
-    minrepeat{
+    //minrepeat{
+    repeat (??) {
         if(??){ x = x ^ y;}else{ y = x ^ y; } 
     }
 }

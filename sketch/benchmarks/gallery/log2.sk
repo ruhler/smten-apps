@@ -2,7 +2,8 @@
 
 pragma options "--bnd-unroll-amnt 6";
 
-int W = 32, logW = 5;
+int W = 32;
+int logW = 5;
 
 
 bit[W] log2(bit[W] in) {

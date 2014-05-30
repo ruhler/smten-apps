@@ -1,0 +1,186 @@
+
+Status of gallery benchmarks:
+
+benchmarks/gallery/compress.sk:
+  Type: BIT
+  yices2.int: 2m13s
+  yices1.int: 23m47s
+  stp.int: stack space overflow after 6m30s
+  z3.int: 1m30s
+  minisat: Over 2 hours before I gave up, but memory is okay.
+
+  Profiling for yices2 int:
+    28% Solve
+    70% EvalS 
+      The primitive Int operations are called a lot, especially from the shift
+      operation, which has a partially concrete shift amount.
+
+benchmarks/gallery/jburnim_morton.sk:
+  Type: BIT
+  yices2.int: 4m29s
+  yices1.int: 6m53s
+  stp.int: stack space overflow after 5m12s
+  z3.int: 3m35s
+  minisat.int: 40m37s
+
+  Profiling for yices2 int:
+    33% Solve
+     7% Build
+     3% Assert
+    48% shlB.
+  This is very much like compress. A repeated partial shift amount.
+
+benchmarks/gallery/logcount.sk:
+  Type: BIT
+  yices2.int: 0m15s
+  yices1.int: 1m08s
+  stp.int: 2m28s
+  z3.int: 9m50s
+  minisat.int: I gave up waiting after 45 minutes.
+
+  Profiling for yices2 int:
+    25% Solve
+     6% Build
+     3% Assert
+  This is like compress and morton, except the shift is a right shift of
+  unknown amount.
+
+benchmarks/gallery/parity.sk:
+  Type: BIT
+  yices2.int: 1s
+  yices1.int: 4s
+  stp.int: 8s
+  z3.int: 4s
+  minisat.int: 7s
+ 
+  Profiling for yices1 int:
+  This is like all the others, with a shift left.
+
+benchmarks/gallery/polynomial.sk:
+  Type: DATA
+  yices2.int: 1s
+  yices1.int: 1s
+  stp.int: 1s
+  z3.int: 1s
+  minisat.int: 1s
+
+  It's not worth profiling.
+
+benchmarks/gallery/tutorial1.sk
+  Type: Int
+  yices2.int: 1s
+  yices1.int: 1s
+  stp.int: 1s
+  z3.int: 1s
+  minisat.int: 1s
+
+  It's not worth profiling.
+
+benchmarks/gallery/SetTest.cpped.sk:
+  Type: Data
+  This uses an uninterpreted function for the hash function of a hash table.
+  My implementation does not support uninterpreted functions, so I will not
+  use this benchmark.
+
+benchmarks/gallery/diagStencil.sk:
+  Type: STENCIL
+  This uses stencils and floats, which I don't support.
+  I will not use this benchmark.
+
+benchmarks/gallery/diagStencilClean.sk: STENCIL
+  Type: STENCIL
+  This uses stencils and floats, which I don't support.
+  I will not use this benchmark.
+
+benchmarks/gallery/enqueueSeqSK.sk
+  Type: DATA
+  Note: this used "minrepeat", which I don't support. I have replaced
+  that with "repeat (??)" instead, which I do support.
+
+  int: The memory of this blows up searching for a counter example.
+  TODO: Understand why.
+
+benchmarks/gallery/registerlesSwap.sk:
+  Type: Bit
+  Note: this used "minrepeat", which I don't support. I have replaced
+  that with "repeat (??)" instead, which I do support. It's a little silly,
+  because the whole point of the test case is to find the smallest, but that's
+  what I can do for now.
+
+  int: 1s (solver doesn't matter)
+
+benchmarks/gallery/karatsuba.sk:
+  Type: Int
+  This benchmark requires support for array lengths which are passed as
+  arguments to functions, which I don't currently support.
+  It's not convenient to manually rewrite this like signedAvg.sk because it
+  re-uses functions with a variety of different lengths.
+  Though it does appear those lengths are all statically known, so 
+  we could statically inline it in theory.
+
+benchmarks/gallery/signedAvg.sk
+  Type: Bit
+  Note: This benchmark was modified to avoid use of passing array lengths
+  as arguments. This doesn't change anything significant, because the array
+  length was statically known anyway.
+
+  int: The memory of this blows up in verification.
+  It appears to have a very deep generator stack.
+  TODO: understand the problem.
+
+benchmarks/gallery/tableBasedAddition.sk:
+  Type: Bit
+  Note: This was modified by manually doing the static inline of W * (1 << W*2);
+
+  int: Memory blowup searching for a counterexample. Perhaps because it's
+  dealing with a 1024 bit table?
+
+  TODO: understand the problem. A good start would be shrinking W and see
+  if it helps.
+
+benchmarks/gallery/log2.sk:
+  Type: Bit
+  Note: I made a minor change to fix a parse issue with global vars. It
+  doesn't change anything significant.
+
+  int: claims unsat. But sketch says sat after 3 minutes.
+  There is an issue with repeat bounds: we have a static value, 
+  but we don't figure it out. But even fixing that, my sketch claims unsat.
+  TODO: why do we get different answers?
+
+benchmarks/gallery/partition.cpped.sk: LOCAL_GEN
+benchmarks/gallery/sort.included.sk(INT): LOCAL_GEN
+
+benchmarks/gallery/Pollard.sk(INT): memory blowup
+benchmarks/gallery/doublyLinkedList.sk(DATA): SLOW: memory blowup
+benchmarks/gallery/isolateRightmost.sk(BIT): SLOW
+  Because of:
+    1. not recognizing unreachable paths statically (to bound inlining)
+    2. something else to be determined.
+  See doc/perf7.txt
+
+benchmarks/gallery/listReverse.sk(DATA): SLOW: memory blowup
+  see doc/perf9.txt
+
+benchmarks/gallery/lss.sk(INT): SLOW: memory blowup
+
+benchmarks/gallery/reverse.sk(BIT): SLOW
+  looks like it will finish, just slow. Maybe 2 hours?
+
+benchmarks/gallery/tutorial2.sk(INT): SLOW: memory blowup
+  Because of mix of counter-example choice and large size of ints.
+  See doc/perf6.txt.
+
+benchmarks/gallery/tutorial3.sk(INT): SLOW: memory blowup
+  Looks like blowup of symbolic Ints.
+  See doc/perf8.txt.
+  
+benchmarks/gallery/xpose.sk(INT): SLOW: memory blowup
+  This actually appears to make slow progress.
+  The memory usage is still high, but not a complete blowup.
+  One thing that is interesting: it's not picking very good counter-examples.
+  A random counter-example would much more effectively find the answer by
+  exploring more paths at once.
+  Using z3 gives more interesting choices of counter-example. It's still slow
+  though.
+
