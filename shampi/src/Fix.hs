@@ -6,12 +6,9 @@ import Smten.Prelude
 import Smten.Control.Monad.State.Strict
 
 import Smten.Data.Array
-import Smten.Data.Ix
 import Smten.Data.Functor
 import Smten.Data.Maybe
 import qualified Smten.Data.Map as Map
-
-import Smten.Debug.Trace
 
 import RegEx
 import SCFG

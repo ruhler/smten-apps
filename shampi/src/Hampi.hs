@@ -4,7 +4,6 @@ module Hampi where
 import Smten.Prelude
 import qualified Smten.Data.Map as Map
 import CFG
-import Fix
 
 data Assertion = AssertIn ID Bool ID
                | AssertContains ID Bool String

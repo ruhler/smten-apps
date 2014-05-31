@@ -16,8 +16,6 @@ import Lexer
 %name parseHampi hampi
 %tokentype { Token }
 %error { parseError }
-%monad { ParserMonad }
-%lexer { lexer } { TkEOF }
 
 %token
     '('     { TkOpenParen }
@@ -187,10 +185,8 @@ mkhampi v stmts =
      asserts = [a | AssertStmt a <- stmts]
  in Hampi v vals cfgs asserts
 
-parseError :: Token -> ParserMonad a
-parseError tok = do
-    x <- get
-    failE $ "parser error at " ++ show tok ++ "\n when parsing: " ++ x
+parseError :: [Token] -> a
+parseError toks = error $ "Parse error at " ++ show toks
 
 }
 

@@ -2,20 +2,16 @@
 module Match (match) where
 
 import Smten.Prelude
-import Smten.Control.Monad.State
 
 import Smten.Data.Array
-import Smten.Data.Functor
-import Smten.Data.Maybe
-import qualified Smten.Data.Map as Map
 
 import SChar
 import RegEx
 
 data SubMatch = SubMatch {
-    m_id :: RID,    -- ID.
-    m_len :: Int,   -- Length to match.
-    m_off :: Int    -- Offset in entire string to match at.
+    _m_id :: RID,    -- ID.
+    _m_len :: Int,   -- Length to match.
+    _m_off :: Int    -- Offset in entire string to match at.
 } deriving (Eq)
 
 instance Show SubMatch where

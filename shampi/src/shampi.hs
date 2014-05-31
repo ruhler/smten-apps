@@ -1,9 +1,7 @@
 
 import Smten.Prelude
-import Smten.Control.Monad.State
 import Smten.Data.Maybe(fromMaybe)
 import Smten.Data.Functor((<$>))
-import Smten.Symbolic
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.STP
 import Smten.Symbolic.Solver.MiniSat
@@ -17,7 +15,6 @@ import Smten.System.Timeout
 
 import Lexer
 import Grammar
-import Hampi
 import Query
 import SChar
 
@@ -73,11 +70,8 @@ main = do
             putStr (fin ++ ": ")
             input <- readFile fin
 
-            h <- case {-# SCC "ParseHampi" #-} evalStateT parseHampi input of
-                    Left msg -> fail msg
-                    Right x -> return x
-
-            let hq = case elemtype of
+            let h = {-# SCC "ParseHampi" #-} parseHampi (lexer input)
+                hq = case elemtype of
                         SChar_Bit -> hquery bitSChar solver h
                         SChar_Integer -> hquery integerSChar solver h
                         SChar_Char -> hquery charSChar solver h

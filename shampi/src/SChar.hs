@@ -6,7 +6,6 @@ module SChar where
 import Smten.Prelude
 import Smten.Control.Monad
 import Smten.Data.Char
-import Smten.Data.Function
 import Smten.Data.Functor
 
 import Smten.Symbolic

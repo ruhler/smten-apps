@@ -11,7 +11,6 @@ import Smten.Control.Monad.Error
 import Smten.Control.Monad.State
 
 import Smten.Data.Char (isSpace, isAlphaNum, isAlpha, isDigit, chr, digitToInt)
-import Smten.Data.Functor ((<$>))
 
 data Token =
     TkOpenParen | TkCloseParen | TkOpenBracket | TkCloseBracket
@@ -86,40 +85,28 @@ closeblockcomment (c:cs) = closeblockcomment cs
 mkseq :: Char -> Char -> Char -> Char
 mkseq a b c = chr $ (100 * digitToInt a) + (10 * digitToInt b) + digitToInt c
 
-lex :: ParserMonad Token
-lex = do
-    text <- get
-    case text of
-      [] -> return TkEOF
-      (a:b:cs) | Just tok <- lookup [a, b] doubles ->  {-# SCC "DOUBLE" #-} put cs >> return tok
-      (c:cs) | Just tok <- lookup c singles ->  {-# SCC "SINGLE" #-} put cs >> return tok
-      (c:cs) | isSpace c -> {-# SCC "SPACE" #-} put cs >> lex
-      (c:cs) | isAlpha c -> {-# SCC "ALPHA" #-}
-         let (ns, rest) = span isIDChar cs
-         in case (c:ns) of
-              id | Just t <- lookup id keywords -> put rest >> return t
-                 | otherwise -> put rest >> return (TkID $ id)
-      (c:cs) | isDigit c -> {-# SCC "DIGIT" #-}
-         case span isDigit cs of
-            (ns, rest) -> put rest >> return (TkInt (read (c:ns)))
-      ('\'':c:'\'':cs) -> {-# SCC "CHAR" #-} put cs >> return (TkChar c)
-      ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c -> {-# SCC "CHARSEQ" #-}
-         case mkseq a b c of
-            !cv -> put cs >> return (TkChar cv)
-      ('"':cs) | (ns, '"':rest) <- {-# SCC "STR" #-} break (== '"') cs ->
-         put rest >> return (TkString ns)
-      ('/':'*':cs) -> {-# SCC "BLOCKCOMMENT"#-} put (closeblockcomment cs) >> lex
-      ('/':'/':cs) -> {-# SCC "LINECOMMENT"#-} put (dropWhile (/= '\n') cs) >> lex
-      cs -> failE $ "fail to lex: " ++ cs
-
--- Get all the remaining tokens.
-tokens :: ParserMonad [Token]
-tokens = do
-    t <- lex
-    case t of
-        TkEOF -> return []
-        _ -> (:) t <$> tokens
-
-lexer :: (Token -> ParserMonad a) -> ParserMonad a
-lexer output = lex >>= output
+lexer :: String -> [Token]
+lexer text =
+  case text of
+    [] -> []
+    (a:b:cs) | Just tok <- lookup [a, b] doubles -> {-# SCC "DOUBLE" #-} tok : lexer cs
+    (c:cs) | Just tok <- lookup c singles ->  {-# SCC "SINGLE" #-} tok : lexer cs
+    (c:cs) | isSpace c -> {-# SCC "SPACE" #-} lexer cs
+    (c:cs) | isAlpha c -> {-# SCC "ALPHA" #-}
+       let (ns, rest) = span isIDChar cs
+       in case (c:ns) of
+            id | Just t <- lookup id keywords -> t : lexer rest
+               | otherwise -> TkID id : lexer rest
+    (c:cs) | isDigit c -> {-# SCC "DIGIT" #-}
+       case span isDigit cs of
+          (ns, rest) -> (TkInt (read (c:ns))) : lexer rest
+    ('\'':c:'\'':cs) -> {-# SCC "CHAR" #-} TkChar c : lexer cs
+    ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c -> {-# SCC "CHARSEQ" #-}
+       case mkseq a b c of
+          !cv -> TkChar cv : lexer cs
+    ('"':cs) | (ns, '"':rest) <- {-# SCC "STR" #-} break (== '"') cs ->
+       TkString ns : lexer rest
+    ('/':'*':cs) -> {-# SCC "BLOCKCOMMENT"#-} lexer (closeblockcomment cs)
+    ('/':'/':cs) -> {-# SCC "LINECOMMENT"#-} lexer (dropWhile (/= '\n') cs)
+    cs -> error $ "fail to lex: " ++ cs
 
