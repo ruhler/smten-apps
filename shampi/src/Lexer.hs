@@ -1,6 +1,8 @@
 
+{-# LANGUAGE BangPatterns #-}
+{-# OPTIONS_GHC -fprof-auto-top #-}
 module Lexer (
-    Token(..), ParserMonad, lexer, failE, read_int,
+    Token(..), ParserMonad, lexer, failE,
     ) where
 
 import Smten.Prelude
@@ -89,24 +91,25 @@ lex = do
     text <- get
     case text of
       [] -> return TkEOF
-      (a:b:cs) | Just tok <- lookup [a, b] doubles -> put cs >> return tok
-      (c:cs) | Just tok <- lookup c singles -> put cs >> return tok
-      (c:cs) | isSpace c -> put cs >> lex
-      (c:cs) | isAlpha c ->
+      (a:b:cs) | Just tok <- lookup [a, b] doubles ->  {-# SCC "DOUBLE" #-} put cs >> return tok
+      (c:cs) | Just tok <- lookup c singles ->  {-# SCC "SINGLE" #-} put cs >> return tok
+      (c:cs) | isSpace c -> {-# SCC "SPACE" #-} put cs >> lex
+      (c:cs) | isAlpha c -> {-# SCC "ALPHA" #-}
          let (ns, rest) = span isIDChar cs
          in case (c:ns) of
               id | Just t <- lookup id keywords -> put rest >> return t
                  | otherwise -> put rest >> return (TkID $ id)
-      (c:cs) | isDigit c ->
-         let (ns, rest) = span isDigit cs
-         in put rest >> return (TkInt . read_int $ c:ns)
-      ('\'':c:'\'':cs) -> put cs >> return (TkChar c)
-      ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c ->
-         put cs >> return (TkChar (mkseq a b c))
-      ('"':cs) | (ns, '"':rest) <- break (== '"') cs ->
+      (c:cs) | isDigit c -> {-# SCC "DIGIT" #-}
+         case span isDigit cs of
+            (ns, rest) -> put rest >> return (TkInt (read (c:ns)))
+      ('\'':c:'\'':cs) -> {-# SCC "CHAR" #-} put cs >> return (TkChar c)
+      ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c -> {-# SCC "CHARSEQ" #-}
+         case mkseq a b c of
+            !cv -> put cs >> return (TkChar cv)
+      ('"':cs) | (ns, '"':rest) <- {-# SCC "STR" #-} break (== '"') cs ->
          put rest >> return (TkString ns)
-      ('/':'*':cs) -> put (closeblockcomment cs) >> lex
-      ('/':'/':cs) -> put (dropWhile (/= '\n') cs) >> lex
+      ('/':'*':cs) -> {-# SCC "BLOCKCOMMENT"#-} put (closeblockcomment cs) >> lex
+      ('/':'/':cs) -> {-# SCC "LINECOMMENT"#-} put (dropWhile (/= '\n') cs) >> lex
       cs -> failE $ "fail to lex: " ++ cs
 
 -- Get all the remaining tokens.
@@ -119,21 +122,4 @@ tokens = do
 
 lexer :: (Token -> ParserMonad a) -> ParserMonad a
 lexer output = lex >>= output
-
-read_int' :: Int -> String -> Int
-read_int' x ('0':xs) = read_int' (x*10 + 0) xs
-read_int' x ('1':xs) = read_int' (x*10 + 1) xs
-read_int' x ('2':xs) = read_int' (x*10 + 2) xs
-read_int' x ('3':xs) = read_int' (x*10 + 3) xs
-read_int' x ('4':xs) = read_int' (x*10 + 4) xs
-read_int' x ('5':xs) = read_int' (x*10 + 5) xs
-read_int' x ('6':xs) = read_int' (x*10 + 6) xs
-read_int' x ('7':xs) = read_int' (x*10 + 7) xs
-read_int' x ('8':xs) = read_int' (x*10 + 8) xs
-read_int' x ('9':xs) = read_int' (x*10 + 9) xs
-read_int' x _ = x
-
-read_int :: String -> Int
-read_int ('-':xs) = negate (read_int xs)
-read_int xs = read_int' 0 xs
 

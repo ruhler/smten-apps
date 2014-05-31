@@ -47,7 +47,7 @@ main = do
         then putStrLn usage >> exitSuccess
         else return ()
 
-    let to = fromMaybe (negate 1) (read_int <$> lookuparg "-t" args)
+    let to = fromMaybe (negate 1) (read <$> lookuparg "-t" args)
     basesolver <- case lookuparg "-s" args of
                      Just "yices1" -> return yices1
                      Just "yices2" -> return yices2
