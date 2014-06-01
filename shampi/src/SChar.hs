@@ -65,3 +65,11 @@ instance SChar Char where
 charSChar :: Char
 charSChar = '\0'
 
+instance SChar Int where
+    toSChar = fromEnum
+    fromSChar = toEnum
+    freeSChar = msum (map return [0..256])
+
+intSChar :: Int
+intSChar = 0
+

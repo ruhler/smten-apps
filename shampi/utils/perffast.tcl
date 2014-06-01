@@ -16,15 +16,21 @@ proc runcfg {slv rep} {
 }
 
 runcfg stp Bit
+#runcfg stp Char
+runcfg stp Int
 runcfg yices2 Bit
 runcfg yices2 Integer
 runcfg yices2 Char
+runcfg yices2 Int
 runcfg yices1 Bit
 runcfg yices1 Integer
 runcfg yices1 Char
+runcfg yices1 Int
 runcfg z3 Bit
 runcfg z3 Integer
 runcfg z3 Char
+runcfg z3 Int
 runcfg minisat Bit
 runcfg minisat Char
+runcfg minisat Int
 
