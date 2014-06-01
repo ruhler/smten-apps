@@ -10,11 +10,12 @@ proc hrun {args} {
 }
 
 # Run from the shampi/ directory.
-hrun mkdir -p build
-hrun happy src/Grammar.y -o build/Grammar.hs
-hrun smten --make -o build/shampi_prof -prof -ibuild -isrc -hidir build/ -odir build/ src/shampi.hs -fwarn-unused-imports -fwarn-unused-binds
-hrun smten --make -o build/shampi -O -ibuild -isrc -hidir build/ -odir build/ src/shampi.hs -fwarn-unused-imports -fwarn-unused-binds
+hrun mkdir -p build/profile build/release
+hrun happy src/Grammar.y -o build/profile/Grammar.hs
+hrun happy src/Grammar.y -o build/release/Grammar.hs
+hrun smten --make -o build/profile/shampi -prof -ibuild/profile -isrc -hidir build/profile -odir build/profile src/shampi.hs -fwarn-unused-imports -fwarn-unused-binds
+hrun smten --make -o build/release/shampi -O -ibuild/release -isrc -hidir build/release -odir build/release src/shampi.hs -fwarn-unused-imports -fwarn-unused-binds
 
-run tclsh utils/runtests.tcl ./build/shampi > build/tests.shampi
+run tclsh utils/runtests.tcl ./build/release/shampi > build/tests.shampi
 hrun diff utils/tests.rhampi build/tests.shampi
 

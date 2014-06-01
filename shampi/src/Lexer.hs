@@ -93,10 +93,9 @@ lexer text =
     (c:cs) | Just tok <- lookup c singles ->  {-# SCC "SINGLE" #-} tok : lexer cs
     (c:cs) | isSpace c -> {-# SCC "SPACE" #-} lexer cs
     (c:cs) | isAlpha c -> {-# SCC "ALPHA" #-}
-       let (ns, rest) = span isIDChar cs
-       in case (c:ns) of
-            id | Just t <- lookup id keywords -> t : lexer rest
-               | otherwise -> TkID id : lexer rest
+       case span isIDChar cs of
+         (ns, rest) | Just t <- lookup (c:ns) keywords -> t : lexer rest
+                    | otherwise -> TkID (c:ns) : lexer rest
     (c:cs) | isDigit c -> {-# SCC "DIGIT" #-}
        case span isDigit cs of
           (ns, rest) -> (TkInt (read (c:ns))) : lexer rest

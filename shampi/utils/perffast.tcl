@@ -11,7 +11,7 @@ set ::tests $argv
 proc runcfg {slv rep} {
     puts -nonewline "$slv $rep: "
     flush stdout
-    set t [mytime "exec ./build/shampi -s $slv -e $rep $::tests"]
+    set t [mytime "exec ./build/release/shampi -s $slv -e $rep $::tests"]
     puts "$t"
 }
 
