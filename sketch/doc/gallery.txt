@@ -126,17 +126,18 @@ benchmarks/gallery/signedAvg.sk
 
   int: The memory of this blows up in verification.
   It appears to have a very deep generator stack.
-  TODO: understand the problem.
 
 benchmarks/gallery/tableBasedAddition.sk:
   Type: Bit
   Note: This was modified by manually doing the static inline of W * (1 << W*2);
 
-  int: Memory blowup searching for a counterexample. Perhaps because it's
-  dealing with a 1024 bit table?
+  see perf10.txt
+  
+  int: Looks like a blowup in query size due to +# and -# operators for
+  int, which are used in the genericDrop of bulkAccess, when the drop length
+  is unknown. The fix is to improve add_IntFF and sub_IntFF functions.
 
-  TODO: understand the problem. A good start would be shrinking W and see
-  if it helps.
+  bit: This is solved in 3 minutes for yices2.
 
 benchmarks/gallery/log2.sk:
   Type: Bit

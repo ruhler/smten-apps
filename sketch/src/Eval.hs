@@ -361,12 +361,12 @@ bulkAccess arr lo w = do
     IntV w' <- evalE w
     case arr of
         BitsV xs -> do
-          let xs' = genericDrop lo' xs
-          assert (lo' >= 0 && w' <= fromInt (length xs'))
-          return (BitsV (genericTake w' xs'))
+          let xs' = {-# SCC "BAdrop" #-} genericDrop lo' xs
+          assert (lo' >= 0 && lo' + w' <= genericLength xs)
+          return (BitsV ({-# SCC "BAtake" #-} genericTake w' xs'))
         ArrayV xs -> do
           let xs' = genericDrop lo' xs
-          assert (lo' >= 0 && w' <= fromInt (length xs'))
+          assert (lo' >= 0 && lo' + w' <= genericLength xs)
           return (ArrayV (genericTake w' xs'))
 
 -- Access a field of a structure
@@ -396,10 +396,10 @@ updateLV (ArrLV lv i) x = do
   ir <- evalE i
   arr' <- case (arr, ir, x) of
              (BitsV xs, IntV i', BitV e') -> do
-                assert (i' < fromInt (length xs))
+                assert (i' < genericLength xs)
                 return (BitsV $ arrupd xs i' e')
              (ArrayV xs, IntV i', e') -> do
-                assert (i' < fromInt (length xs))
+                assert (i' < genericLength xs)
                 return (ArrayV $ arrupd xs i' e')
   updateLV lv arr'
 updateLV (BulkLV lv lo _) x = do

@@ -1,0 +1,193 @@
+
+Sun Jun  1 11:30:50 EDT 2014
+
+Understanding the blowup in gallery/tableBasedAddition.sk.
+
+The benchmark is: synthesize a table which does addition by table lookup.
+
+Current behavior:
+
+yices2.int: memory blowup searching for the first counter example.
+yices1.int: memory blowup searching for the first counter example.
+z3.int: memory blowup searching for the first counter example.
+
+Profiler says:
+  All time is stuck in sub_IntFF, from a bulkAccess.
+
+yices2.integer:
+  All time is stuck in add_IntFF, from a bulkAccess.
+
+There's only one bulk access. So it shouldn't be too hard to figure out the
+problem.
+
+yices2.bit:
+  All time is stuck in add_IntFF, from a bulkAccess.
+  
+First step: minimize the test case by removing holes.
+
+Or rather: minimize by reducing the size 'w', because it's too big to work
+with nicely.
+
+Setting W to 2:
+  It finishes fine.
+
+This suggests the problem is not an infinite loop, just a large problem.
+
+Setting W to 3:
+  It finishes, but only after a long time.
+  This is good. I should be able to get a clear picture of the bottleneck.
+
+First, to minimize it, let's get rid of holes, and see if it still blows up
+or takes a long time.
+
+Yes. It takes about 20 seconds to determine there is no counterexample.
+
+Profiling says:
+  All the time is in Solve: 83% of time is spent there. 14% of time in assert.
+  All of the memory is from + in bulkAccess.
+
+In other words, it looks like it's making a hard query to solve.
+
+I notice we are doing a conversion from IntS to Int in bulkAccess that we
+shouldn't be doing.
+
+That doesn't really change anything for the int backend.
+If I switch to the bit backend, however, this is now very fast.
+
+Hypothesis: The assertions which ensure bulk array access is in bounds are
+applied on large symbolic ints. For IntS, that leads to a blowup (which I bet
+we could fix just by improving the comparison operators for Int). For bit,
+that works fine, because there is no complicated blowup.
+
+Wait... why doesn't this work for int again?
+
+Things to try:
+ A. run the gallery test now with Bit instead of Int.
+ B. add sccs to bulkAccess to pinpoint the operations that cause int to blowup.
+    Then try fixing those in smten.
+
+A. It runs, memory is not a problem, but it takes time.
+Let me turn on the profiler and see where all the time is spent.
+I suspect it's all in 'solve'.
+
+According to the profiler, it took about 8 minutes to finish.
+
+30% of time is in Solve
+    17% in Solve itself,
+     5% in Assert
+     8% in Build
+65% of time is in bulkAccess, and 91% of space.
+  ite is called a lot.
+
+So there is likely redundant work going on that we could avoid.
+More investigation here is warranted.
+
+Let me focus now on the problem with Int in the minimized test case.
+
+bulkAccess decomposes as:
+  30% alloc from BAdrop.
+    Which uses -# and ite
+  60% alloc from BAlength
+    Which uses +#
+
+I bet if I fix those, at least memory allocation here will improve.
+
+But all the time is apparently spent in Solve.
+
+This means we are generating an ugly formula, which takes up a lot of space,
+and is hard to solve. It just doesn't take too much time to generate?
+
+I propose: try to improve:
+Mostly: sub_IntFF, add_IntFF
+
+Those take up most of the memory allocation, meaning they are producing large
+formulas (I think) and not sharing as much as they should or could.
+
+I would be interested in understanding how these are used:
+  * Concrete Values?
+  * Finite Values?
+  * Partial Values?
+
+That may give some hint as to what to optimize.
+
+Mon Jun  2 11:12:47 EDT 2014
+
+I want to go back to the 'Bit' and gallery thing again.
+Just to see with these added annotations if we learn anything.
+
+Recall, 30% time is in Solve, 65% time is in bulkAccess.
+  61% of the time is in BAdrop, dominated by iteF which it calls.
+
+A surprising amount of time is spent converting Integers to bit vectors (2%).
+BAlength is 2.6% of time, with much of it in converting integers to bit
+vectors.
+
+But the bulk of the trouble is with drop, when the count is unknown.
+Note the length of the list is 1024 elements.
+
+Is there any way to rewrite the function to avoid dependence on the amount to
+drop?
+
+You know what's probably happening? We are merging the drops of all possible
+locations.
+
+For example, given list [a, b, c, d, e, f]
+And say we don't know what to drop.
+
+Then effectively we'll have to merge:
+p0: [a, b, c, d, e, f]
+p1: [b, c, d, e, f]
+p2: [c, d, e, f]
+p3: [d, e, f]
+p4: [e, f]
+p5: [f]
+p6: []
+
+We get something like:
+
+[p0 ? a : p1 ? b : p2 ? c : ...,
+ p0 ? b : p1 ? c : p2 ? d : ...
+ p0 ? c : ...
+]
+
+Perhaps that's what's leading to a lot of ites?
+
+Is there something better we could do?
+For example... drop from the back?
+That is, reverse the list, take from the front, and everything will be nicer?
+
+The trouble is, then we do a take, and we need to take from the front.
+One or the other will not line up perfectly.
+
+Could we do the access all at once? Would that help anything?
+It may. Let me try it just for the fun of it and see.
+
+Wow! 17 minutes reduced to 3 minutes. And now all the time is in finding the
+candidate program, not the counterexample.
+And profile says: 20% of the time is converting integers to bit vectors.
+That's pretty surprising in my mind.
+
+The next things to do:
+ A. see if it was just because length was on the original xs instead of 
+   the taken one.
+ B. see if this helps the Int type too
+ C. see what affect this has on other test cases (both with Int and Bit)
+ D. if it works well overall, switch to this for the other array access.
+   And maybe look for something similar in the Bits shift implementations?
+
+Mon Jun  2 13:35:05 EDT 2014
+
+A.
+Turns out the problem was just because we were running length on the 'dropped'
+version of xs instead of the original.
+There's nothing wrong with using drop and take.
+
+B. No. It doesn't help.
+At least, that's not the current bottleneck. Perhaps this would help after the
+current Int bottleneck is solved.
+
+C. No affect. Not worse or better, except maybe one test case improved for
+Bit.
+
+D. I'll switch, because I think it's better all around.
+

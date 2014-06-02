@@ -383,9 +383,6 @@ parseError tok = do
     x <- get
     failE $ "parser error at " ++ show tok ++ "\n when parsing: " ++ x
 
-seq :: a -> b -> b
-seq = const id
-
 -- Note: we parse lvals as an expr to avoid reduce/reduce conflicts.
 -- This converts the Expr back to an LVal, failing if it doesn't convert.
 asLValM :: (LVal -> a) -> Expr -> ParserMonad a
