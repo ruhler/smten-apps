@@ -1,0 +1,52 @@
+
+Tue Jun  3 08:13:40 EDT 2014
+
+Blowup in gallery/lss.sk.
+
+Profiling says it's in a post increment operator, and the time is spent
+looking up a variable in a map.
+
+This is strange, because we expect it to be a constant operation.
+
+Let me start by minimizing the test case.
+
+Here's the problem:
+   sum = {| (sum | psum) - psum |}
+
+If we replace this line with:
+   bit x = ??;
+   if (x) {
+     sum = sum - psum;
+   } else {
+     sum = psum - psum;
+   }
+
+Then it works fine.
+
+This is consistent with the profiling question: because we are dealing with a
+variable lookup whose name is not entirely known.
+
+Except, it isn't to do with post increment?
+
+PRIM_CHAR_LE.
+
+You know what this suggests?
+We should finally change the implementation of symbolic chars in Smten to be
+like symbolic ints. Because I bet a whole bunch of the options it thinks it
+has are identical.
+
+Hmm... You know what may be happening?
+
+insertVar checks if a variable belongs to the local scope to determine whether
+to insert locally or globally. Perhaps the name is partially concrete, so it
+has to do both, and it's not totally clear which map the insert is made in?
+
+Or perhaps it's just difficult to lookup a partially concrete name in a map?
+We would like it to return the combination of both values.
+But... maybe it gets stuck looking up the name?
+
+Oh. There was also a bug in PostIncrE.
+Did that help any?
+
+It didn't, but I want to check in the fix anyway.
+

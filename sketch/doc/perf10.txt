@@ -191,3 +191,17 @@ Bit.
 
 D. I'll switch, because I think it's better all around.
 
+Mon Jun  2 17:51:41 EDT 2014
+
+I changed how we implement iii, used at the core for symbolic Int# primitives.
+With this change, perf10 finishes instantly with Int (instead of taking 30
+seconds).
+
+And the gallery test finishes in 95 seconds according to profiling, where time
+is dominated still by iii and applyToIntFF.
+
+That's pretty cool.
+
+Let's check the overall status of things.
+
+

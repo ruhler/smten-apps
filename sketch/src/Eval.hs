@@ -252,8 +252,6 @@ evalE (BinaryE ShrOp a b) = {-# SCC "ShrE" #-} do
 evalE (PostIncrE lv) = {-# SCC "PostIncrE" #-} do
     a' <- lookupLV lv
     updateLV lv (a' + IntV 1)
-    case a' of
-        IntV av -> updateLV lv (IntV (av + 1))
     return a'
 evalE (PostDecrE lv) = {-# SCC "PostDecrE" #-} do
     a' <- lookupLV lv
@@ -441,11 +439,17 @@ arrsub (x:xs) n = if (n == 0)
 
 -- Do a bulk update starting at the given index.
 arrbulkupd :: [a] -> IntS -> [a] -> [a]
-arrbulkupd vals i vals' =
-  let lo = genericTake i vals
-      mid = vals'
-      hi = genericDrop (i + genericLength vals') vals
-  in concat [lo, mid, hi]
+arrbulkupd vals i vals' = bulkupd vals i vals'
+  --let lo = genericTake i vals
+      --mid = vals'
+      --hi = genericDrop (i + genericLength vals') vals
+  --in concat [lo, mid, hi]
+
+bulkupd :: (Eq n, Num n) => [a] -> n -> [a] -> [a]
+bulkupd [] _ _ = []
+bulkupd (v:vs) 0 [] = (v:vs)
+bulkupd (v:vs) 0 (x:xs) = x : bulkupd vs 0 xs
+bulkupd (v:vs) n xs = v : bulkupd vs (n-1) xs
 
 -- Implicitly cast the given value to the given type.
 icast :: Type -> Value -> Value

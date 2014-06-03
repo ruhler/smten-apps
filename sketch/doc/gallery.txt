@@ -132,12 +132,9 @@ benchmarks/gallery/tableBasedAddition.sk:
   Note: This was modified by manually doing the static inline of W * (1 << W*2);
 
   see perf10.txt
-  
-  int: Looks like a blowup in query size due to +# and -# operators for
-  int, which are used in the genericDrop of bulkAccess, when the drop length
-  is unknown. The fix is to improve add_IntFF and sub_IntFF functions.
 
-  bit: This is solved in 3 minutes for yices2.
+  yices2.int: 1m17s
+  yices2.bit: about 3 minutes
 
 benchmarks/gallery/log2.sk:
   Type: Bit
@@ -153,7 +150,9 @@ benchmarks/gallery/partition.cpped.sk: LOCAL_GEN
 benchmarks/gallery/sort.included.sk(INT): LOCAL_GEN
 
 benchmarks/gallery/Pollard.sk(INT): memory blowup
+
 benchmarks/gallery/doublyLinkedList.sk(DATA): SLOW: memory blowup
+
 benchmarks/gallery/isolateRightmost.sk(BIT): SLOW
   Because of:
     1. not recognizing unreachable paths statically (to bound inlining)
@@ -163,25 +162,66 @@ benchmarks/gallery/isolateRightmost.sk(BIT): SLOW
 benchmarks/gallery/listReverse.sk(DATA): SLOW: memory blowup
   see doc/perf9.txt
 
-benchmarks/gallery/lss.sk(INT): SLOW: memory blowup
+benchmarks/gallery/lss.sk:
+  Type: Int
 
-benchmarks/gallery/reverse.sk(BIT): SLOW
-  looks like it will finish, just slow. Maybe 2 hours?
+  see doc/perf11.txt
 
-benchmarks/gallery/tutorial2.sk(INT): SLOW: memory blowup
-  Because of mix of counter-example choice and large size of ints.
+  yices2.int: memory blowup
+  yices1.int: memory blowup
+  z3.int: memory blowup
+
+  Profiling yices2.int:
+   70% of the time is in insertVar from a post increment.
+   Specifically in char_le and char_eq primitives.
+
+benchmarks/gallery/reverse.sk:
+  Type: Bit
+
+  int.yices2: 39s
+  int.yices1: 28s
+  int.stp:  3m22s
+  int.z3: 59s
+  int.minisat: 29s
+
+  Profiling on int.yices2:
+    20% Solve
+    20% <=#
+    33% shrB
+    30% shlB
+
+benchmarks/gallery/tutorial2.sk:
+  Type: Int
   See doc/perf6.txt.
+ 
+  yices2.int: 9s
+  yices1.int: 2s
+  stp.int: 8s
+  z3.int: 2s
+  minisat.int: 3s
+
+  Profiling on yices2: All the time is in multiplication: mul_IntFF, iii.
+  Perhaps we could optimize: x * 0 = 0, x * 1 = x.
+  That should save those couple of cases. Everything else will still be hard.
+    
 
 benchmarks/gallery/tutorial3.sk(INT): SLOW: memory blowup
-  Looks like blowup of symbolic Ints.
   See doc/perf8.txt.
+
+  int: blows up.
+  Profiling says: All the time is in sub_intFF, iii.
   
-benchmarks/gallery/xpose.sk(INT): SLOW: memory blowup
-  This actually appears to make slow progress.
-  The memory usage is still high, but not a complete blowup.
-  One thing that is interesting: it's not picking very good counter-examples.
-  A random counter-example would much more effectively find the answer by
-  exploring more paths at once.
-  Using z3 gives more interesting choices of counter-example. It's still slow
-  though.
+ 
+benchmarks/gallery/xpose.sk:
+  Type: Int
+
+  int.yices2: Get's stuck (more than 640 minutes) on one query. Memory is okay.
+  int.yices1: 17s
+  int.stp: 58s
+  int.z3: 15s
+  int.minisat: 2m13s
+
+  It looks like the choice of counter-example is responsible for the variety
+  in solving time. yices2 picks something with lots of 7s, which apparently is
+  (much) harder to solve than smaller numbers.
 
