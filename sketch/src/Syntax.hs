@@ -250,10 +250,12 @@ functionT :: Function -> Type
 functionT f = FunT (f_outtype f) [t | Arg _ t _ <- f_args f]
 
 pad :: Type -> Value
+pad VoidT = VoidV
 pad BitT = BitV False
 pad IntT = IntV 0
 pad (ArrT t (ValE (IntV w))) = arrayV (genericReplicate w (pad t))
 pad (StructT _) = PointerV Null
+
 
 binaryChoiceE :: [BinOp] -> Expr -> Expr -> Expr
 binaryChoiceE [] a b = error "binaryChoiceE: no operators given"

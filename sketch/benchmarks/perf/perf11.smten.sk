@@ -5,17 +5,19 @@ pragma options "--bnd-inline-amnt 5 --bnd-inbits 3 --bnd-cbits 2";
 int W = 4;
 
 int lss(int[W] in) {
-	for(int k=0; k<W; k = k+1) {
-       in[k] = in[k] - 3;
+	for(int k=0; k<W; ++k) {
+        in[k] = in[k] - 3;
     }
 	int sum = 0;
 	int maxsum = 0;
+	int psum = 0;
 	for(int i = 0;i<W; i = i+1) {
-		sum = 0;
-		for(int j = i; j<W; j = j+1) {
-			sum = sum + in[j];
-			if(sum > maxsum) maxsum = sum;
-		}
+		psum = sum;
+		sum = sum + in[i];
+		if (psum + 1 <= 0) {
+            sum = sum -  psum;
+        }
+		if(sum > maxsum) maxsum = sum;
 	}
 	return maxsum;
 }
@@ -27,7 +29,7 @@ int lssSketch(int[W] in) implements lss {
 	int sum = 0;
 	int maxsum = 0;
 	int psum = 0;
-	for(int i = 0;i<W; i++) {
+	for(int i = 0;i<W; i = i+1) {
 		psum = sum;
 		sum = sum + in[i];
 		if (psum + 1 <= 0) {
@@ -37,3 +39,4 @@ int lssSketch(int[W] in) implements lss {
 	}
 	return maxsum;
 }
+

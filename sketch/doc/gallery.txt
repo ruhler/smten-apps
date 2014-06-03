@@ -149,18 +149,45 @@ benchmarks/gallery/log2.sk:
 benchmarks/gallery/partition.cpped.sk: LOCAL_GEN
 benchmarks/gallery/sort.included.sk(INT): LOCAL_GEN
 
-benchmarks/gallery/Pollard.sk(INT): memory blowup
+benchmarks/gallery/Pollard.sk:
+  Type: Int
+ 
+  int: memory blowup searching for candidate
+  Profiling says:
+    arrayAccess is 30% or so, the rest is spread out.
 
-benchmarks/gallery/doublyLinkedList.sk(DATA): SLOW: memory blowup
+  TODO: minimize this test case.
 
-benchmarks/gallery/isolateRightmost.sk(BIT): SLOW
-  Because of:
-    1. not recognizing unreachable paths statically (to bound inlining)
-    2. something else to be determined.
-  See doc/perf7.txt
+benchmarks/gallery/doublyLinkedList.sk:
+  Type: DATA
+  
+  int: memory blowup searching for candidate program.
+  Profile: No useful info. Looks very similar to isolateRightmost and
+           listReverse.
 
-benchmarks/gallery/listReverse.sk(DATA): SLOW: memory blowup
+benchmarks/gallery/isolateRightmost.sk:
+  Type: Bit
+
+  yices2.int: 5s
+  yices1.int: 2s
+  z3.int: 3s
+  stp.int: 3s
+  minisat.int: 3s
+
+  Profiling says: Miscellaneous stuff:
+    pretty printing, generating the generators, things like that.
+  I think this is because of the deep generator stack, with lots of
+  choices. I also think it isn't important.
+    
+
+benchmarks/gallery/listReverse.sk:
+  Type: DATA
+
   see doc/perf9.txt
+
+  int: stack overflow
+
+  I don't know the problem: weird stuff is happening.
 
 benchmarks/gallery/lss.sk:
   Type: Int
@@ -171,9 +198,8 @@ benchmarks/gallery/lss.sk:
   yices1.int: memory blowup
   z3.int: memory blowup
 
-  Profiling yices2.int:
-   70% of the time is in insertVar from a post increment.
-   Specifically in char_le and char_eq primitives.
+  Looks like an issue with partially concrete name lookups? Maybe with
+  symbolic char implementation?
 
 benchmarks/gallery/reverse.sk:
   Type: Bit
@@ -205,11 +231,14 @@ benchmarks/gallery/tutorial2.sk:
   That should save those couple of cases. Everything else will still be hard.
     
 
-benchmarks/gallery/tutorial3.sk(INT): SLOW: memory blowup
+benchmarks/gallery/tutorial3.sk:
+  Type: Int
   See doc/perf8.txt.
 
   int: blows up.
   Profiling says: All the time is in sub_intFF, iii.
+
+  bit: TODO: I suspect it will work?
   
  
 benchmarks/gallery/xpose.sk:

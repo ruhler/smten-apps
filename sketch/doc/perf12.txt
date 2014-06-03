@@ -1,0 +1,70 @@
+
+Tue Jun  3 11:14:59 EDT 2014
+
+Another attempt at minimizing isolateRightmost from the gallery.
+
+First step: shrink it, see if that helps.
+
+It blows up, even with W = 2, looking for a candidate program.
+
+Tue Jun  3 11:22:18 EDT 2014
+
+Well, this is easy:
+
+There are two problems:
+1. isolate0 does not return, for x = 0.
+What does this mean in sketch?
+
+Fix: return 0 for x = 0.
+
+2. The generator does not return, for all 0 holes.
+Fix: return 0 for the default case.
+
+With these two fixes, the problem disappears.
+
+What is supposed to be the behavior of a function if you don't return
+anything? Default to pad?
+
+What do I do now?
+
+Is there some way I can test this?
+
+Let me do the following:
+1. Read the sketch manual, see if it says anything
+  Nothing. But it has an example of a generator which doesn't always return.
+2. Read my implementation, see what it does 
+   If you apply a function which doesn't return anything.
+  It uses VoidV. (See the 'returned' function)
+  But note, this may be the wrong type.
+  It might be nice to use a pad, but we don't have the return type?
+  Actually, we do. So we should be able to use pad instead if we want.
+3. Write the following test cases:
+ * A non-returning spec of type bit[W]
+   A sketch which returns ??
+  Sketch says the spec doesn't return. Perhaps I need to trick it.
+  With trick:
+    It gives a bad answer?
+
+It says:
+  return 0;
+
+I want something equal to:
+  if (in == 0) {
+     return 1;
+  }
+
+Surely that's wrong?
+
+There are some issues.
+
+Anyway, I have an example here where it returns '0'.
+Let me see if I can change that.
+
+No.
+
+So it looks like no return means zero.
+Let me assume no return means pad.
+
+Let me use the type information I have to have the same behavior, see if that
+fixes the problem.
+    

@@ -24,3 +24,20 @@ case fix misses?
 
 Note: if the input 'n' is concrete, there is no problem.
 It has something to do with not knowing the value of 'n'.
+
+Tue Jun  3 08:51:46 EDT 2014
+
+Profiling of the gallery doesn't show any useful information.
+Perhaps the important SCCs are missing.
+
+Is it in populate or serialize that we get stuck?
+
+We get stuck in populate. In evaluating the resulting list.
+
+Here's a funny thing: we pass an argument 'elems' to the populate function,
+but that argument is unused.
+
+If we remove that argument, we no longer blow up. Why?
+
+Very strange.
+

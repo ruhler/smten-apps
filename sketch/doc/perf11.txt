@@ -50,3 +50,15 @@ Did that help any?
 
 It didn't, but I want to check in the fix anyway.
 
+The trouble is, I don't really understand the problem. I just have hints.
+Can I understand it better?
+
+Tue Jun  3 08:44:30 EDT 2014
+
+More observations:
+ * removing the for loop at the beginning causes the problem to go away.
+   That's odd, no?
+
+That could just be because it flipped the initial guess, which made the
+problem trivial, because it never found a counter-example.
+

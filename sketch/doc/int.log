@@ -329,7 +329,7 @@ benchmarks/tests/miniTestb334.sk ... FAIL
 benchmarks/tests/miniTestb335.sk ... PASS
 benchmarks/tests/miniTestb336.sk ... PASS
 benchmarks/tests/miniTestb337.sk ... PASS
-benchmarks/tests/miniTestb338.sk ... FAIL
+benchmarks/tests/miniTestb338.sk ... TIMEOUT
 benchmarks/tests/miniTestb339.sk ... FAIL
 benchmarks/tests/miniTestb340.sk ... FAIL
 benchmarks/tests/miniTestb341.sk ... FAIL
@@ -539,6 +539,8 @@ benchmarks/tests/miniTestb544.sk ... FAIL
 benchmarks/perf/perf0.smten.sk ... PASS
 benchmarks/perf/perf1.smten.sk ... PASS
 benchmarks/perf/perf10.smten.sk ... PASS
+benchmarks/perf/perf11.smten.sk ... TIMEOUT
+benchmarks/perf/perf12.smten.sk ... PASS
 benchmarks/perf/perf2.smten.sk ... PASS
 benchmarks/perf/perf3.smten.sk ... PASS
 benchmarks/perf/perf4.smten.sk ... PASS

@@ -71,7 +71,7 @@ apply' f xs = do
 
     scoped $ do
        zipWithM declVar argnms xs'
-       res <- returned <$> evalS (f_body f)
+       res <- returned (pad (f_outtype f)) <$> evalS (f_body f)
        refs <- mapM getref (f_args f)
        return (res, refs)
 
@@ -93,9 +93,9 @@ apply f xs = do
 data StmtResult = OK | RET Value
   deriving (Eq)
 
-returned :: StmtResult -> Value
-returned OK = VoidV
-returned (RET v) = v
+returned :: Value -> StmtResult -> Value
+returned def OK = def
+returned _ (RET v) = v
 
 -- | Evaluate a statement
 evalS :: Stmt -> EvalM StmtResult
