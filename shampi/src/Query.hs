@@ -2,11 +2,12 @@
 module Query (hquery) where
 
 import Smten.Prelude
+import Smten.Control.Monad
 import Smten.Data.Array
 import Smten.Data.List (isInfixOf)
 import Smten.Data.Maybe (fromMaybe)
 import qualified Smten.Data.Map as Map
-import Smten.Symbolic
+import Smten.Search
 
 import SChar
 import Hampi
@@ -16,7 +17,7 @@ import Fix
 import Match
 
 -- Ignores value of the first argument. That's just to specify the type.
-freevar :: (SChar c) => c -> Int -> Symbolic [c]
+freevar :: (SChar c) => c -> Int -> Space [c]
 freevar _ = freeSCharString
 
 -- inlinevals varid varval vals
@@ -54,21 +55,21 @@ assertIn (FixResult regs reg) vstr
   = match regs reg vstr
 
 -- Make a hampi assertion.
-hassert :: (SChar c) => Map.Map ID SID -> Array SID SCFG -> Map.Map ID [c] -> Assertion -> Symbolic ()
+hassert :: (SChar c) => Map.Map ID SID -> Array SID SCFG -> Map.Map ID [c] -> Assertion -> Space ()
 hassert cfgm cfgs vals (AssertIn v b y) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         yid = fromMaybe (error $ "cfg " ++ y ++ " not found") $ Map.lookup y cfgm
         fr = fixN cfgs yid (length vstr)
-    in assert $ xor b (assertIn fr vstr)
+    in guard $ xor b (assertIn fr vstr)
 
 hassert _ _ vals (AssertEquals v b x) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
         xstr = fromMaybe (error $ "val " ++ x ++ " not found") $ Map.lookup x vals
-    in assert $ xor b (vstr == xstr)
+    in guard $ xor b (vstr == xstr)
 
 hassert _ _ vals (AssertContains v b s) =
     let vstr = fromMaybe (error $ "val " ++ v ++ " not found") $ Map.lookup v vals
-    in assert $ xor b (contains vstr s)
+    in guard $ xor b (contains vstr s)
 
 -- A hampi query.
 -- Takes an argument of SChar type to specify which type to use for the
@@ -76,12 +77,10 @@ hassert _ _ vals (AssertContains v b s) =
 hquery :: (SChar c) => c -> Solver -> Hampi -> IO String
 hquery _ _ (Hampi (Var vid wmin wmax) _ _ _) | wmax < wmin = return "UNSAT"
 hquery e s (Hampi (Var vid wmin wmax) vals cfgs asserts) = do
-    r <- run_symbolic s $ do
+    r <- search s $ do
         svar <- freevar e wmin
         let svals = inlinevals vid svar vals
             (m, cfgs') = cfgsS cfgs
-        --traceShow m (return ())
-        --traceShow cfgs' (return ())
         mapM_ (hassert m cfgs' svals) asserts
         return svar
     case r of

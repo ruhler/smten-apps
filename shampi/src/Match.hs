@@ -2,7 +2,6 @@
 module Match (match) where
 
 import Smten.Prelude
-
 import Smten.Data.Array
 
 import SChar

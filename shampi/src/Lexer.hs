@@ -89,23 +89,23 @@ lexer :: String -> [Token]
 lexer text =
   case text of
     [] -> []
-    (a:b:cs) | Just tok <- lookup [a, b] doubles -> {-# SCC "DOUBLE" #-} tok : lexer cs
-    (c:cs) | Just tok <- lookup c singles ->  {-# SCC "SINGLE" #-} tok : lexer cs
-    (c:cs) | isSpace c -> {-# SCC "SPACE" #-} lexer cs
-    (c:cs) | isAlpha c -> {-# SCC "ALPHA" #-}
+    (a:b:cs) | Just tok <- lookup [a, b] doubles -> tok : lexer cs
+    (c:cs) | Just tok <- lookup c singles ->  tok : lexer cs
+    (c:cs) | isSpace c -> lexer cs
+    (c:cs) | isAlpha c -> 
        case span isIDChar cs of
          (ns, rest) | Just t <- lookup (c:ns) keywords -> t : lexer rest
                     | otherwise -> TkID (c:ns) : lexer rest
-    (c:cs) | isDigit c -> {-# SCC "DIGIT" #-}
+    (c:cs) | isDigit c ->
        case span isDigit cs of
           (ns, rest) -> (TkInt (read (c:ns))) : lexer rest
-    ('\'':c:'\'':cs) -> {-# SCC "CHAR" #-} TkChar c : lexer cs
-    ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c -> {-# SCC "CHARSEQ" #-}
+    ('\'':c:'\'':cs) -> TkChar c : lexer cs
+    ('\\':a:b:c:cs) | isDigit a && isDigit b && isDigit c -> 
        case mkseq a b c of
           !cv -> TkChar cv : lexer cs
-    ('"':cs) | (ns, '"':rest) <- {-# SCC "STR" #-} break (== '"') cs ->
+    ('"':cs) | (ns, '"':rest) <- break (== '"') cs ->
        TkString ns : lexer rest
-    ('/':'*':cs) -> {-# SCC "BLOCKCOMMENT"#-} lexer (closeblockcomment cs)
-    ('/':'/':cs) -> {-# SCC "LINECOMMENT"#-} lexer (dropWhile (/= '\n') cs)
+    ('/':'*':cs) -> lexer (closeblockcomment cs)
+    ('/':'/':cs) -> lexer (dropWhile (/= '\n') cs)
     cs -> error $ "fail to lex: " ++ cs
 

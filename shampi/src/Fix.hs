@@ -36,10 +36,7 @@ fixM :: SCFG -> Int -> FixM RegEx
 fixM r n =
   case andS [n] (sizeS r) of
      [] -> return Empty
-     _ -> do
-        res <- fixM' r n
-        --traceShow ((r, n), res == Empty) (return ())
-        return res
+     _ -> fixM' r n
 
 -- Given cfg x, compute fix of x* for all i less than n
 -- Returns (xc, fc, res)
@@ -99,8 +96,7 @@ fixN regs x n = {-# SCC "FixN" #-}
       maxsid = snd (bounds regs)
       bnds = ((0, 0), (maxsid, n))
       elems = Map.toList (fs_cache s)
-  in --traceShow r $
-      FixResult {    
+  in FixResult {    
         fr_regs = array bnds elems,
         fr_top = r
       }
