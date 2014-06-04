@@ -1,0 +1,26 @@
+
+struct Node{
+	Node next;	
+}
+
+int test(bit x){
+	return 0;
+}
+
+int rest(bit x) implements test{
+	Node q = new Node();
+    Node m = null;
+
+	if(x){
+        m = new Node();
+        m.next = null;	
+	}
+
+    m = new Node();
+    m.next = null;	
+    if(m.next != null)
+    {
+    }
+	return 0;
+}
+

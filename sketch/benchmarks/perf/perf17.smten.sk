@@ -1,0 +1,22 @@
+
+bit avg(bit x, bit y){
+   return x;
+}
+
+bit id(bit x){
+    return x;
+}
+
+bit avgGood(bit x, bit y)implements avg{
+    bit p = ??;
+    bit q = ??;
+    if(p) {
+      return {| x | y |};
+    }
+
+    if(q){
+        return id(x);
+    }
+    return 0;
+}
+

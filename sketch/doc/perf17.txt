@@ -1,0 +1,31 @@
+
+Wed Jun  4 14:57:07 EDT 2014
+
+Understand memory blowup in gallery/signedAvg.sk
+
+Status:
+  Stack overflow searching for a candidate.
+
+The generate stack is huge.
+
+First step: minimize.
+
+I shrunk it a bit.
+
+Profiling says: It's all just ite stuff. Nothing useful.
+
+Perhaps I need to add more SCCs.
+
+This is interesting: I changed div2 to just return its argument.
+But there seems to be a big difference between 
+  div2(y ^ x) and just (y ^ x).
+
+Why would that be the case?
+
+It's odd.
+
+* return {| x | y | div2(y ^ x) |} is fine.
+* Using if expressions for each of them is fine.
+
+But mixing {|x | y |} with an if expression for div2 blows up. Why?
+

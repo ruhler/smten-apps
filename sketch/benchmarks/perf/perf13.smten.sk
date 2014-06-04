@@ -1,6 +1,7 @@
+
 //@Description A read-only array with N elements contains the values {1,...,N-1}. This Sketch finds the duplicate entry using only constant extra space.
 
-int W = 17;
+int W = 9;
 
 pragma options "--bnd-inline-amnt 5 --bnd-inbits 3 "; 
 
@@ -36,16 +37,14 @@ bit dupSketched(int[W] in) implements dup{
 	int count2 = ??;
 	a = expr(in, W-1, 1);
 	b = expr(in, W-1, 2);
-	//for(int i = 0; a != b; i++) {
-	for(int i = 0; i < 8 && a != b; i++) {
+	for(int i = 0; i < 10 && a != b; i++) {
 		a = expr(in, a, 1);
 		b = expr(in, b, 2);
 	}
 
 	//Computing length of tail
 	a = W - ??;
-	//for(int i = 0; a != b; i++) {
-	for(int i = 0; i < 8 && a != b; i++) {
+	for(int i = 0; i < 10 && a != b; i++) {
 		count2 = count2 + 1;
 		a = f(in, a);
 		b = f(in, b);
@@ -53,8 +52,7 @@ bit dupSketched(int[W] in) implements dup{
 
 	//Counting the length of cycle
 	a = expr(in, a, 1);
-	//for(int i = 0; a != b; i++) {
-	for(int i = 0; i < 8 && a != b; i++) {
+	for(int i = 0; i < 10 && a != b; i++) {
 		a = f(in, a);
 		count1 = count1 + 1;
 	}

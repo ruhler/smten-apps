@@ -1,0 +1,50 @@
+
+Wed Jun  4 13:49:47 EDT 2014
+
+Understand performance issue with enqueueSeqSK.sk
+
+Current status: Memory blowup looking for a counter-example.
+
+Good, this should be easy to minimize then.
+
+We are down to a concrete sketch we just have to verify. But it's still fairly
+complicated.
+
+Profiling says:
+  22% PRIM_CHAR_LE
+  20% PRIM_CHAR_EQ
+  50% update struct, from various ites.
+
+In other words, it looks like we have blowup because we don't know what
+fields to access? This could be the same underlying problem as lss.sk
+(perf11), even though the surface cause is clearly different.
+
+Is there anyway to further simplify the problem?
+
+Perhaps fix the control? Let me try that and see if it does anything.
+
+That makes the problem instantly solveable.
+
+What if I ignore the values?
+
+Okay, I've simplified it a bit more.
+
+Note: if we allocate the nodes outside of conditional expressions, the blowup
+goes away.
+
+Okay, it's simplified enough now that it finishes, but only after an absurd
+amount of time. What does profiling say?
+
+Symbolic field access and struct update.
+
+But... why? Why do we have symbolic characters at all?
+
+Is it stupid things, like if x then 'n' else 'n'?
+
+It also appears to be something to do with allocating new nodes conditionally?
+It would be great if we didn't have to have a specific id associated with each
+pointer.
+
+This is an example where a traceS feature would be very nice. I could look at
+what the member I'm trying to look up is, and what the map is.
+

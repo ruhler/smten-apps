@@ -1,0 +1,34 @@
+
+Wed Jun  4 10:45:11 EDT 2014
+
+Trying to understand the problem with the gallery/log2.sk benchmark.
+It's not really a performance problem, but a correctness issue.
+
+My implementation says it is unsatisfiable for input 0.
+Sketch says it is satisfiable, using holes:
+  repeat 6:
+    0xFFFF0000, 16, 16
+    0x00007FFF, 1, 0
+    0x0000FF80, 8, 8
+    0x000000F8, 4, 4
+    0x0000000E, 2, 2
+    0x00000003, 0, 1
+
+The first problem is: 
+  castInt. My implementation doesn't recognize the repeat argument as being
+static, so it doesn't repeat it enough.
+
+Let me work around this for now manually.
+
+I want to represent 32 as a bit vector.
+
+How about: 1 << 4?
+
+Or, don't use a repeat loop.
+That's probably easiest.
+
+Wow. With that, my sketch works, and it looks much more efficient than the
+original sketch.
+
+Cool. Let me make this change then, with a note.
+

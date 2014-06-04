@@ -43,7 +43,7 @@ generator bit[W] castInt(int n){
 	bit[W] one = 0;
 	one[0] = 1;
 	bit[W] ret = 0;
-	for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
 		ret = ret + one;	
 	}
 	return ret;

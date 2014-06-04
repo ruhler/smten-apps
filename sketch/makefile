@@ -16,11 +16,7 @@ bench:
 	tclsh utils/bench.tcl ./build/release/sketch 5 benchmarks/tests/*.sk benchmarks/perf/*.sk | tee build/bench.log
 
 perf:
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices2" > /dev/null
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices1" > /dev/null
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s z3" > /dev/null
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s stp" > /dev/null
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s minisat" > /dev/null
+	tclsh ./utils/perf.tcl | tee build/perf.txt
 
 check:
 	tclsh utils/test.tcl "./build/release/sketch -s yices2"

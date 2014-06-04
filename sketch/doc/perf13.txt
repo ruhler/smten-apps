@@ -1,0 +1,67 @@
+
+Wed Jun  4 09:06:46 EDT 2014
+
+Understanding the problem with gallery/Pollard.smten.sk.
+
+Behavior:
+
+yices2.int: blowup searching for a counter example.
+
+This means I should be able to minimize fairly easily. Let me start with that.
+
+Note: sketch takes more than 20 minutes on this, so it's hard.
+
+I reduced W to 9, which sketch can do quickly. We still blow up searching for
+a counter-example.
+
+Wed Jun  4 09:58:04 EDT 2014
+
+Okay, I see the problem. Or, one problem anyway.
+
+It is possible to pick a value for the holes leading to a program which is an
+infinite loop. My implementation gets stuck on the infinite loop. The original
+sketch implementation does not.
+
+Question: Shouldn't we be bounding the number of iterations in the loop
+because we don't know the bounds statically? Isn't that the rule?
+
+Because if we do that, we shouldn't have any problem here.
+
+The language spec says:
+ * If bounds completely known statically, that's how many times the loop will
+   run
+ * If bounds completely unknown statically, it will run at most 
+    loop-unroll-bnd amount (or whatever the flag is)
+ * If an upper bound is known, but otherwise the bounds aren't known
+   statically, it will run at most the minimum of 
+    loop-unrool-bnd amount and the upper bound.
+
+This is slightly annoying, because I don't currently have a good framework in
+place to differentiate between what things I know statically and what things I
+don't, in terms of loop bounds.
+
+Is there some way I could alter the benchmark to test this, rather than the
+sketch implementation? Make it obvious what the bounds are?
+
+Or, how else could I test that limiting the unrolling this way would fix the
+problem?
+
+I can encode it in the problem. Let me try and see.
+
+That works for perf13.txt, but not the original benchmark.
+So either it isn't working the way it should in perf13.txt, or there is some
+other problem going on here.
+
+Note: putting the bounds explicitly helps sketch a lot.
+
+Let me start over again, then, with the bounds in place.
+
+Oh. I forgot to put the bounds in the right places.
+Fix this, and the test case is solved, just like that.
+
+Hmm... Do you accept that?
+Should I change the sketch implementation to support this bounds behavior?
+
+Probably yes. How hard will it be?
+I worry annoyingly hard.
+

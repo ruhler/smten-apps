@@ -5,9 +5,10 @@ benchmarks/gallery/compress.sk:
   Type: BIT
   yices2.int: 2m13s
   yices1.int: 23m47s
-  stp.int: stack space overflow after 6m30s
+  stp.int: 1m26s
   z3.int: 1m30s
   minisat: Over 2 hours before I gave up, but memory is okay.
+  sketch: 1m31s
 
   Profiling for yices2 int:
     28% Solve
@@ -19,9 +20,10 @@ benchmarks/gallery/jburnim_morton.sk:
   Type: BIT
   yices2.int: 4m29s
   yices1.int: 6m53s
-  stp.int: stack space overflow after 5m12s
+  stp.int: 1m33s
   z3.int: 3m35s
   minisat.int: 40m37s
+  sketch: 9s
 
   Profiling for yices2 int:
     33% Solve
@@ -37,6 +39,7 @@ benchmarks/gallery/logcount.sk:
   stp.int: 2m28s
   z3.int: 9m50s
   minisat.int: I gave up waiting after 45 minutes.
+  sketch: 5m01s
 
   Profiling for yices2 int:
     25% Solve
@@ -52,17 +55,19 @@ benchmarks/gallery/parity.sk:
   stp.int: 8s
   z3.int: 4s
   minisat.int: 7s
+  sketch: 9s
  
   Profiling for yices1 int:
   This is like all the others, with a shift left.
 
 benchmarks/gallery/polynomial.sk:
-  Type: DATA
+  Type: Bit
   yices2.int: 1s
   yices1.int: 1s
   stp.int: 1s
   z3.int: 1s
   minisat.int: 1s
+  sketch: 1s
 
   It's not worth profiling.
 
@@ -73,6 +78,7 @@ benchmarks/gallery/tutorial1.sk
   stp.int: 1s
   z3.int: 1s
   minisat.int: 1s
+  sketch: 1s
 
   It's not worth profiling.
 
@@ -97,8 +103,13 @@ benchmarks/gallery/enqueueSeqSK.sk
   Note: this used "minrepeat", which I don't support. I have replaced
   that with "repeat (??)" instead, which I do support.
 
+  see doc/perf15.txt
+
   int: The memory of this blows up searching for a counter example.
-  TODO: Understand why.
+  sketch: 1s
+
+  There's some issue with looking up a symbolic key in a symbolic map.
+  I don't entirely understand it. traceS would help.
 
 benchmarks/gallery/registerlesSwap.sk:
   Type: Bit
@@ -108,6 +119,7 @@ benchmarks/gallery/registerlesSwap.sk:
   what I can do for now.
 
   int: 1s (solver doesn't matter)
+  sketch: 1s
 
 benchmarks/gallery/karatsuba.sk:
   Type: Int
@@ -124,8 +136,12 @@ benchmarks/gallery/signedAvg.sk
   as arguments. This doesn't change anything significant, because the array
   length was statically known anyway.
 
+  see doc/perf17.txt
+
   int: The memory of this blows up in verification.
-  It appears to have a very deep generator stack.
+  sketch: 10s
+
+  Something funny is going on. I'm not sure what.
 
 benchmarks/gallery/tableBasedAddition.sk:
   Type: Bit
@@ -135,35 +151,54 @@ benchmarks/gallery/tableBasedAddition.sk:
 
   yices2.int: 1m17s
   yices2.bit: about 3 minutes
+  sketch: 4s
 
 benchmarks/gallery/log2.sk:
   Type: Bit
-  Note: I made a minor change to fix a parse issue with global vars. It
-  doesn't change anything significant.
+  Notes:
+    * I made a minor change to fix a parse issue with global vars.
+      It doesn't change anything significant.
+    * I changed a repeat(n) loop to a for loop. This is to overcome current
+      limitations in my sketch implementation for detecting static bounds.
+      The meaning of the program is otherwise entirely unchanged.
 
-  int: claims unsat. But sketch says sat after 3 minutes.
-  There is an issue with repeat bounds: we have a static value, 
-  but we don't figure it out. But even fixing that, my sketch claims unsat.
-  TODO: why do we get different answers?
+  see doc/perf14.txt
+
+  yices2.int: 49s
+  yices1.int: 3m08s
+  stp.int: 3m03s
+  z3.int: 3m04s
+  minisat.int: 56m58s
+  sketch: 15m23s
+
+  Profile on yices2:
+    9% Solve
+    It's pretty spread out otherwise. ShrE and ArrayAccess are prominent.
+
 
 benchmarks/gallery/partition.cpped.sk: LOCAL_GEN
 benchmarks/gallery/sort.included.sk(INT): LOCAL_GEN
 
 benchmarks/gallery/Pollard.sk:
   Type: Int
+
+  see doc/perf13.txt
  
   int: memory blowup searching for candidate
-  Profiling says:
-    arrayAccess is 30% or so, the rest is spread out.
-
-  TODO: minimize this test case.
+  This is because we don't statically bound the loop unrolling (as we should
+  according to the sketch language definition), and there are some choices of
+  holes for which the loops are infinite.
+  If the loops are manually bounded, this solves immediately.
 
 benchmarks/gallery/doublyLinkedList.sk:
   Type: DATA
+
+  see doc/perf16.txt
   
   int: memory blowup searching for candidate program.
-  Profile: No useful info. Looks very similar to isolateRightmost and
-           listReverse.
+  Profile: No useful info.
+
+  sketch: 1s
 
 benchmarks/gallery/isolateRightmost.sk:
   Type: Bit
@@ -173,12 +208,7 @@ benchmarks/gallery/isolateRightmost.sk:
   z3.int: 3s
   stp.int: 3s
   minisat.int: 3s
-
-  Profiling says: Miscellaneous stuff:
-    pretty printing, generating the generators, things like that.
-  I think this is because of the deep generator stack, with lots of
-  choices. I also think it isn't important.
-    
+  sketch: 3s
 
 benchmarks/gallery/listReverse.sk:
   Type: DATA
@@ -186,6 +216,7 @@ benchmarks/gallery/listReverse.sk:
   see doc/perf9.txt
 
   int: stack overflow
+  sketch: 4m16s
 
   I don't know the problem: weird stuff is happening.
 
@@ -197,6 +228,8 @@ benchmarks/gallery/lss.sk:
   yices2.int: memory blowup
   yices1.int: memory blowup
   z3.int: memory blowup
+  sketch: 1s
+
 
   Looks like an issue with partially concrete name lookups? Maybe with
   symbolic char implementation?
@@ -209,6 +242,7 @@ benchmarks/gallery/reverse.sk:
   int.stp:  3m22s
   int.z3: 59s
   int.minisat: 29s
+  sketch: 2s
 
   Profiling on int.yices2:
     20% Solve
@@ -225,6 +259,7 @@ benchmarks/gallery/tutorial2.sk:
   stp.int: 8s
   z3.int: 2s
   minisat.int: 3s
+  sketch: 1s
 
   Profiling on yices2: All the time is in multiplication: mul_IntFF, iii.
   Perhaps we could optimize: x * 0 = 0, x * 1 = x.
@@ -237,6 +272,7 @@ benchmarks/gallery/tutorial3.sk:
 
   int: blows up.
   Profiling says: All the time is in sub_intFF, iii.
+  sketch: 9s
 
   bit: TODO: I suspect it will work?
   
@@ -249,8 +285,5 @@ benchmarks/gallery/xpose.sk:
   int.stp: 58s
   int.z3: 15s
   int.minisat: 2m13s
-
-  It looks like the choice of counter-example is responsible for the variety
-  in solving time. yices2 picks something with lots of 7s, which apparently is
-  (much) harder to solve than smaller numbers.
+  sketch: 16m06s
 
