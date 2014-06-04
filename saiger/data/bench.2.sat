@@ -1,4 +1,4 @@
-  pdtrav saiger
+  PdTrav Saiger
 tests/sat/139442p0neg.aig 1.013477 0.24941
 tests/sat/139442p1.aig 0.877551 0.254436
 tests/sat/139442p1neg.aig 0.875429 0.278783

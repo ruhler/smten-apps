@@ -1,19 +1,19 @@
 
-all: build/release/aiger build/profile/aiger
+all: build/release/saiger build/profile/saiger
 
 SOURCES := src/Aiger.hs src/AigerPCheck.hs src/PCheck.hs
 
-check: build/release/aiger
+check: build/release/saiger
 	tclsh utils/test.tcl
 
-perf: build/release/aiger
+perf: build/release/saiger
 	tclsh utils/perf.tcl | tee build/perf.txt
 
-build/release/aiger: src/aiger.hs  $(SOURCES)
+build/release/saiger: src/saiger.hs  $(SOURCES)
 	mkdir -p build/release
 	smten --make -O -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports
 	
-build/profile/aiger: src/aiger.hs  $(SOURCES)
+build/profile/saiger: src/saiger.hs  $(SOURCES)
 	mkdir -p build/profile
 	smten --make -prof -o $@ -ibuild/release -isrc -hidir build/release -odir build/release $< -rtsopts -fwarn-unused-imports -fprof-auto-top
 

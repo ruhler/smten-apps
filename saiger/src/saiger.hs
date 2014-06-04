@@ -15,7 +15,7 @@ import AigerPCheck
 
 usage :: String
 usage = unlines $ [
-    "aiger [-d debug] [-k0 n] [-ki n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE",
+    "saiger [-d debug] [-k0 n] [-ki n] [-s yices1 | yices2 | stp | z3 | minisat] < FILE",
     "  -k0 n    Start with initial bound n",
     "  -ki n    Use increments of n for the bound"
     ]

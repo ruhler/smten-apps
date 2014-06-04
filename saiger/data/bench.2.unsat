@@ -1,4 +1,4 @@
-  pdtrav saiger
+  PdTrav Saiger
 tests/unsat/139442p0.aig 0.826471 900.305938
 tests/unsat/139443p0.aig 0.839148 900.319486
 tests/unsat/139444p0.aig 0.863365 900.451032
