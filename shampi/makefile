@@ -7,7 +7,7 @@ all:
 graphs: build/perf.data
 	Rscript utils/perf.R
 
-build/perf.data: utils/perf.tcl build/shampi
+build/perf.data: utils/perf.tcl build/release/shampi
 	tclsh utils/perf.tcl | tee $@
 
 perf:

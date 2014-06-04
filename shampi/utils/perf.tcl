@@ -9,18 +9,19 @@ proc mytime {script} {
 }
 
 proc mkcfg {slv rep} {
-  return [list "Shampi.$slv.$rep" "exec ./build/shampi -s $slv -e $rep"]
+  return [list "Shampi.$slv.$rep" "exec ./build/release/shampi -s $slv -e $rep"]
 }
 
 set cfgs [list  \
   [list hampi "exec tclsh ./utils/rhampi.tcl"]  \
-  [mkcfg yices2 Integer] \
-  [mkcfg yices2 Bit]    \
+  [mkcfg stp Bit]   \
+  [mkcfg yices2 Bit]
+  ]
+  #[mkcfg yices2 Integer] \
   [mkcfg yices1 Integer] \
   [mkcfg yices1 Bit] \
   [mkcfg z3 Integer] \
   [mkcfg z3 Bit]    \
-  [mkcfg stp Bit]   \
   [mkcfg minisat Bit]   \
   ]
 

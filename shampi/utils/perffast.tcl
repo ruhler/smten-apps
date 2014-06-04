@@ -16,7 +16,7 @@ proc runcfg {slv rep} {
 }
 
 runcfg stp Bit
-#runcfg stp Char
+runcfg stp Char
 runcfg stp Int
 runcfg yices2 Bit
 runcfg yices2 Integer

@@ -1,5 +1,4 @@
 #!/bin/bash
 
-cd hampi/trunk
-bash hampi_server.sh 4444 > /dev/null 2> /dev/null
+hampi_server.sh 4444 > /dev/null 2> /dev/null
 

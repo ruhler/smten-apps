@@ -1,5 +1,4 @@
 #!/bin/bash
 
-cd hampi/trunk
-bash hampi_client.sh 4444 SHUTDOWN
+hampi_client.sh 4444 SHUTDOWN
 

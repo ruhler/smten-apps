@@ -4,8 +4,5 @@
 *.pdf
 *.ps
 build/
-hsbuild/
-data/
 hampi/
-thoughts
 *.gp
