@@ -14,6 +14,6 @@ import Generate
 import Options
 import Program
 
-synthesize :: Options -> Program -> Searches (Maybe Program)
-synthesize opts p = cegis (mkFreeProgramInput opts p) (generate opts p) [] evalP
+synthesize :: Bool -> Options -> Program -> Searches (Maybe Program)
+synthesize verbose opts p = cegis verbose (mkFreeProgramInput opts p) (generate opts p) [] evalP
 

@@ -1,5 +1,4 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module Cegis (cegis) where
 
 import Smten.Prelude
@@ -22,11 +21,12 @@ import Program
 --
 --  x has type a
 --  c has type b
-cegis :: Space ProgramInput -> Space Program -> [ProgramInput] -> (Program -> ProgramInput -> Bool) -> Searches (Maybe Program)
-cegis freeX freeC xs p = do
+cegis :: Bool -> Space ProgramInput -> Space Program -> [ProgramInput] -> (Program -> ProgramInput -> Bool) -> Searches (Maybe Program)
+cegis verbose freeX freeC xs p = do
+  let info msg = if verbose then liftIO (putStrLn msg) else return ()
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.
-  liftIO $ putStrLn ("searching for candidate satisfying: " ++ show xs)
+  info $ "searching for candidate satisfying: " ++ show xs
   rc <- search $ do
       c <- freeC
       guard (all (p c) xs)
@@ -34,7 +34,7 @@ cegis freeX freeC xs p = do
   case rc of
     Nothing -> return Nothing
     Just cv -> do
-      liftIO $ putStrLn ("candidate program: " ++ pretty cv)
+      info $ "candidate program: " ++ pretty cv
       -- Search for a counter example
       rx <- search $ do
           x <- freeX
@@ -43,6 +43,6 @@ cegis freeX freeC xs p = do
       case rx of
         Nothing -> return (Just cv)
         Just xv -> do
-            liftIO $ putStrLn ("found counter example: " ++ show xv)
-            cegis freeX freeC (xv:xs) p
+            info $ "found counter example: " ++ show xv
+            cegis verbose freeX freeC (xv:xs) p
   

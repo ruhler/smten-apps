@@ -24,6 +24,7 @@ usage = unlines [
     "  ssketch [OPTIONS] [FILE...]",
     "",
     " Options:",
+    "    -v                     Use verbose output",
     "    -d FILE                Output debug info to the given file",
     "    -s solver              Select the back-end solver to use:",
     "                            yices1, yices2, z3, stp, or minisat",
@@ -37,6 +38,7 @@ data CmdArgs = CmdArgs {
     cmd_err :: Maybe String,
     cmd_files :: [String],
     cmd_debug :: Maybe String,
+    cmd_verbose :: Bool,
     cmd_solver :: Solver,
     cmd_opts :: Options
 }
@@ -46,6 +48,7 @@ defargs = CmdArgs {
     cmd_err = Nothing,
     cmd_files = [],
     cmd_debug = Nothing,
+    cmd_verbose = False,
     cmd_solver = yices2,
     cmd_opts = defaultOptions
 }
@@ -55,6 +58,7 @@ parseargs s =
   case s of
     [] -> defargs
     ("-d" : dbg : rest) -> (parseargs rest) { cmd_debug = Just dbg }
+    ("-v" : rest) -> (parseargs rest) { cmd_verbose = True }
     ("-s" : "yices1" : rest) -> (parseargs rest) { cmd_solver = yices1 }
     ("-s" : "yices2" : rest) -> (parseargs rest) { cmd_solver = yices2 }
     ("-s" : "stp" : rest) -> (parseargs rest) { cmd_solver = stp }
@@ -109,19 +113,21 @@ main = do
     -- Update the options based on any pragmas in the file
     let args' = parseargs (argv ++ words skopts)
         opts = cmd_opts args'
+        verbose = cmd_verbose args'
+        putVerbose msg = if verbose then putStrLn msg else return ()
     case cmd_err args' of
        Just err -> putStrLn $ unlines ["warning: " ++ err, "(from use of a pragma)"]
        Nothing -> return ()
-    putStrLn $ "Using Options: " ++ show opts
-    putStrLn $ "Parsed: " ++ show sk
+    putVerbose $ "Using Options: " ++ show opts
+    putVerbose $ "Parsed: " ++ show sk
       
 
     -- Perform static analysis and execution
     let st = static sk
-    putStrLn $ "Statically Evaluated: " ++ show st
+    putVerbose $ "Statically Evaluated: " ++ show st
 
     -- Run the synthesizer
-    syn <- runSearches solver (synthesize opts st)
+    syn <- runSearches solver (synthesize verbose opts st)
     case syn of
       Nothing -> fail "sketch not satisfiable"
       Just v -> putStrLn (pretty v)

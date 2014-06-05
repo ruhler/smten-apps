@@ -37,17 +37,18 @@ proc runcfgs {bench args} {
     puts ""
 }
         
-runcfgs benchmarks/gallery/compress.sk yices2 stp z3
-runcfgs benchmarks/gallery/jburnim_morton.sk yices2 yices1 stp z3
-runcfgs benchmarks/gallery/logcount.sk yices2 yices1 stp z3
-runcfgs benchmarks/gallery/parity.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/polynomial.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/tutorial1.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/tutorial2.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/registerlesSwap.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/tableBasedAddition.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/log2.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/isolateRightmost.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/reverse.sk yices2 yices1 stp z3 minisat
-runcfgs benchmarks/gallery/xpose.sk yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/compress.sk yices2 stp z3
+#runcfgs benchmarks/gallery/jburnim_morton.sk yices2 yices1 stp z3
+#runcfgs benchmarks/gallery/logcount.sk yices2 yices1 stp z3
+#runcfgs benchmarks/gallery/parity.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/polynomial.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/tutorial1.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/tutorial2.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/registerlesSwap.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/tableBasedAddition.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/log2.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/isolateRightmost.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/reverse.sk yices2 yices1 stp z3 minisat
+#runcfgs benchmarks/gallery/xpose.sk yices1 stp z3 minisat
+runcfgs benchmarks/gallery/Pollard.sk yices2 yices1 stp z3 minisat
     
