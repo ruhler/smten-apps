@@ -8,7 +8,7 @@ import Smten.Data.Functor
 import Smten.Data.List
 import qualified Smten.Data.Map as Map
 import Smten.Data.Maybe
-import Smten.Symbolic
+import Smten.Search
 
 import Input
 import Options
@@ -17,7 +17,7 @@ import Syntax
 
 -- Given a program with explicit holes, generate a corresponding symbolic
 -- candidate program without holes.
-generate :: Options -> Program -> Symbolic Program
+generate :: Options -> Program -> Space Program
 generate opts p = do
   let readed = runReaderT (mapM genD (decls p)) (GR opts p Map.empty)
   (ds, s) <- runStateT readed (TS [] 0)
@@ -41,7 +41,7 @@ data TS = TS {
     ts_fresh :: Int
 }
 
-type GM = ReaderT GR (StateT TS Symbolic)
+type GM = ReaderT GR (StateT TS Space)
 
 -- Emit a declaration. Use a template for the declaration name, and a
 -- uniquified version of that name will be used instead and returned. 
@@ -60,8 +60,8 @@ fresh = do
   put $ s { ts_fresh = ts_fresh s + 1 }
   return nm
 
-liftSymbolic :: Symbolic a -> GM a
-liftSymbolic = lift . lift
+liftSpace :: Space a -> GM a
+liftSpace = lift . lift
 
 genD :: Decl -> GM Decl
 genD d@(VarD {}) = return d
@@ -86,7 +86,7 @@ genS (ReorderS xs) = do
         x <- free_Bool
         return (x, s)
       mkrow = mapM mkelem xs'
-  matrix <- liftSymbolic $ mapM (const mkrow) xs'
+  matrix <- liftSpace $ mapM (const mkrow) xs'
 
   -- Each row and col should have exactly one statement executed
   let rowselects = map (map fst) matrix
@@ -94,7 +94,7 @@ genS (ReorderS xs) = do
       cols ([]:_) = []
       cols xs = map head xs : cols (map tail xs)
       colselects = map (map fst) (cols matrix)
-  liftSymbolic $ assert (all oneset rowselects && all oneset colselects)
+  liftSpace $ guard (all oneset rowselects && all oneset colselects)
 
   -- Get and return the list of statements to execute
   let stmts = map (\(x, s) -> if x then s else BlockS []) (concat matrix)
@@ -147,12 +147,12 @@ genLV (FieldLV lv m) = do
 genLV (ChoiceLV a b) = do
   a' <- genLV a
   b' <- genLV b
-  liftSymbolic $ mplus (return a') (return b')
+  liftSpace $ mplus (return a') (return b')
 
 genOp :: BinOp -> GM BinOp
 genOp (ChoiceOp xs) = do
   ops <- mapM genOp xs
-  liftSymbolic $ msum (map return ops)
+  liftSpace $ msum (map return ops)
 genOp op = return op
 
 genE :: Expr -> GM Expr
@@ -168,14 +168,14 @@ genE (CondE p a b) = liftM3 CondE (genE p) (genE a) (genE b)
 genE (HoleE ty mbnd) = do
   opts <- asks gr_opts
   let bnd = fromMaybe (bnd_cbits opts) mbnd
-  ValE <$> (liftSymbolic $ mkFreeArg bnd ty)
+  ValE <$> (liftSpace $ mkFreeArg bnd ty)
 genE (ChoiceE a b) = do
   a' <- genE a
   b' <- genE b
-  liftSymbolic $ mplus (return a') (return b')
+  liftSpace $ mplus (return a') (return b')
 genE (BitChooseE ty a b) = do
   -- TODO: use the bit width of a and b, not 32.
-  x <- ValE <$> (liftSymbolic $ mkFreeArg 32 ty)
+  x <- ValE <$> (liftSpace $ mkFreeArg 32 ty)
   a' <- genE a
   b' <- genE b
   return (BinaryE OrOp (BinaryE AndOp a' x) (BinaryE AndOp b' (NotE x)))

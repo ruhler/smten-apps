@@ -4,8 +4,7 @@ module Cegis (cegis) where
 
 import Smten.Prelude
 import Smten.Control.Monad.Trans
-import Smten.Symbolic
-import Smten.Symbolic.SMT
+import Smten.Searches
 
 import Input
 import Ppr
@@ -23,23 +22,23 @@ import Program
 --
 --  x has type a
 --  c has type b
-cegis :: Symbolic ProgramInput -> Symbolic Program -> [ProgramInput] -> (Program -> ProgramInput -> Bool) -> SMT (Maybe Program)
+cegis :: Space ProgramInput -> Space Program -> [ProgramInput] -> (Program -> ProgramInput -> Bool) -> Searches (Maybe Program)
 cegis freeX freeC xs p = do
   -- Find some concrete 'c' which satisfies the predicate for all existing
   -- examples.
   liftIO $ putStrLn ("searching for candidate satisfying: " ++ show xs)
-  rc <- query $ do
+  rc <- search $ do
       c <- freeC
-      assert (all (p c) xs)
+      guard (all (p c) xs)
       return c
   case rc of
     Nothing -> return Nothing
     Just cv -> do
       liftIO $ putStrLn ("candidate program: " ++ pretty cv)
       -- Search for a counter example
-      rx <- query $ do
+      rx <- search $ do
           x <- freeX
-          assert (not (p cv x))
+          guard (not (p cv x))
           return x
       case rx of
         Nothing -> return (Just cv)

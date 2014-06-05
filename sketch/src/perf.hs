@@ -1,8 +1,8 @@
 
 import Smten.Prelude
-import Smten.Symbolic
+import Smten.Search
 import Smten.Control.Monad.State
-import Smten.Symbolic.Solver.Yices2
+import Smten.Search.Solver.Yices2
 
 import qualified Smten.Data.Map as Map
 import EvalMonad
@@ -22,7 +22,7 @@ perf3 = do
   let solver = yices2
       opts = defaultOptions
 
-  r <- run_symbolic solver $ do
+  r <- search solver $ do
      p <- free_Bool
      let env = Map.empty
          run = do
@@ -37,7 +37,7 @@ perf3 = do
                  declVar "d" (BitV False)
                  lookupVar "d"
          res = runEvalM env run
-     Smten.Symbolic.assert (Just (Just (BitV True)) == res) 
+     guard (Just (Just (BitV True)) == res) 
   putStrLn $ show r
 
 perf4 :: IO ()
@@ -45,7 +45,7 @@ perf4 = do
   let solver = yices2
       opts = defaultOptions
 
-  r <- run_symbolic solver $ do
+  r <- search solver $ do
      let a = BinaryE AddOp (ValE (IntV 1)) (ValE $ IntV 1)
          b = ValE $ IntV 4
      e <- mplus (return a) (return b)
@@ -54,7 +54,7 @@ perf4 = do
             declVar "a" (IntV 3)
             evalE e
          res = runEvalM env run
-     Smten.Symbolic.assert (Just (IntV 3) == res) 
+     guard (Just (IntV 3) == res) 
   putStrLn $ show r
 
 perf5 :: IO ()
@@ -62,7 +62,7 @@ perf5 = do
   let solver = yices2
       opts = defaultOptions
 
-  r <- run_symbolic solver $ do
+  r <- search solver $ do
      x <- msum (map return [0..7 :: Int])
      let got = x
 

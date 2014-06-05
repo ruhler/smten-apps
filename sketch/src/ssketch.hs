@@ -1,14 +1,13 @@
 
 import Smten.Prelude
 import Smten.Control.Monad.State
-import Smten.Symbolic
-import Smten.Symbolic.SMT
-import Smten.Symbolic.Solver.Debug
-import Smten.Symbolic.Solver.Yices1
-import Smten.Symbolic.Solver.Yices2
-import Smten.Symbolic.Solver.STP
-import Smten.Symbolic.Solver.Z3
-import Smten.Symbolic.Solver.MiniSat
+import Smten.Searches
+import Smten.Search.Solver.Debug
+import Smten.Search.Solver.Yices1
+import Smten.Search.Solver.Yices2
+import Smten.Search.Solver.STP
+import Smten.Search.Solver.Z3
+import Smten.Search.Solver.MiniSat
 import Smten.System.Environment
 import Smten.System.IO
 
@@ -122,7 +121,7 @@ main = do
     putStrLn $ "Statically Evaluated: " ++ show st
 
     -- Run the synthesizer
-    syn <- runSMT solver (synthesize opts st)
+    syn <- runSearches solver (synthesize opts st)
     case syn of
       Nothing -> fail "sketch not satisfiable"
       Just v -> putStrLn (pretty v)

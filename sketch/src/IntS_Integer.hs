@@ -8,7 +8,7 @@ module IntS_Integer (
 
 import Smten.Prelude
 import Smten.Control.Monad
-import Smten.Symbolic
+import Smten.Search
 
 newtype IntS = IntS Integer
     deriving (Eq, Ord, Num, Enum, Integral, Real)
@@ -25,6 +25,6 @@ exp2 0 = 1
 exp2 n = 2 * exp2 (n-1)
 
 -- Make a set of ints from 0 to 2^n-1
-freeInt :: Int -> Symbolic IntS
+freeInt :: Int -> Space IntS
 freeInt n = msum (map (return . fromInt) [0..(exp2 n - 1)])
 

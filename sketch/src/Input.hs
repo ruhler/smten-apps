@@ -8,7 +8,7 @@ import qualified Smten.Data.Map as Map
 import Smten.Data.Functor
 import Smten.Data.List
 import Smten.Data.Maybe
-import Smten.Symbolic
+import Smten.Search
 
 import IntS
 import Options
@@ -23,9 +23,9 @@ type FunctionInput = [Value]
 type ProgramInput = Map.Map String FunctionInput
 
 -- Construct a sample input for the given program.
-mkFreeProgramInput :: Options -> Program -> Symbolic ProgramInput
+mkFreeProgramInput :: Options -> Program -> Space ProgramInput
 mkFreeProgramInput opts p = do
-  let mkDeclInput :: Decl -> Symbolic (Maybe (String, FunctionInput))
+  let mkDeclInput :: Decl -> Space (Maybe (String, FunctionInput))
       mkDeclInput d@(FunD {}) = do
         let needsinputs = 
              case fd_kind d of
@@ -45,12 +45,12 @@ mkFreeProgramInput opts p = do
 
 -- Given a list of types, return a list of free inputs corresponding to those
 -- types.
-mkFreeArgs :: Options -> [Type] -> Symbolic FunctionInput
+mkFreeArgs :: Options -> [Type] -> Space FunctionInput
 mkFreeArgs opts = mapM (mkFreeArg (bnd_inbits opts))
 
 -- Given a type, construct a free expression of that type.
 -- Takes a bound on the number of bits used for the expression.
-mkFreeArg :: Int -> Type -> Symbolic Value
+mkFreeArg :: Int -> Type -> Space Value
 mkFreeArg bnd t =
   case t of
     BitT -> BitV <$> free

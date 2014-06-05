@@ -11,7 +11,7 @@ module Bits (
     ) where
 
 import Smten.Prelude
-import Smten.Symbolic
+import Smten.Search
 import Smten.Data.List
 
 type Bit = Bool
@@ -53,7 +53,7 @@ shlB a b = take (length a) $ genericReplicate b False ++ a
 -- Construct a symbolic bit vector
 --  w - the width of the vector
 --  n - the number of free bits (the rest of the bits are 0)
-freeBits :: Int -> Int -> Symbolic Bits
+freeBits :: Int -> Int -> Space Bits
 freeBits w n = do
   let n' = min n w
   vals <- sequence $ replicate n' free
