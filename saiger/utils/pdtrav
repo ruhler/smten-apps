@@ -2,4 +2,4 @@
 
 # Run the pdtrav program on a .aig file.
 fout=`dirname $1`/`basename $1 .aig`.pdtrav.out
-./reference/pdtools-1.3.0/pdtrav-3.2.0/bin/pdtrav -engine itp1 $1 && rm $fout 
+pdtrav -engine itp1 $1 && rm $fout 
