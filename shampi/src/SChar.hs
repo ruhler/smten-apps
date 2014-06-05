@@ -9,7 +9,6 @@ import Smten.Data.Char
 import Smten.Data.Functor
 
 import Smten.Search
-import Smten.Symbolic
 import Smten.Data.Bit
 
 class (Ord a) => SChar a where
