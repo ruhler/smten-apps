@@ -1,9 +1,5 @@
 #!/bin/bash
 
 # Script for running the original version of sketch.
-# Run from the top level sketch directory.
-
-export SKETCH_HOME=`pwd`/sketch-1.6.4/sketch-frontend/runtime
-export PATH=$PATH:`pwd`/sketch-1.6.4/sketch-frontend
 sketch $*
 
