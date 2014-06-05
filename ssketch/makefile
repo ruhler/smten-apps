@@ -2,11 +2,7 @@
 .PHONY: all
 all: 
 	tclsh utils/make.tcl
-	time -f %E tclsh utils/test.tcl "./build/release/ssketch -s yices2"
-
-perfer:
-	tclsh utils/makeperf.tcl
-	./build/profile/perf +RTS -p
+	tclsh utils/test.tcl "./build/release/ssketch -s yices2"
 
 bench:
 	tclsh utils/bench.tcl ./build/release/ssketch 5 benchmarks/tests/*.sk benchmarks/perf/*.sk | tee build/bench.log
@@ -24,4 +20,4 @@ build/sskVsk.data: utils/sskVsk.tcl
 	tclsh utils/sskVsk.tcl | tee $@
 
 clean:
-	rm -rf *.hi *.smten_o *.smten_hi Smten test test_prof build/*
+	rm -rf build
