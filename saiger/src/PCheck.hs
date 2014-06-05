@@ -10,8 +10,7 @@
 module PCheck (Model(..), pcheck) where
 
 import Smten.Prelude
-import Smten.Symbolic
-import Smten.Symbolic.SMT
+import Smten.Searches
 
 data Model s = Model {
    -- | The initial states of the system
@@ -20,10 +19,10 @@ data Model s = Model {
    -- | The transition relation for the system
    -- Given a state, return a symbolic state representing all possible
    -- next states of the system.
-   _T :: s -> Symbolic s,
+   _T :: s -> Space s,
 
    -- | Construct a free state
-   _S :: Symbolic s
+   _S :: Space s
 }
 
 -- | pcheck k0 ki m p
@@ -41,33 +40,33 @@ data Model s = Model {
 -- state not satisfying the property>
 --
 -- Note: This corresponds to Algorithm 3 of the paper.
-pcheck :: (Eq s) => Int -> Int -> Model s -> (s -> Bool) -> SMT (Maybe [s])
+pcheck :: (Eq s) => Int -> Int -> Model s -> (s -> Bool) -> Searches (Maybe [s])
 pcheck k ki m p = do
    -- Search for a failing path of this length
-   ra <- query $ do
+   ra <- search $ do
       xs <- mkPath m (k+1)
-      assert (_I m (head xs) && not (all p xs))
+      guard (_I m (head xs) && not (all p xs))
       return xs
    case ra of
      Just xs -> return (Just xs)
      Nothing -> do
        -- Search for a loopfree path of 1 greater length
-       rb <- query $ do 
+       rb <- search $ do 
           xs <- mkPath m (k+2)
-          assert (_I m (head xs) && all (not . _I m) (tail xs) && loopfree m xs)
+          guard (_I m (head xs) && all (not . _I m) (tail xs) && loopfree m xs)
        case rb of
           Nothing -> return Nothing
           _ -> do
             -- Search backwards for a loopfree path of 1 greater length
-            rc <- query $ do
+            rc <- search $ do
                 xs <- mkPath m (k+2)
-                assert (loopfree m xs && all p (init xs) && not (p (last xs)))
+                guard (loopfree m xs && all p (init xs) && not (p (last xs)))
             case rc of
               Nothing -> return Nothing
               _ -> pcheck (k+ki) ki m p
                 
 -- Make a symbolic path of the given length.
-mkPath :: Model s -> Int -> Symbolic [s]
+mkPath :: Model s -> Int -> Space [s]
 mkPath m 0 = return []
 mkPath m n = do
   s0 <- _S m

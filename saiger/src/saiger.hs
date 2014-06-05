@@ -1,7 +1,7 @@
 
 import Smten.Prelude
 import Smten.Data.Array
-import Smten.Symbolic.SMT
+import Smten.Searches
 import Smten.Symbolic.Solver.Debug
 import Smten.Symbolic.Solver.MiniSat
 import Smten.Symbolic.Solver.STP
@@ -59,7 +59,7 @@ main = do
 
   -- Note: we only look for the first output.
   -- Presumably we need to check for them all?
-  result <- runSMT solver $ aigercheck k0 ki aig (aig_outputs aig ! 1)
+  result <- runSearches solver $ aigercheck k0 ki aig (aig_outputs aig ! 1)
   case result of
     Nothing -> putStrLn "0\n."
     Just v -> do
