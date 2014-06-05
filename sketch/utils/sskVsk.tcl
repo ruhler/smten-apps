@@ -12,7 +12,7 @@ proc mytime {script} {
 puts "  sketch ssketch"
 foreach x [glob tests/*.sk] {
     set sketch [mytime "exec ./utils/sketch $x"]
-    set ssketch [mytime "exec ./build/release/sketch -s yices2 $x"]
+    set ssketch [mytime "exec ./build/release/ssketch -s yices2 $x"]
     puts "$x $sketch $ssketch"
 }
 

@@ -13,8 +13,8 @@ proc hrun {args} {
 hrun mkdir -p build/release build/profile
 
 hrun happy src/Grammar.y -o build/profile/Grammar.hs -ibuild/Grammar.info
-hrun smten --make -o build/profile/sketch -prof -fprof-auto-top -ibuild/profile -isrc -hidir build/profile -odir build/profile src/sketch.hs -fwarn-unused-imports -rtsopts
+hrun smten --make -o build/profile/ssketch -prof -fprof-auto-top -ibuild/profile -isrc -hidir build/profile -odir build/profile src/ssketch.hs -fwarn-unused-imports -rtsopts
 
 hrun happy src/Grammar.y -o build/release/Grammar.hs
-hrun smten --make -o build/release/sketch -ibuild/release -isrc -hidir build/release -odir build/release src/sketch.hs -fwarn-unused-imports -rtsopts
+hrun smten --make -o build/release/ssketch -ibuild/release -isrc -hidir build/release -odir build/release src/ssketch.hs -fwarn-unused-imports -rtsopts
 

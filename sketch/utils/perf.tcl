@@ -14,7 +14,7 @@ proc runsketch {bench} {
 proc runssketch {slv bench} {
     puts -nonewline "ssketch.$slv.$bench: "
     flush stdout
-    set t [mytime "exec ./build/release/sketch -s $slv $bench"]
+    set t [mytime "exec ./build/release/ssketch -s $slv $bench"]
     puts "$t"
 }
 
@@ -29,15 +29,15 @@ proc runcfgs {bench args} {
 
     # Run each config:
     foreach slv $args {
-        puts -nonewline "  $slv: "
+        puts -nonewline " ssketch $slv: "
         flush stdout
-        set t [mytime "exec ./build/release/sketch -s $slv $bench"]
+        set t [mytime "exec ./build/release/ssketch -s $slv $bench"]
         puts "$t"
     }
     puts ""
 }
         
-runcfgs benchmarks/gallery/compress.sk yices2 yices1 stp z3
+runcfgs benchmarks/gallery/compress.sk yices2 stp z3
 runcfgs benchmarks/gallery/jburnim_morton.sk yices2 yices1 stp z3
 runcfgs benchmarks/gallery/logcount.sk yices2 yices1 stp z3
 runcfgs benchmarks/gallery/parity.sk yices2 yices1 stp z3 minisat

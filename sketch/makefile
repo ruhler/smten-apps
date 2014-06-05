@@ -2,7 +2,7 @@
 .PHONY: all
 all: 
 	tclsh utils/make.tcl
-	time -f %E tclsh utils/test.tcl "./build/release/sketch -s yices2"
+	time -f %E tclsh utils/test.tcl "./build/release/ssketch -s yices2"
 
 unit:
 	tclsh utils/makeunit.tcl
@@ -13,13 +13,13 @@ perfer:
 	./build/profile/perf +RTS -p
 
 bench:
-	tclsh utils/bench.tcl ./build/release/sketch 5 benchmarks/tests/*.sk benchmarks/perf/*.sk | tee build/bench.log
+	tclsh utils/bench.tcl ./build/release/ssketch 5 benchmarks/tests/*.sk benchmarks/perf/*.sk | tee build/bench.log
 
 perf:
 	tclsh ./utils/perf.tcl | tee build/perf.txt
 
 check:
-	tclsh utils/test.tcl "./build/release/sketch -s yices2"
+	tclsh utils/test.tcl "./build/release/ssketch -s yices2"
 
 build/sskVsk.pdf: build/sskVsk.data
 	Rscript utils/sskVsk.R

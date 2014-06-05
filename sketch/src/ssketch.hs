@@ -22,7 +22,7 @@ import Synthesis
 usage :: String
 usage = unlines [
     "Usage:",
-    "  sketch [OPTIONS] [FILE...]",
+    "  ssketch [OPTIONS] [FILE...]",
     "",
     " Options:",
     "    -d FILE                Output debug info to the given file",
@@ -99,7 +99,7 @@ main = do
 
   -- Run sketch on each input file
   flip mapM_ (cmd_files args) $ \fin -> do
-    putStrLn $ "Running sketch on " ++ show fin ++ "..."
+    putStrLn $ "Running ssketch on " ++ show fin ++ "..."
 
     -- Parse the input file
     input <- readFile fin
