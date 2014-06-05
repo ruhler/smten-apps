@@ -1,6 +1,4 @@
 
-{-# LANGUAGE TemplateHaskell #-}
-
 module Aiger (
     Aiger, Vector, Literal,
     aig_num_inputs, aig_num_outputs, aig_num_latches, aig_outputs,
