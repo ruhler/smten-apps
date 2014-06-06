@@ -2,6 +2,6 @@
 
 # Run the saiger program on a .aig file.
 # Assert the result is a correct witness.
-./utils/aigtoaig -a $1 | ./build/release/saiger -k0 4 -ki 3 > build/`basename $1`.wit
-./utils/aigsim -m -c $1 build/`basename $1`.wit
+aigtoaig -a $1 | ./build/release/saiger -k0 4 -ki 3 > build/`basename $1`.wit
+aigsim -m -c $1 build/`basename $1`.wit
 

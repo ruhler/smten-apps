@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # Run the saiger program on a .aig file.
-./utils/aigtoaig -a $1 | ./build/release/saiger -k0 10 -ki 10
+aigtoaig -a $1 | ./build/release/saiger -k0 10 -ki 10
 
