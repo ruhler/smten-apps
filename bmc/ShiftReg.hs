@@ -1,10 +1,9 @@
 
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 module ShiftReg (tests) where
 
 import Smten.Prelude
-import Smten.Symbolic
-import Smten.Symbolic.Solver.Pure
+import Smten.Search
+import Smten.Search.Solver.Smten
 
 import BMC
 
@@ -50,12 +49,12 @@ shiftregf = G (P (not . allzero))
 
 tests :: IO ()
 tests = do
-   s <- run_symbolic pure (check shiftregm_good shiftregf 3)
+   s <- search smten (check shiftregm_good shiftregf 3)
    case s of
       Nothing -> return ()
       Just xs -> error $ "shiftregm_good test failed: " ++ show xs
 
-   s <- run_symbolic pure (check shiftregm_bad shiftregf 3)
+   s <- search smten (check shiftregm_bad shiftregf 3)
    case s of
       Just xs -> putStrLn $ show xs
       Nothing -> error "shiftregm_bad test failed"

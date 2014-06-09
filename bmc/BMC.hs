@@ -4,13 +4,12 @@
 --  by Armin Biere, Alessandro Cimatti, Edmund Clarke, and Yunshan Zhu
 --   January 4, 1999
 --   Submitted for TACAS'99
-{-# LANGUAGE NoImplicitPrelude, RebindableSyntax #-}
 {-# LANGUAGE PatternGuards #-}
 module BMC (Model(..), LTL(..), check) where
 
 import Smten.Prelude hiding (succ)
 import Smten.Data.Array
-import Smten.Symbolic
+import Smten.Search
 
 data Model s = Model {
     _I :: s -> Bool,        -- | The initial states
@@ -93,10 +92,10 @@ trans s m f k = ispath s m k
 -- Returns
 --   Nothing  - if the formula is valid
 --   Just xs  - if the formula is not valid, where xs are a counterexample.
-check :: (Free s) => Model s -> LTL s -> Int -> Symbolic [s]
+check :: (Free s) => Model s -> LTL s -> Int -> Space [s]
 check m f k = do
     xs <- sequence (replicate (k+1) free)
     let s = listArray (0,k) xs
-    assert (trans s m f k)
+    guard (trans s m f k)
     return (elems s)
     
