@@ -13,28 +13,28 @@ proc runcfg {slv rep n} {
     puts "$t"
 }
 
-#runcfg yices2 Int 59
-#runcfg yices2 Integer 31
-#runcfg yices2 Bit 92
-#runcfg yices2 Bool 152
-#runcfg yices2 Bool2 72
-#
-#runcfg yices1 Int 31
-#runcfg yices1 Integer 44
-#runcfg yices1 Bit 68
-#runcfg yices1 Bool 100
-#runcfg yices1 Bool2 55
-#
-#runcfg z3 Int 38
-#runcfg z3 Integer 36
-#runcfg z3 Bit 60
-#runcfg z3 Bool 80
-#runcfg z3 Bool2 60
-#
-#runcfg stp Int 28
-#runcfg stp Bit 70
-#runcfg stp Bool 60
-#runcfg stp Bool2 35
+runcfg yices2 Int 59
+runcfg yices2 Integer 31
+runcfg yices2 Bit 92
+runcfg yices2 Bool 152
+runcfg yices2 Bool2 72
+
+runcfg yices1 Int 31
+runcfg yices1 Integer 44
+runcfg yices1 Bit 68
+runcfg yices1 Bool 100
+runcfg yices1 Bool2 55
+
+runcfg z3 Int 38
+runcfg z3 Integer 36
+runcfg z3 Bit 60
+runcfg z3 Bool 80
+runcfg z3 Bool2 60
+
+runcfg stp Int 28
+runcfg stp Bit 70
+runcfg stp Bool 60
+runcfg stp Bool2 35
 
 runcfg minisat Int 42
 runcfg minisat Bit 68

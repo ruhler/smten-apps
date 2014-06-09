@@ -2,7 +2,7 @@
 module BoolNQueens (bool_nqueens) where
 
 import Smten.Prelude
-import Smten.Symbolic
+import Smten.Search
 
 import Block
 
@@ -33,10 +33,10 @@ islegal places = and [
   all (not . multiset) (pdiags places),
   all (not . multiset) (ndiags places)]
 
-bool_nqueens :: Int -> Symbolic [Int]
+bool_nqueens :: Int -> Space [Int]
 bool_nqueens n = do
   places <- blockM free_Bool n n
-  assert (islegal places)
+  guard (islegal places)
   return $ map colof (rows places)
 
 colof :: [Bool] -> Int

@@ -4,7 +4,7 @@
 module IntegerNQueens( integer_nqueens ) where
 
 import Smten.Prelude
-import Smten.Symbolic
+import Smten.Search
 
 -- Placement: A list of locations (row, col) for each queen.
 -- Indices go from 0 to n-1
@@ -21,17 +21,17 @@ islegal places = and [
   distinct (map (uncurry (+)) places),
   distinct (map (uncurry (-)) places)]
 
-mkcol :: Int -> Symbolic Integer
+mkcol :: Int -> Space Integer
 mkcol n = do
    x <- free_Integer
-   assert (x >= 0 && x < toInteger n)
+   guard (x >= 0 && x < toInteger n)
    return x
 
-integer_nqueens :: Int -> Symbolic [Int]
+integer_nqueens :: Int -> Space [Int]
 integer_nqueens n = do
     let rows = [0..(toInteger n-1)]
     cols <- sequence $ replicate n (mkcol n)
     let places = zip rows cols
-    assert (islegal places)
+    guard (islegal places)
     return (map fromInteger cols)
 

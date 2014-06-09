@@ -2,7 +2,7 @@
 module Bool2NQueens (bool2_nqueens) where
 
 import Smten.Prelude
-import Smten.Symbolic
+import Smten.Search
 
 import Block
 
@@ -24,10 +24,10 @@ islegal places = and [
   {-# SCC "PDNonConflict" #-}   all noconf (pdiags places), -- diagonals shouldn't conflict
   {-# SCC "NDNonConflict" #-}   all noconf (ndiags places)]
 
-bool2_nqueens :: Int -> Symbolic [Int]
+bool2_nqueens :: Int -> Space [Int]
 bool2_nqueens n = do
   places <- blockM free_Bool n n
-  assert (islegal places)
+  guard (islegal places)
   return $ map colof (rows places)
 
 colof :: [Bool] -> Int

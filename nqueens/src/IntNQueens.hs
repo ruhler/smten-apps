@@ -4,7 +4,7 @@ module IntNQueens( int_nqueens ) where
 
 import Smten.Prelude
 import Smten.Control.Monad
-import Smten.Symbolic
+import Smten.Search
 
 -- Placement: A list of locations (row, col) for each queen.
 -- Indices go from 0 to n-1
@@ -22,10 +22,10 @@ islegal queens = and [
   distinct (map (uncurry (+)) queens),
   distinct (map (uncurry (-)) queens)]
 
-mkcol :: Int -> Symbolic Int
+mkcol :: Int -> Space Int
 mkcol n = msum (map return [0..(n-1)])
 
-int_nqueens :: Int -> Symbolic [Int]
+int_nqueens :: Int -> Space [Int]
 int_nqueens n = do
     let rows = [0..(n-1)]
     cols <- replicateM n (mkcol n)

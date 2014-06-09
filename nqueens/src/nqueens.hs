@@ -3,13 +3,13 @@ import Smten.Prelude
 import Smten.System.Environment
 import Smten.System.Exit
 import Smten.System.IO0 (linebuffer)
-import Smten.Symbolic
-import Smten.Symbolic.Solver.STP
-import Smten.Symbolic.Solver.Yices1
-import Smten.Symbolic.Solver.Yices2
-import Smten.Symbolic.Solver.MiniSat
-import Smten.Symbolic.Solver.Debug
-import Smten.Symbolic.Solver.Z3
+import Smten.Search
+import Smten.Search.Solver.STP
+import Smten.Search.Solver.Yices1
+import Smten.Search.Solver.Yices2
+import Smten.Search.Solver.MiniSat
+import Smten.Search.Solver.Debug
+import Smten.Search.Solver.Z3
 
 import BoolNQueens
 import Bool2NQueens
@@ -81,9 +81,9 @@ main = do
     then do
         linebuffer
         flip mapM_ [0..(negate n)] $ \n -> do
-            run_symbolic solver (f n) >>= print
+            search solver (f n) >>= print
     else do
-      mxs <- run_symbolic solver (f n)
+      mxs <- search solver (f n)
       case mxs of
         Nothing -> putStrLn "no solution"
         Just xs -> putStrLn $ pretty n xs

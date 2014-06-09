@@ -60,13 +60,16 @@ solve p = do
   c_minisat_assert s p'
   r <- c_minisat_check s
   case r of
-   0 -> return Nothing
+   0 -> do
+     c_minisat_delete s
+     return Nothing
    1 -> do
      let f (nm, v) = do
            v' <- c_minisat_getvar s v
            return (nm, BoolA $ v' == 1)
      vs <- H.toList vars
      mvs <- mapM f vs
+     c_minisat_delete s
      Just <$> model mvs
             
 

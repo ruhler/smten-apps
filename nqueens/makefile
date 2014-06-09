@@ -22,11 +22,17 @@ all: build/release/nqueens \
 	build/release/ms5nqueens \
 	build/release/ms6nqueens \
 	build/release/ms7nqueens \
+	build/release/ms8nqueens \
+	build/release/ms9nqueens \
+	build/release/ms10nqueens \
 	build/profile/ms3nqueens \
 	build/profile/ms4nqueens \
 	build/profile/ms5nqueens \
 	build/profile/ms6nqueens \
 	build/profile/ms7nqueens \
+	build/profile/ms8nqueens \
+	build/profile/ms9nqueens \
+	build/profile/ms10nqueens \
 	build/y2nqueens
 
 build/release/nqueens: src/nqueens.hs $(sources)
@@ -81,6 +87,10 @@ graphs: build/bench.data
 
 build/bench.data: build/release/nqueens
 	tclsh utils/bench.tcl | tee $@
+
+overheads:
+	tclsh utils/overheads.tcl
+	Rscript utils/overheads.R
 
 clean:
 	rm -rf build

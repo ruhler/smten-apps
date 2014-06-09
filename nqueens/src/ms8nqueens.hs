@@ -1,20 +1,93 @@
 
 -- Implementation of n-queens using MiniSat
--- Implemented in Haskell, using Formula.Finite and 'solve' from smten-base.
+-- Implemented in Haskell, using custom formula type and build function.
+-- Uses optimizations and:
+-- Creates the BuildCache, but does not use it during build.
 
+import qualified Data.HashTable.IO as H
 import Data.Functor
 import System.Environment
 import System.Exit
 import System.IO
 
-import Smten.Runtime.Formula.Finite
+import Smten.Runtime.MiniSat.FFI
 import Smten.Runtime.FreeID
 import Smten.Runtime.Model
-import Smten.Runtime.Solver
-import Smten.Compiled.Smten.Search.Solver.MiniSat
+import Smten.Runtime.BuildCache
 
 import Block
 
+data BoolFF = VarFF FreeID BuildCache
+            | TrueFF | FalseFF
+            | OrFF BoolFF BoolFF BuildCache
+            | AndFF BoolFF BoolFF BuildCache
+            | NotFF BoolFF BuildCache
+
+trueFF = TrueFF
+falseFF = FalseFF
+varFF x = new (VarFF x)
+
+andFF TrueFF b = b
+andFF FalseFF _ = falseFF
+andFF a TrueFF = a
+andFF _ FalseFF = falseFF
+andFF a b = new (AndFF a b)
+
+notFF TrueFF = FalseFF
+notFF FalseFF = TrueFF
+notFF (NotFF x _) = x
+notFF x = new (NotFF x)
+
+orFF TrueFF _ = trueFF
+orFF _ TrueFF = trueFF
+orFF FalseFF b = b
+orFF a FalseFF = a
+orFF a b = new (OrFF a b)
+
+solve :: BoolFF -> IO (Maybe Model)
+solve p = do
+  s <- c_minisat_new
+  vars <- H.new :: IO (H.BasicHashTable FreeID MSExpr)
+  key <- newKey
+  let build :: BoolFF -> IO MSExpr
+      build (VarFF x c) = do
+        mv <- H.lookup vars x
+        case mv of
+            Nothing -> do   
+              v <- c_minisat_var s
+              H.insert vars x v
+              return v
+            Just v -> return v
+      build TrueFF = c_minisat_true s
+      build FalseFF = c_minisat_false s
+      build (NotFF a c) = do
+        a' <- build a
+        c_minisat_not s a'
+      build (AndFF a b c) = do
+        a' <- build a
+        b' <- build b
+        c_minisat_and s a' b'
+      build (OrFF a b c) = do
+        a' <- build a
+        b' <- build b
+        c_minisat_or s a' b'     
+
+  p' <- build p 
+  c_minisat_assert s p'
+  r <- c_minisat_check s
+  case r of
+   0 -> do
+     c_minisat_delete s
+     return Nothing
+   1 -> do
+     let f (nm, v) = do
+           v' <- c_minisat_getvar s v
+           return (nm, BoolA $ v' == 1)
+     vs <- H.toList vars
+     mvs <- mapM f vs
+     c_minisat_delete s
+     Just <$> model mvs
+            
 
 nqueens :: Int -> IO (Maybe [Int])
 nqueens n = do
@@ -44,7 +117,7 @@ nqueens n = do
           allM noconf (pdiags places),
           allM noconf (ndiags places)]
   let p = islegal places
-  r <- solve minisat p
+  r <- solve p
   case r of
     Nothing -> return Nothing
     Just m -> do
