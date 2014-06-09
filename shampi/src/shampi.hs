@@ -34,7 +34,7 @@ getfiles (x:xs)
   | otherwise = x:xs
 
 usage :: String
-usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Bit] [FILE]"
+usage = "Usage: shampi [-t timeout(s)] [-d debug] [-s yices1 | yices2 | stp | z3 | minisat] [-e Integer | Bit | Int | Char] [FILE...]"
 
 main :: IO ()
 main = do

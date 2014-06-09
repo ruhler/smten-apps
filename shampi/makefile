@@ -3,17 +3,19 @@
 all:
 	tclsh utils/make.tcl
 
-.PHONY: graphs
-graphs: build/perf.data
+.PHONY: perf
+perf: utils/perf.tcl build/release/shampi
+	tclsh utils/perf.tcl -runs 8 | tee build/perf.data
+
+.PHONY: perf_fast
+perf_fast: utils/perf.tcl build/release/shampi
+	tclsh utils/perf.tcl -runs 1 | tee build/perf.data
+
+.PHONY: graph
+graph: build/perf.data
 	Rscript utils/perf.R
 
-build/perf.data: utils/perf.tcl build/release/shampi
-	tclsh utils/perf.tcl | tee $@
-
-perf:
-	tclsh utils/perffast.tcl `cat utils/benchmarks.txt` | tee build/perf.txt
-
-
+.PHONY: clean
 clean:
-	rm -r build/*
+	rm -r build
 

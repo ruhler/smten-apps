@@ -1,4 +1,6 @@
 #!/bin/bash
 
-bash hampi.sh $1
+echo "printOrd=no" > hampi.properties
+hampi.sh $1
+rm hampi.properties
 

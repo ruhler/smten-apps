@@ -1,7 +1,13 @@
 
 # Gather performance data for Hampi and Shampi.
 #  Prints out individual test times (average)
-set ::runspertest 8
+
+set runsidx [lsearch $argv -runs]
+if { $runsidx >= 0 && $runsidx + 1 < [llength $argv] } {
+    set ::runspertest [lindex $argv [expr $runsidx + 1]]
+} else {
+    set ::runspertest 8
+}
 
 # Return the average time in seconds to run the given script.
 proc mytime {script} {

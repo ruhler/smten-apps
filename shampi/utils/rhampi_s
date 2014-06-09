@@ -1,4 +1,5 @@
 #!/bin/bash
 
+echo "printOrd=no" > hampi.properties
 hampi_server.sh 4444 > /dev/null 2> /dev/null
 
