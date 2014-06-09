@@ -1,8 +1,8 @@
 
-pdf(file="build/bench.pdf", width=4, height=4)
+pdf(file="build/perf.pdf", width=4, height=4)
 
-sat <- read.table("data/bench.2.sat")
-unsat <- read.table("data/bench.2.unsat")
+sat <- read.table("build/sat.data")
+unsat <- read.table("build/unsat.data")
 
 lim = c(min(sat, unsat), max(sat, unsat))
 plot(sat, log="xy", xlim=lim, ylim=lim, pch=1)

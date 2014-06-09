@@ -1,3 +1,1 @@
-build/*
-reference/*
-*.aig
+build/
