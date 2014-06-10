@@ -18,6 +18,7 @@ To install 'happy', use cabal:
 
 
 Smten can be retrieved from:
+
   http://github.com/ruhler/smten
 
 Note: you may need to add $HOME/.cabal/bin to your PATH environment variable
@@ -85,7 +86,7 @@ The script 'utils/perf.tcl' runs shampi and the original HAMPI on each of the
 benchmarks, excluding 'unit' tests and the 'buggy' tests. The script is
 currently set to run 3 configurations:
 1. The original HAMPI implementation. This assumes and requires
-hampi_server.sh and hampi_client.sh are in $PATH.
+hampi_server.sh and hampi_client.sh from the original HAMPI are in $PATH.
 2. Shampi using the stp solver and Bit type.
 3. Shampi using the yices2 solver and Bit type.
 

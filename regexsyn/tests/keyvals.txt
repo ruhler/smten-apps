@@ -1,5 +1,0 @@
-+aaabbfabba
-+aadbfabeea
-+bcaefad
--abcde
--abcdb

@@ -5,7 +5,7 @@
 --   January 4, 1999
 --   Submitted for TACAS'99
 {-# LANGUAGE PatternGuards #-}
-module BMC (Model(..), LTL(..), check) where
+module BMC.BMC (Model(..), LTL(..), check) where
 
 import Smten.Prelude hiding (succ)
 import Smten.Data.Array

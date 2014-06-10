@@ -1,11 +1,11 @@
 
-module ShiftReg (tests) where
+module BMC.ShiftReg (tests) where
 
 import Smten.Prelude
 import Smten.Search
 import Smten.Search.Solver.Smten
 
-import BMC
+import BMC.BMC
 
 data SRState = SRState {
     x0 :: Bool,
